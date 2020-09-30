@@ -1,4 +1,4 @@
-const { User } = require("../../models/user");
+const User = require("../../classes/User/User");
 
 //Middleware method for authorization
 //Method for checking if user is superAdmin or send respones 403 to client if not

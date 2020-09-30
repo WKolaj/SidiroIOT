@@ -20,7 +20,6 @@ const minPasswordLength = 8;
 //Schema payload should be exported in order for other models to use it
 exports.usersJoiSchemaPayload = {
   name: Joi.string().min(3).max(100).required(),
-  email: Joi.string().email().required(),
   permissions: Joi.number().integer().min(0).max(255).required(),
   password: Joi.string().min(minPasswordLength).max(100),
   oldPassword: Joi.string(),

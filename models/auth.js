@@ -7,7 +7,7 @@ const UserSchema = require("./user").usersJoiSchemaPayload;
 //Schema payload should be exported in order for other models to use it
 //Password is additionally required
 exports.credentialsJoiSchemaPayload = {
-  email: UserSchema.email,
+  name: UserSchema.name,
   password: UserSchema.password.required(),
 };
 

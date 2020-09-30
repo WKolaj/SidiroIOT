@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const { User, validateUser } = require("../models/user");
+const { validateUser } = require("../models/user");
+const User = require("../classes/User/User");
 const validate = require("../middleware/validation/joiValidate");
 const validateObjectId = require("../middleware/validation/validateObjectId");
 const {
@@ -29,13 +30,13 @@ applyJSONParsingToRoute(express, router);
 //Only admin can get a list of all users
 router.get("/", [hasUser, isAdmin], async (req, res) => {
   //Getting all users from database
-  var allUsers = await User.find();
+  var allUsers = await User.GetAllUsersFromFile();
 
   let payloadToReturn = [];
 
   //Generating payload for each user
   for (let user of allUsers) {
-    payloadToReturn.push(await user.getPayload());
+    payloadToReturn.push(user.PayloadWithoutPassword);
   }
 
   return res.status(200).send(payloadToReturn);
@@ -46,7 +47,8 @@ router.get("/", [hasUser, isAdmin], async (req, res) => {
 router.get("/me", [hasUser, isUser], async (req, res) => {
   //Searching for user of given id - fetched from jwt
   //If it doesn't exist - return 404
-  let user = await User.findOne({ _id: req.user._id });
+  let user = await User.GetUserFromFileById(req.user._id);
+
   if (!exists(user)) return res.status(404).send("User not found");
 
   //Building payload to return
@@ -60,7 +62,7 @@ router.get("/me", [hasUser, isUser], async (req, res) => {
 router.get("/:id", [hasUser, isAdmin, validateObjectId], async (req, res) => {
   //Searching for user of given id
   //If it doesn't exist - return 404
-  let user = await User.findOne({ _id: req.params.id });
+  let user = await User.GetUserFromFileById(req.params.id);
   if (!exists(user)) return res.status(404).send("User not found");
 
   //Building payload to return
@@ -81,7 +83,7 @@ router.post(
   [hasUser, isAdmin, validate(validateUser)],
   async (req, res) => {
     //Checking if user already exists
-    let user = await User.findOne({ email: req.body.email });
+    let user = await User.GetUserFromFileByName(req.body.name);
     if (exists(user)) return res.status(400).send("User already registered.");
 
     //Checking what user wants to create what user
@@ -99,28 +101,20 @@ router.post(
 
     //Setting password as random one if user's password do not exist
     if (!exists(req.body.password))
-      req.body.password = User.generateRandomPassword();
-
-    let passwordBeforeHash = req.body.password;
-
-    //Hash password
-    req.body.password = await hashString(req.body.password);
+      return res
+        .status(400)
+        .send(`"password" is required when creating an user`);
 
     //Create and save new user
-    user = new User(
-      _.pick(req.body, ["name", "email", "password", "permissions"])
-    );
+    user = User.CreateFromPayload(req.body);
 
-    await user.save();
+    await user.Save();
 
     //Building payload to return
-    let payloadToReturn = await user.getPayload();
-
-    //Assigning password additionaly
-    payloadToReturn.password = passwordBeforeHash;
+    let payloadToReturn = await user.PayloadWithoutPassword;
 
     //Logging action of creating user
-    logger.action(`User ${req.user.email} created user ${user.email}`);
+    logger.action(`User ${req.user.name} created user ${user.name}`);
 
     return res.status(200).send(payloadToReturn);
   }
@@ -134,19 +128,19 @@ router.post(
 //Editing permissions via this route is forbidden
 router.put("/me", [hasUser, validate(validateUser)], async (req, res) => {
   //Finding user of given id and return 404 if not found
-  let user = await User.findOne({ _id: req.user._id });
+  let user = await User.GetUserFromFileById(req.user._id);
   if (!exists(user)) return res.status(404).send("User not found");
 
-  //Checking if given email is proper - cannot modify email
-  if (req.body.email !== user.email)
-    return res.status(400).send("Invalid email for given user");
+  //Checking if given name is proper - cannot modify name
+  if (req.body.name !== user.Name)
+    return res.status(400).send("Invalid name for given user");
 
   //Checking if given permissions is proper - cannot modify permissions via this route
-  if (req.body.permissions !== user.permissions)
+  if (req.body.permissions !== user.Permissions)
     return res.status(400).send("Invalid permissions for given user");
 
-  //Setting new name if specified
-  if (exists(req.body.name)) user.name = req.body.name;
+  //Assigning ID to users payload
+  req.body._id = user.ID;
 
   //Checking if password exists - and edit it if exists
   if (exists(req.body.password)) {
@@ -156,21 +150,21 @@ router.put("/me", [hasUser, validate(validateUser)], async (req, res) => {
 
     let oldPasswordMatches = await hashedStringMatch(
       req.body.oldPassword,
-      user.password
+      user.Password
     );
     if (!oldPasswordMatches)
       return res.status(400).send("Invalid old password");
-
-    //changing password
-    user.password = await hashString(req.body.password);
   }
 
+  //Editing user
+  user.EditWithPayload(req.body, true);
+
   //Saving changes
-  await user.save();
+  await user.Save();
 
-  let payloadToReturn = await user.getPayload();
+  let payloadToReturn = await user.PayloadWithoutPassword();
 
-  logger.action(`User ${req.user.email} updated their profile data`);
+  logger.action(`User ${req.user.name} updated their profile data`);
 
   return res.status(200).send(payloadToReturn);
 });
@@ -182,22 +176,19 @@ router.put(
   [hasUser, isAdmin, validateObjectId, validate(validateUser)],
   async (req, res) => {
     //Id has to be defined
-    let user = await User.findById(req.params.id);
+    let user = await User.GetUserFromFileById(req.params.id);
     if (!exists(user)) return res.status(404).send("User not found");
 
-    //Checking if given email is proper
-    if (req.body.email !== user.email)
-      return res.status(400).send("Invalid email for given user");
+    //Checking if given name is proper
+    if (req.body.name !== user.Name)
+      return res.status(400).send("Invalid name for given user");
 
     //Checking if user permissions are admin - making it possible only for superAdmin to change admins or superAdmins users
     if (
-      (User.isAdmin(user.permissions) || User.isSuperAdmin(user.permissions)) &&
+      (User.isAdmin(user.Permissions) || User.isSuperAdmin(user.Permissions)) &&
       !User.isSuperAdmin(req.user.permissions)
     )
       return res.status(403).send("Access forbidden.");
-
-    //Changing name if defined in body
-    if (exists(req.body.name)) user.name = req.body.name;
 
     //Changing permissions if defined in body
     if (exists(req.body.permissions)) {
@@ -208,23 +199,18 @@ router.put(
         !User.isSuperAdmin(req.user.permissions)
       )
         return res.status(403).send("Access forbidden.");
-
-      //if not - setting new permissions
-      user.permissions = req.body.permissions;
     }
 
-    //Changing password if given in body - has to be hashed first
-    if (exists(req.body.password))
-      user.password = await hashString(req.body.password);
+    user.EditWithPayload(req.body);
 
     //Saving changes
-    await user.save();
+    await user.Save();
 
     logger.action(
-      `User ${req.user.email} updated profile data of user ${user.email}`
+      `User ${req.user.name} updated profile data of user ${user.name}`
     );
 
-    let payloadToReturn = await user.getPayload();
+    let payloadToReturn = await user.PayloadWithoutPassword();
 
     return res.status(200).send(payloadToReturn);
   }
@@ -241,23 +227,23 @@ router.delete(
   [hasUser, isAdmin, validateObjectId],
   async (req, res) => {
     //Searching for users to delete
-    let user = await User.findById(req.params.id);
+    let user = await User.GetUserFromFileById(req.params.id);
     if (!exists(user)) return res.status(404).send("User not found");
 
     //Checking if user permissions are admin - making it possible only for superAdmin to delete admins or superAdmins and superAdmin users
     if (
-      (User.isAdmin(user.permissions) || User.isSuperAdmin(user.permissions)) &&
+      (User.isAdmin(user.Permissions) || User.isSuperAdmin(user.Permissions)) &&
       !User.isSuperAdmin(req.user.permissions)
     )
       return res.status(403).send("Access forbidden.");
 
-    let payloadToReturn = await user.getPayload();
+    let payloadToReturn = await user.Payload();
 
     //Deleting user
-    await User.deleteOne({ _id: req.params.id });
+    await User.RemoveUserFromFile(req.params.id);
 
     //Logging action of deleting user
-    logger.action(`User ${req.user.email} deleted user ${user.email}`);
+    logger.action(`User ${req.user.name} deleted user ${user.name}`);
 
     return res.status(200).send(payloadToReturn);
   }

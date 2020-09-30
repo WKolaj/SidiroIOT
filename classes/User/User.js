@@ -106,6 +106,29 @@ class User {
   }
 
   /**
+   * @description Method for getting all users from file
+   */
+  static async GetAllUsersFromFile() {
+    let usersFileContent = await getUsersFileContent();
+
+    return Object.values(usersFileContent).map((userPayload) =>
+      CreateFromPayload(userPayload, false)
+    );
+  }
+
+  /**
+   * @description Method for deleting user from file content
+   * @param {String} id id of user to delete
+   */
+  static async RemoveUserFromFile(id) {
+    let usersFileContent = await getUsersFileContent();
+
+    if (exists(usersFileContent[id])) delete usersFileContent[id];
+
+    await setUsersFileContent(usersFileContent);
+  }
+
+  /**
    * @description Method for checking if user is super admin
    * @param {Number} permissions permissions to check
    */
