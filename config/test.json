@@ -1,6 +1,8 @@
 {
   "dbConnectionString": "mongodb://testUser:testUserPassword@localhost:27017/testDB",
   "jwtPrivateKey": "testPrivateKey",
+  "settingsPath": "__testDir/settings",
+  "userFileName": "userSettings.json",
   "port": 5000,
   "logging": {
     "logActions": true,

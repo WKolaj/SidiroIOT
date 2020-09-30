@@ -3,6 +3,7 @@ const path = require("path");
 const { promisify } = require("util");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
+const uniqid = require("uniqid");
 
 /**
  * Reads all the text in a readable stream and returns it as a string,
@@ -133,6 +134,15 @@ module.exports.removeFileOrDirectoryAsync = async function (filePath) {
       }
     });
   });
+};
+
+/**
+ * @description Method for deleting file if file exists
+ * @param {string} file file to delete if exists
+ */
+module.exports.removeFileIfExistsAsync = async function (filePath) {
+  let fileExists = await module.exports.checkIfFileExistsAsync(filePath);
+  if (fileExists) return module.exports.removeFileOrDirectoryAsync(filePath);
 };
 
 /**
@@ -290,6 +300,13 @@ module.exports.generateRandomString = function (length) {
   }
 
   return result;
+};
+
+/**
+ * @description Method for generating uniq id
+ */
+module.exports.generateUniqId = function () {
+  return uniqid();
 };
 
 /**

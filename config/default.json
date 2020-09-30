@@ -1,6 +1,8 @@
 {
   "tokenHeader": "x-auth-token",
   "port": 5000,
+  "settingsPath": "settings",
+  "userFileName": "userSettings.json",
   "logging": {
     "logActions": true,
     "info": {

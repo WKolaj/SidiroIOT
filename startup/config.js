@@ -20,6 +20,8 @@ module.exports = async function () {
   //#region ========== SERVER CONFIG PROPERTIES ==========
 
   throwIfConfigDoesNotExist("dbConnectionString");
+  throwIfConfigDoesNotExist("settingsPath");
+  throwIfConfigDoesNotExist("userFileName");
   throwIfConfigDoesNotExist("port");
   throwIfConfigDoesNotExist("tokenHeader");
   throwIfConfigDoesNotExist("jwtPrivateKey");

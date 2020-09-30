@@ -27,11 +27,11 @@ module.exports = async function (workingDirName) {
 
   //#endregion ========== INITIALIZING CONFIG ==========
 
-  //#region ========== INITIALIZING DATABASE ==========
+  //#region ========== INITIALIZING USERS ==========
 
-  await require("./db")();
+  await require("./users")();
 
-  //#endregion ========== INITIALIZING DATABASE ==========
+  //#endregion ========== INITIALIZING USERS ==========
 
   //#region ========== INITIALIZING VALIDATION ==========
 
