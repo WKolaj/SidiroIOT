@@ -9,6 +9,7 @@ const {
   readFileAsync,
   writeFileAsync,
   getBit,
+  checkIfFileExistsAsync,
 } = require("../../utilities/utilities");
 
 const jwtPrivateKey = config.get("jwtPrivateKey");
@@ -57,16 +58,21 @@ class User {
   /**
    * @description Method for creating user from payload
    * @param {JSON} payload Payload of user
-   * @param {Boolean} passwordHashed Is password hashed in payload
+   * @param {Boolean} hashPassword Should password be hashed
    */
-  static async CreateFromPayload(payload, passwordHashed = false) {
+  static async CreateFromPayload(payload, hashPassword = true) {
+    if (!exists(payload.name)) throw new Error(`"name" is required`);
+    if (!exists(payload.permissions))
+      throw new Error(`"permissions" is required`);
+    if (!exists(payload.password)) throw new Error(`"password" is required`);
+
     let usersPayload = { ...payload };
 
     //Generating users id if doesn't exists
     if (!usersPayload._id) usersPayload._id = generateUniqId();
 
     let user = new User();
-    await user.EditWithPayload(usersPayload, passwordHashed);
+    await user.EditWithPayload(usersPayload, hashPassword);
 
     return user;
   }
@@ -80,7 +86,7 @@ class User {
 
     if (!usersFileContent[id]) return null;
 
-    return User.CreateFromPayload(usersFileContent[id], true);
+    return User.CreateFromPayload(usersFileContent[id], false);
   }
 
   /**
@@ -96,7 +102,7 @@ class User {
 
     if (!userWithName) return null;
 
-    return User.CreateFromPayload(userWithName, true);
+    return User.CreateFromPayload(userWithName, false);
   }
 
   /**
@@ -184,27 +190,49 @@ class User {
    * @description Save client to file
    */
   async Save() {
+    //Checking content of payload to save
     let payload = this.Payload;
-    if (!payload._id) return;
-
-    let allUsersObject = await getUsersFileContent();
+    if (!exists(payload._id)) throw new Error(`"_id" is required`);
+    if (!exists(payload.name)) throw new Error(`"name" is required`);
+    if (!exists(payload.permissions))
+      throw new Error(`"permissions" is required`);
+    if (!exists(payload.password)) throw new Error(`"password" is required`);
 
     //Checking if name is unique - except currently checked user with given id
     if (!(await User._isUserNameUniqueExceptIds(payload.name, [payload._id])))
       throw new Error(`User's name ${payload.name} already exists!`);
 
+    let allUsersObject = await getUsersFileContent();
+
+    let usersCurrentPayload = allUsersObject[this.ID];
+
+    //If updating exisiting user - checking if there is an attempt to change name or id
+    if (exists(usersCurrentPayload)) {
+      if (usersCurrentPayload.name !== payload.name)
+        throw new Error(
+          `Name ${payload.name} does not correspond to users name ${usersCurrentPayload.name}`
+        );
+
+      if (usersCurrentPayload._id !== payload._id)
+        throw new Error(
+          `ID ${payload._id} does not correspond to users id ${usersCurrentPayload._id}`
+        );
+    }
+
+    //Update users object with new payload
     allUsersObject[payload._id] = payload;
 
-    return setUsersFileContent(allUsersObject);
+    //Save payload to file
+    return setUsersFileContent(allUsersObject, true);
   }
 
   /**
    * @description Method for editing user with payload
    * @param {JSON} payload Payload of user to edit
-   * @param {String} passwordHashed Does payload contain hashed password
+   * @param {String} hashPassword Should password be hashed
    */
-  async EditWithPayload(payload, passwordHashed = false) {
-    if (payload._id) {
+  async EditWithPayload(payload, hashPassword = true) {
+    if (exists(payload._id)) {
       //Edit name id if it is null - otherwise throw if there id is diff then actual id
       if (!this.ID) this._id = payload._id;
       else if (this.ID !== payload._id)
@@ -213,7 +241,7 @@ class User {
         );
     }
 
-    if (payload.name) {
+    if (exists(payload.name)) {
       //Edit name only if it is null - otherwise throw if there name is diff then actual name
       if (!this.Name) this._name = payload.name;
       else if (this.Name !== payload.name)
@@ -222,10 +250,10 @@ class User {
         );
     }
 
-    if (payload.permissions) this._permissions = payload.permissions;
-    if (payload.password) {
-      if (passwordHashed) this._password = payload.password;
-      else this._password = await hashString(payload.password);
+    if (exists(payload.permissions)) this._permissions = payload.permissions;
+    if (exists(payload.password)) {
+      if (hashPassword) this._password = await hashString(payload.password);
+      else this._password = payload.password;
     }
   }
 }
