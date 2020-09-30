@@ -1,0 +1,4 @@
+{
+  "dbConnectionString": "mongodb://testUser:testUserPassword@localhost:27017/testDB",
+  "jwtPrivateKey": "testPrivateKey"
+}

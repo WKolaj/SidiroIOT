@@ -1,0 +1,47 @@
+{
+  "name": "template_backend_nodejs",
+  "version": "1.0.1",
+  "description": "Back-end for NodeJS server",
+  "main": "server.js",
+  "scripts": {
+    "test": "jest --watch --runInBand --detectOpenHandles --forceExit --coverage",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WKolaj/TEMPLATE_BACKEND_NODEJS.git"
+  },
+  "keywords": [
+    "Back-end",
+    "template",
+    "NodeJS"
+  ],
+  "author": "WK",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/WKolaj/TEMPLATE_BACKEND_NODEJS/issues"
+  },
+  "homepage": "https://github.com/WKolaj/TEMPLATE_BACKEND_NODEJS#readme",
+  "dependencies": {
+    "@hapi/joi": "^17.1.1",
+    "bcrypt": "^5.0.0",
+    "config": "^3.3.2",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "express-async-errors": "^3.1.1",
+    "helmet": "^4.1.1",
+    "joi": "^17.2.1",
+    "joi-objectid": "^3.0.1",
+    "jsonwebtoken": "^8.5.1",
+    "lodash": "^4.17.20",
+    "mongoose": "^5.10.7",
+    "winston": "^3.3.3"
+  },
+  "devDependencies": {
+    "jest": "^26.4.2",
+    "supertest": "^5.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  }
+}

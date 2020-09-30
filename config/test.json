@@ -1,0 +1,23 @@
+{
+  "dbConnectionString": "mongodb://testUser:testUserPassword@localhost:27017/testDB",
+  "jwtPrivateKey": "testPrivateKey",
+  "port": 5000,
+  "logging": {
+    "logActions": true,
+    "info": {
+      "path": "__testDir/logs/info/info.log",
+      "maxsize": 10485760,
+      "maxFiles": 10
+    },
+    "warning": {
+      "path": "__testDir/logs/info/warning.log",
+      "maxsize": 10485760,
+      "maxFiles": 10
+    },
+    "error": {
+      "path": "__testDir/logs/info/error.log",
+      "maxsize": 10485760,
+      "maxFiles": 10
+    }
+  }
+}

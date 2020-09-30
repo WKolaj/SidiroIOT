@@ -1,0 +1,4 @@
+{
+  "dbConnectionString": "DB_CONNECTION_STRING",
+  "jwtPrivateKey": "JWT_PRIVATE_KEY"
+}
