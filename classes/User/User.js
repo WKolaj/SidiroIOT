@@ -111,9 +111,13 @@ class User {
   static async GetAllUsersFromFile() {
     let usersFileContent = await getUsersFileContent();
 
-    return Object.values(usersFileContent).map((userPayload) =>
-      CreateFromPayload(userPayload, false)
-    );
+    let usersToReturn = [];
+
+    for (let userPayload of Object.values(usersFileContent)) {
+      usersToReturn.push(await User.CreateFromPayload(userPayload, false));
+    }
+
+    return usersToReturn;
   }
 
   /**

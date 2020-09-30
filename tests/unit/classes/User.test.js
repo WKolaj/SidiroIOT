@@ -1315,4 +1315,267 @@ describe("User", () => {
       expect(decodedJWT).toEqual(expectedJWTContent);
     });
   });
+
+  describe("RemoveUserFromFile", () => {
+    let initialFileContent;
+    let userId;
+
+    //$2b$10$aMq3VOxEXUuz/79BqT2qZOdV93VGDZ2SElvIljIAsTsvh1GKvJhCm is hashed abcd1234
+    //$2b$10$Xs7ycwcoi2kujNzZWCTfIuXRO3R/KFGf6Y2vd8pIOtcjgTvQhxdou is hashed abcd2234
+    //$2b$10$.jzMTWaWt2kYvHK.SPiHpuElEqlFlPQcEfhvlnNZPB/zyY7uD9j16 is hashed abcd3234
+    //$2b$10$4.HSYaIKlZIkuwlfRXHA/ufw7cRhbetnIZwYJt27H.CM2/td//gyC is hashed abcd4234
+
+    beforeEach(() => {
+      initialFileContent = {
+        testUser1Id: {
+          _id: "testUser1Id",
+          name: "testUser1",
+          password:
+            "$2b$10$aMq3VOxEXUuz/79BqT2qZOdV93VGDZ2SElvIljIAsTsvh1GKvJhCm",
+          permissions: 1,
+        },
+        testUser2Id: {
+          _id: "testUser2Id",
+          name: "testUser2",
+          password:
+            "$2b$10$Xs7ycwcoi2kujNzZWCTfIuXRO3R/KFGf6Y2vd8pIOtcjgTvQhxdou",
+          permissions: 2,
+        },
+        testUser3Id: {
+          _id: "testUser3Id",
+          name: "testUser3",
+          password:
+            "$2b$10$.jzMTWaWt2kYvHK.SPiHpuElEqlFlPQcEfhvlnNZPB/zyY7uD9j16",
+          permissions: 3,
+        },
+        testUser4Id: {
+          _id: "testUser4Id",
+          name: "testUser4",
+          password:
+            "$2b$10$4.HSYaIKlZIkuwlfRXHA/ufw7cRhbetnIZwYJt27H.CM2/td//gyC",
+          permissions: 4,
+        },
+      };
+      userId = "testUser3Id";
+    });
+
+    let exec = async () => {
+      await writeFileAsync(
+        userFilePath,
+        JSON.stringify(initialFileContent),
+        "utf8"
+      );
+      await User.RemoveUserFromFile(userId);
+    };
+
+    it("should remove user of given id from file content", async () => {
+      await exec();
+
+      let userFileContent = JSON.parse(
+        await readFileAsync(userFilePath, "utf8")
+      );
+
+      let expectedContent = {
+        testUser1Id: {
+          _id: "testUser1Id",
+          name: "testUser1",
+          password:
+            "$2b$10$aMq3VOxEXUuz/79BqT2qZOdV93VGDZ2SElvIljIAsTsvh1GKvJhCm",
+          permissions: 1,
+        },
+        testUser2Id: {
+          _id: "testUser2Id",
+          name: "testUser2",
+          password:
+            "$2b$10$Xs7ycwcoi2kujNzZWCTfIuXRO3R/KFGf6Y2vd8pIOtcjgTvQhxdou",
+          permissions: 2,
+        },
+        testUser4Id: {
+          _id: "testUser4Id",
+          name: "testUser4",
+          password:
+            "$2b$10$4.HSYaIKlZIkuwlfRXHA/ufw7cRhbetnIZwYJt27H.CM2/td//gyC",
+          permissions: 4,
+        },
+      };
+
+      expect(userFileContent).toEqual(expectedContent);
+    });
+
+    it("should remove user of given id from file content - if there is only one user", async () => {
+      initialFileContent = {
+        testUser3Id: {
+          _id: "testUser3Id",
+          name: "testUser3",
+          password:
+            "$2b$10$.jzMTWaWt2kYvHK.SPiHpuElEqlFlPQcEfhvlnNZPB/zyY7uD9j16",
+          permissions: 3,
+        },
+      };
+      await exec();
+
+      let userFileContent = JSON.parse(
+        await readFileAsync(userFilePath, "utf8")
+      );
+
+      let expectedContent = {};
+
+      expect(userFileContent).toEqual(expectedContent);
+    });
+
+    it("should not remove any user if there is no user of given id", async () => {
+      userId = "fakeId";
+
+      await exec();
+
+      let userFileContent = JSON.parse(
+        await readFileAsync(userFilePath, "utf8")
+      );
+
+      let expectedContent = initialFileContent;
+
+      expect(userFileContent).toEqual(expectedContent);
+    });
+
+    it("should not remove any user if there no users", async () => {
+      initialFileContent = {};
+
+      await exec();
+
+      let userFileContent = JSON.parse(
+        await readFileAsync(userFilePath, "utf8")
+      );
+
+      let expectedContent = {};
+
+      expect(userFileContent).toEqual(expectedContent);
+    });
+
+    it("should not remove any user if id is null", async () => {
+      userId = null;
+
+      await exec();
+
+      let userFileContent = JSON.parse(
+        await readFileAsync(userFilePath, "utf8")
+      );
+
+      let expectedContent = initialFileContent;
+
+      expect(userFileContent).toEqual(expectedContent);
+    });
+
+    it("should not remove any user if id is not defined", async () => {
+      userId = null;
+
+      await exec();
+
+      let userFileContent = JSON.parse(
+        await readFileAsync(userFilePath, "utf8")
+      );
+
+      let expectedContent = initialFileContent;
+
+      expect(userFileContent).toEqual(expectedContent);
+    });
+  });
+
+  describe("GetAllUsersFromFile", () => {
+    let initialFileContent;
+    let userId;
+
+    //$2b$10$aMq3VOxEXUuz/79BqT2qZOdV93VGDZ2SElvIljIAsTsvh1GKvJhCm is hashed abcd1234
+    //$2b$10$Xs7ycwcoi2kujNzZWCTfIuXRO3R/KFGf6Y2vd8pIOtcjgTvQhxdou is hashed abcd2234
+    //$2b$10$.jzMTWaWt2kYvHK.SPiHpuElEqlFlPQcEfhvlnNZPB/zyY7uD9j16 is hashed abcd3234
+    //$2b$10$4.HSYaIKlZIkuwlfRXHA/ufw7cRhbetnIZwYJt27H.CM2/td//gyC is hashed abcd4234
+
+    beforeEach(() => {
+      initialFileContent = {
+        testUser1Id: {
+          _id: "testUser1Id",
+          name: "testUser1",
+          password:
+            "$2b$10$aMq3VOxEXUuz/79BqT2qZOdV93VGDZ2SElvIljIAsTsvh1GKvJhCm",
+          permissions: 1,
+        },
+        testUser2Id: {
+          _id: "testUser2Id",
+          name: "testUser2",
+          password:
+            "$2b$10$Xs7ycwcoi2kujNzZWCTfIuXRO3R/KFGf6Y2vd8pIOtcjgTvQhxdou",
+          permissions: 2,
+        },
+        testUser3Id: {
+          _id: "testUser3Id",
+          name: "testUser3",
+          password:
+            "$2b$10$.jzMTWaWt2kYvHK.SPiHpuElEqlFlPQcEfhvlnNZPB/zyY7uD9j16",
+          permissions: 3,
+        },
+        testUser4Id: {
+          _id: "testUser4Id",
+          name: "testUser4",
+          password:
+            "$2b$10$4.HSYaIKlZIkuwlfRXHA/ufw7cRhbetnIZwYJt27H.CM2/td//gyC",
+          permissions: 4,
+        },
+      };
+      userId = "testUser3Id";
+    });
+
+    let exec = async () => {
+      await writeFileAsync(
+        userFilePath,
+        JSON.stringify(initialFileContent),
+        "utf8"
+      );
+      return User.GetAllUsersFromFile();
+    };
+
+    it("should return all users", async () => {
+      let result = await exec();
+
+      expect(result).toBeDefined();
+
+      let convertedResult = result.map((user) => user.Payload);
+
+      let expectedResult = Object.values(initialFileContent);
+      expect(convertedResult).toEqual(expectedResult);
+    });
+
+    it("should return all users - if there is only one user", async () => {
+      initialFileContent = {
+        testUser3Id: {
+          _id: "testUser3Id",
+          name: "testUser3",
+          password:
+            "$2b$10$.jzMTWaWt2kYvHK.SPiHpuElEqlFlPQcEfhvlnNZPB/zyY7uD9j16",
+          permissions: 3,
+        },
+      };
+      let result = await exec();
+
+      expect(result).toBeDefined();
+
+      let convertedResult = result.map((user) => user.Payload);
+
+      expect(convertedResult).toEqual([
+        {
+          _id: "testUser3Id",
+          name: "testUser3",
+          password:
+            "$2b$10$.jzMTWaWt2kYvHK.SPiHpuElEqlFlPQcEfhvlnNZPB/zyY7uD9j16",
+          permissions: 3,
+        },
+      ]);
+    });
+
+    it("should return all users - if there is not users", async () => {
+      initialFileContent = {};
+      let result = await exec();
+
+      expect(result).toBeDefined();
+      expect(result).toEqual([]);
+    });
+  });
 });
