@@ -229,6 +229,19 @@ module.exports.snooze = function (ms) {
 };
 
 /**
+ * @description Method for checking wether string is a valid JSON
+ * @param {String} str String to check
+ */
+module.exports.isStringAValidJSON = function (str) {
+  try {
+    JSON.parse(str);
+  } catch (e) {
+    return false;
+  }
+  return true;
+};
+
+/**
  * @description Method for hashing password
  * @param {String} stringToHash string to hash
  */

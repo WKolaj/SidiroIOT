@@ -1,6 +1,4 @@
 const Joi = require("joi");
-const mongoose = require("mongoose");
-const config = require("config");
 const { getBit, generateRandomString } = require("../utilities/utilities");
 
 //There are 3 users group
