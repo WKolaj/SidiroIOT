@@ -1,18 +1,25 @@
-const { User } = require("../../models/user");
+const User = require("../../classes/User/User");
 const {
   exists,
   hashString,
   generateRandomNumberString,
 } = require("../../utilities/utilities");
 
-const testUselessUserEmail = "useless@test1234abcd.com.pl";
-const testAdminEmail = "admin@test1234abcd.com.pl";
-const testUserEmail = "user@test1234abcd.com.pl";
-const testUserAndAdminEmail = "userAndAdmin@test1234abcd.com.pl";
-const testSuperAdminEmail = "superAdmin@test1234abcd.com.pl";
-const testAdminAndSuperAdminEmail = "superAdminAndAdmin@test1234abcd.com.pl";
-const testUserAndAdminAndSuperAdminEmail =
-  "userAndSuperAdminAndAdmin@test1234abcd.com.pl";
+const testUselessUserID = "uselessUserID";
+const testAdminID = "adminID";
+const testUserID = "userID";
+const testUserAndAdminID = "userAndAdminID";
+const testSuperAdminID = "superAdminID";
+const testAdminAndSuperAdminID = "adminAndSuperAdminID";
+const testUserAndAdminAndSuperAdminID = "userAndAdminAndSuperAdminID";
+
+const testUselessUserName = "uselessUserName";
+const testAdminName = "adminName";
+const testUserName = "userName";
+const testUserAndAdminName = "userAndAdminName";
+const testSuperAdminName = "superAdminName";
+const testAdminAndSuperAdminName = "adminAndSuperAdminName";
+const testUserAndAdminAndSuperAdminName = "userAndAdminAndSuperAdminName";
 
 const testUselessUserPassword = "testUselessUserPassword";
 const testAdminPassword = "testAdminPassword";
@@ -23,13 +30,21 @@ const testAdminAndSuperAdminPassword = "superAdminAndAdminPassword";
 const testUserAndAdminAndSuperAdminPassword =
   "userAndSuperAdminAndAdminPassword";
 
-module.exports.testUselessUserEmail = testUselessUserEmail;
-module.exports.testAdminEmail = testAdminEmail;
-module.exports.testUserEmail = testUserEmail;
-module.exports.testUserAndAdminEmail = testUserAndAdminEmail;
-module.exports.testSuperAdminEmail = testSuperAdminEmail;
-module.exports.testAdminAndSuperAdminEmail = testAdminAndSuperAdminEmail;
-module.exports.testUserAndAdminAndSuperAdminEmail = testUserAndAdminAndSuperAdminEmail;
+module.exports.testUselessUserID = testUselessUserID;
+module.exports.testAdminID = testAdminID;
+module.exports.testUserID = testUserID;
+module.exports.testUserAndAdminID = testUserAndAdminID;
+module.exports.testSuperAdminID = testSuperAdminID;
+module.exports.testAdminAndSuperAdminID = testAdminAndSuperAdminID;
+module.exports.testUserAndAdminAndSuperAdminID = testUserAndAdminAndSuperAdminID;
+
+module.exports.testUselessUserName = testUselessUserName;
+module.exports.testAdminName = testAdminName;
+module.exports.testUserName = testUserName;
+module.exports.testUserAndAdminName = testUserAndAdminName;
+module.exports.testSuperAdminName = testSuperAdminName;
+module.exports.testAdminAndSuperAdminName = testAdminAndSuperAdminName;
+module.exports.testUserAndAdminAndSuperAdminName = testUserAndAdminAndSuperAdminName;
 
 module.exports.testUselessUserPassword = testUselessUserPassword;
 module.exports.testAdminPassword = testAdminPassword;
@@ -41,119 +56,140 @@ module.exports.testUserAndAdminAndSuperAdminPassword = testUserAndAdminAndSuperA
 
 //Method for generating useless (without permissions) user directly into database
 module.exports.generateUselessUser = async () => {
-  let user = await User.findOne({ email: testUselessUserEmail });
+  let user = await User.GetUserFromFileById(testUselessUserID);
   if (exists(user)) return user;
 
-  user = new User({
-    name: "testUselessUser",
-    email: testUselessUserEmail,
-    password: await hashString(testUselessUserPassword),
-    permissions: 0,
-  });
+  user = await User.CreateFromPayload(
+    {
+      _id: testUselessUserID,
+      name: testUselessUserName,
+      password: testUselessUserPassword,
+      permissions: 0,
+    },
+    true
+  );
 
-  await user.save();
+  await user.Save();
 
   return user;
 };
 
 //Method for generating test admin user directly into database
 module.exports.generateTestAdmin = async () => {
-  let admin = await User.findOne({ email: testAdminEmail });
-  if (exists(admin)) return admin;
+  let user = await User.GetUserFromFileById(testAdminID);
+  if (exists(user)) return user;
 
-  admin = new User({
-    name: "testAdmin",
-    email: testAdminEmail,
-    password: await hashString(testAdminPassword),
-    permissions: 2,
-  });
+  user = await User.CreateFromPayload(
+    {
+      _id: testAdminID,
+      name: testAdminName,
+      password: testAdminPassword,
+      permissions: 2,
+    },
+    true
+  );
 
-  await admin.save();
+  await user.Save();
 
-  return admin;
+  return user;
 };
 
 //Method for generating test  user directly into database
 module.exports.generateTestUser = async () => {
-  let user = await User.findOne({ email: testUserEmail });
+  let user = await User.GetUserFromFileById(testUserID);
   if (exists(user)) return user;
 
-  user = new User({
-    name: "testUser",
-    email: testUserEmail,
-    password: await hashString(testUserPassword),
-    permissions: 1,
-  });
+  user = await User.CreateFromPayload(
+    {
+      _id: testUserID,
+      name: testUserName,
+      password: testUserPassword,
+      permissions: 1,
+    },
+    true
+  );
 
-  await user.save();
+  await user.Save();
 
   return user;
 };
 
 //Method for generating test user that is also an admin directly into database
 module.exports.generateTestAdminAndUser = async () => {
-  let user = await User.findOne({ email: testUserAndAdminEmail });
+  let user = await User.GetUserFromFileById(testUserAndAdminID);
   if (exists(user)) return user;
 
-  user = new User({
-    name: "testUserAndAdmin",
-    email: testUserAndAdminEmail,
-    password: await hashString(testUserAndAdminPassword),
-    permissions: 3,
-  });
+  user = await User.CreateFromPayload(
+    {
+      _id: testUserAndAdminID,
+      name: testUserAndAdminName,
+      password: testUserAndAdminPassword,
+      permissions: 3,
+    },
+    true
+  );
 
-  await user.save();
+  await user.Save();
 
   return user;
 };
 
 //Method for generating test su[er admin user directly into database
 module.exports.generateTestSuperAdmin = async () => {
-  let admin = await User.findOne({ email: testSuperAdminEmail });
-  if (exists(admin)) return admin;
+  let user = await User.GetUserFromFileById(testSuperAdminID);
+  if (exists(user)) return user;
 
-  admin = new User({
-    name: "testSuperAdmin",
-    email: testSuperAdminEmail,
-    password: await hashString(testSuperAdminPassword),
-    permissions: 4,
-  });
+  user = await User.CreateFromPayload(
+    {
+      _id: testSuperAdminID,
+      name: testSuperAdminName,
+      password: testSuperAdminPassword,
+      permissions: 4,
+    },
+    true
+  );
 
-  await admin.save();
+  await user.Save();
 
-  return admin;
+  return user;
 };
 
 //Method for generating test admin that is also a super admin
 module.exports.generateTestAdminAndSuperAdmin = async () => {
-  let user = await User.findOne({ email: testAdminAndSuperAdminEmail });
+  let user = await User.GetUserFromFileById(testAdminAndSuperAdminID);
   if (exists(user)) return user;
 
-  user = new User({
-    name: "testAdminAndSuperAdmin",
-    email: testAdminAndSuperAdminEmail,
-    password: await hashString(testAdminAndSuperAdminPassword),
-    permissions: 6,
-  });
+  user = await User.CreateFromPayload(
+    {
+      _id: testAdminAndSuperAdminID,
+      name: testAdminAndSuperAdminName,
+      password: testAdminAndSuperAdminPassword,
+      permissions: 6,
+    },
+    true
+  );
 
-  await user.save();
+  await user.Save();
 
   return user;
 };
 
 //Method for generating test admin that is also a super admin and user
 module.exports.generateTestUserAndAdminAndSuperAdmin = async () => {
-  let user = await User.findOne({ email: testUserAndAdminAndSuperAdminEmail });
+  let user = await User.GetUserFromFileById(testUserAndAdminAndSuperAdminID);
   if (exists(user)) return user;
 
-  user = new User({
-    name: "testuserAndAdminAndSuperAdmin",
-    email: testUserAndAdminAndSuperAdminEmail,
-    password: await hashString(testUserAndAdminAndSuperAdminPassword),
-    permissions: 7,
-  });
+  user = await User.CreateFromPayload(
+    {
+      _id: testUserAndAdminAndSuperAdminID,
+      name: testUserAndAdminAndSuperAdminName,
+      password: testUserAndAdminAndSuperAdminPassword,
+      permissions: 7,
+    },
+    true
+  );
 
-  await user.save();
+  await user.Save();
 
   return user;
 };

@@ -1,10 +1,15 @@
-const { snooze } = require("../../../utilities/utilities");
+const { snooze, writeFileAsync } = require("../../../utilities/utilities");
 const _ = require("lodash");
 const request = require("supertest");
 const bcrypt = require("bcrypt");
 const config = require("config");
 const jsonWebToken = require("jsonwebtoken");
-const mongoose = require("mongoose");
+const path = require("path");
+const privateKey = config.get("jwtPrivateKey");
+const settingsDirPath = config.get("settingsPath");
+const userFileName = config.get("userFileName");
+const userFilePath = path.join(settingsDirPath, userFileName);
+
 let { User } = require("../../../models/user");
 let {
   generateTestAdmin,
@@ -13,6 +18,27 @@ let {
   generateUselessUser,
   generateTestSuperAdmin,
   generateStringOfGivenLength,
+  testAdminAndSuperAdminID,
+  testAdminID,
+  testSuperAdminID,
+  testUselessUserID,
+  testUserAndAdminAndSuperAdminID,
+  testUserAndAdminID,
+  testUserID,
+  testAdminAndSuperAdminPassword,
+  testAdminPassword,
+  testSuperAdminPassword,
+  testUselessUserPassword,
+  testUserAndAdminAndSuperAdminPassword,
+  testUserAndAdminPassword,
+  testUserPassword,
+  testAdminAndSuperAdminName,
+  testAdminName,
+  testSuperAdminName,
+  testUselessUserName,
+  testUserAndAdminAndSuperAdminName,
+  testUserAndAdminName,
+  testUserName,
 } = require("../../utilities/testUtilities");
 let server;
 let logger = require("../../../logger/logger");
@@ -28,7 +54,7 @@ describe("api/auth", () => {
     server = await require("../../../startup/app")();
 
     //Clearing users in database before each test
-    await User.deleteMany({});
+    await writeFileAsync(userFilePath, "{}", "utf8");
 
     //generating uslessUser, user, admin and adminUser
     uselessUser = await generateUselessUser();
@@ -43,7 +69,7 @@ describe("api/auth", () => {
 
   afterEach(async () => {
     //Clearing users in database after each test
-    await User.deleteMany({});
+    await writeFileAsync(userFilePath, "{}", "utf8");
 
     await server.close();
   });
@@ -53,8 +79,8 @@ describe("api/auth", () => {
 
     beforeEach(async () => {
       requestPayload = {
-        email: "user@test1234abcd.com.pl",
-        password: "testUserPassword",
+        name: testUserName,
+        password: testUserPassword,
       };
     });
 
@@ -74,10 +100,9 @@ describe("api/auth", () => {
       expect(result.body).toBeDefined();
 
       let expectedBody = {
-        _id: testUser.id,
-        email: testUser.email,
-        name: testUser.name,
-        permissions: testUser.permissions,
+        _id: testUser.ID,
+        name: testUser.Name,
+        permissions: testUser.Permissions,
       };
 
       expect(result.body).toEqual(expectedBody);
@@ -98,21 +123,19 @@ describe("api/auth", () => {
 
       expect(logActionMock).toHaveBeenCalledTimes(1);
 
-      expect(logActionMock.mock.calls[0][0]).toEqual(
-        "User user@test1234abcd.com.pl logged in"
-      );
+      expect(logActionMock.mock.calls[0][0]).toEqual("User userName logged in");
     });
 
     //#region =========== INVALID EMAIL ===========
 
-    it("should return 400 and not return jwt in header if users email is empty", async () => {
-      delete requestPayload.email;
+    it("should return 400 and not return jwt in header if users name is empty", async () => {
+      delete requestPayload.name;
 
       let result = await exec();
 
       expect(result.status).toEqual(400);
 
-      expect(result.text).toEqual('"email" is required');
+      expect(result.text).toEqual('"name" is required');
 
       //Checking if there is no jwt in payload
       expect(result.header["x-auth-token"]).not.toBeDefined();
@@ -121,14 +144,14 @@ describe("api/auth", () => {
       expect(logActionMock).not.toHaveBeenCalled();
     });
 
-    it("should return 400 and not return jwt in header if users email is null", async () => {
-      requestPayload.email = null;
+    it("should return 400 and not return jwt in header if users name is null", async () => {
+      requestPayload.name = null;
 
       let result = await exec();
 
       expect(result.status).toEqual(400);
 
-      expect(result.text).toEqual('"email" must be a string');
+      expect(result.text).toEqual('"name" must be a string');
 
       //Checking if there is no jwt in payload
       expect(result.header["x-auth-token"]).not.toBeDefined();
@@ -137,14 +160,14 @@ describe("api/auth", () => {
       expect(logActionMock).not.toHaveBeenCalled();
     });
 
-    it("should return 400 and not return jwt in header if users email is not a valid string", async () => {
-      requestPayload.email = 123;
+    it("should return 400 and not return jwt in header if users name is not a valid string", async () => {
+      requestPayload.name = 123;
 
       let result = await exec();
 
       expect(result.status).toEqual(400);
 
-      expect(result.text).toEqual('"email" must be a string');
+      expect(result.text).toEqual('"name" must be a string');
 
       //Checking if there is no jwt in payload
       expect(result.header["x-auth-token"]).not.toBeDefined();
@@ -153,30 +176,14 @@ describe("api/auth", () => {
       expect(logActionMock).not.toHaveBeenCalled();
     });
 
-    it("should return 400 and not return jwt in header if users email is not a valid email", async () => {
-      requestPayload.email = "fakeEmail";
+    it("should return 400 and not return jwt in header if there is no user of given name", async () => {
+      requestPayload.name = "fakeName";
 
       let result = await exec();
 
       expect(result.status).toEqual(400);
 
-      expect(result.text).toEqual('"email" must be a valid email');
-
-      //Checking if there is no jwt in payload
-      expect(result.header["x-auth-token"]).not.toBeDefined();
-
-      //Logging action should not have been called
-      expect(logActionMock).not.toHaveBeenCalled();
-    });
-
-    it("should return 400 and not return jwt in header if there is no user of given email", async () => {
-      requestPayload.email = "fakeEmail@mail.com";
-
-      let result = await exec();
-
-      expect(result.status).toEqual(400);
-
-      expect(result.text).toEqual("Invalid email or password");
+      expect(result.text).toEqual("Invalid name or password");
 
       //Checking if there is no jwt in payload
       expect(result.header["x-auth-token"]).not.toBeDefined();
@@ -280,7 +287,7 @@ describe("api/auth", () => {
 
       expect(result.status).toEqual(400);
 
-      expect(result.text).toEqual("Invalid email or password");
+      expect(result.text).toEqual("Invalid name or password");
 
       //Checking if there is no jwt in payload
       expect(result.header["x-auth-token"]).not.toBeDefined();

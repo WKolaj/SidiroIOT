@@ -28,10 +28,10 @@ router.post("/", [validate(validateCredentials)], async (req, res) => {
 
   //If user does not exsts or password given in body does not match - return 400
   if (!existsAndIsNotEmpty(user))
-    return res.status(400).send("Invalid email or password");
+    return res.status(400).send("Invalid name or password");
 
   if (!(await hashedStringMatch(req.body.password, user.Password)))
-    return res.status(400).send("Invalid email or password");
+    return res.status(400).send("Invalid name or password");
 
   //If user exists and password matches - return users payload as a body and jwt as header
 

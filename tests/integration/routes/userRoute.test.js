@@ -1,11 +1,15 @@
-const { snooze } = require("../../../utilities/utilities");
+const {
+  snooze,
+  writeFileAsync,
+  readFileAsync,
+} = require("../../../utilities/utilities");
 const _ = require("lodash");
+const path = require("path");
 const request = require("supertest");
 const bcrypt = require("bcrypt");
 const config = require("config");
 const jsonWebToken = require("jsonwebtoken");
-const mongoose = require("mongoose");
-let { User } = require("../../../models/user");
+let User = require("../../../classes/User/User");
 let {
   generateTestAdmin,
   generateTestUser,
@@ -15,25 +19,40 @@ let {
   generateTestAdminAndSuperAdmin,
   generateTestUserAndAdminAndSuperAdmin,
   generateStringOfGivenLength,
-  testUselessUserEmail,
-  testAdminEmail,
-  testUserEmail,
-  testUserAndAdminEmail,
-  testSuperAdminEmail,
-  testAdminAndSuperAdminEmail,
-  testUserAndAdminAndSuperAdminEmail,
-  testUselessUserPassword,
-  testAdminPassword,
-  testUserPassword,
-  testUserAndAdminPassword,
-  testSuperAdminPassword,
+  testAdminAndSuperAdminID,
+  testAdminID,
+  testSuperAdminID,
+  testUselessUserID,
+  testUserAndAdminAndSuperAdminID,
+  testUserAndAdminID,
+  testUserID,
   testAdminAndSuperAdminPassword,
+  testAdminPassword,
+  testSuperAdminPassword,
+  testUselessUserPassword,
   testUserAndAdminAndSuperAdminPassword,
+  testUserAndAdminPassword,
+  testUserPassword,
+  testAdminAndSuperAdminName,
+  testAdminName,
+  testSuperAdminName,
+  testUselessUserName,
+  testUserAndAdminAndSuperAdminName,
+  testUserAndAdminName,
+  testUserName,
 } = require("../../utilities/testUtilities");
+
+const privateKey = config.get("jwtPrivateKey");
+const settingsDirPath = config.get("settingsPath");
+const userFileName = config.get("userFileName");
+const userFilePath = path.join(settingsDirPath, userFileName);
 
 let { exists, hashedStringMatch } = require("../../../utilities/utilities");
 let server;
 let logger = require("../../../logger/logger");
+const { pathToFileURL } = require("url");
+const { not } = require("joi");
+const { initial } = require("lodash");
 
 describe("api/user", () => {
   let uselessUser;
@@ -46,12 +65,7 @@ describe("api/user", () => {
   let logActionMock;
 
   const getUserPayload = (user) => {
-    return {
-      _id: user._id.toString(),
-      name: user.name,
-      email: user.email,
-      permissions: user.permissions,
-    };
+    return user.PayloadWithoutPassword;
   };
 
   const getAllInitialUsersPayload = (user) => {
@@ -70,7 +84,7 @@ describe("api/user", () => {
     server = await require("../../../startup/app")();
 
     //Clearing users in database before each test
-    await User.deleteMany({});
+    await writeFileAsync(userFilePath, "{}", "utf8");
 
     //generating uslessUser, user, admin and adminUser
     uselessUser = await generateUselessUser();
@@ -88,7 +102,7 @@ describe("api/user", () => {
 
   afterEach(async () => {
     //Clearing users in database after each test
-    await User.deleteMany({});
+    await writeFileAsync(userFilePath, "{}", "utf8");
 
     await server.close();
   });
@@ -130,7 +144,8 @@ describe("api/user", () => {
     });
 
     it("should return 200 and an empty list - if there are no users", async () => {
-      await User.deleteMany({});
+      //Clearing users in database after each test
+      await writeFileAsync(userFilePath, "{}", "utf8");
 
       //JWT should still be valid - regarding its content
       let response = await exec();
@@ -148,8 +163,10 @@ describe("api/user", () => {
     });
 
     it("should return 200 and proper list - if there is only one users", async () => {
-      //deleting all except testUser
-      await User.deleteMany({ _id: { $ne: testUser._id } });
+      //Clearing users in database after each test
+      await writeFileAsync(userFilePath, "{}", "utf8");
+
+      testUser = await generateTestUser();
 
       //JWT should still be valid - regarding its content
       let response = await exec();
@@ -161,14 +178,7 @@ describe("api/user", () => {
       expect(response.body).toBeDefined();
 
       //There should be empty array - no users
-      expect(response.body).toEqual([
-        {
-          _id: testUser._id.toString(),
-          name: testUser.name,
-          email: testUser.email,
-          permissions: testUser.permissions,
-        },
-      ]);
+      expect(response.body).toEqual([testUser.PayloadWithoutPassword]);
 
       //#endregion CHECKING_RESPONSE
     });
@@ -287,7 +297,7 @@ describe("api/user", () => {
 
     beforeEach(async () => {
       jwt = await testAdmin.generateJWT();
-      userId = testUser._id;
+      userId = testUser.ID;
     });
 
     let exec = async () => {
@@ -327,23 +337,8 @@ describe("api/user", () => {
 
     //#region ========== INVALID ID ==========
 
-    it("should return 404 - if id of user is invalid", async () => {
-      userId = "fakeUserId";
-
-      //JWT should still be valid - regarding its content
-      let response = await exec();
-
-      //#region CHECKING_RESPONSE
-
-      expect(response).toBeDefined();
-      expect(response.status).toEqual(404);
-      expect(response.text).toEqual("Invalid id...");
-
-      //#endregion CHECKING_RESPONSE
-    });
-
     it("should return 404 - if there is no user of given id", async () => {
-      userId = mongoose.Types.ObjectId();
+      userId = "fakeUserId";
 
       //JWT should still be valid - regarding its content
       let response = await exec();
@@ -364,7 +359,7 @@ describe("api/user", () => {
     //Only admins can get users and others admins payload
 
     it("should return 200 and payload of given user - if admin is sending request for useless user", async () => {
-      userId = uselessUser._id;
+      userId = uselessUser.ID;
 
       let response = await exec();
 
@@ -383,7 +378,7 @@ describe("api/user", () => {
     });
 
     it("should return 200 and payload of given user - if admin is sending request for admin", async () => {
-      userId = testAdmin._id;
+      userId = testAdmin.ID;
 
       let response = await exec();
 
@@ -402,7 +397,7 @@ describe("api/user", () => {
     });
 
     it("should return 200 and payload of given user - if admin is sending request for superAdmin", async () => {
-      userId = testSuperAdmin._id;
+      userId = testSuperAdmin.ID;
 
       let response = await exec();
 
@@ -497,10 +492,9 @@ describe("api/user", () => {
 
     it("should not return any user and return 400 if  jwt from different private key was provided", async () => {
       let fakeUserPayload = {
-        _id: testAdmin._id,
-        email: testAdmin.email,
-        name: testAdmin.name,
-        permissions: testAdmin.permissions,
+        _id: testAdmin.ID,
+        name: testAdmin.Name,
+        permissions: testAdmin.Permissions,
       };
 
       jwt = await jsonWebToken.sign(fakeUserPayload, "differentTestPrivateKey");
@@ -642,9 +636,8 @@ describe("api/user", () => {
     it("should not return any user and return 400 if  jwt from different private key was provided", async () => {
       let fakeUserPayload = {
         _id: testAdmin._id,
-        email: testAdmin.email,
-        name: testAdmin.name,
-        permissions: testAdmin.permissions,
+        name: testAdmin.Name,
+        permissions: testAdmin.Permissions,
       };
 
       jwt = await jsonWebToken.sign(fakeUserPayload, "differentTestPrivateKey");
@@ -672,7 +665,6 @@ describe("api/user", () => {
       jwt = await testAdmin.generateJWT();
       userPayload = {
         name: "newUserName",
-        email: "newUser@newMail.com.pl",
         permissions: 1,
         password: "abcd1234",
       };
@@ -687,7 +679,7 @@ describe("api/user", () => {
       else return request(server).post("/api/user").send(userPayload);
     };
 
-    it("should return 200 and create new user in database", async () => {
+    it("should return 200 and create new user in file", async () => {
       let response = await exec();
 
       //#region CHECKING_RESPONSE
@@ -704,6 +696,9 @@ describe("api/user", () => {
         _id: response.body._id,
       };
 
+      //password should not be returned
+      delete expectedBody.password;
+
       //after sorting - both array should be the same
       expect(response.body).toEqual(expectedBody);
 
@@ -711,12 +706,10 @@ describe("api/user", () => {
 
       //#region CHECKING_DATABASE
 
-      let createdUserArray = await User.find({ _id: response.body._id });
+      let createdUser = await User.GetUserFromFileById(response.body._id);
 
       //User should exists
-      expect(createdUserArray.length).toEqual(1);
-
-      let createdUser = createdUserArray[0];
+      expect(createdUser).toBeDefined();
 
       //User should have valid payload
       let createdUserPayload = getUserPayload(createdUser);
@@ -731,7 +724,7 @@ describe("api/user", () => {
 
       let passwordMatch = await hashedStringMatch(
         userPayload.password,
-        createdUser.password
+        createdUser.Password
       );
       expect(passwordMatch).toEqual(true);
 
@@ -744,7 +737,7 @@ describe("api/user", () => {
       expect(logActionMock).toHaveBeenCalledTimes(1);
 
       expect(logActionMock.mock.calls[0][0]).toEqual(
-        "User admin@test1234abcd.com.pl created user newUser@newMail.com.pl"
+        "User adminName created user newUserName"
       );
     });
 
@@ -767,7 +760,9 @@ describe("api/user", () => {
       //#region CHECKING_DATABASE
 
       //There should be 7 users in array - no user should be added
-      let createdUserArray = await User.find({});
+      let createdUserArray = Object.values(
+        JSON.parse(await readFileAsync(userFilePath, "utf8"))
+      );
 
       expect(createdUserArray.length).toEqual(7);
 
@@ -791,7 +786,9 @@ describe("api/user", () => {
       //#region CHECKING_DATABASE
 
       //There should be 7 users in array - no user should be added
-      let createdUserArray = await User.find({});
+      let createdUserArray = Object.values(
+        JSON.parse(await readFileAsync(userFilePath, "utf8"))
+      );
 
       expect(createdUserArray.length).toEqual(7);
 
@@ -815,7 +812,9 @@ describe("api/user", () => {
       //#region CHECKING_DATABASE
 
       //There should be 7 users in array - no user should be added
-      let createdUserArray = await User.find({});
+      let createdUserArray = Object.values(
+        JSON.parse(await readFileAsync(userFilePath, "utf8"))
+      );
 
       expect(createdUserArray.length).toEqual(7);
 
@@ -841,7 +840,9 @@ describe("api/user", () => {
       //#region CHECKING_DATABASE
 
       //There should be 7 users in array - no user should be added
-      let createdUserArray = await User.find({});
+      let createdUserArray = Object.values(
+        JSON.parse(await readFileAsync(userFilePath, "utf8"))
+      );
 
       expect(createdUserArray.length).toEqual(7);
 
@@ -867,7 +868,37 @@ describe("api/user", () => {
       //#region CHECKING_DATABASE
 
       //There should be 7 users in array - no user should be added
-      let createdUserArray = await User.find({});
+      let createdUserArray = Object.values(
+        JSON.parse(await readFileAsync(userFilePath, "utf8"))
+      );
+
+      expect(createdUserArray.length).toEqual(7);
+
+      //#endregion CHECKING_DATABASE
+    });
+
+    it("should not create any user and return 400 if there is an attempt to create user with the same name", async () => {
+      userPayload.name = testUser.Name;
+
+      let response = await exec();
+
+      //#region CHECKING_RESPONSE
+
+      expect(response).toBeDefined();
+      expect(response.status).toEqual(400);
+      expect(response.text).toBeDefined();
+      expect(response.text).toContain(
+        "User with given name already registered..."
+      );
+
+      //#endregion CHECKING_RESPONSE
+
+      //#region CHECKING_DATABASE
+
+      //There should be 7 users in array - no user should be added
+      let createdUserArray = Object.values(
+        JSON.parse(await readFileAsync(userFilePath, "utf8"))
+      );
 
       expect(createdUserArray.length).toEqual(7);
 
@@ -875,130 +906,6 @@ describe("api/user", () => {
     });
 
     //#endregion  ========== INVALID NAME ==========
-
-    //#region  ========== INVALID EMAIL ==========
-
-    it("should not create any user and return 400 if email is not defined", async () => {
-      delete userPayload.email;
-
-      let response = await exec();
-
-      //#region CHECKING_RESPONSE
-
-      expect(response).toBeDefined();
-      expect(response.status).toEqual(400);
-      expect(response.text).toBeDefined();
-      expect(response.text).toContain('"email" is required');
-
-      //#endregion CHECKING_RESPONSE
-
-      //#region CHECKING_DATABASE
-
-      //There should be 7 users in array - no user should be added
-      let createdUserArray = await User.find({});
-
-      expect(createdUserArray.length).toEqual(7);
-
-      //#endregion CHECKING_DATABASE
-    });
-
-    it("should not create any user and return 400 if email is null", async () => {
-      userPayload.email = null;
-
-      let response = await exec();
-
-      //#region CHECKING_RESPONSE
-
-      expect(response).toBeDefined();
-      expect(response.status).toEqual(400);
-      expect(response.text).toBeDefined();
-      expect(response.text).toContain('"email" must be a string');
-
-      //#endregion CHECKING_RESPONSE
-
-      //#region CHECKING_DATABASE
-
-      //There should be 7 users in array - no user should be added
-      let createdUserArray = await User.find({});
-
-      expect(createdUserArray.length).toEqual(7);
-
-      //#endregion CHECKING_DATABASE
-    });
-
-    it("should not create any user and return 400 if email is not a valid string", async () => {
-      userPayload.email = 123;
-
-      let response = await exec();
-
-      //#region CHECKING_RESPONSE
-
-      expect(response).toBeDefined();
-      expect(response.status).toEqual(400);
-      expect(response.text).toBeDefined();
-      expect(response.text).toContain('"email" must be a string');
-
-      //#endregion CHECKING_RESPONSE
-
-      //#region CHECKING_DATABASE
-
-      //There should be 7 users in array - no user should be added
-      let createdUserArray = await User.find({});
-
-      expect(createdUserArray.length).toEqual(7);
-
-      //#endregion CHECKING_DATABASE
-    });
-
-    it("should not create any user and return 400 if email is not a valid email", async () => {
-      userPayload.email = "fakeEmail";
-
-      let response = await exec();
-
-      //#region CHECKING_RESPONSE
-
-      expect(response).toBeDefined();
-      expect(response.status).toEqual(400);
-      expect(response.text).toBeDefined();
-      expect(response.text).toContain('"email" must be a valid email');
-
-      //#endregion CHECKING_RESPONSE
-
-      //#region CHECKING_DATABASE
-
-      //There should be 7 users in array - no user should be added
-      let createdUserArray = await User.find({});
-
-      expect(createdUserArray.length).toEqual(7);
-
-      //#endregion CHECKING_DATABASE
-    });
-
-    it("should not create any user and return 400 if there has already been a user with given email", async () => {
-      userPayload.email = testUser.email;
-
-      let response = await exec();
-
-      //#region CHECKING_RESPONSE
-
-      expect(response).toBeDefined();
-      expect(response.status).toEqual(400);
-      expect(response.text).toBeDefined();
-      expect(response.text).toContain("User already registered.");
-
-      //#endregion CHECKING_RESPONSE
-
-      //#region CHECKING_DATABASE
-
-      //There should be 7 users in array - no user should be added
-      let createdUserArray = await User.find({});
-
-      expect(createdUserArray.length).toEqual(7);
-
-      //#endregion CHECKING_DATABASE
-    });
-
-    //#endregion  ========== INVALID EMAIL ==========
 
     //#region  ========== INVALID PERMISSIONS ==========
 
@@ -1019,7 +926,9 @@ describe("api/user", () => {
       //#region CHECKING_DATABASE
 
       //There should be 7 users in array - no user should be added
-      let createdUserArray = await User.find({});
+      let createdUserArray = Object.values(
+        JSON.parse(await readFileAsync(userFilePath, "utf8"))
+      );
 
       expect(createdUserArray.length).toEqual(7);
 
@@ -1043,7 +952,9 @@ describe("api/user", () => {
       //#region CHECKING_DATABASE
 
       //There should be 7 users in array - no user should be added
-      let createdUserArray = await User.find({});
+      let createdUserArray = Object.values(
+        JSON.parse(await readFileAsync(userFilePath, "utf8"))
+      );
 
       expect(createdUserArray.length).toEqual(7);
 
@@ -1067,7 +978,9 @@ describe("api/user", () => {
       //#region CHECKING_DATABASE
 
       //There should be 7 users in array - no user should be added
-      let createdUserArray = await User.find({});
+      let createdUserArray = Object.values(
+        JSON.parse(await readFileAsync(userFilePath, "utf8"))
+      );
 
       expect(createdUserArray.length).toEqual(7);
 
@@ -1091,7 +1004,9 @@ describe("api/user", () => {
       //#region CHECKING_DATABASE
 
       //There should be 7 users in array - no user should be added
-      let createdUserArray = await User.find({});
+      let createdUserArray = Object.values(
+        JSON.parse(await readFileAsync(userFilePath, "utf8"))
+      );
 
       expect(createdUserArray.length).toEqual(7);
 
@@ -1117,7 +1032,9 @@ describe("api/user", () => {
       //#region CHECKING_DATABASE
 
       //There should be 7 users in array - no user should be added
-      let createdUserArray = await User.find({});
+      let createdUserArray = Object.values(
+        JSON.parse(await readFileAsync(userFilePath, "utf8"))
+      );
 
       expect(createdUserArray.length).toEqual(7);
 
@@ -1143,7 +1060,9 @@ describe("api/user", () => {
       //#region CHECKING_DATABASE
 
       //There should be 7 users in array - no user should be added
-      let createdUserArray = await User.find({});
+      let createdUserArray = Object.values(
+        JSON.parse(await readFileAsync(userFilePath, "utf8"))
+      );
 
       expect(createdUserArray.length).toEqual(7);
 
@@ -1154,7 +1073,7 @@ describe("api/user", () => {
 
     //#region  ========== INVALID PASSWORD ==========
 
-    it("should return 200 and create new user in database and generate password if it was not defined in payload", async () => {
+    it("should not create any user and return 400 if password is not defined in payload", async () => {
       delete userPayload.password;
 
       let response = await exec();
@@ -1162,54 +1081,22 @@ describe("api/user", () => {
       //#region CHECKING_RESPONSE
 
       expect(response).toBeDefined();
-      expect(response.status).toEqual(200);
-      expect(response.body).toBeDefined();
-
-      //id should be generated
-      expect(response.body._id).toBeDefined();
-
-      //password should be generated
-      expect(response.body.password).toBeDefined();
-
-      //password should be 8 charaters long
-      expect(response.body.password.length).toEqual(8);
-
-      let expectedBody = {
-        ...userPayload,
-        password: response.body.password,
-        _id: response.body._id,
-      };
-
-      //after sorting - both array should be the same
-      expect(response.body).toEqual(expectedBody);
+      expect(response.status).toEqual(400);
+      expect(response.text).toBeDefined();
+      expect(response.text).toContain(
+        '"password" is required when creating an user'
+      );
 
       //#endregion CHECKING_RESPONSE
 
       //#region CHECKING_DATABASE
 
-      let createdUserArray = await User.find({ _id: response.body._id });
-
-      //User should exists
-      expect(createdUserArray.length).toEqual(1);
-
-      let createdUser = createdUserArray[0];
-
-      //User should have valid payload
-      let createdUserPayload = getUserPayload(createdUser);
-
-      let expectedPayload = { ...userPayload, _id: response.body._id };
-
-      //Do not check password - it should have been hashed
-      delete expectedPayload.password;
-      expect(createdUserPayload).toEqual(expectedPayload);
-
-      //Checking if hashed password corresponds to the previous one
-
-      let passwordMatch = await hashedStringMatch(
-        response.body.password,
-        createdUser.password
+      //There should be 7 users in array - no user should be added
+      let createdUserArray = Object.values(
+        JSON.parse(await readFileAsync(userFilePath, "utf8"))
       );
-      expect(passwordMatch).toEqual(true);
+
+      expect(createdUserArray.length).toEqual(7);
 
       //#endregion CHECKING_DATABASE
     });
@@ -1231,7 +1118,9 @@ describe("api/user", () => {
       //#region CHECKING_DATABASE
 
       //There should be 7 users in array - no user should be added
-      let createdUserArray = await User.find({});
+      let createdUserArray = Object.values(
+        JSON.parse(await readFileAsync(userFilePath, "utf8"))
+      );
 
       expect(createdUserArray.length).toEqual(7);
 
@@ -1255,7 +1144,9 @@ describe("api/user", () => {
       //#region CHECKING_DATABASE
 
       //There should be 7 users in array - no user should be added
-      let createdUserArray = await User.find({});
+      let createdUserArray = Object.values(
+        JSON.parse(await readFileAsync(userFilePath, "utf8"))
+      );
 
       expect(createdUserArray.length).toEqual(7);
 
@@ -1281,7 +1172,9 @@ describe("api/user", () => {
       //#region CHECKING_DATABASE
 
       //There should be 7 users in array - no user should be added
-      let createdUserArray = await User.find({});
+      let createdUserArray = Object.values(
+        JSON.parse(await readFileAsync(userFilePath, "utf8"))
+      );
 
       expect(createdUserArray.length).toEqual(7);
 
@@ -1307,7 +1200,9 @@ describe("api/user", () => {
       //#region CHECKING_DATABASE
 
       //There should be 7 users in array - no user should be added
-      let createdUserArray = await User.find({});
+      let createdUserArray = Object.values(
+        JSON.parse(await readFileAsync(userFilePath, "utf8"))
+      );
 
       expect(createdUserArray.length).toEqual(7);
 
@@ -1335,7 +1230,9 @@ describe("api/user", () => {
       //#region CHECKING_DATABASE
 
       //There should be 7 users in array - no user should be added
-      let createdUserArray = await User.find({});
+      let createdUserArray = Object.values(
+        JSON.parse(await readFileAsync(userFilePath, "utf8"))
+      );
 
       expect(createdUserArray.length).toEqual(7);
 
@@ -1366,7 +1263,9 @@ describe("api/user", () => {
       //#region CHECKING_DATABASE
 
       //There should be 7 users in array - no user should be added
-      let createdUserArray = await User.find({});
+      let createdUserArray = Object.values(
+        JSON.parse(await readFileAsync(userFilePath, "utf8"))
+      );
 
       expect(createdUserArray.length).toEqual(7);
 
@@ -1392,7 +1291,6 @@ describe("api/user", () => {
 
       userPayload = {
         name: "newUserName",
-        email: "newUser@newMail.com.pl",
         permissions: permissions,
         password: "abcd1234",
       };
@@ -1414,6 +1312,9 @@ describe("api/user", () => {
           _id: response.body._id,
         };
 
+        //Response should not have password
+        delete expectedBody.password;
+
         //after sorting - both array should be the same
         expect(response.body).toEqual(expectedBody);
 
@@ -1421,12 +1322,10 @@ describe("api/user", () => {
 
         //#region CHECKING_DATABASE
 
-        let createdUserArray = await User.find({ _id: response.body._id });
+        let createdUser = await User.GetUserFromFileById(response.body._id);
 
         //User should exists
-        expect(createdUserArray.length).toEqual(1);
-
-        let createdUser = createdUserArray[0];
+        expect(createdUser).toBeDefined();
 
         //User should have valid payload
         let createdUserPayload = getUserPayload(createdUser);
@@ -1441,7 +1340,7 @@ describe("api/user", () => {
 
         let passwordMatch = await hashedStringMatch(
           userPayload.password,
-          createdUser.password
+          createdUser.Password
         );
         expect(passwordMatch).toEqual(true);
 
@@ -1459,7 +1358,9 @@ describe("api/user", () => {
         //#region CHECKING_DATABASE
 
         //There should be 7 users in array - no user should be added
-        let createdUserArray = await User.find({});
+        let createdUserArray = Object.values(
+          JSON.parse(await readFileAsync(userFilePath, "utf8"))
+        );
 
         expect(createdUserArray.length).toEqual(7);
 
@@ -1594,6 +1495,499 @@ describe("api/user", () => {
     //#endregion ========== AUTHORIZATION AND AUTHENTICATION ==========
   });
 
+  describe("DELETE/:id", () => {
+    let jwt;
+    let userId;
+
+    beforeEach(async () => {
+      jwt = await testAdmin.generateJWT();
+      userId = testUser._id;
+    });
+
+    let exec = async () => {
+      if (exists(jwt))
+        return request(server)
+          .delete("/api/user/" + userId)
+          .set(config.get("tokenHeader"), jwt)
+          .send();
+      else
+        return request(server)
+          .delete("/api/user/" + userId)
+          .send();
+    };
+
+    /**
+     * @description Method for testring deleting a user
+     * @param {Object} loggedUser Logged user which performs action
+     * @param {String} userToDeleteId User id to delete
+     * @param {String} userToDeletePassword Password of user to delete
+     * @param {Boolean} expectValidDelete Should deletion be performed properly
+     * @param {Number} errorCode error code - if error occurs
+     * @param {String} errorText error text - if error occurs
+     */
+    const testUserDelete = async (
+      loggedUser,
+      userToDeleteId,
+      userToDeletePassword,
+      expectValidDelete,
+      errorCode = null,
+      errorText = null,
+      userToDeleteExists = true
+    ) => {
+      jwt = await loggedUser.generateJWT();
+      userId = userToDeleteId;
+
+      //Getting initial user if exissts
+      let userToDelete = await User.GetUserFromFileById(userToDeleteId);
+      let initialUserPayload = null;
+
+      if (userToDelete) {
+        initialUserPayload = getUserPayload(userToDelete);
+      }
+
+      let response = await exec();
+
+      if (expectValidDelete) {
+        //#region CHECKING_RESPONSE
+
+        //Looking for deleted user
+
+        expect(response).toBeDefined();
+        expect(response.status).toEqual(200);
+        expect(response.body).toBeDefined();
+
+        let expectedBody = initialUserPayload;
+
+        //Response body should not contain password
+        delete expectedBody.password;
+
+        //after sorting - both array should be the same
+        expect(response.body).toEqual(expectedBody);
+
+        //#endregion CHECKING_RESPONSE
+
+        //#region CHECKING_DATABASE
+
+        //There should be no user of given id in database anymore
+        let deletedUser = await User.GetUserFromFileByName(userToDeleteId);
+
+        expect(deletedUser).toEqual(null);
+
+        //#endregion CHECKING_DATABASE
+      } else {
+        //#region CHECKING_RESPONSE
+
+        expect(response).toBeDefined();
+        expect(response.status).toEqual(errorCode);
+        expect(response.text).toEqual(errorText);
+
+        //#endregion CHECKING_RESPONSE
+
+        //#region CHECKING_DATABASE
+
+        //Checking only if user to delete exists
+        if (userToDeleteExists) {
+          let deletedUser = await User.GetUserFromFileById(userToDeleteId);
+
+          //User should exists
+          expect(deletedUser).toBeDefined();
+
+          //User should have valid payload
+          let deletedUserPayload = getUserPayload(deletedUser);
+
+          expect(deletedUserPayload).toEqual(initialUserPayload);
+
+          //Checking if hashed password corresponds to the previous one
+
+          let passwordMatch = await hashedStringMatch(
+            userToDeletePassword,
+            deletedUser.Password
+          );
+
+          expect(passwordMatch).toEqual(true);
+        }
+        //#endregion CHECKING_DATABASE
+      }
+    };
+
+    it("should return 200 and delete user - if there is user of given id", async () => {
+      await testUserDelete(testAdmin, testUser.ID, testUserPassword, true);
+    });
+
+    it("should call logger action method", async () => {
+      await exec();
+
+      expect(logActionMock).toHaveBeenCalledTimes(1);
+
+      expect(logActionMock.mock.calls[0][0]).toEqual(
+        "User adminName deleted user userName"
+      );
+    });
+
+    it("should return 404 and not delete user - if user of given id was not found", async () => {
+      await testUserDelete(
+        testAdmin,
+        "fakeId",
+        testUserPassword,
+        false,
+        404,
+        "User not found",
+        false
+      );
+    });
+
+    //#region  ========== AUTHORIZATION AND AUTHENTICATION ==========
+
+    it("should not delete any user and return 401 if jwt has not been given", async () => {
+      jwt = undefined;
+
+      let initialUserPayload = getUserPayload(testUser);
+
+      let response = await exec();
+
+      //#region CHECKING_RESPONSE
+
+      expect(response).toBeDefined();
+      expect(response.status).toEqual(401);
+      expect(response.text).toBeDefined();
+      expect(response.text).toContain("Access denied. No token provided");
+
+      //#endregion CHECKING_RESPONSE
+
+      //#region CHECKING_DATABASE
+
+      let deletedUser = await User.GetUserFromFileById(userId);
+
+      //User should exists
+      expect(deletedUser).toBeDefined();
+
+      //User should have valid payload
+      let deletedUserPayload = getUserPayload(testUser);
+
+      //Password should not be checked - it is hashed
+      let expectedPayload = { ...initialUserPayload };
+      delete expectedPayload.password;
+
+      expect(deletedUserPayload).toEqual(initialUserPayload);
+
+      //Checking if hashed password corresponds to the previous one
+
+      let passwordMatch = await hashedStringMatch(
+        testUserPassword,
+        deletedUser.Password
+      );
+
+      expect(passwordMatch).toEqual(true);
+
+      //#endregion CHECKING_DATABASE
+    });
+
+    it("should not return any user and return 400 if invalid jwt has been given", async () => {
+      jwt = "abcd1234";
+
+      let initialUserPayload = getUserPayload(testUser);
+
+      let response = await exec();
+
+      //#region CHECKING_RESPONSE
+
+      expect(response).toBeDefined();
+      expect(response.status).toEqual(400);
+      expect(response.text).toBeDefined();
+      expect(response.text).toContain("Invalid token provided");
+
+      //#endregion CHECKING_RESPONSE
+
+      //#region CHECKING_DATABASE
+
+      let deletedUser = await User.GetUserFromFileById(userId);
+
+      //User should exists
+      expect(deletedUser).toBeDefined();
+
+      //User should have valid payload
+      let deletedUserPayload = getUserPayload(testUser);
+
+      //Password should not be checked - it is hashed
+      let expectedPayload = { ...initialUserPayload };
+      delete expectedPayload.password;
+
+      expect(deletedUserPayload).toEqual(initialUserPayload);
+
+      //Checking if hashed password corresponds to the previous one
+
+      let passwordMatch = await hashedStringMatch(
+        testUserPassword,
+        deletedUser.Password
+      );
+
+      expect(passwordMatch).toEqual(true);
+
+      //#endregion CHECKING_DATABASE
+    });
+
+    it("should not return any user and return 400 if  jwt from different private key was provided", async () => {
+      let fakeUserPayload = {
+        _id: testAdmin._id,
+        email: testAdmin.email,
+        name: testAdmin.name,
+        permissions: testAdmin.permissions,
+      };
+
+      jwt = await jsonWebToken.sign(fakeUserPayload, "differentTestPrivateKey");
+
+      let initialUserPayload = getUserPayload(testUser);
+
+      let response = await exec();
+
+      //#region CHECKING_RESPONSE
+
+      expect(response).toBeDefined();
+      expect(response.status).toEqual(400);
+      expect(response.text).toBeDefined();
+      expect(response.text).toContain("Invalid token provided");
+
+      //#endregion CHECKING_RESPONSE
+
+      //#region CHECKING_DATABASE
+
+      let deletedUser = await User.GetUserFromFileById(userId);
+
+      //User should exists
+      expect(deletedUser).toBeDefined();
+
+      //User should have valid payload
+      let deletedUserPayload = getUserPayload(testUser);
+
+      //Password should not be checked - it is hashed
+      let expectedPayload = { ...initialUserPayload };
+      delete expectedPayload.password;
+
+      expect(deletedUserPayload).toEqual(initialUserPayload);
+
+      //Checking if hashed password corresponds to the previous one
+
+      let passwordMatch = await hashedStringMatch(
+        testUserPassword,
+        deletedUser.Password
+      );
+
+      expect(passwordMatch).toEqual(true);
+
+      //#endregion CHECKING_DATABASE
+    });
+
+    it("useless user deletes useless user - return 403", async () => {
+      await testUserDelete(
+        uselessUser,
+        uselessUser._id.toString(),
+        testUselessUserPassword,
+        false,
+        403,
+        "Access forbidden."
+      );
+    });
+
+    it("useless user deletes user - return 403", async () => {
+      await testUserDelete(
+        uselessUser,
+        testUser._id.toString(),
+        testUserPassword,
+        false,
+        403,
+        "Access forbidden."
+      );
+    });
+
+    it("useless user deletes admin - return 403", async () => {
+      await testUserDelete(
+        uselessUser,
+        testAdmin._id.toString(),
+        testAdminPassword,
+        false,
+        403,
+        "Access forbidden."
+      );
+    });
+
+    it("useless user deletes superAdmin - return 403", async () => {
+      await testUserDelete(
+        uselessUser,
+        testSuperAdmin._id.toString(),
+        testSuperAdminPassword,
+        false,
+        403,
+        "Access forbidden."
+      );
+    });
+
+    it("user deletes useless user - return 403", async () => {
+      await testUserDelete(
+        testUser,
+        uselessUser._id.toString(),
+        testUselessUserPassword,
+        false,
+        403,
+        "Access forbidden."
+      );
+    });
+
+    it("user deletes user - return 403", async () => {
+      await testUserDelete(
+        testUser,
+        testUser._id.toString(),
+        testUserPassword,
+        false,
+        403,
+        "Access forbidden."
+      );
+    });
+
+    it("user deletes admin - return 403", async () => {
+      await testUserDelete(
+        testUser,
+        testAdmin._id.toString(),
+        testAdminPassword,
+        false,
+        403,
+        "Access forbidden."
+      );
+    });
+
+    it("user deletes superAdmin - return 403", async () => {
+      await testUserDelete(
+        testUser,
+        testSuperAdmin._id.toString(),
+        testSuperAdminPassword,
+        false,
+        403,
+        "Access forbidden."
+      );
+    });
+
+    it("admin deletes useless user - return 200", async () => {
+      await testUserDelete(
+        testAdmin,
+        uselessUser._id.toString(),
+        testUselessUserPassword,
+        true
+      );
+    });
+
+    it("admin deletes user - return 200", async () => {
+      await testUserDelete(
+        testAdmin,
+        testUser._id.toString(),
+        testUserPassword,
+        true
+      );
+    });
+
+    it("admin deletes admin - return 403", async () => {
+      await testUserDelete(
+        testAdmin,
+        testAdmin._id.toString(),
+        testAdminPassword,
+        false,
+        403,
+        "Access forbidden."
+      );
+    });
+
+    it("admin deletes superAdmin - return 403", async () => {
+      await testUserDelete(
+        testAdmin,
+        testSuperAdmin._id.toString(),
+        testSuperAdminPassword,
+        false,
+        403,
+        "Access forbidden."
+      );
+    });
+
+    it("superAdmin deletes useless user - return 403", async () => {
+      await testUserDelete(
+        testSuperAdmin,
+        uselessUser._id.toString(),
+        testUselessUserPassword,
+        false,
+        403,
+        "Access forbidden."
+      );
+    });
+
+    it("superAdmin deletes user - return 403", async () => {
+      await testUserDelete(
+        testSuperAdmin,
+        testUser._id.toString(),
+        testUserPassword,
+        false,
+        403,
+        "Access forbidden."
+      );
+    });
+
+    it("superAdmin deletes admin - return 403", async () => {
+      await testUserDelete(
+        testSuperAdmin,
+        testAdmin._id.toString(),
+        testAdminPassword,
+        false,
+        403,
+        "Access forbidden."
+      );
+    });
+
+    it("superAdmin deletes superAdmin - return 403", async () => {
+      await testUserDelete(
+        testSuperAdmin,
+        testSuperAdmin._id.toString(),
+        testSuperAdminPassword,
+        false,
+        403,
+        "Access forbidden."
+      );
+    });
+
+    it("adminAndSuperAdmin deletes useless user - return 200", async () => {
+      await testUserDelete(
+        testAdminAndSuperAdmin,
+        uselessUser._id.toString(),
+        testUselessUserPassword,
+        true
+      );
+    });
+
+    it("adminAndSuperAdmin deletes user - return 200", async () => {
+      await testUserDelete(
+        testAdminAndSuperAdmin,
+        testUser._id.toString(),
+        testUserPassword,
+        true
+      );
+    });
+
+    it("adminAndSuperAdmin deletes admin - return 200", async () => {
+      await testUserDelete(
+        testAdminAndSuperAdmin,
+        testAdmin._id.toString(),
+        testAdminPassword,
+        true
+      );
+    });
+
+    it("adminAndSuperAdmin deletes superAdmin - return 200", async () => {
+      await testUserDelete(
+        testAdminAndSuperAdmin,
+        testSuperAdmin._id.toString(),
+        testSuperAdminPassword,
+        true
+      );
+    });
+
+    //#endregion ========== AUTHORIZATION AND AUTHENTICATION ==========
+  });
+
   describe("PUT/:id", () => {
     let jwt;
     let editUserId;
@@ -1603,8 +1997,7 @@ describe("api/user", () => {
       jwt = await testAdmin.generateJWT();
       editUserId = testUser._id.toString();
       editPayload = {
-        name: "newUserName",
-        email: testUser.email,
+        name: testUserName,
         permissions: 0,
         password: "abcd1234",
       };
@@ -1624,7 +2017,6 @@ describe("api/user", () => {
 
     it("should return 200 and edit user in database", async () => {
       let response = await exec();
-
       //#region CHECKING_RESPONSE
 
       expect(response).toBeDefined();
@@ -1643,14 +2035,10 @@ describe("api/user", () => {
 
       //#region CHECKING_DATABASE
 
-      let editedUserArray = await User.find({
-        _id: editUserId,
-      });
+      let editedUser = await User.GetUserFromFileById(editUserId);
 
       //User should exists
-      expect(editedUserArray.length).toEqual(1);
-
-      let editedUser = editedUserArray[0];
+      expect(editedUser).toBeDefined();
 
       //User should have valid payload
       let editedUserPayload = getUserPayload(editedUser);
@@ -1664,11 +2052,10 @@ describe("api/user", () => {
       delete expectedPayload.password;
       expect(editedUserPayload).toEqual(expectedPayload);
 
-      //Checking if hashed password corresponds to the previous one
-
+      //Checking if hashed password corresponds to the previous onex
       let passwordMatch = await hashedStringMatch(
         editPayload.password,
-        editedUser.password
+        editedUser.Password
       );
       expect(passwordMatch).toEqual(true);
 
@@ -1681,55 +2068,14 @@ describe("api/user", () => {
       expect(logActionMock).toHaveBeenCalledTimes(1);
 
       expect(logActionMock.mock.calls[0][0]).toEqual(
-        "User admin@test1234abcd.com.pl updated profile data of user user@test1234abcd.com.pl"
+        "User adminName updated profile data of user userName"
       );
     });
 
     //#region  ========== INVALID ID ==========
 
-    it("should return 404 and not edit user in database - if id is not a valid id of object", async () => {
-      editUserId = "fakeUserId";
-
-      let response = await exec();
-
-      //#region CHECKING_RESPONSE
-
-      expect(response).toBeDefined();
-      expect(response.status).toEqual(404);
-      expect(response.text).toEqual("Invalid id...");
-
-      //#endregion CHECKING_RESPONSE
-
-      //#region CHECKING_DATABASE
-
-      let editedUserArray = await User.find({
-        _id: testUser._id.toString(),
-      });
-
-      //User should exists
-      expect(editedUserArray.length).toEqual(1);
-
-      let editedUser = editedUserArray[0];
-
-      //User should have valid payload
-      let editedUserPayload = getUserPayload(editedUser);
-      let originalUserPayload = getUserPayload(testUser);
-
-      expect(editedUserPayload).toEqual(originalUserPayload);
-
-      //Checking if hashed password corresponds to the previous one
-
-      let passwordMatch = await hashedStringMatch(
-        "testUserPassword",
-        editedUser.password
-      );
-      expect(passwordMatch).toEqual(true);
-
-      //#endregion CHECKING_DATABASE
-    });
-
     it("should return 404 and not edit user in database - if there is no user of given id", async () => {
-      editUserId = mongoose.Types.ObjectId();
+      editUserId = "fakeUserId";
 
       let response = await exec();
 
@@ -1743,14 +2089,9 @@ describe("api/user", () => {
 
       //#region CHECKING_DATABASE
 
-      let editedUserArray = await User.find({
-        _id: testUser._id.toString(),
-      });
+      let editedUser = await User.GetUserFromFileById(testUser.ID);
 
-      //User should exists
-      expect(editedUserArray.length).toEqual(1);
-
-      let editedUser = editedUserArray[0];
+      expect(editedUser).toBeDefined();
 
       //User should have valid payload
       let editedUserPayload = getUserPayload(editedUser);
@@ -1761,8 +2102,80 @@ describe("api/user", () => {
       //Checking if hashed password corresponds to the previous one
 
       let passwordMatch = await hashedStringMatch(
-        "testUserPassword",
-        editedUser.password
+        testUserPassword,
+        editedUser.Password
+      );
+      expect(passwordMatch).toEqual(true);
+
+      //#endregion CHECKING_DATABASE
+    });
+
+    it("should return 404 and not edit user in database - if valid id is given in payload", async () => {
+      editPayload._id = editUserId;
+
+      let response = await exec();
+
+      //#region CHECKING_RESPONSE
+
+      expect(response).toBeDefined();
+      expect(response.status).toEqual(400);
+      expect(response.text).toEqual(`"_id" is not allowed`);
+
+      //#endregion CHECKING_RESPONSE
+
+      //#region CHECKING_DATABASE
+
+      let editedUser = await User.GetUserFromFileById(testUser.ID);
+
+      expect(editedUser).toBeDefined();
+
+      //User should have valid payload
+      let editedUserPayload = getUserPayload(editedUser);
+      let originalUserPayload = getUserPayload(testUser);
+
+      expect(editedUserPayload).toEqual(originalUserPayload);
+
+      //Checking if hashed password corresponds to the previous one
+
+      let passwordMatch = await hashedStringMatch(
+        testUserPassword,
+        editedUser.Password
+      );
+      expect(passwordMatch).toEqual(true);
+
+      //#endregion CHECKING_DATABASE
+    });
+
+    it("should return 404 and not edit user in database - if invalid id is given in payload", async () => {
+      editPayload._id = "fakeId";
+
+      let response = await exec();
+
+      //#region CHECKING_RESPONSE
+
+      expect(response).toBeDefined();
+      expect(response.status).toEqual(400);
+      expect(response.text).toEqual(`"_id" is not allowed`);
+
+      //#endregion CHECKING_RESPONSE
+
+      //#region CHECKING_DATABASE
+
+      let editedUser = await User.GetUserFromFileById(testUser.ID);
+
+      expect(editedUser).toBeDefined();
+
+      //User should have valid payload
+      let editedUserPayload = getUserPayload(editedUser);
+      let originalUserPayload = getUserPayload(testUser);
+
+      expect(editedUserPayload).toEqual(originalUserPayload);
+
+      //Checking if hashed password corresponds to the previous one
+
+      let passwordMatch = await hashedStringMatch(
+        testUserPassword,
+        editedUser.Password
       );
       expect(passwordMatch).toEqual(true);
 
@@ -1788,14 +2201,9 @@ describe("api/user", () => {
 
       //#region CHECKING_DATABASE
 
-      let editedUserArray = await User.find({
-        _id: editUserId,
-      });
+      let editedUser = await User.GetUserFromFileById(testUser.ID);
 
-      //User should exists
-      expect(editedUserArray.length).toEqual(1);
-
-      let editedUser = editedUserArray[0];
+      expect(editedUser).toBeDefined();
 
       //User should have valid payload
       let editedUserPayload = getUserPayload(editedUser);
@@ -1806,8 +2214,80 @@ describe("api/user", () => {
       //Checking if hashed password corresponds to the previous one
 
       let passwordMatch = await hashedStringMatch(
-        "testUserPassword",
-        editedUser.password
+        testUserPassword,
+        editedUser.Password
+      );
+      expect(passwordMatch).toEqual(true);
+
+      //#endregion CHECKING_DATABASE
+    });
+
+    it("should return 400 and not edit user in database - if name is is different than original - trying to update users name", async () => {
+      editPayload.name = "fakeName";
+
+      let response = await exec();
+
+      //#region CHECKING_RESPONSE
+
+      expect(response).toBeDefined();
+      expect(response.status).toEqual(400);
+      expect(response.text).toEqual("Invalid name for given user");
+
+      //#endregion CHECKING_RESPONSE
+
+      //#region CHECKING_DATABASE
+
+      let editedUser = await User.GetUserFromFileById(testUser.ID);
+
+      expect(editedUser).toBeDefined();
+
+      //User should have valid payload
+      let editedUserPayload = getUserPayload(editedUser);
+      let originalUserPayload = getUserPayload(testUser);
+
+      expect(editedUserPayload).toEqual(originalUserPayload);
+
+      //Checking if hashed password corresponds to the previous one
+
+      let passwordMatch = await hashedStringMatch(
+        testUserPassword,
+        editedUser.Password
+      );
+      expect(passwordMatch).toEqual(true);
+
+      //#endregion CHECKING_DATABASE
+    });
+
+    it("should return 400 and not edit user in database - if name is is different than original - trying to update users name with already existing user", async () => {
+      editPayload.name = testAdminAndSuperAdminName;
+
+      let response = await exec();
+
+      //#region CHECKING_RESPONSE
+
+      expect(response).toBeDefined();
+      expect(response.status).toEqual(400);
+      expect(response.text).toEqual("Invalid name for given user");
+
+      //#endregion CHECKING_RESPONSE
+
+      //#region CHECKING_DATABASE
+
+      let editedUser = await User.GetUserFromFileById(testUser.ID);
+
+      expect(editedUser).toBeDefined();
+
+      //User should have valid payload
+      let editedUserPayload = getUserPayload(editedUser);
+      let originalUserPayload = getUserPayload(testUser);
+
+      expect(editedUserPayload).toEqual(originalUserPayload);
+
+      //Checking if hashed password corresponds to the previous one
+
+      let passwordMatch = await hashedStringMatch(
+        testUserPassword,
+        editedUser.Password
       );
       expect(passwordMatch).toEqual(true);
 
@@ -1829,14 +2309,9 @@ describe("api/user", () => {
 
       //#region CHECKING_DATABASE
 
-      let editedUserArray = await User.find({
-        _id: editUserId,
-      });
+      let editedUser = await User.GetUserFromFileById(testUser.ID);
 
-      //User should exists
-      expect(editedUserArray.length).toEqual(1);
-
-      let editedUser = editedUserArray[0];
+      expect(editedUser).toBeDefined();
 
       //User should have valid payload
       let editedUserPayload = getUserPayload(editedUser);
@@ -1847,8 +2322,8 @@ describe("api/user", () => {
       //Checking if hashed password corresponds to the previous one
 
       let passwordMatch = await hashedStringMatch(
-        "testUserPassword",
-        editedUser.password
+        testUserPassword,
+        editedUser.Password
       );
       expect(passwordMatch).toEqual(true);
 
@@ -1870,14 +2345,9 @@ describe("api/user", () => {
 
       //#region CHECKING_DATABASE
 
-      let editedUserArray = await User.find({
-        _id: editUserId,
-      });
+      let editedUser = await User.GetUserFromFileById(testUser.ID);
 
-      //User should exists
-      expect(editedUserArray.length).toEqual(1);
-
-      let editedUser = editedUserArray[0];
+      expect(editedUser).toBeDefined();
 
       //User should have valid payload
       let editedUserPayload = getUserPayload(editedUser);
@@ -1888,8 +2358,8 @@ describe("api/user", () => {
       //Checking if hashed password corresponds to the previous one
 
       let passwordMatch = await hashedStringMatch(
-        "testUserPassword",
-        editedUser.password
+        testUserPassword,
+        editedUser.Password
       );
       expect(passwordMatch).toEqual(true);
 
@@ -1913,14 +2383,9 @@ describe("api/user", () => {
 
       //#region CHECKING_DATABASE
 
-      let editedUserArray = await User.find({
-        _id: editUserId,
-      });
+      let editedUser = await User.GetUserFromFileById(testUser.ID);
 
-      //User should exists
-      expect(editedUserArray.length).toEqual(1);
-
-      let editedUser = editedUserArray[0];
+      expect(editedUser).toBeDefined();
 
       //User should have valid payload
       let editedUserPayload = getUserPayload(editedUser);
@@ -1931,8 +2396,8 @@ describe("api/user", () => {
       //Checking if hashed password corresponds to the previous one
 
       let passwordMatch = await hashedStringMatch(
-        "testUserPassword",
-        editedUser.password
+        testUserPassword,
+        editedUser.Password
       );
       expect(passwordMatch).toEqual(true);
 
@@ -1956,14 +2421,9 @@ describe("api/user", () => {
 
       //#region CHECKING_DATABASE
 
-      let editedUserArray = await User.find({
-        _id: editUserId,
-      });
+      let editedUser = await User.GetUserFromFileById(testUser.ID);
 
-      //User should exists
-      expect(editedUserArray.length).toEqual(1);
-
-      let editedUser = editedUserArray[0];
+      expect(editedUser).toBeDefined();
 
       //User should have valid payload
       let editedUserPayload = getUserPayload(editedUser);
@@ -1974,8 +2434,8 @@ describe("api/user", () => {
       //Checking if hashed password corresponds to the previous one
 
       let passwordMatch = await hashedStringMatch(
-        "testUserPassword",
-        editedUser.password
+        testUserPassword,
+        editedUser.Password
       );
       expect(passwordMatch).toEqual(true);
 
@@ -1983,215 +2443,6 @@ describe("api/user", () => {
     });
 
     //#endregion  ========== INVALID NAME ==========
-
-    //#region  ========== INVALID EMAIL ==========
-
-    it("should return 400 and not edit user in database - if email is not defined in edit payload", async () => {
-      delete editPayload.email;
-
-      let response = await exec();
-
-      //#region CHECKING_RESPONSE
-
-      expect(response).toBeDefined();
-      expect(response.status).toEqual(400);
-      expect(response.text).toEqual('"email" is required');
-
-      //#endregion CHECKING_RESPONSE
-
-      //#region CHECKING_DATABASE
-
-      let editedUserArray = await User.find({
-        _id: editUserId,
-      });
-
-      //User should exists
-      expect(editedUserArray.length).toEqual(1);
-
-      let editedUser = editedUserArray[0];
-
-      //User should have valid payload
-      let editedUserPayload = getUserPayload(editedUser);
-      let originalUserPayload = getUserPayload(testUser);
-
-      expect(editedUserPayload).toEqual(originalUserPayload);
-
-      //Checking if hashed password corresponds to the previous one
-
-      let passwordMatch = await hashedStringMatch(
-        "testUserPassword",
-        editedUser.password
-      );
-      expect(passwordMatch).toEqual(true);
-
-      //#endregion CHECKING_DATABASE
-    });
-
-    it("should return 400 and not edit user in database - if email is null", async () => {
-      editPayload.email = null;
-
-      let response = await exec();
-
-      //#region CHECKING_RESPONSE
-
-      expect(response).toBeDefined();
-      expect(response.status).toEqual(400);
-      expect(response.text).toEqual('"email" must be a string');
-
-      //#endregion CHECKING_RESPONSE
-
-      //#region CHECKING_DATABASE
-
-      let editedUserArray = await User.find({
-        _id: editUserId,
-      });
-
-      //User should exists
-      expect(editedUserArray.length).toEqual(1);
-
-      let editedUser = editedUserArray[0];
-
-      //User should have valid payload
-      let editedUserPayload = getUserPayload(editedUser);
-      let originalUserPayload = getUserPayload(testUser);
-
-      expect(editedUserPayload).toEqual(originalUserPayload);
-
-      //Checking if hashed password corresponds to the previous one
-
-      let passwordMatch = await hashedStringMatch(
-        "testUserPassword",
-        editedUser.password
-      );
-      expect(passwordMatch).toEqual(true);
-
-      //#endregion CHECKING_DATABASE
-    });
-
-    it("should return 400 and not edit user in database - if email is not a valid string", async () => {
-      editPayload.email = 123;
-
-      let response = await exec();
-
-      //#region CHECKING_RESPONSE
-
-      expect(response).toBeDefined();
-      expect(response.status).toEqual(400);
-      expect(response.text).toEqual('"email" must be a string');
-
-      //#endregion CHECKING_RESPONSE
-
-      //#region CHECKING_DATABASE
-
-      let editedUserArray = await User.find({
-        _id: editUserId,
-      });
-
-      //User should exists
-      expect(editedUserArray.length).toEqual(1);
-
-      let editedUser = editedUserArray[0];
-
-      //User should have valid payload
-      let editedUserPayload = getUserPayload(editedUser);
-      let originalUserPayload = getUserPayload(testUser);
-
-      expect(editedUserPayload).toEqual(originalUserPayload);
-
-      //Checking if hashed password corresponds to the previous one
-
-      let passwordMatch = await hashedStringMatch(
-        "testUserPassword",
-        editedUser.password
-      );
-      expect(passwordMatch).toEqual(true);
-
-      //#endregion CHECKING_DATABASE
-    });
-
-    it("should return 400 and not edit user in database - if email is not a valid email", async () => {
-      editPayload.email = "fakeEmail";
-
-      let response = await exec();
-
-      //#region CHECKING_RESPONSE
-
-      expect(response).toBeDefined();
-      expect(response.status).toEqual(400);
-      expect(response.text).toEqual('"email" must be a valid email');
-
-      //#endregion CHECKING_RESPONSE
-
-      //#region CHECKING_DATABASE
-
-      let editedUserArray = await User.find({
-        _id: editUserId,
-      });
-
-      //User should exists
-      expect(editedUserArray.length).toEqual(1);
-
-      let editedUser = editedUserArray[0];
-
-      //User should have valid payload
-      let editedUserPayload = getUserPayload(editedUser);
-      let originalUserPayload = getUserPayload(testUser);
-
-      expect(editedUserPayload).toEqual(originalUserPayload);
-
-      //Checking if hashed password corresponds to the previous one
-
-      let passwordMatch = await hashedStringMatch(
-        "testUserPassword",
-        editedUser.password
-      );
-      expect(passwordMatch).toEqual(true);
-
-      //#endregion CHECKING_DATABASE
-    });
-
-    it("should return 400 and not edit user in database - if email value differs from value in user", async () => {
-      editPayload.email = "otherEmail@email.com";
-
-      let response = await exec();
-
-      //#region CHECKING_RESPONSE
-
-      expect(response).toBeDefined();
-      expect(response.status).toEqual(400);
-      expect(response.text).toEqual("Invalid email for given user");
-
-      //#endregion CHECKING_RESPONSE
-
-      //#region CHECKING_DATABASE
-
-      let editedUserArray = await User.find({
-        _id: editUserId,
-      });
-
-      //User should exists
-      expect(editedUserArray.length).toEqual(1);
-
-      let editedUser = editedUserArray[0];
-
-      //User should have valid payload
-      let editedUserPayload = getUserPayload(editedUser);
-      let originalUserPayload = getUserPayload(testUser);
-
-      expect(editedUserPayload).toEqual(originalUserPayload);
-
-      //Checking if hashed password corresponds to the previous one
-
-      let passwordMatch = await hashedStringMatch(
-        "testUserPassword",
-        editedUser.password
-      );
-      expect(passwordMatch).toEqual(true);
-
-      //#endregion CHECKING_DATABASE
-    });
-
-    //#endregion  ========== INVALID EMAIL ==========
 
     //#region  ========== INVALID PERMISSIONS ==========
 
@@ -2210,14 +2461,9 @@ describe("api/user", () => {
 
       //#region CHECKING_DATABASE
 
-      let editedUserArray = await User.find({
-        _id: editUserId,
-      });
+      let editedUser = await User.GetUserFromFileById(testUser.ID);
 
-      //User should exists
-      expect(editedUserArray.length).toEqual(1);
-
-      let editedUser = editedUserArray[0];
+      expect(editedUser).toBeDefined();
 
       //User should have valid payload
       let editedUserPayload = getUserPayload(editedUser);
@@ -2228,8 +2474,8 @@ describe("api/user", () => {
       //Checking if hashed password corresponds to the previous one
 
       let passwordMatch = await hashedStringMatch(
-        "testUserPassword",
-        editedUser.password
+        testUserPassword,
+        editedUser.Password
       );
       expect(passwordMatch).toEqual(true);
 
@@ -2251,14 +2497,9 @@ describe("api/user", () => {
 
       //#region CHECKING_DATABASE
 
-      let editedUserArray = await User.find({
-        _id: editUserId,
-      });
+      let editedUser = await User.GetUserFromFileById(testUser.ID);
 
-      //User should exists
-      expect(editedUserArray.length).toEqual(1);
-
-      let editedUser = editedUserArray[0];
+      expect(editedUser).toBeDefined();
 
       //User should have valid payload
       let editedUserPayload = getUserPayload(editedUser);
@@ -2269,8 +2510,8 @@ describe("api/user", () => {
       //Checking if hashed password corresponds to the previous one
 
       let passwordMatch = await hashedStringMatch(
-        "testUserPassword",
-        editedUser.password
+        testUserPassword,
+        editedUser.Password
       );
       expect(passwordMatch).toEqual(true);
 
@@ -2292,14 +2533,9 @@ describe("api/user", () => {
 
       //#region CHECKING_DATABASE
 
-      let editedUserArray = await User.find({
-        _id: editUserId,
-      });
+      let editedUser = await User.GetUserFromFileById(testUser.ID);
 
-      //User should exists
-      expect(editedUserArray.length).toEqual(1);
-
-      let editedUser = editedUserArray[0];
+      expect(editedUser).toBeDefined();
 
       //User should have valid payload
       let editedUserPayload = getUserPayload(editedUser);
@@ -2310,8 +2546,8 @@ describe("api/user", () => {
       //Checking if hashed password corresponds to the previous one
 
       let passwordMatch = await hashedStringMatch(
-        "testUserPassword",
-        editedUser.password
+        testUserPassword,
+        editedUser.Password
       );
       expect(passwordMatch).toEqual(true);
 
@@ -2333,14 +2569,9 @@ describe("api/user", () => {
 
       //#region CHECKING_DATABASE
 
-      let editedUserArray = await User.find({
-        _id: editUserId,
-      });
+      let editedUser = await User.GetUserFromFileById(testUser.ID);
 
-      //User should exists
-      expect(editedUserArray.length).toEqual(1);
-
-      let editedUser = editedUserArray[0];
+      expect(editedUser).toBeDefined();
 
       //User should have valid payload
       let editedUserPayload = getUserPayload(editedUser);
@@ -2351,8 +2582,8 @@ describe("api/user", () => {
       //Checking if hashed password corresponds to the previous one
 
       let passwordMatch = await hashedStringMatch(
-        "testUserPassword",
-        editedUser.password
+        testUserPassword,
+        editedUser.Password
       );
       expect(passwordMatch).toEqual(true);
 
@@ -2376,14 +2607,9 @@ describe("api/user", () => {
 
       //#region CHECKING_DATABASE
 
-      let editedUserArray = await User.find({
-        _id: editUserId,
-      });
+      let editedUser = await User.GetUserFromFileById(testUser.ID);
 
-      //User should exists
-      expect(editedUserArray.length).toEqual(1);
-
-      let editedUser = editedUserArray[0];
+      expect(editedUser).toBeDefined();
 
       //User should have valid payload
       let editedUserPayload = getUserPayload(editedUser);
@@ -2394,8 +2620,8 @@ describe("api/user", () => {
       //Checking if hashed password corresponds to the previous one
 
       let passwordMatch = await hashedStringMatch(
-        "testUserPassword",
-        editedUser.password
+        testUserPassword,
+        editedUser.Password
       );
       expect(passwordMatch).toEqual(true);
 
@@ -2419,14 +2645,9 @@ describe("api/user", () => {
 
       //#region CHECKING_DATABASE
 
-      let editedUserArray = await User.find({
-        _id: editUserId,
-      });
+      let editedUser = await User.GetUserFromFileById(testUser.ID);
 
-      //User should exists
-      expect(editedUserArray.length).toEqual(1);
-
-      let editedUser = editedUserArray[0];
+      expect(editedUser).toBeDefined();
 
       //User should have valid payload
       let editedUserPayload = getUserPayload(editedUser);
@@ -2437,8 +2658,8 @@ describe("api/user", () => {
       //Checking if hashed password corresponds to the previous one
 
       let passwordMatch = await hashedStringMatch(
-        "testUserPassword",
-        editedUser.password
+        testUserPassword,
+        editedUser.Password
       );
       expect(passwordMatch).toEqual(true);
 
@@ -2451,6 +2672,8 @@ describe("api/user", () => {
 
     it("should return 200 and edit user without password - if password is not defined in edit payload", async () => {
       delete editPayload.password;
+
+      let initialUserPayload = testUser.Payload;
 
       let response = await exec();
 
@@ -2469,14 +2692,10 @@ describe("api/user", () => {
 
       //#region CHECKING_DATABASE
 
-      let editedUserArray = await User.find({
-        _id: editUserId,
-      });
+      let editedUser = await User.GetUserFromFileById(editUserId);
 
       //User should exists
-      expect(editedUserArray.length).toEqual(1);
-
-      let editedUser = editedUserArray[0];
+      expect(editedUser).toBeDefined();
 
       //User should have valid payload
       let editedUserPayload = getUserPayload(editedUser);
@@ -2486,17 +2705,10 @@ describe("api/user", () => {
         _id: editUserId,
       };
 
-      //Do not check password - it should have been hashed
-      delete expectedPayload.password;
       expect(editedUserPayload).toEqual(expectedPayload);
 
-      //Checking if hashed password corresponds to the previous one
-
-      let passwordMatch = await hashedStringMatch(
-        "testUserPassword",
-        editedUser.password
-      );
-      expect(passwordMatch).toEqual(true);
+      //Password should not have been changed
+      expect(editedUser.Password).toEqual(initialUserPayload.password);
 
       //#endregion CHECKING_DATABASE
     });
@@ -2516,14 +2728,9 @@ describe("api/user", () => {
 
       //#region CHECKING_DATABASE
 
-      let editedUserArray = await User.find({
-        _id: editUserId,
-      });
+      let editedUser = await User.GetUserFromFileById(testUser.ID);
 
-      //User should exists
-      expect(editedUserArray.length).toEqual(1);
-
-      let editedUser = editedUserArray[0];
+      expect(editedUser).toBeDefined();
 
       //User should have valid payload
       let editedUserPayload = getUserPayload(editedUser);
@@ -2534,8 +2741,8 @@ describe("api/user", () => {
       //Checking if hashed password corresponds to the previous one
 
       let passwordMatch = await hashedStringMatch(
-        "testUserPassword",
-        editedUser.password
+        testUserPassword,
+        editedUser.Password
       );
       expect(passwordMatch).toEqual(true);
 
@@ -2557,14 +2764,9 @@ describe("api/user", () => {
 
       //#region CHECKING_DATABASE
 
-      let editedUserArray = await User.find({
-        _id: editUserId,
-      });
+      let editedUser = await User.GetUserFromFileById(testUser.ID);
 
-      //User should exists
-      expect(editedUserArray.length).toEqual(1);
-
-      let editedUser = editedUserArray[0];
+      expect(editedUser).toBeDefined();
 
       //User should have valid payload
       let editedUserPayload = getUserPayload(editedUser);
@@ -2575,8 +2777,8 @@ describe("api/user", () => {
       //Checking if hashed password corresponds to the previous one
 
       let passwordMatch = await hashedStringMatch(
-        "testUserPassword",
-        editedUser.password
+        testUserPassword,
+        editedUser.Password
       );
       expect(passwordMatch).toEqual(true);
 
@@ -2600,14 +2802,9 @@ describe("api/user", () => {
 
       //#region CHECKING_DATABASE
 
-      let editedUserArray = await User.find({
-        _id: editUserId,
-      });
+      let editedUser = await User.GetUserFromFileById(testUser.ID);
 
-      //User should exists
-      expect(editedUserArray.length).toEqual(1);
-
-      let editedUser = editedUserArray[0];
+      expect(editedUser).toBeDefined();
 
       //User should have valid payload
       let editedUserPayload = getUserPayload(editedUser);
@@ -2618,8 +2815,8 @@ describe("api/user", () => {
       //Checking if hashed password corresponds to the previous one
 
       let passwordMatch = await hashedStringMatch(
-        "testUserPassword",
-        editedUser.password
+        testUserPassword,
+        editedUser.Password
       );
       expect(passwordMatch).toEqual(true);
 
@@ -2643,14 +2840,9 @@ describe("api/user", () => {
 
       //#region CHECKING_DATABASE
 
-      let editedUserArray = await User.find({
-        _id: editUserId,
-      });
+      let editedUser = await User.GetUserFromFileById(testUser.ID);
 
-      //User should exists
-      expect(editedUserArray.length).toEqual(1);
-
-      let editedUser = editedUserArray[0];
+      expect(editedUser).toBeDefined();
 
       //User should have valid payload
       let editedUserPayload = getUserPayload(editedUser);
@@ -2661,8 +2853,8 @@ describe("api/user", () => {
       //Checking if hashed password corresponds to the previous one
 
       let passwordMatch = await hashedStringMatch(
-        "testUserPassword",
-        editedUser.password
+        testUserPassword,
+        editedUser.Password
       );
       expect(passwordMatch).toEqual(true);
 
@@ -2689,14 +2881,9 @@ describe("api/user", () => {
 
       //#region CHECKING_DATABASE
 
-      let editedUserArray = await User.find({
-        _id: editUserId,
-      });
+      let editedUser = await User.GetUserFromFileById(testUser.ID);
 
-      //User should exists
-      expect(editedUserArray.length).toEqual(1);
-
-      let editedUser = editedUserArray[0];
+      expect(editedUser).toBeDefined();
 
       //User should have valid payload
       let editedUserPayload = getUserPayload(editedUser);
@@ -2707,8 +2894,8 @@ describe("api/user", () => {
       //Checking if hashed password corresponds to the previous one
 
       let passwordMatch = await hashedStringMatch(
-        "testUserPassword",
-        editedUser.password
+        testUserPassword,
+        editedUser.Password
       );
       expect(passwordMatch).toEqual(true);
 
@@ -2738,14 +2925,9 @@ describe("api/user", () => {
 
       //#region CHECKING_DATABASE
 
-      let editedUserArray = await User.find({
-        _id: editUserId,
-      });
+      let editedUser = await User.GetUserFromFileById(testUser.ID);
 
-      //User should exists
-      expect(editedUserArray.length).toEqual(1);
-
-      let editedUser = editedUserArray[0];
+      expect(editedUser).toBeDefined();
 
       //User should have valid payload
       let editedUserPayload = getUserPayload(editedUser);
@@ -2756,8 +2938,8 @@ describe("api/user", () => {
       //Checking if hashed password corresponds to the previous one
 
       let passwordMatch = await hashedStringMatch(
-        "testUserPassword",
-        editedUser.password
+        testUserPassword,
+        editedUser.Password
       );
       expect(passwordMatch).toEqual(true);
 
@@ -2782,15 +2964,14 @@ describe("api/user", () => {
       expectedErrorText = null
     ) => {
       let originalUserPayload = getUserPayload(userToEdit);
-      let originalUserHashedPassword = userToEdit.password;
+      let originalUserHashedPassword = userToEdit.Password;
 
       jwt = await loggedUser.generateJWT();
 
-      editUserId = userToEdit._id.toString();
+      editUserId = userToEdit.ID;
 
       editPayload = {
-        name: "newUserName",
-        email: userToEdit.email,
+        name: userToEdit.Name,
         permissions: newPermissions,
         password: "abcd1234",
       };
@@ -2819,14 +3000,10 @@ describe("api/user", () => {
 
         //Edition should update user of given id in database
 
-        let editedUserArray = await User.find({
-          _id: editUserId,
-        });
+        let editedUser = await User.GetUserFromFileById(editUserId);
 
         //User should exists
-        expect(editedUserArray.length).toEqual(1);
-
-        let editedUser = editedUserArray[0];
+        expect(editedUser).toBeDefined();
 
         //User should have valid payload
         let editedUserPayload = getUserPayload(editedUser);
@@ -2844,7 +3021,7 @@ describe("api/user", () => {
 
         let passwordMatch = await hashedStringMatch(
           editPayload.password,
-          editedUser.password
+          editedUser.Password
         );
         expect(passwordMatch).toEqual(true);
 
@@ -2863,14 +3040,10 @@ describe("api/user", () => {
 
         //#region CHECKING_DATABASE
 
-        let editedUserArray = await User.find({
-          _id: editUserId,
-        });
+        let editedUser = await User.GetUserFromFileById(editUserId);
 
         //User should exists
-        expect(editedUserArray.length).toEqual(1);
-
-        let editedUser = editedUserArray[0];
+        expect(editedUser).toBeDefined();
 
         //User should have valid payload
         let editedUserPayload = getUserPayload(editedUser);
@@ -2878,13 +3051,13 @@ describe("api/user", () => {
         expect(editedUserPayload).toEqual(originalUserPayload);
 
         //Checking if hashed password corresponds to the hashed previous one
-        expect(editedUser.password).toEqual(originalUserHashedPassword);
+        expect(editedUser.Password).toEqual(originalUserHashedPassword);
 
         //#endregion CHECKING_DATABASE
       }
     };
 
-    //#region NO ATTEMPT TO CHANGE PERMISSIONS
+    // #region NO ATTEMPT TO CHANGE PERMISSIONS
 
     it("no attempt to change persmission - user edits user - should return 403", async () => {
       await testAuthorizationAndAuthentication(
@@ -3446,9 +3619,8 @@ describe("api/user", () => {
     beforeEach(async () => {
       jwt = await testUser.generateJWT();
       editPayload = {
-        name: "newUserName",
-        email: testUser.email,
-        permissions: testUser.permissions,
+        name: testUserName,
+        permissions: testUser.Permissions,
         password: "abcd1234",
         oldPassword: testUserPassword,
       };
@@ -3508,14 +3680,9 @@ describe("api/user", () => {
 
         //#region CHECKING_DATABASE
 
-        let editedUserArray = await User.find({
-          _id: editUserId,
-        });
+        let editedUser = await User.GetUserFromFileById(editUserId);
 
-        //User should exists
-        expect(editedUserArray.length).toEqual(1);
-
-        let editedUser = editedUserArray[0];
+        expect(editedUser).toBeDefined();
 
         //User should have valid payload
         let editedUserPayload = getUserPayload(editedUser);
@@ -3533,8 +3700,8 @@ describe("api/user", () => {
         //Checking if hashed password corresponds to the previous one
 
         let passwordMatch = passwordShouldHaveChanged
-          ? await hashedStringMatch(editPayload.password, editedUser.password)
-          : await hashedStringMatch(initialUserPassword, editedUser.password);
+          ? await hashedStringMatch(editPayload.password, editedUser.Password)
+          : await hashedStringMatch(initialUserPassword, editedUser.Password);
 
         expect(passwordMatch).toEqual(true);
 
@@ -3550,14 +3717,10 @@ describe("api/user", () => {
 
         //#region CHECKING_DATABASE
 
-        let editedUserArray = await User.find({
-          _id: editUserId,
-        });
+        let editedUser = await User.GetUserFromFileById(editUserId);
 
         //User should exists
-        expect(editedUserArray.length).toEqual(1);
-
-        let editedUser = editedUserArray[0];
+        expect(editedUser).toBeDefined();
 
         //User should have valid payload
         let editedUserPayload = getUserPayload(editedUser);
@@ -3568,7 +3731,7 @@ describe("api/user", () => {
 
         let passwordMatch = await hashedStringMatch(
           initialUserPassword,
-          editedUser.password
+          editedUser.Password
         );
 
         expect(passwordMatch).toEqual(true);
@@ -3587,7 +3750,7 @@ describe("api/user", () => {
       expect(logActionMock).toHaveBeenCalledTimes(1);
 
       expect(logActionMock.mock.calls[0][0]).toEqual(
-        "User user@test1234abcd.com.pl updated their profile data"
+        "User userName updated their profile data"
       );
     });
 
@@ -3603,6 +3766,32 @@ describe("api/user", () => {
         false,
         400,
         '"name" is required'
+      );
+    });
+
+    it("should return 400 and not edit user in database - if there is na attempt to change name, for completle new value", async () => {
+      editPayload.name = "fakeName";
+
+      await testUserEdition(
+        testUser,
+        testUserPassword,
+        editPayload,
+        false,
+        400,
+        "Invalid name for given user"
+      );
+    });
+
+    it("should return 400 and not edit user in database - if there is na attempt to change name, for value of existing user", async () => {
+      editPayload.name = testAdminName;
+
+      await testUserEdition(
+        testUser,
+        testUserPassword,
+        editPayload,
+        false,
+        400,
+        "Invalid name for given user"
       );
     });
 
@@ -3659,75 +3848,6 @@ describe("api/user", () => {
     });
 
     //#endregion  ========== INVALID NAME ==========
-
-    //#region  ========== INVALID EMAIL ==========
-
-    it("should return 400 and not edit user in database - if email is not defined in edit payload", async () => {
-      delete editPayload.email;
-
-      await testUserEdition(
-        testUser,
-        testUserPassword,
-        editPayload,
-        false,
-        400,
-        '"email" is required'
-      );
-    });
-
-    it("should return 400 and not edit user in database - if email is null", async () => {
-      editPayload.email = null;
-
-      await testUserEdition(
-        testUser,
-        testUserPassword,
-        editPayload,
-        false,
-        400,
-        '"email" must be a string'
-      );
-    });
-
-    it("should return 400 and not edit user in database - if email is not a valid string", async () => {
-      editPayload.email = 123;
-
-      await testUserEdition(
-        testUser,
-        testUserPassword,
-        editPayload,
-        false,
-        400,
-        '"email" must be a string'
-      );
-    });
-
-    it("should return 400 and not edit user in database - if email is not a valid email", async () => {
-      editPayload.email = "fakeEmail";
-
-      await testUserEdition(
-        testUser,
-        testUserPassword,
-        editPayload,
-        false,
-        400,
-        '"email" must be a valid email'
-      );
-    });
-
-    it("should return 400 and not edit user in database - if email value differs from value in user", async () => {
-      editPayload.email = "otherEmail@email.com";
-
-      await testUserEdition(
-        testUser,
-        testUserPassword,
-        editPayload,
-        false,
-        400,
-        "Invalid email for given user"
-      );
-    });
-
-    //#endregion  ========== INVALID EMAIL ==========
 
     //#region  ========== INVALID PERMISSIONS ==========
 
@@ -3944,14 +4064,10 @@ describe("api/user", () => {
 
       //#region CHECKING_DATABASE
 
-      let editedUserArray = await User.find({
-        _id: testUser._id.toString(),
-      });
+      let editedUser = await User.GetUserFromFileById(testUser.ID);
 
       //User should exists
-      expect(editedUserArray.length).toEqual(1);
-
-      let editedUser = editedUserArray[0];
+      expect(editedUser).toBeDefined();
 
       //User should have valid payload
       let editedUserPayload = getUserPayload(editedUser);
@@ -3962,7 +4078,7 @@ describe("api/user", () => {
 
       let passwordMatch = await hashedStringMatch(
         testUserPassword,
-        editedUser.password
+        editedUser.Password
       );
       expect(passwordMatch).toEqual(true);
 
@@ -3994,14 +4110,10 @@ describe("api/user", () => {
 
       //#region CHECKING_DATABASE
 
-      let editedUserArray = await User.find({
-        _id: testUser._id.toString(),
-      });
+      let editedUser = await User.GetUserFromFileById(testUser.ID);
 
       //User should exists
-      expect(editedUserArray.length).toEqual(1);
-
-      let editedUser = editedUserArray[0];
+      expect(editedUser).toBeDefined();
 
       //User should have valid payload
       let editedUserPayload = getUserPayload(editedUser);
@@ -4012,7 +4124,7 @@ describe("api/user", () => {
 
       let passwordMatch = await hashedStringMatch(
         testUserPassword,
-        editedUser.password
+        editedUser.Password
       );
       expect(passwordMatch).toEqual(true);
 
@@ -4021,9 +4133,8 @@ describe("api/user", () => {
 
     it("should return 200 and edit user if useless user is trying to edit its own properties", async () => {
       editPayload = {
-        name: "newUserName",
-        email: uselessUser.email,
-        permissions: uselessUser.permissions,
+        name: uselessUser.Name,
+        permissions: uselessUser.Permissions,
         password: "abcd1234",
         oldPassword: testUselessUserPassword,
       };
@@ -4038,9 +4149,8 @@ describe("api/user", () => {
 
     it("should return 200 and edit user if user is trying to edit its own properties", async () => {
       editPayload = {
-        name: "newUserName",
-        email: testUser.email,
-        permissions: testUser.permissions,
+        name: testUser.Name,
+        permissions: testUser.Permissions,
         password: "abcd1234",
         oldPassword: testUserPassword,
       };
@@ -4050,9 +4160,8 @@ describe("api/user", () => {
 
     it("should return 200 and edit user if admin is trying to edit its own properties", async () => {
       editPayload = {
-        name: "newUserName",
-        email: testAdmin.email,
-        permissions: testAdmin.permissions,
+        name: testAdmin.Name,
+        permissions: testAdmin.Permissions,
         password: "abcd1234",
         oldPassword: testAdminPassword,
       };
@@ -4062,9 +4171,8 @@ describe("api/user", () => {
 
     it("should return 200 and edit user if superAdmin is trying to edit its own properties", async () => {
       editPayload = {
-        name: "newUserName",
-        email: testSuperAdmin.email,
-        permissions: testSuperAdmin.permissions,
+        name: testSuperAdmin.Name,
+        permissions: testSuperAdmin.Permissions,
         password: "abcd1234",
         oldPassword: testSuperAdminPassword,
       };
@@ -4079,8 +4187,7 @@ describe("api/user", () => {
 
     it("should return 400 and not edit user if uselessUser is trying to promote himself to user", async () => {
       editPayload = {
-        name: "newUserName",
-        email: uselessUser.email,
+        name: uselessUser.Name,
         permissions: 1,
         password: "abcd1234",
         oldPassword: testUselessUserPassword,
@@ -4098,8 +4205,7 @@ describe("api/user", () => {
 
     it("should return 400 and not edit user if uselessUser is trying to promote himself to admin", async () => {
       editPayload = {
-        name: "newUserName",
-        email: uselessUser.email,
+        name: uselessUser.Name,
         permissions: 2,
         password: "abcd1234",
         oldPassword: testUselessUserPassword,
@@ -4117,8 +4223,7 @@ describe("api/user", () => {
 
     it("should return 400 and not edit user if uselessUser is trying to promote himself to superAdmin", async () => {
       editPayload = {
-        name: "newUserName",
-        email: uselessUser.email,
+        name: uselessUser.Name,
         permissions: 4,
         password: "abcd1234",
         oldPassword: testUselessUserPassword,
@@ -4136,8 +4241,7 @@ describe("api/user", () => {
 
     it("should return 400 and not edit user if user is trying to promote himself to admin", async () => {
       editPayload = {
-        name: "newUserName",
-        email: testUser.email,
+        name: testUser.Name,
         permissions: 2,
         password: "abcd1234",
         oldPassword: testUserPassword,
@@ -4155,8 +4259,7 @@ describe("api/user", () => {
 
     it("should return 400 and not edit user if user is trying to promote himself to superAdmin", async () => {
       editPayload = {
-        name: "newUserName",
-        email: testUser.email,
+        name: testUser.Name,
         permissions: 4,
         password: "abcd1234",
         oldPassword: testUserPassword,
@@ -4174,8 +4277,7 @@ describe("api/user", () => {
 
     it("should return 400 and not edit user if admin is trying to promote himself to superAdmin", async () => {
       editPayload = {
-        name: "newUserName",
-        email: testAdmin.email,
+        name: testAdmin.Name,
         permissions: 4,
         password: "abcd1234",
         oldPassword: testAdminPassword,
@@ -4188,502 +4290,6 @@ describe("api/user", () => {
         false,
         400,
         "Invalid permissions for given user"
-      );
-    });
-
-    //#endregion ========== AUTHORIZATION AND AUTHENTICATION ==========
-  });
-
-  describe("GET/:id", () => {
-    let jwt;
-    let userId;
-
-    beforeEach(async () => {
-      jwt = await testAdmin.generateJWT();
-      userId = testUser._id.toString();
-    });
-
-    let exec = async () => {
-      if (exists(jwt))
-        return request(server)
-          .delete("/api/user/" + userId)
-          .set(config.get("tokenHeader"), jwt)
-          .send();
-      else
-        return request(server)
-          .delete("/api/user/" + userId)
-          .send();
-    };
-
-    /**
-     * @description Method for testring deleting a user
-     * @param {Object} loggedUser Logged user which performs action
-     * @param {String} userToDeleteId User id to delete
-     * @param {String} userToDeletePassword Password of user to delete
-     * @param {Boolean} expectValidDelete Should deletion be performed properly
-     * @param {Number} errorCode error code - if error occurs
-     * @param {String} errorText error text - if error occurs
-     */
-    const testUserDelete = async (
-      loggedUser,
-      userToDeleteId,
-      userToDeletePassword,
-      expectValidDelete,
-      errorCode = null,
-      errorText = null,
-      userToDeleteExists = true
-    ) => {
-      jwt = await loggedUser.generateJWT();
-      userId = userToDeleteId;
-
-      //Getting initial user if exissts
-      let userToDeleteArray = await User.find({ _id: userToDeleteId });
-      let initialUserPayload = null;
-      let userToDelete = null;
-
-      if (userToDeleteArray.length > 0) {
-        userToDelete = userToDeleteArray[0];
-        initialUserPayload = getUserPayload(userToDelete);
-      }
-
-      let response = await exec();
-
-      if (expectValidDelete) {
-        //#region CHECKING_RESPONSE
-
-        //Looking for deleted user
-
-        expect(response).toBeDefined();
-        expect(response.status).toEqual(200);
-        expect(response.body).toBeDefined();
-
-        let expectedBody = initialUserPayload;
-
-        //after sorting - both array should be the same
-        expect(response.body).toEqual(expectedBody);
-
-        //#endregion CHECKING_RESPONSE
-
-        //#region CHECKING_DATABASE
-
-        //There should be no user of given id in database anymore
-        let deletedUserArray = await User.find({ _id: userToDeleteId });
-
-        expect(deletedUserArray).toBeDefined();
-        expect(deletedUserArray.length).toEqual(0);
-
-        //#endregion CHECKING_DATABASE
-      } else {
-        //#region CHECKING_RESPONSE
-
-        expect(response).toBeDefined();
-        expect(response.status).toEqual(errorCode);
-        expect(response.text).toEqual(errorText);
-
-        //#endregion CHECKING_RESPONSE
-
-        //#region CHECKING_DATABASE
-
-        //Checking only if user to delete exists
-        if (userToDeleteExists) {
-          let deleteUserArray = await User.find({
-            _id: userToDeleteId,
-          });
-
-          //User should exists
-          expect(deleteUserArray.length).toEqual(1);
-
-          let deletedUser = deleteUserArray[0];
-
-          //User should have valid payload
-          let deletedUserPayload = getUserPayload(deletedUser);
-
-          expect(deletedUserPayload).toEqual(initialUserPayload);
-
-          //Checking if hashed password corresponds to the previous one
-
-          let passwordMatch = await hashedStringMatch(
-            userToDeletePassword,
-            deletedUser.password
-          );
-
-          expect(passwordMatch).toEqual(true);
-        }
-        //#endregion CHECKING_DATABASE
-      }
-    };
-
-    it("should return 200 and delete user - if there is user of given id", async () => {
-      await testUserDelete(
-        testAdmin,
-        testUser._id.toString(),
-        testUserPassword,
-        true
-      );
-    });
-
-    it("should call logger action method", async () => {
-      await exec();
-
-      expect(logActionMock).toHaveBeenCalledTimes(1);
-
-      expect(logActionMock.mock.calls[0][0]).toEqual(
-        "User admin@test1234abcd.com.pl deleted user user@test1234abcd.com.pl"
-      );
-    });
-
-    it("should return 404 and not delete user - if user of given id was not found", async () => {
-      await testUserDelete(
-        testAdmin,
-        mongoose.Types.ObjectId(),
-        testUserPassword,
-        false,
-        404,
-        "User not found",
-        false
-      );
-    });
-
-    //#region  ========== AUTHORIZATION AND AUTHENTICATION ==========
-
-    it("should not delete any user and return 401 if jwt has not been given", async () => {
-      jwt = undefined;
-
-      let initialUserPayload = getUserPayload(testUser);
-
-      let response = await exec();
-
-      //#region CHECKING_RESPONSE
-
-      expect(response).toBeDefined();
-      expect(response.status).toEqual(401);
-      expect(response.text).toBeDefined();
-      expect(response.text).toContain("Access denied. No token provided");
-
-      //#endregion CHECKING_RESPONSE
-
-      //#region CHECKING_DATABASE
-
-      let deleteUserArray = await User.find({ _id: userId });
-
-      //User should exists
-      expect(deleteUserArray.length).toEqual(1);
-
-      let deletedUser = deleteUserArray[0];
-
-      //User should have valid payload
-      let deletedUserPayload = getUserPayload(testUser);
-
-      expect(deletedUserPayload).toEqual(initialUserPayload);
-
-      //Checking if hashed password corresponds to the previous one
-
-      let passwordMatch = await hashedStringMatch(
-        testUserPassword,
-        deletedUser.password
-      );
-
-      expect(passwordMatch).toEqual(true);
-
-      //#endregion CHECKING_DATABASE
-    });
-
-    it("should not return any user and return 400 if invalid jwt has been given", async () => {
-      jwt = "abcd1234";
-
-      let initialUserPayload = getUserPayload(testUser);
-
-      let response = await exec();
-
-      //#region CHECKING_RESPONSE
-
-      expect(response).toBeDefined();
-      expect(response.status).toEqual(400);
-      expect(response.text).toBeDefined();
-      expect(response.text).toContain("Invalid token provided");
-
-      //#endregion CHECKING_RESPONSE
-
-      //#region CHECKING_DATABASE
-
-      let deleteUserArray = await User.find({ _id: userId });
-
-      //User should exists
-      expect(deleteUserArray.length).toEqual(1);
-
-      let deletedUser = deleteUserArray[0];
-
-      //User should have valid payload
-      let deletedUserPayload = getUserPayload(testUser);
-
-      expect(deletedUserPayload).toEqual(initialUserPayload);
-
-      //Checking if hashed password corresponds to the previous one
-
-      let passwordMatch = await hashedStringMatch(
-        testUserPassword,
-        deletedUser.password
-      );
-
-      expect(passwordMatch).toEqual(true);
-
-      //#endregion CHECKING_DATABASE
-    });
-
-    it("should not return any user and return 400 if  jwt from different private key was provided", async () => {
-      let fakeUserPayload = {
-        _id: testAdmin._id,
-        email: testAdmin.email,
-        name: testAdmin.name,
-        permissions: testAdmin.permissions,
-      };
-
-      jwt = await jsonWebToken.sign(fakeUserPayload, "differentTestPrivateKey");
-
-      let initialUserPayload = getUserPayload(testUser);
-
-      let response = await exec();
-
-      //#region CHECKING_RESPONSE
-
-      expect(response).toBeDefined();
-      expect(response.status).toEqual(400);
-      expect(response.text).toBeDefined();
-      expect(response.text).toContain("Invalid token provided");
-
-      //#endregion CHECKING_RESPONSE
-
-      //#region CHECKING_DATABASE
-
-      let deleteUserArray = await User.find({ _id: userId });
-
-      //User should exists
-      expect(deleteUserArray.length).toEqual(1);
-
-      let deletedUser = deleteUserArray[0];
-
-      //User should have valid payload
-      let deletedUserPayload = getUserPayload(testUser);
-
-      expect(deletedUserPayload).toEqual(initialUserPayload);
-
-      //Checking if hashed password corresponds to the previous one
-
-      let passwordMatch = await hashedStringMatch(
-        testUserPassword,
-        deletedUser.password
-      );
-
-      expect(passwordMatch).toEqual(true);
-
-      //#endregion CHECKING_DATABASE
-    });
-
-    it("useless user deletes useless user - return 403", async () => {
-      await testUserDelete(
-        uselessUser,
-        uselessUser._id.toString(),
-        testUselessUserPassword,
-        false,
-        403,
-        "Access forbidden."
-      );
-    });
-
-    it("useless user deletes user - return 403", async () => {
-      await testUserDelete(
-        uselessUser,
-        testUser._id.toString(),
-        testUserPassword,
-        false,
-        403,
-        "Access forbidden."
-      );
-    });
-
-    it("useless user deletes admin - return 403", async () => {
-      await testUserDelete(
-        uselessUser,
-        testAdmin._id.toString(),
-        testAdminPassword,
-        false,
-        403,
-        "Access forbidden."
-      );
-    });
-
-    it("useless user deletes superAdmin - return 403", async () => {
-      await testUserDelete(
-        uselessUser,
-        testSuperAdmin._id.toString(),
-        testSuperAdminPassword,
-        false,
-        403,
-        "Access forbidden."
-      );
-    });
-
-    it("user deletes useless user - return 403", async () => {
-      await testUserDelete(
-        testUser,
-        uselessUser._id.toString(),
-        testUselessUserPassword,
-        false,
-        403,
-        "Access forbidden."
-      );
-    });
-
-    it("user deletes user - return 403", async () => {
-      await testUserDelete(
-        testUser,
-        testUser._id.toString(),
-        testUserPassword,
-        false,
-        403,
-        "Access forbidden."
-      );
-    });
-
-    it("user deletes admin - return 403", async () => {
-      await testUserDelete(
-        testUser,
-        testAdmin._id.toString(),
-        testAdminPassword,
-        false,
-        403,
-        "Access forbidden."
-      );
-    });
-
-    it("user deletes superAdmin - return 403", async () => {
-      await testUserDelete(
-        testUser,
-        testSuperAdmin._id.toString(),
-        testSuperAdminPassword,
-        false,
-        403,
-        "Access forbidden."
-      );
-    });
-
-    it("admin deletes useless user - return 200", async () => {
-      await testUserDelete(
-        testAdmin,
-        uselessUser._id.toString(),
-        testUselessUserPassword,
-        true
-      );
-    });
-
-    it("admin deletes user - return 200", async () => {
-      await testUserDelete(
-        testAdmin,
-        testUser._id.toString(),
-        testUserPassword,
-        true
-      );
-    });
-
-    it("admin deletes admin - return 403", async () => {
-      await testUserDelete(
-        testAdmin,
-        testAdmin._id.toString(),
-        testAdminPassword,
-        false,
-        403,
-        "Access forbidden."
-      );
-    });
-
-    it("admin deletes superAdmin - return 403", async () => {
-      await testUserDelete(
-        testAdmin,
-        testSuperAdmin._id.toString(),
-        testSuperAdminPassword,
-        false,
-        403,
-        "Access forbidden."
-      );
-    });
-
-    it("superAdmin deletes useless user - return 403", async () => {
-      await testUserDelete(
-        testSuperAdmin,
-        uselessUser._id.toString(),
-        testUselessUserPassword,
-        false,
-        403,
-        "Access forbidden."
-      );
-    });
-
-    it("superAdmin deletes user - return 403", async () => {
-      await testUserDelete(
-        testSuperAdmin,
-        testUser._id.toString(),
-        testUserPassword,
-        false,
-        403,
-        "Access forbidden."
-      );
-    });
-
-    it("superAdmin deletes admin - return 403", async () => {
-      await testUserDelete(
-        testSuperAdmin,
-        testAdmin._id.toString(),
-        testAdminPassword,
-        false,
-        403,
-        "Access forbidden."
-      );
-    });
-
-    it("superAdmin deletes superAdmin - return 403", async () => {
-      await testUserDelete(
-        testSuperAdmin,
-        testSuperAdmin._id.toString(),
-        testSuperAdminPassword,
-        false,
-        403,
-        "Access forbidden."
-      );
-    });
-
-    it("adminAndSuperAdmin deletes useless user - return 200", async () => {
-      await testUserDelete(
-        testAdminAndSuperAdmin,
-        uselessUser._id.toString(),
-        testUselessUserPassword,
-        true
-      );
-    });
-
-    it("adminAndSuperAdmin deletes user - return 200", async () => {
-      await testUserDelete(
-        testAdminAndSuperAdmin,
-        testUser._id.toString(),
-        testUserPassword,
-        true
-      );
-    });
-
-    it("adminAndSuperAdmin deletes admin - return 200", async () => {
-      await testUserDelete(
-        testAdminAndSuperAdmin,
-        testAdmin._id.toString(),
-        testAdminPassword,
-        true
-      );
-    });
-
-    it("adminAndSuperAdmin deletes superAdmin - return 200", async () => {
-      await testUserDelete(
-        testAdminAndSuperAdmin,
-        testSuperAdmin._id.toString(),
-        testSuperAdminPassword,
-        true
       );
     });
 

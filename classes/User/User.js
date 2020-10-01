@@ -279,8 +279,11 @@ class User {
 
     if (exists(payload.permissions)) this._permissions = payload.permissions;
     if (exists(payload.password)) {
-      if (hashPassword) this._password = await hashString(payload.password);
-      else this._password = payload.password;
+      if (hashPassword) {
+        this._password = await hashString(payload.password);
+      } else {
+        this._password = payload.password;
+      }
     }
   }
 }
