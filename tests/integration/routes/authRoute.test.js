@@ -126,7 +126,7 @@ describe("api/auth", () => {
       expect(logActionMock.mock.calls[0][0]).toEqual("User userName logged in");
     });
 
-    //#region =========== INVALID EMAIL ===========
+    //#region =========== INVALID NAME ===========
 
     it("should return 400 and not return jwt in header if users name is empty", async () => {
       delete requestPayload.name;
@@ -192,7 +192,7 @@ describe("api/auth", () => {
       expect(logActionMock).not.toHaveBeenCalled();
     });
 
-    //#endregion =========== INVALID EMAIL ===========
+    //#endregion =========== INVALID NAME ===========
 
     //#region =========== INVALID PASSWORD ===========
 

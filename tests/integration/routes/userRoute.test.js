@@ -269,7 +269,6 @@ describe("api/user", () => {
     it("should not return any user and return 400 if  jwt from different private key was provided", async () => {
       let fakeUserPayload = {
         _id: testAdmin._id,
-        email: testAdmin.email,
         name: testAdmin.name,
         permissions: testAdmin.permissions,
       };
@@ -1242,7 +1241,6 @@ describe("api/user", () => {
     it("should not create any user and return 400 if  jwt from different private key was provided", async () => {
       let fakeUserPayload = {
         _id: testAdmin._id,
-        email: testAdmin.email,
         name: testAdmin.name,
         permissions: testAdmin.permissions,
       };
@@ -1729,7 +1727,6 @@ describe("api/user", () => {
     it("should not return any user and return 400 if  jwt from different private key was provided", async () => {
       let fakeUserPayload = {
         _id: testAdmin._id,
-        email: testAdmin.email,
         name: testAdmin.name,
         permissions: testAdmin.permissions,
       };
@@ -2905,7 +2902,6 @@ describe("api/user", () => {
     it("should not edit any user and return 400 if jwt from different private key was provided", async () => {
       let fakeUserPayload = {
         _id: testAdmin._id,
-        email: testAdmin.email,
         name: testAdmin.name,
         permissions: testAdmin.permissions,
       };
@@ -4088,7 +4084,6 @@ describe("api/user", () => {
     it("should not edit any user and return 400 if jwt from different private key was provided", async () => {
       let fakeUserPayload = {
         _id: testAdmin._id,
-        email: testAdmin.email,
         name: testAdmin.name,
         permissions: testAdmin.permissions,
       };

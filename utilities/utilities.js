@@ -242,6 +242,19 @@ module.exports.isStringAValidJSON = function (str) {
 };
 
 /**
+ * @description Method for rounding values to given precision
+ * @param {Number} number Number to round
+ * @param {Number} precision Precision
+ */
+module.exports.roundToPrecision = function (number, precision = 0) {
+  if (number === null || number === undefined) return null;
+
+  let multiplier = Math.pow(10, precision);
+
+  return Math.round(number * multiplier) / multiplier;
+};
+
+/**
  * @description Method for hashing password
  * @param {String} stringToHash string to hash
  */

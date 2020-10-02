@@ -2,6 +2,7 @@ const logger = require("../logger/logger");
 const error = require("../middleware/routeError");
 const userRouter = require("../routes/user");
 const authRouter = require("../routes/auth");
+const devInfoRouter = require("../routes/deviceInfo");
 
 //Method for initializing routes
 module.exports = async function (app) {
@@ -9,9 +10,8 @@ module.exports = async function (app) {
 
   //#region ========== CUSTOM ROUTES ==========
 
-  //TODO - HERE PUT ALL ROUTES THAT YOU IMPLEMENT
-  //USE CODE app.use() - AS BELOW
-  //IF APP IS HOSTED NOT ON MAIN URL - eg. sidiro.pl/sidiroAR instead of sidiro.pl PUT WHOLE PATH TO API - /sidiroAR/api/auth
+  app.use("/api/devInfo", devInfoRouter);
+  logger.info("Device info route initialized");
 
   //#endregion ========== CUSTOM ROUTES ==========
 
