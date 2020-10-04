@@ -3,6 +3,8 @@
   "jwtPrivateKey": "testPrivateKey",
   "settingsPath": "__testDir/settings",
   "userFileName": "userSettings.json",
+  "netplanConfigSocketFilePath": "__testDir/netplan/data.socket",
+  "netplanConfigAuthToken": "testNetplanSocketAuth",
   "port": 5000,
   "logging": {
     "logActions": true,

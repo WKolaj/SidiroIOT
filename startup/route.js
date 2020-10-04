@@ -3,6 +3,7 @@ const error = require("../middleware/routeError");
 const userRouter = require("../routes/user");
 const authRouter = require("../routes/auth");
 const devInfoRouter = require("../routes/deviceInfo");
+const ipConfigRouter = require("../routes/ipConfig");
 
 //Method for initializing routes
 module.exports = async function (app) {
@@ -22,6 +23,9 @@ module.exports = async function (app) {
 
   app.use("/api/user", userRouter);
   logger.info("User route initialized");
+
+  app.use("/api/ipConfig", ipConfigRouter);
+  logger.info("ipConfig route initialized");
 
   //#endregion ========== SERVER ROUTES ==========
 

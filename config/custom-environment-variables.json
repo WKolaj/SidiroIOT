@@ -1,4 +1,5 @@
 {
   "dbConnectionString": "DB_CONNECTION_STRING",
-  "jwtPrivateKey": "JWT_PRIVATE_KEY"
+  "jwtPrivateKey": "JWT_PRIVATE_KEY",
+  "netplanConfigAuthToken": "NETPLAN_CONFIG_AUTH_TOKEN"
 }

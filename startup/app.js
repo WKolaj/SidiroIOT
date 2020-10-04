@@ -33,6 +33,12 @@ module.exports = async function (workingDirName) {
 
   //#endregion ========== INITIALIZING USERS ==========
 
+  //#region ========== INITIALIZING NETPLAN IPCONFIG ==========
+
+  await require("./netplan")();
+
+  //#endregion ========== INITIALIZING NETPLAN IPCONFIG ==========
+
   //#region ========== INITIALIZING VALIDATION ==========
 
   await require("./validation")();

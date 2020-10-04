@@ -1,4 +1,5 @@
 {
-  "dbConnectionString": "mongodb://testUser:testUserPassword@localhost:27017/testDB",
-  "jwtPrivateKey": "developmentPrivateKey"
+  "jwtPrivateKey": "developmentPrivateKey",
+  "netplanConfigSocketFilePath": "/home/wk/Documents/Projects/netplan-ip-configurator/ipc/data.socket",
+  "netplanConfigAuthToken": "developmentServerKey"
 }

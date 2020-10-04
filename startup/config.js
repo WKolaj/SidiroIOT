@@ -12,14 +12,13 @@ module.exports = async function () {
 
   //#region ========== CUSTOM CONFIG PROPERTIES ==========
 
-  //TODO HERE PUT YOUR CUSTOM CONFIG PROPERTY CHECK THAT ARE OBLIGRATORY TO BE DEFINED IN CONFIG FILE
-  //USE throwIfConfigDoesNotExist, EXACTLY IN THE WAY FOR REST PROPERTIES
+  throwIfConfigDoesNotExist("netplanConfigSocketFilePath");
+  throwIfConfigDoesNotExist("netplanConfigAuthToken");
 
   //#endregion ========== CUSTOM CONFIG PROPERTIES ==========
 
   //#region ========== SERVER CONFIG PROPERTIES ==========
 
-  throwIfConfigDoesNotExist("dbConnectionString");
   throwIfConfigDoesNotExist("settingsPath");
   throwIfConfigDoesNotExist("userFileName");
   throwIfConfigDoesNotExist("port");
