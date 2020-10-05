@@ -58,6 +58,7 @@ describe("api/auth", () => {
   let testUser;
   let testSuperAdmin;
   let logActionMock;
+  let ipConfigMockServer;
 
   beforeEach(async () => {
     //Clearing project file if exists
@@ -65,6 +66,9 @@ describe("api/auth", () => {
 
     //Clearing socket file path if exists
     await removeFileIfExistsAsync(socketFilePath);
+
+    ipConfigMockServer = require("../../utilities/fakeIPService");
+    await ipConfigMockServer.Start();
 
     server = await require("../../../startup/app")();
 
@@ -92,6 +96,10 @@ describe("api/auth", () => {
     //Clearing users in database after each test
     await writeFileAsync(userFilePath, "{}", "utf8");
 
+    if (ipConfigMockServer) {
+      await ipConfigMockServer.Stop();
+      ipConfigMockServer = null;
+    }
     await server.close();
   });
 
