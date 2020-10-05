@@ -105,7 +105,7 @@ router.put(
       return res.status(500).send("Error during editing interface");
 
     //Settting new content inside project file
-    await projectService.updateNetplanSettingsAccordingToNetplanFile();
+    await projectService.setIPConfigFromNetplanToProject();
 
     return res
       .status(200)

@@ -1,0 +1,1 @@
+{"ipConfig":{"eth1":{"name":"eth1","dhcp":true,"optional":true},"eth2":{"name":"eth2","dhcp":true,"optional":true}},"data":{"testData":"testData1"}}

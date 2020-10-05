@@ -22,14 +22,18 @@ const socketFilePath = config.get("netplanConfigSocketFilePath");
 const settingsDirPath = config.get("settingsPath");
 const userFileName = config.get("userFileName");
 const userFilePath = path.join(settingsDirPath, userFileName);
+const projectFileName = config.get("projectFileName");
+const projectFilePath = path.join(settingsDirPath, projectFileName);
 
 const netplanAuthToken = config.get("netplanConfigAuthToken");
+
+const projectService = require("../../../services/projectService");
 
 let { exists, hashedStringMatch } = require("../../../utilities/utilities");
 let server;
 let logger = require("../../../logger/logger");
 
-describe("api/devInfo", () => {
+describe("api/ipConfig", () => {
   let uselessUser;
   let testAdmin;
   let testUser;
@@ -42,25 +46,18 @@ describe("api/devInfo", () => {
   let ipConfigMockServer;
   let initialIPServerContent;
 
+  //Non-standard methods have to be implemented:
+  //IN ORDER FOR SERVER TO START WE NEED TO START NETPLAN SERVICE BEFORE
+  //WE NEED TO CONTROL THE START OF NETPLAN SERVICE THEREFORE STARTING SERVER HAS TO BE PERFORMED IN initTest METHOD NOT BEFORE EACH
+
+  //Method invoked after init
+  let afterTestInit;
+
+  //Method invoked after method afterTestInit
+  let afterAfterTestInit;
+
   beforeEach(async () => {
     jest.resetAllMocks();
-    server = await require("../../../startup/app")();
-    ipConfigMockServer = require("../../utilities/fakeIPService");
-
-    //Clearing users in database before each test
-    await writeFileAsync(userFilePath, "{}", "utf8");
-
-    //Clearing socket file path if exists
-    await removeFileIfExistsAsync(socketFilePath);
-
-    //generating uslessUser, user, admin and adminUser
-    uselessUser = await generateUselessUser();
-    testAdmin = await generateTestAdmin();
-    testUser = await generateTestUser();
-    testSuperAdmin = await generateTestSuperAdmin();
-    testUserAndAdmin = await generateTestAdminAndUser();
-    testAdminAndSuperAdmin = await generateTestAdminAndSuperAdmin();
-    testUserAndAdminAndSuperAdmin = await generateTestUserAndAdminAndSuperAdmin();
 
     //Overwriting logget action method
     logActionMock = jest.fn();
@@ -76,7 +73,7 @@ describe("api/devInfo", () => {
       {
         name: "eth2",
         dhcp: true,
-        optional: false,
+        optional: true,
       },
       {
         name: "eth3",
@@ -88,6 +85,9 @@ describe("api/devInfo", () => {
         dns: ["10.10.10.1", "1.1.1.1"],
       },
     ];
+
+    afterTestInit = null;
+    afterAfterTestInit = null;
   });
 
   afterEach(async () => {
@@ -96,10 +96,14 @@ describe("api/devInfo", () => {
     //Clearing users in database after each test
     await writeFileAsync(userFilePath, "{}", "utf8");
 
+    //Clearing project file if exists
+    await removeFileIfExistsAsync(projectFilePath);
+
     //Clearing socket file path if exists
     await removeFileIfExistsAsync(socketFilePath);
 
-    await server.close();
+    if (server) await server.close();
+
     if (ipConfigMockServer) {
       await ipConfigMockServer.Stop();
       ipConfigMockServer = null;
@@ -107,17 +111,47 @@ describe("api/devInfo", () => {
   });
 
   const initTest = async () => {
+    ipConfigMockServer = require("../../utilities/fakeIPService");
+
+    //Clearing socket file path if exists
+    await removeFileIfExistsAsync(socketFilePath);
+
     if (runIPConfigServer) {
       await ipConfigMockServer.Start();
       ipConfigMockServer._setContent(initialIPServerContent);
     }
+
+    //Clearing project file if exists
+    await removeFileIfExistsAsync(projectFilePath);
+
+    //Clearing users in database before each test
+    await writeFileAsync(userFilePath, "{}", "utf8");
+
+    server = await require("../../../startup/app")();
+
+    //generating uslessUser, user, admin and adminUser
+    uselessUser = await generateUselessUser();
+    testAdmin = await generateTestAdmin();
+    testUser = await generateTestUser();
+    testSuperAdmin = await generateTestSuperAdmin();
+    testUserAndAdmin = await generateTestAdminAndUser();
+    testAdminAndSuperAdmin = await generateTestAdminAndSuperAdmin();
+    testUserAndAdminAndSuperAdmin = await generateTestUserAndAdminAndSuperAdmin();
+
+    if (afterTestInit) await afterTestInit();
+
+    if (afterAfterTestInit) await afterAfterTestInit();
+    //Have to reset all mocks - get was invoked during app startup
+    jest.resetAllMocks();
   };
 
   describe("GET/", () => {
     let jwt;
 
-    beforeEach(async () => {
-      jwt = await testUser.generateJWT();
+    beforeEach(() => {
+      afterTestInit = async () => {
+        jwt = await testUser.generateJWT();
+      };
     });
 
     let exec = async () => {
@@ -235,7 +269,9 @@ describe("api/devInfo", () => {
     //#region ========== AUTHORIZATION AND AUTHENTICATION ==========
 
     it("should not return any interface and return 401 if jwt has not been given", async () => {
-      jwt = undefined;
+      afterAfterTestInit = async () => {
+        jwt = undefined;
+      };
 
       let response = await exec();
 
@@ -250,7 +286,9 @@ describe("api/devInfo", () => {
     });
 
     it("should not return any interface and return 403 - USELESS USER", async () => {
-      jwt = await uselessUser.generateJWT();
+      afterAfterTestInit = async () => {
+        jwt = await uselessUser.generateJWT();
+      };
 
       let response = await exec();
 
@@ -265,7 +303,9 @@ describe("api/devInfo", () => {
     });
 
     it("should not return any interface and return 403 - ADMIN", async () => {
-      jwt = await testAdmin.generateJWT();
+      afterAfterTestInit = async () => {
+        jwt = await testAdmin.generateJWT();
+      };
 
       let response = await exec();
 
@@ -280,7 +320,9 @@ describe("api/devInfo", () => {
     });
 
     it("should not return any interface and return 403 - SUPER ADMIN", async () => {
-      jwt = await testSuperAdmin.generateJWT();
+      afterAfterTestInit = async () => {
+        jwt = await testSuperAdmin.generateJWT();
+      };
 
       let response = await exec();
 
@@ -295,7 +337,9 @@ describe("api/devInfo", () => {
     });
 
     it("should not return any interface and return 400 if invalid jwt has been given", async () => {
-      jwt = "abcd1234";
+      afterAfterTestInit = async () => {
+        jwt = "abcd1234";
+      };
 
       let response = await exec();
 
@@ -310,14 +354,18 @@ describe("api/devInfo", () => {
     });
 
     it("should not return any interface and return 400 if  jwt from different private key was provided", async () => {
-      let fakeUserPayload = {
-        _id: testAdmin._id,
-        name: testAdmin.name,
-        permissions: testAdmin.permissions,
+      afterAfterTestInit = async () => {
+        let fakeUserPayload = {
+          _id: testAdmin._id,
+          name: testAdmin.name,
+          permissions: testAdmin.permissions,
+        };
+
+        jwt = await jsonWebToken.sign(
+          fakeUserPayload,
+          "differentTestPrivateKey"
+        );
       };
-
-      jwt = await jsonWebToken.sign(fakeUserPayload, "differentTestPrivateKey");
-
       let response = await exec();
 
       //#region CHECKING_RESPONSE
@@ -338,8 +386,11 @@ describe("api/devInfo", () => {
     let interfaceName;
 
     beforeEach(async () => {
-      jwt = await testUser.generateJWT();
       interfaceName = "eth3";
+
+      afterTestInit = async () => {
+        jwt = await testUser.generateJWT();
+      };
     });
 
     let exec = async () => {
@@ -469,8 +520,9 @@ describe("api/devInfo", () => {
     //#region ========== AUTHORIZATION AND AUTHENTICATION ==========
 
     it("should not return any interface and return 401 if jwt has not been given", async () => {
-      jwt = undefined;
-
+      afterAfterTestInit = async () => {
+        jwt = undefined;
+      };
       let response = await exec();
 
       //#region CHECKING_RESPONSE
@@ -484,8 +536,9 @@ describe("api/devInfo", () => {
     });
 
     it("should not return any interface and return 403 - USELESS USER", async () => {
-      jwt = await uselessUser.generateJWT();
-
+      afterAfterTestInit = async () => {
+        jwt = await uselessUser.generateJWT();
+      };
       let response = await exec();
 
       //#region CHECKING_RESPONSE
@@ -499,8 +552,9 @@ describe("api/devInfo", () => {
     });
 
     it("should not return any interface and return 403 - ADMIN", async () => {
-      jwt = await testAdmin.generateJWT();
-
+      afterAfterTestInit = async () => {
+        jwt = await testAdmin.generateJWT();
+      };
       let response = await exec();
 
       //#region CHECKING_RESPONSE
@@ -514,8 +568,9 @@ describe("api/devInfo", () => {
     });
 
     it("should not return any interface and return 403 - SUPER ADMIN", async () => {
-      jwt = await testSuperAdmin.generateJWT();
-
+      afterAfterTestInit = async () => {
+        jwt = await testSuperAdmin.generateJWT();
+      };
       let response = await exec();
 
       //#region CHECKING_RESPONSE
@@ -529,8 +584,9 @@ describe("api/devInfo", () => {
     });
 
     it("should not return any interface and return 400 if invalid jwt has been given", async () => {
-      jwt = "abcd1234";
-
+      afterAfterTestInit = async () => {
+        jwt = "abcd1234";
+      };
       let response = await exec();
 
       //#region CHECKING_RESPONSE
@@ -544,13 +600,18 @@ describe("api/devInfo", () => {
     });
 
     it("should not return any interface and return 400 if jwt from different private key was provided", async () => {
-      let fakeUserPayload = {
-        _id: testAdmin._id,
-        name: testAdmin.name,
-        permissions: testAdmin.permissions,
-      };
+      afterAfterTestInit = async () => {
+        let fakeUserPayload = {
+          _id: testAdmin._id,
+          name: testAdmin.name,
+          permissions: testAdmin.permissions,
+        };
 
-      jwt = await jsonWebToken.sign(fakeUserPayload, "differentTestPrivateKey");
+        jwt = await jsonWebToken.sign(
+          fakeUserPayload,
+          "differentTestPrivateKey"
+        );
+      };
 
       let response = await exec();
 
@@ -572,8 +633,7 @@ describe("api/devInfo", () => {
     let interfaceName;
     let putContent;
 
-    beforeEach(async () => {
-      jwt = await testAdmin.generateJWT();
+    beforeEach(() => {
       interfaceName = "eth2";
       putContent = {
         name: "eth2",
@@ -582,6 +642,10 @@ describe("api/devInfo", () => {
         subnetMask: "255.255.255.0",
         gateway: "10.10.11.1",
         dns: ["10.10.11.1", "1.1.1.1"],
+      };
+
+      afterTestInit = async () => {
+        jwt = await testAdmin.generateJWT();
       };
     });
 
@@ -692,6 +756,20 @@ describe("api/devInfo", () => {
         expect(response.body).toEqual(expectedResponseContent);
 
         //#endregion ========= TESTING RESPONSE CONTENT =========
+
+        //#region ========= TESTING PROJECT FILE CONTENT =========
+
+        let projectIPConfig = await projectService.getIPConfig();
+
+        let expectedIPConfigContent = {};
+
+        for (let inter of expectedContent) {
+          expectedIPConfigContent[inter.name] = inter;
+        }
+
+        expect(projectIPConfig).toEqual(expectedIPConfigContent);
+
+        //#endregion ========= TESTING PROJECT FILE CONTENT =========
       } else {
         //#region ========= TESTING MOCKED POST CALL =========
 
@@ -707,6 +785,22 @@ describe("api/devInfo", () => {
         expect(response.text).toEqual(errorText);
 
         //#endregion ========= TESTING RESPONSE CONTENT =========
+
+        //#region ========= TESTING PROJECT FILE CONTENT =========
+
+        let projectIPConfig = await projectService.getIPConfig();
+
+        let expectedIPConfigContent = {};
+
+        for (let inter of initialIPServerContent) {
+          expectedIPConfigContent[inter.name] = inter;
+        }
+
+        //If ipconfigserver has not been started - set expectedIPConfig as empty object - settings could not have been set at the begining
+        if (!runIPConfigServer) expectedIPConfigContent = {};
+        expect(projectIPConfig).toEqual(expectedIPConfigContent);
+
+        //#endregion ========= TESTING PROJECT FILE CONTENT =========
       }
     };
 
@@ -1894,99 +1988,106 @@ describe("api/devInfo", () => {
     //#region ========== AUTHORIZATION AND AUTHENTICATION ==========
 
     it("should not return any interface and return 401 if jwt has not been given", async () => {
-      jwt = undefined;
+      afterAfterTestInit = async () => {
+        jwt = undefined;
+      };
 
-      let response = await exec();
-
-      //#region CHECKING_RESPONSE
-
-      expect(response).toBeDefined();
-      expect(response.status).toEqual(401);
-      expect(response.text).toBeDefined();
-      expect(response.text).toContain("Access denied. No token provided");
-
-      //#endregion CHECKING_RESPONSE
+      await testIPConfigRoute(
+        false,
+        jwt,
+        initialIPServerContent,
+        interfaceName,
+        putContent,
+        401,
+        `Access denied. No token provided`
+      );
     });
 
     it("should not return any interface and return 403 - USELESS USER", async () => {
-      jwt = await uselessUser.generateJWT();
+      afterAfterTestInit = async () => {
+        jwt = await uselessUser.generateJWT();
+      };
 
-      let response = await exec();
-
-      //#region CHECKING_RESPONSE
-
-      expect(response).toBeDefined();
-      expect(response.status).toEqual(403);
-      expect(response.text).toBeDefined();
-      expect(response.text).toContain("Access forbidden");
-
-      //#endregion CHECKING_RESPONSE
+      await testIPConfigRoute(
+        false,
+        jwt,
+        initialIPServerContent,
+        interfaceName,
+        putContent,
+        403,
+        "Access forbidden."
+      );
     });
 
     it("should not return any interface and return 403 - USER", async () => {
-      jwt = await testUser.generateJWT();
+      afterAfterTestInit = async () => {
+        jwt = await testUser.generateJWT();
+      };
 
-      let response = await exec();
-
-      //#region CHECKING_RESPONSE
-
-      expect(response).toBeDefined();
-      expect(response.status).toEqual(403);
-      expect(response.text).toBeDefined();
-      expect(response.text).toContain("Access forbidden");
-
-      //#endregion CHECKING_RESPONSE
+      await testIPConfigRoute(
+        false,
+        jwt,
+        initialIPServerContent,
+        interfaceName,
+        putContent,
+        403,
+        "Access forbidden."
+      );
     });
 
     it("should not return any interface and return 403 - SUPER ADMIN", async () => {
-      jwt = await testSuperAdmin.generateJWT();
+      afterAfterTestInit = async () => {
+        jwt = await testSuperAdmin.generateJWT();
+      };
 
-      let response = await exec();
-
-      //#region CHECKING_RESPONSE
-
-      expect(response).toBeDefined();
-      expect(response.status).toEqual(403);
-      expect(response.text).toBeDefined();
-      expect(response.text).toContain("Access forbidden");
-
-      //#endregion CHECKING_RESPONSE
+      await testIPConfigRoute(
+        false,
+        jwt,
+        initialIPServerContent,
+        interfaceName,
+        putContent,
+        403,
+        "Access forbidden."
+      );
     });
 
     it("should not return any interface and return 400 if invalid jwt has been given", async () => {
-      jwt = "abcd1234";
-
-      let response = await exec();
-
-      //#region CHECKING_RESPONSE
-
-      expect(response).toBeDefined();
-      expect(response.status).toEqual(400);
-      expect(response.text).toBeDefined();
-      expect(response.text).toContain("Invalid token provided");
-
-      //#endregion CHECKING_RESPONSE
+      afterAfterTestInit = async () => {
+        jwt = "abcd1234";
+      };
+      await testIPConfigRoute(
+        false,
+        jwt,
+        initialIPServerContent,
+        interfaceName,
+        putContent,
+        400,
+        "Invalid token provided"
+      );
     });
 
     it("should not return any interface and return 400 if  jwt from different private key was provided", async () => {
-      let fakeUserPayload = {
-        _id: testAdmin._id,
-        name: testAdmin.name,
-        permissions: testAdmin.permissions,
+      afterAfterTestInit = async () => {
+        let fakeUserPayload = {
+          _id: testAdmin._id,
+          name: testAdmin.name,
+          permissions: testAdmin.permissions,
+        };
+
+        jwt = await jsonWebToken.sign(
+          fakeUserPayload,
+          "differentTestPrivateKey"
+        );
       };
-
-      jwt = await jsonWebToken.sign(fakeUserPayload, "differentTestPrivateKey");
-
-      let response = await exec();
-
-      //#region CHECKING_RESPONSE
-
-      expect(response).toBeDefined();
-      expect(response.status).toEqual(400);
-      expect(response.text).toBeDefined();
-      expect(response.text).toContain("Invalid token provided");
-
-      //#endregion CHECKING_RESPONSE
+      await testIPConfigRoute(
+        false,
+        jwt,
+        initialIPServerContent,
+        interfaceName,
+        putContent,
+        400,
+        "Invalid token provided"
+      );
     });
 
     //#endregion ========== AUTHORIZATION AND AUTHENTICATION ==========

@@ -1,4 +1,4 @@
-const netplanSerive = require("../services/netplanService");
+const netplanService = require("../services/netplanService");
 const {
   exists,
   checkIfFileExistsAsync,
@@ -8,35 +8,90 @@ const {
 } = require("../utilities/utilities");
 const _ = require("lodash");
 
-let settingsFilePath = null;
+/**
+ * @description project file path
+ */
+let projectFilePath = null;
 
+/**
+ * @description Method for initializing project service
+ * @param {String} filePath Path to project file
+ */
+module.exports.init = async (filePath) => {
+  projectFilePath = filePath;
+};
+
+/**
+ * @description Method for getting content from project file - THROWS IF CONTENT IS INVALID!
+ */
+module.exports.getProjectContentFromFile = async () => {
+  //Checking if project service is initialized
+  if (!exists(projectFilePath))
+    throw new Error("project service not initialized");
+
+  //Reading and parsing file content
+  return JSON.parse(await readFileAsync(projectFilePath, "utf8"));
+};
+
+/**
+ * @description Method for saving project content to file
+ * @param {JSON} projectContent new project content
+ */
+module.exports.saveProjectContentToFile = async (projectContent) => {
+  //Checking if project service is initialized
+  if (!exists(projectFilePath))
+    throw new Error("project service not initialized");
+
+  //Writing new project content to file
+  return writeFileAsync(
+    projectFilePath,
+    JSON.stringify(projectContent),
+    "utf8"
+  );
+};
+
+/**
+ * @description Method for getting initial project content payload - newly created
+ */
 const getInitialProjectContent = async () => {
   let payloadToReturn = {
     ipConfig: {},
   };
 
-  let ipConfig = await netplanSerive.getInterfaces();
-
-  if (exists(ipConfig)) payloadToReturn.ipConfig = ipConfig;
-
   return payloadToReturn;
 };
 
-module.exports.init = async (projectFilePath) => {
-  settingsFilePath = projectFilePath;
+/**
+ * @description Method for creating new empty project file
+ */
+module.exports.createNewProjectFile = async () => {
+  //Checking if project service is initialized
+  if (!exists(projectFilePath))
+    throw new Error("project service not initialized");
+
+  let initialFileContent = await getInitialProjectContent();
+
+  //Appending project file content with actual interfaces from netplan - if the exists
+  let ipConfig = await netplanService.getInterfaces();
+  if (exists(ipConfig)) initialFileContent.ipConfig = ipConfig;
+
+  await module.exports.saveProjectContentToFile(initialFileContent);
 };
 
+/**
+ * @description Method for checking id project file exists and is valid
+ */
 module.exports.checkIfProjFileExistsAndIsValid = async () => {
   //Checking if project service is initialized
-  if (!exists(settingsFilePath))
+  if (!exists(projectFilePath))
     throw new Error("project service not initialized");
 
   //Checking if file exists
-  let fileExists = await checkIfFileExistsAsync(settingsFilePath);
+  let fileExists = await checkIfFileExistsAsync(projectFilePath);
   if (!fileExists) return false;
 
   //Checking if file is a valid JSON
-  let fileContent = await readFileAsync(settingsFilePath, "utf8");
+  let fileContent = await readFileAsync(projectFilePath, "utf8");
   if (!isStringAValidJSON(fileContent)) {
     return false;
   }
@@ -46,35 +101,12 @@ module.exports.checkIfProjFileExistsAndIsValid = async () => {
   return true;
 };
 
-module.exports.createAndSaveNewProjectFile = async () => {
-  //Checking if project service is initialized
-  if (!exists(settingsFilePath))
-    throw new Error("project service not initialized");
-
-  let initialFileContent = await getInitialProjectContent();
-
-  await writeFileAsync(
-    settingsFilePath,
-    JSON.stringify(initialFileContent),
-    "utf8"
-  );
-};
-
-module.exports.setAndSaveNewIPConfig = async (ipConfig) => {
-  //Checking if project service is initialized
-  if (!exists(settingsFilePath))
-    throw new Error("project service not initialized");
-
-  fileContent = await module.exports.getProjectContentFromFile();
-
-  fileContent.ipConfig = ipConfig;
-
-  await module.exports.saveProjectContentToFile(fileContent);
-};
-
+/**
+ * @description Method for getting ip config from project file
+ */
 module.exports.getIPConfig = async () => {
   //Checking if project service is initialized
-  if (!exists(settingsFilePath))
+  if (!exists(projectFilePath))
     throw new Error("project service not initialized");
 
   fileContent = await module.exports.getProjectContentFromFile();
@@ -82,54 +114,58 @@ module.exports.getIPConfig = async () => {
   return fileContent.ipConfig;
 };
 
-module.exports.getProjectContentFromFile = async () => {
+/**
+ * @description Method for saving new ip config to project file
+ * @param {JSON} ipConfig ipConfig to save
+ */
+module.exports.setIPConfig = async (ipConfig) => {
   //Checking if project service is initialized
-  if (!exists(settingsFilePath))
+  if (!exists(projectFilePath))
     throw new Error("project service not initialized");
 
-  return JSON.parse(await readFileAsync(settingsFilePath, "utf8"));
+  fileContent = await module.exports.getProjectContentFromFile();
+  fileContent.ipConfig = ipConfig;
+
+  await module.exports.saveProjectContentToFile(fileContent);
 };
 
-module.exports.saveProjectContentToFile = async (projectContent) => {
+/**
+ * @description Method for setting ip config from project file to netplan service
+ */
+module.exports.setIPConfigFromProjectToNetplan = async () => {
   //Checking if project service is initialized
-  if (!exists(settingsFilePath))
+  if (!exists(projectFilePath))
     throw new Error("project service not initialized");
 
-  return writeFileAsync(
-    settingsFilePath,
-    JSON.stringify(projectContent),
-    "utf8"
-  );
-};
-
-module.exports.updateNetplanSettingsAccordingToProject = async () => {
-  //Checking if project service is initialized
-  if (!exists(settingsFilePath))
-    throw new Error("project service not initialized");
-
+  //Getting and comparing ipConfig from netplan and from project file
   let ipConfigFromFile = await module.exports.getIPConfig();
-  let ipConfigFromNetplan = await netplanSerive.getInterfaces();
+  let ipConfigFromNetplan = await netplanService.getInterfaces();
+
+  //If there is no ipConfig from netplan -> set empty object
+  if (!exists(ipConfigFromNetplan)) ipConfigFromNetplan = {};
 
   //Setting new netplan settings if there is a difference
   if (!_.isEqual(ipConfigFromFile, ipConfigFromNetplan))
-    await netplanSerive.setInterfaces(ipConfigFromFile);
+    await netplanService.setInterfaces(ipConfigFromFile);
 };
 
-module.exports.updateNetplanSettingsAccordingToNetplanFile = async (
-  projectContent
-) => {
+/**
+ * @description Method for setting ip config from netplan service to project file
+ */
+module.exports.setIPConfigFromNetplanToProject = async () => {
   //Checking if project service is initialized
-  if (!exists(settingsFilePath))
+  if (!exists(projectFilePath))
     throw new Error("project service not initialized");
 
+  //Getting and comparing ipConfig from netplan and from project file
   let ipConfigFromFile = await module.exports.getIPConfig();
-  let ipConfigFromNetplan = await netplanSerive.getInterfaces();
+  let ipConfigFromNetplan = await netplanService.getInterfaces();
 
-  //If there is no ipConfigFromNetplan -> set empty object
+  //If there is no ipConfig from netplan -> set empty object
   if (!exists(ipConfigFromNetplan)) ipConfigFromNetplan = {};
 
   //Setting new netplan settings if there is a difference
   if (!_.isEqual(ipConfigFromFile, ipConfigFromNetplan)) {
-    await module.exports.setAndSaveNewIPConfig(ipConfigFromNetplan);
+    await module.exports.setIPConfig(ipConfigFromNetplan);
   }
 };

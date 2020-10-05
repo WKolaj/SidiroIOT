@@ -31,16 +31,18 @@ module.exports = async function () {
   //Initializing project service
   await projectService.init(projectFilePath);
 
+  //Checking if project file exists - if exists and is valid - set ipconfig from proj to netplan
+  //Otherwise - create new project file and load ipConfig from netplan to project file
   let projFileValid = await projectService.checkIfProjFileExistsAndIsValid();
   if (projFileValid) {
     //Updating netplan settings based on project content
-    await projectService.updateNetplanSettingsAccordingToProject();
+    await projectService.setIPConfigFromProjectToNetplan();
   } else {
     //Creating brand new project file if current one does not exists or is invalid
-    await projectService.createAndSaveNewProjectFile();
+    await projectService.createNewProjectFile();
 
     //Reading ipConfig from netplan file
-    await projectService.updateNetplanSettingsAccordingToNetplanFile();
+    await projectService.setIPConfigFromNetplanToProject();
     logger.info("New project file created");
   }
 
