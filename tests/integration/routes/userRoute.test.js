@@ -2,6 +2,7 @@ const {
   snooze,
   writeFileAsync,
   readFileAsync,
+  removeFileIfExistsAsync,
 } = require("../../../utilities/utilities");
 const _ = require("lodash");
 const path = require("path");
@@ -54,6 +55,11 @@ const { pathToFileURL } = require("url");
 const { not } = require("joi");
 const { initial } = require("lodash");
 
+const projectFileName = config.get("projectFileName");
+const projectFilePath = path.join(settingsDirPath, projectFileName);
+
+const socketFilePath = config.get("netplanConfigSocketFilePath");
+
 describe("api/user", () => {
   let uselessUser;
   let testAdmin;
@@ -63,6 +69,7 @@ describe("api/user", () => {
   let testAdminAndSuperAdmin;
   let testUserAndAdminAndSuperAdmin;
   let logActionMock;
+  let ipConfigMockServer;
 
   const getUserPayload = (user) => {
     return user.PayloadWithoutPassword;
@@ -81,6 +88,15 @@ describe("api/user", () => {
   };
 
   beforeEach(async () => {
+    //Clearing project file if exists
+    await removeFileIfExistsAsync(projectFilePath);
+
+    //Clearing socket file path if exists
+    await removeFileIfExistsAsync(socketFilePath);
+
+    ipConfigMockServer = require("../../utilities/fakeIPService");
+    await ipConfigMockServer.Start();
+
     server = await require("../../../startup/app")();
 
     //Clearing users in database before each test
@@ -101,8 +117,19 @@ describe("api/user", () => {
   });
 
   afterEach(async () => {
+    //Clearing project file if exists
+    await removeFileIfExistsAsync(projectFilePath);
+
+    //Clearing socket file path if exists
+    await removeFileIfExistsAsync(socketFilePath);
+
     //Clearing users in database after each test
     await writeFileAsync(userFilePath, "{}", "utf8");
+
+    if (ipConfigMockServer) {
+      await ipConfigMockServer.Stop();
+      ipConfigMockServer = null;
+    }
 
     await server.close();
   });

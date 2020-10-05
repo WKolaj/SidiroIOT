@@ -6,6 +6,7 @@ const jsonWebToken = require("jsonwebtoken");
 const {
   writeFileAsync,
   roundToPrecision,
+  removeFileIfExistsAsync,
 } = require("../../../utilities/utilities");
 let {
   generateTestAdmin,
@@ -22,6 +23,11 @@ const privateKey = config.get("jwtPrivateKey");
 const settingsDirPath = config.get("settingsPath");
 const userFileName = config.get("userFileName");
 const userFilePath = path.join(settingsDirPath, userFileName);
+
+const projectFileName = config.get("projectFileName");
+const projectFilePath = path.join(settingsDirPath, projectFileName);
+
+const socketFilePath = config.get("netplanConfigSocketFilePath");
 
 let { exists, hashedStringMatch } = require("../../../utilities/utilities");
 let server;
@@ -42,6 +48,12 @@ describe("api/devInfo", () => {
   let logActionMock;
 
   beforeEach(async () => {
+    //Clearing project file if exists
+    await removeFileIfExistsAsync(projectFilePath);
+
+    //Clearing socket file path if exists
+    await removeFileIfExistsAsync(socketFilePath);
+
     server = await require("../../../startup/app")();
 
     //Clearing users in database before each test
@@ -62,6 +74,12 @@ describe("api/devInfo", () => {
   });
 
   afterEach(async () => {
+    //Clearing project file if exists
+    await removeFileIfExistsAsync(projectFilePath);
+
+    //Clearing socket file path if exists
+    await removeFileIfExistsAsync(socketFilePath);
+
     //Clearing users in database after each test
     await writeFileAsync(userFilePath, "{}", "utf8");
 

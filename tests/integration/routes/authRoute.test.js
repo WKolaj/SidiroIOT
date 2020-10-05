@@ -1,4 +1,8 @@
-const { snooze, writeFileAsync } = require("../../../utilities/utilities");
+const {
+  snooze,
+  writeFileAsync,
+  removeFileIfExistsAsync,
+} = require("../../../utilities/utilities");
 const _ = require("lodash");
 const request = require("supertest");
 const bcrypt = require("bcrypt");
@@ -43,6 +47,11 @@ let {
 let server;
 let logger = require("../../../logger/logger");
 
+const projectFileName = config.get("projectFileName");
+const projectFilePath = path.join(settingsDirPath, projectFileName);
+
+const socketFilePath = config.get("netplanConfigSocketFilePath");
+
 describe("api/auth", () => {
   let uselessUser;
   let testAdmin;
@@ -51,6 +60,12 @@ describe("api/auth", () => {
   let logActionMock;
 
   beforeEach(async () => {
+    //Clearing project file if exists
+    await removeFileIfExistsAsync(projectFilePath);
+
+    //Clearing socket file path if exists
+    await removeFileIfExistsAsync(socketFilePath);
+
     server = await require("../../../startup/app")();
 
     //Clearing users in database before each test
@@ -68,6 +83,12 @@ describe("api/auth", () => {
   });
 
   afterEach(async () => {
+    //Clearing project file if exists
+    await removeFileIfExistsAsync(projectFilePath);
+
+    //Clearing socket file path if exists
+    await removeFileIfExistsAsync(socketFilePath);
+
     //Clearing users in database after each test
     await writeFileAsync(userFilePath, "{}", "utf8");
 

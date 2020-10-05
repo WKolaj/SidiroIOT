@@ -194,4 +194,6 @@ describe("projectService", () => {
       expect(error.message).toContain("project service not initialized");
     });
   });
+
+  //TODO - finish testing other methods
 });
