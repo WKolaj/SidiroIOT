@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const config = require("config");
+const path = require("path");
 const { validateNetplanInterface } = require("../models/ipConfig");
 const validate = require("../middleware/validation/joiValidate");
 const {
@@ -7,6 +9,8 @@ const {
   hashString,
   hashedStringMatch,
   applyJSONParsingToRoute,
+  readFileAsync,
+  writeFileAsync,
 } = require("../utilities/utilities");
 const hasUser = require("../middleware/auth/hasUser");
 const isAdmin = require("../middleware/auth/isAdmin");
@@ -14,6 +18,7 @@ const isUser = require("../middleware/auth/isUser");
 const _ = require("lodash");
 const logger = require("../logger/logger");
 const netplanService = require("../services/netplanService");
+const projectService = require("../services/projectService");
 
 applyJSONParsingToRoute(express, router);
 
@@ -98,6 +103,9 @@ router.put(
 
     if (!exists(newInterfacePayload))
       return res.status(500).send("Error during editing interface");
+
+    //Settting new content inside project file
+    await projectService.updateNetplanSettingsAccordingToNetplanFile();
 
     return res
       .status(200)

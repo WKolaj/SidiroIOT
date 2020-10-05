@@ -45,6 +45,12 @@ module.exports = async function (workingDirName) {
 
   //#endregion ========== INITIALIZING VALIDATION ==========
 
+  //#region ========== INITIALIZING PROJECT ==========
+
+  await require("./project")();
+
+  //#endregion ========== INITIALIZING PROJECT ==========
+
   //#region ========== INITIALIZING ROUTES ==========
 
   //Initializing proccess of automatically calling next when error occurs while request handling - in order to go to last middlware of logging error
