@@ -11,11 +11,31 @@ module.exports.init = async (socketPath, authToken) => {
   netplanIpAuthToken = authToken;
 };
 
+const normalizePayload = (ipContent) => {
+  if (ipContent.dhcp) {
+    return {
+      name: ipContent.name,
+      dhcp: ipContent.dhcp,
+      optional: ipContent.optional,
+    };
+  } else {
+    return {
+      name: ipContent.name,
+      dhcp: ipContent.dhcp,
+      ipAddress: ipContent.ipAddress,
+      subnetMask: ipContent.subnetMask,
+      gateway: ipContent.gateway,
+      dns: ipContent.dns,
+      optional: ipContent.optional,
+    };
+  }
+};
+
 const convertInterfacesPayloadToObject = (interfacesPayload) => {
   let objectToReturn = {};
 
   for (let inter of interfacesPayload) {
-    objectToReturn[inter.name] = inter;
+    objectToReturn[inter.name] = normalizePayload(inter);
   }
 
   return objectToReturn;
@@ -29,7 +49,6 @@ module.exports.getInterfaces = async () => {
   try {
     //return null if not initialized
     if (!netplanIpSocketPath || !netplanIpAuthToken) return null;
-
     let response = await sendHTTPGetToSocket(netplanIpSocketPath, "/", {
       "x-auth-token": netplanIpAuthToken,
     });
@@ -109,7 +128,8 @@ module.exports.setInterface = async (interfaceName, interfaceObject) => {
 
     if (interfaceName !== interfaceObject.name) return null;
 
-    interfacesObject[interfaceName] = interfaceObject;
+    //Payload has to be normalized - in order to check parameters in case dhcp is true or false
+    interfacesObject[interfaceName] = normalizePayload(interfaceObject);
 
     let response = await module.exports.setInterfaces(interfacesObject);
 

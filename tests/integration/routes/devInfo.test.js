@@ -2,6 +2,7 @@ const _ = require("lodash");
 const path = require("path");
 const request = require("supertest");
 const config = require("config");
+const jsonWebToken = require("jsonwebtoken");
 const {
   writeFileAsync,
   roundToPrecision,
@@ -710,5 +711,105 @@ describe("api/devInfo", () => {
       };
       expect(response.body).toEqual(expectedBody);
     });
+
+    //#region ========== AUTHORIZATION AND AUTHENTICATION ==========
+
+    it("should not return any device info and return 401 if jwt has not been given", async () => {
+      jwt = undefined;
+
+      let response = await exec();
+
+      //#region CHECKING_RESPONSE
+
+      expect(response).toBeDefined();
+      expect(response.status).toEqual(401);
+      expect(response.text).toBeDefined();
+      expect(response.text).toContain("Access denied. No token provided");
+
+      //#endregion CHECKING_RESPONSE
+    });
+
+    it("should not return any device info and return 403 - USELESS USER", async () => {
+      jwt = await uselessUser.generateJWT();
+
+      let response = await exec();
+
+      //#region CHECKING_RESPONSE
+
+      expect(response).toBeDefined();
+      expect(response.status).toEqual(403);
+      expect(response.text).toBeDefined();
+      expect(response.text).toContain("Access forbidden");
+
+      //#endregion CHECKING_RESPONSE
+    });
+
+    it("should not return any device info and return 403 - ADMIN", async () => {
+      jwt = await testAdmin.generateJWT();
+
+      let response = await exec();
+
+      //#region CHECKING_RESPONSE
+
+      expect(response).toBeDefined();
+      expect(response.status).toEqual(403);
+      expect(response.text).toBeDefined();
+      expect(response.text).toContain("Access forbidden");
+
+      //#endregion CHECKING_RESPONSE
+    });
+
+    it("should not return any device info and return 403 - SUPER ADMIN", async () => {
+      jwt = await testSuperAdmin.generateJWT();
+
+      let response = await exec();
+
+      //#region CHECKING_RESPONSE
+
+      expect(response).toBeDefined();
+      expect(response.status).toEqual(403);
+      expect(response.text).toBeDefined();
+      expect(response.text).toContain("Access forbidden");
+
+      //#endregion CHECKING_RESPONSE
+    });
+
+    it("should not return any device info and return 400 if invalid jwt has been given", async () => {
+      jwt = "abcd1234";
+
+      let response = await exec();
+
+      //#region CHECKING_RESPONSE
+
+      expect(response).toBeDefined();
+      expect(response.status).toEqual(400);
+      expect(response.text).toBeDefined();
+      expect(response.text).toContain("Invalid token provided");
+
+      //#endregion CHECKING_RESPONSE
+    });
+
+    it("should not return any device info and return 400 if  jwt from different private key was provided", async () => {
+      let fakeUserPayload = {
+        _id: testAdmin._id,
+        name: testAdmin.name,
+        permissions: testAdmin.permissions,
+      };
+
+      jwt = await jsonWebToken.sign(fakeUserPayload, "differentTestPrivateKey");
+
+      let response = await exec();
+
+      //#region CHECKING_RESPONSE
+
+      expect(response).toBeDefined();
+      expect(response.status).toEqual(400);
+      expect(response.text).toBeDefined();
+      expect(response.text).toContain("Invalid token provided");
+
+      //#endregion CHECKING_RESPONSE
+    });
+
+    //#endregion ========== AUTHORIZATION AND AUTHENTICATION ==========
   });
 });

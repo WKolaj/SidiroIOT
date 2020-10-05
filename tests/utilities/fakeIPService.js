@@ -62,8 +62,13 @@ module.exports.Stop = async () => {
     if (_httpServer) {
       _httpServer.close((err) => {
         if (err) return reject(err);
-        else return resolve();
+        else {
+          _httpServer = null;
+          return resolve();
+        }
       });
+    } else {
+      return resolve();
     }
   });
 };
