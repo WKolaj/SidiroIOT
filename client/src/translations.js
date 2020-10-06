@@ -10,6 +10,12 @@ export const resources = {
         "Label": "Choose application language",
         "PolishLanguage": "Polish",
         "EnglishLanguage": "English"
+      },
+      "DevicesSelectionPage": {
+        "DatapointsTab": "Data points",
+        "EdgecomputingTab": "Edge computing",
+        "EventsTab": "Events",
+        "DevicesTitle": "Devices"
       }
     }
   },
@@ -24,6 +30,12 @@ export const resources = {
         "Label": "Wybierz język aplikacji",
         "PolishLanguage": "Polski",
         "EnglishLanguage": "Angielski"
+      },
+      "DevicesSelectionPage": {
+        "DatapointsTab": "Data pointy",
+        "EdgecomputingTab": "Edge computing",
+        "EventsTab": "Zdarzenia",
+        "DevicesTitle": "Urządzenia"
       }
     }
   }

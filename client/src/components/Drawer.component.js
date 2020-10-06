@@ -33,6 +33,9 @@ import AccountCircle from '@material-ui/icons/AccountCircle';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
+import SettingsIcon from '@material-ui/icons/Settings';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Box from '@material-ui/core/Box';
 
 const drawerWidth = 240;
 
@@ -98,7 +101,14 @@ const useStyles = makeStyles((theme) => ({
   },
   content: {
     flexGrow: 1,
-    padding: theme.spacing(2),
+    width: `calc(100% - 57px)`,
+    padding: theme.spacing(1),
+    [`${theme.breakpoints.down('sm')} and (orientation: portrait)`]: {
+      paddingBottom: theme.spacing(7),
+      paddingTop: theme.spacing(1),
+      paddingLeft: theme.spacing(1),
+      paddingRight: theme.spacing(1)
+    },
   },
   bottomNavi: {
     position: 'fixed',
@@ -117,21 +127,22 @@ const useStyles = makeStyles((theme) => ({
     textAlign: 'center',
   },
   bottomNaviAction: {
-    color: theme.palette.primary.light
+    color: theme.palette.secondary.main
   },
   title: {
     flexGrow: 1,
   },
   hardwareUsage: {
     width: '50px',
-    height: '40px'
+    height: '40px',
   },
   sectionDesktop: {
     display: 'none',
     [theme.breakpoints.up('md')]: {
       display: 'flex',
+      alignItems: 'center'
     },
-    height: '40px',
+    //height: '40px',
     flexGrow: 1
   },
   sectionMobile: {
@@ -140,11 +151,11 @@ const useStyles = makeStyles((theme) => ({
       display: 'none',
     },
   },
-    loginButton: {
-      display: 'none',
+  loginButton: {
+    display: 'none',
     [theme.breakpoints.up('md')]: {
       display: 'flex',
-    },
+    }
   },
 }));
 
@@ -220,7 +231,7 @@ function MiniDrawer(props) {
     >
       <MenuItem>
         <Badge badgeContent={'17%'} color="primary" >
-          <IconButton aria-label="show 17 new notifications" color="inherit" className={classes.hardwareUsage} >
+          <IconButton aria-label="cpu usage" color="inherit" className={classes.hardwareUsage} >
             <FontAwesomeIcon icon={faMicrochip} />
           </IconButton>
         </Badge>
@@ -228,7 +239,7 @@ function MiniDrawer(props) {
       </MenuItem>
       <MenuItem>
         <Badge badgeContent={'35%'} color="primary" >
-          <IconButton aria-label="show 17 new notifications" color="inherit" className={classes.hardwareUsage}>
+          <IconButton aria-label="memory usage" color="inherit" className={classes.hardwareUsage}>
             <FontAwesomeIcon icon={faMemory} />
           </IconButton>
         </Badge>
@@ -236,7 +247,7 @@ function MiniDrawer(props) {
       </MenuItem>
       <MenuItem>
         <Badge badgeContent={'35°C'} color="primary">
-          <IconButton aria-label="show 17 new notifications" color="inherit" className={classes.hardwareUsage}>
+          <IconButton aria-label="cpu temperature" color="inherit" className={classes.hardwareUsage}>
             <FontAwesomeIcon icon={faThermometerHalf} />
           </IconButton>
         </Badge>
@@ -244,12 +255,13 @@ function MiniDrawer(props) {
       </MenuItem>
       <MenuItem>
         <Badge badgeContent={'55%'} color="primary">
-          <IconButton aria-label="show 17 new notifications" color="inherit" className={classes.hardwareUsage}>
+          <IconButton aria-label="space usage" color="inherit" className={classes.hardwareUsage}>
             <FontAwesomeIcon icon={faHdd} />
           </IconButton>
         </Badge>
         <p>HDD</p>
       </MenuItem>
+      <Divider />
       <MenuItem onClick={handleProfileMenuOpen}>
         <IconButton
           aria-label="account of current user"
@@ -263,6 +275,64 @@ function MiniDrawer(props) {
       </MenuItem>
     </Menu>
   );
+
+  function CircularProgressWithLabel(props) {
+    const percentColors = [
+      { pct: 0.0, color: { r: 0x00, g: 0xff, b: 0 } },
+      { pct: 0.5, color: { r: 0xff, g: 0xff, b: 0 } },
+      { pct: 1.0, color: { r: 0xff, g: 0x00, b: 0 } }];
+
+    const getColorForPercentage = (pct) => {
+      for (var i = 1; i < percentColors.length - 1; i++) {
+        if (pct < percentColors[i].pct) {
+          break;
+        }
+      }
+      var lower = percentColors[i - 1];
+      var upper = percentColors[i];
+      var range = upper.pct - lower.pct;
+      var rangePct = (pct - lower.pct) / range;
+      var pctLower = 1 - rangePct;
+      var pctUpper = rangePct;
+      var color = {
+        r: Math.floor(lower.color.r * pctLower + upper.color.r * pctUpper),
+        g: Math.floor(lower.color.g * pctLower + upper.color.g * pctUpper),
+        b: Math.floor(lower.color.b * pctLower + upper.color.b * pctUpper)
+      };
+      return 'rgb(' + [color.r, color.g, color.b].join(',') + ')';
+      // or output as hex if preferred
+    };
+
+    const useStyles = makeStyles((theme) => ({
+      usageGaugesGroup: {
+        marginRight: '20px',
+        marginLeft: '5px'
+      },
+      usageColor: {
+        color: getColorForPercentage(props.value / 100)
+      },
+
+    }));
+    const classes = useStyles();
+    return (
+      <Box position="relative" display="inline-flex" className={classes.usageGaugesGroup}>
+        <CircularProgress variant="static" {...props} className={classes.usageColor} />
+        <Box
+          top={0}
+          left={0}
+          bottom={0}
+          right={0}
+          position="absolute"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <Typography variant="caption" component="div" color="initial">{`${Math.round(props.value,)}${props.unit}`}</Typography>
+        </Box>
+      </Box>
+    );
+  }
+
 
   return (
     <div className={classes.root}>
@@ -290,11 +360,16 @@ function MiniDrawer(props) {
             <Typography variant="h6" noWrap className={classes.title}>
               Sidiro IoT
           </Typography>
-
-
-
             <div className={classes.sectionDesktop}>
-              <Badge badgeContent={'17%'} color="primary" >
+              <Typography variant="body1">CPU</Typography>
+              <CircularProgressWithLabel value={20} unit="%" />
+              <Typography variant="body1">TEMP</Typography>
+              <CircularProgressWithLabel value={50} unit="°C" />
+              <Typography variant="body1">MEM</Typography>
+              <CircularProgressWithLabel value={70} unit="%" />
+              <Typography variant="body1">HDD</Typography>
+              <CircularProgressWithLabel value={90} unit="%" />
+              {/* <Badge badgeContent={'17%'} color="primary" >
                 <IconButton aria-label="show 17 new notifications" color="inherit" className={classes.hardwareUsage} >
                   <FontAwesomeIcon icon={faMicrochip} />
                 </IconButton>
@@ -313,20 +388,20 @@ function MiniDrawer(props) {
                 <IconButton aria-label="show 17 new notifications" color="inherit" className={classes.hardwareUsage}>
                   <FontAwesomeIcon icon={faHdd} />
                 </IconButton>
-              </Badge>
-              
+              </Badge> */}
+
             </div>
             <IconButton
-            className={classes.loginButton}
-                edge="end"
-                aria-label="account of current user"
-                aria-controls={menuId}
-                aria-haspopup="true"
-                onClick={handleProfileMenuOpen}
-                color="inherit"
-              >
-                <AccountCircle />
-              </IconButton>
+              className={classes.loginButton}
+              edge="end"
+              aria-label="account of current user"
+              aria-controls={menuId}
+              aria-haspopup="true"
+              onClick={handleProfileMenuOpen}
+              color="inherit"
+            >
+              <AccountCircle />
+            </IconButton>
             <div className={classes.sectionMobile}>
               <IconButton
                 aria-label="show more"
@@ -368,9 +443,9 @@ function MiniDrawer(props) {
               </ListItemIcon>
               <ListItemText primary={t('Drawer.1')} />
             </ListItem>
-            <ListItem button component={Link} to="/settings"  >
+            <ListItem button component={Link} to="/settings" >
               <ListItemIcon>
-                <HomeIcon />
+                <SettingsIcon />
               </ListItemIcon>
               <ListItemText primary={t('Drawer.2')} />
             </ListItem>
