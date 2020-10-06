@@ -1094,7 +1094,6 @@ describe("projectService", () => {
     let initProjectService;
     let initialProjectFileContent;
     let createInitialProjectFile;
-    let ipConfigToSetContent;
 
     beforeEach(async () => {
       initProjectService = true;
@@ -1178,6 +1177,88 @@ describe("projectService", () => {
       );
 
       expect(projectFileContent.ipConfig).toEqual({});
+    });
+
+    it("should set ipConfig to empty object - if netplan service has not started", async () => {
+      runIPConfigServer = false;
+
+      await exec();
+
+      let projectFileContent = JSON.parse(
+        await readFileAsync(projectFilePath, "utf8")
+      );
+
+      expect(projectFileContent.ipConfig).toEqual({});
+    });
+
+    it("should not set ipConfig - if netplan ip config is the same as ipConfig", async () => {
+      initialProjectFileContent.ipConfig = {};
+
+      for (let inter of initialIPServerContent) {
+        initialProjectFileContent.ipConfig[inter.name] = inter;
+      }
+
+      await exec();
+
+      let projectFileContent = JSON.parse(
+        await readFileAsync(projectFilePath, "utf8")
+      );
+
+      let expectedPayload = {};
+
+      for (let inter of initialIPServerContent) {
+        expectedPayload[inter.name] = inter;
+      }
+
+      expect(projectFileContent.ipConfig).toEqual(expectedPayload);
+    });
+
+    it("should throw and not set ipConfig if project file does not exists", async () => {
+      createInitialProjectFile = false;
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(error.message).toContain("no such file or directory,");
+
+      let fileExists = await checkIfFileExistsAsync(projectFilePath);
+
+      expect(fileExists).toEqual(false);
+    });
+
+    it("should throw and not set ipConfig if project service has not been initialized", async () => {
+      initProjectService = false;
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(error.message).toContain("project service not initialized");
+
+      let fileContent = JSON.parse(await readFileAsync(projectFilePath));
+
+      expect(fileContent).toEqual(initialProjectFileContent);
     });
   });
 });
