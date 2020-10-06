@@ -42,6 +42,10 @@ module.exports.saveProjectContentToFile = async (projectContent) => {
   if (!exists(projectFilePath))
     throw new Error("project service not initialized");
 
+  if (!exists(projectContent)) throw new Error("project content must exists!");
+
+  //TODO - add validation in the future
+
   //Writing new project content to file
   return writeFileAsync(
     projectFilePath,
@@ -115,7 +119,7 @@ module.exports.getIPConfig = async () => {
 };
 
 /**
- * @description Method for saving new ip config to project file
+ * @description Method for saving new ip config to project file - DOES NOT CHANGE IP IN NETPLAN
  * @param {JSON} ipConfig ipConfig to save
  */
 module.exports.setIPConfig = async (ipConfig) => {
@@ -145,8 +149,9 @@ module.exports.setIPConfigFromProjectToNetplan = async () => {
   if (!exists(ipConfigFromNetplan)) ipConfigFromNetplan = {};
 
   //Setting new netplan settings if there is a difference
-  if (!_.isEqual(ipConfigFromFile, ipConfigFromNetplan))
+  if (!_.isEqual(ipConfigFromFile, ipConfigFromNetplan)) {
     await netplanService.setInterfaces(ipConfigFromFile);
+  }
 };
 
 /**
