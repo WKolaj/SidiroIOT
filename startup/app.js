@@ -35,6 +35,7 @@ module.exports = async function (workingDirName) {
 
   //#region ========== INITIALIZING NETPLAN IPCONFIG ==========
 
+  //Netplan service has to be initialized before project! - in order to set ipConfig based on projectFile content
   await require("./netplan")();
 
   //#endregion ========== INITIALIZING NETPLAN IPCONFIG ==========
