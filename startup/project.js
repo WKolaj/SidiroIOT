@@ -46,7 +46,8 @@ module.exports = async function () {
     logger.info("New project file created");
   }
 
-  //TODO - here initialize project content based on projectFileContent
+  //Loading project - creating devices, variables etc.
+  await projectService.loadProjectFile();
 
   logger.info("project initialized");
 };

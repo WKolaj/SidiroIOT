@@ -5,6 +5,7 @@ const {
   readFileAsync,
   writeFileAsync,
   isStringAValidJSON,
+  statAsync,
 } = require("../utilities/utilities");
 const _ = require("lodash");
 
@@ -12,6 +13,13 @@ const _ = require("lodash");
  * @description project file path
  */
 let projectFilePath = null;
+
+/**
+ * @description Method for getting project file path
+ */
+module.exports.getProjectFilePath = () => {
+  return projectFilePath;
+};
 
 /**
  * @description Method for initializing project service
@@ -173,4 +181,17 @@ module.exports.setIPConfigFromNetplanToProject = async () => {
   if (!_.isEqual(ipConfigFromFile, ipConfigFromNetplan)) {
     await module.exports.setIPConfig(ipConfigFromNetplan);
   }
+};
+
+/**
+ * @description Method for loading project file to memory - creating devices, variables, etc.
+ */
+module.exports.loadProjectFile = async () => {
+  //Setting new ip from project file
+  await module.exports.setIPConfigFromProjectToNetplan();
+
+  //Getting new content from project file
+  let projectContent = await module.exports.getProjectContentFromFile();
+
+  //TODO - add mechanism for loading project - creating devices, variables etc.
 };

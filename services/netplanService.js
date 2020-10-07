@@ -2,6 +2,7 @@ const {
   sendHTTPGetToSocket,
   sendHTTPPostToSocket,
 } = require("../utilities/utilities");
+const logger = require("../logger/logger");
 
 let netplanIpSocketPath = null;
 let netplanIpAuthToken = null;
@@ -62,6 +63,7 @@ module.exports.getInterfaces = async () => {
 
     return convertInterfacesPayloadToObject(interfacesPayload);
   } catch (err) {
+    logger.error(err.message, err);
     //Error during communication - return null
     return null;
   }
@@ -93,6 +95,7 @@ module.exports.setInterfaces = async (interfacesObject) => {
 
     return convertInterfacesPayloadToObject(responseInterfacesPayload);
   } catch (err) {
+    logger.error(err.message, err);
     //Error during communication - return null
     return null;
   }
@@ -110,6 +113,7 @@ module.exports.getInterface = async (interfaceName) => {
 
     return interfacesObject[interfaceName];
   } catch (err) {
+    logger.error(err.message, err);
     //Error during communication - return null
     return null;
   }
@@ -137,6 +141,7 @@ module.exports.setInterface = async (interfaceName, interfaceObject) => {
 
     return response[interfaceName];
   } catch (err) {
+    logger.error(err.message, err);
     //Error during communication - return null
     return null;
   }

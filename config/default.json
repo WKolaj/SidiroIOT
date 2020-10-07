@@ -1,6 +1,7 @@
 {
   "tokenHeader": "x-auth-token",
   "port": 5000,
+  "maxProjectFileSize": 1048576,
   "settingsPath": "settings",
   "userFileName": "userSettings.json",
   "projectFileName": "projectSettings.json",

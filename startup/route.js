@@ -4,6 +4,7 @@ const userRouter = require("../routes/user");
 const authRouter = require("../routes/auth");
 const devInfoRouter = require("../routes/deviceInfo");
 const ipConfigRouter = require("../routes/ipConfig");
+const configFileRouter = require("../routes/configFile");
 
 //Method for initializing routes
 module.exports = async function (app) {
@@ -13,6 +14,9 @@ module.exports = async function (app) {
 
   app.use("/api/devInfo", devInfoRouter);
   logger.info("Device info route initialized");
+
+  app.use("/api/configFile", configFileRouter);
+  logger.info("Config file route initialized");
 
   //#endregion ========== CUSTOM ROUTES ==========
 
