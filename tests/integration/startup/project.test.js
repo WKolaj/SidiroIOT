@@ -164,6 +164,19 @@ describe("projectService", () => {
       let ipConfig = await netplanService.getInterfaces();
 
       expect(ipConfig).toEqual(initialProjectFileContent.ipConfig);
+
+      //Testing content of file
+      let fileExists = await checkIfFileExistsAsync(
+        projectService.getProjectFilePath()
+      );
+
+      expect(fileExists).toEqual(true);
+
+      let fileContent = JSON.parse(
+        await readFileAsync(projectService.getProjectFilePath())
+      );
+
+      expect(fileContent).toEqual(initialProjectFileContent);
     });
 
     it("should set ip to netplanService based on project file but not invoke post - if project file exists and is valid and initial ipConfig is equal to netplan config", async () => {
@@ -186,6 +199,186 @@ describe("projectService", () => {
       expect(ipConfig).toEqual(initialProjectFileContent.ipConfig);
     });
 
-    //TODO - finish other tests with project startup
+    it("should create new project file if not exists - together with setting ip from netplan", async () => {
+      createInitialProjectFile = false;
+
+      await exec();
+
+      //Testing post mock function - post mock fn should not have been called
+      expect(ipConfigMockServer.OnPostMockFn).not.toHaveBeenCalled();
+
+      //Testing get mock function - get mock fn should have been called - CAN BE CALLED SEVERAL TIMES
+      expect(ipConfigMockServer.OnGetMockFn).toHaveBeenCalled();
+
+      //Testing interfaces in project
+      let ipConfig = await projectService.getIPConfig();
+
+      let expectedPayload = {};
+
+      for (let inter of initialIPServerContent) {
+        expectedPayload[inter.name] = inter;
+      }
+      expect(ipConfig).toEqual(expectedPayload);
+
+      //Testing content of file
+      let fileExists = await checkIfFileExistsAsync(
+        projectService.getProjectFilePath()
+      );
+
+      expect(fileExists).toEqual(true);
+
+      let fileContent = JSON.parse(
+        await readFileAsync(projectService.getProjectFilePath())
+      );
+
+      expect(fileContent).toEqual({
+        ipConfig: { ...expectedPayload },
+      });
+
+      //Testing netplan ipConfig
+
+      let netplanIPConfig = await netplanService.getInterfaces();
+
+      expect(netplanIPConfig).toEqual(expectedPayload);
+    });
+
+    it("should create new project file if is not valid - together with setting ip from netplan", async () => {
+      createInitialProjectFile = false;
+
+      await exec();
+
+      //Testing post mock function - post mock fn should not have been called
+      expect(ipConfigMockServer.OnPostMockFn).not.toHaveBeenCalled();
+
+      //Testing get mock function - get mock fn should have been called - CAN BE CALLED SEVERAL TIMES
+      expect(ipConfigMockServer.OnGetMockFn).toHaveBeenCalled();
+
+      //Testing interfaces in project file
+      let ipConfig = await projectService.getIPConfig();
+
+      let expectedPayload = {};
+
+      for (let inter of initialIPServerContent) {
+        expectedPayload[inter.name] = inter;
+      }
+      expect(ipConfig).toEqual(expectedPayload);
+
+      //Testing content of file
+      let fileExists = await checkIfFileExistsAsync(
+        projectService.getProjectFilePath()
+      );
+
+      expect(fileExists).toEqual(true);
+
+      let fileContent = JSON.parse(
+        await readFileAsync(projectService.getProjectFilePath())
+      );
+
+      expect(fileContent).toEqual({
+        ipConfig: { ...expectedPayload },
+      });
+
+      //Testing netplan ipConfig
+
+      let netplanIPConfig = await netplanService.getInterfaces();
+
+      expect(netplanIPConfig).toEqual(expectedPayload);
+    });
+
+    it("should not call post on netplanService - if ipConfig in project and in netplan are the same", async () => {
+      initialProjectFileContent.ipConfig = {};
+
+      for (let inter of initialIPServerContent) {
+        initialProjectFileContent.ipConfig[inter.name] = inter;
+      }
+
+      await exec();
+
+      //Testing post mock function
+
+      expect(ipConfigMockServer.OnPostMockFn).not.toHaveBeenCalled();
+
+      //Testing ipConfig content
+
+      let ipConfig = await netplanService.getInterfaces();
+
+      expect(ipConfig).toEqual(initialProjectFileContent.ipConfig);
+    });
+
+    it("should not throw and start project - if netplanService is not active and project file exists", async () => {
+      runIPConfigServer = false;
+
+      await exec();
+
+      //Testing interfaces in project
+      let ipConfig = await projectService.getIPConfig();
+
+      let expectedPayload = initialProjectFileContent.ipConfig;
+      expect(ipConfig).toEqual(expectedPayload);
+
+      //Testing content of file
+      let fileExists = await checkIfFileExistsAsync(
+        projectService.getProjectFilePath()
+      );
+
+      expect(fileExists).toEqual(true);
+
+      let fileContent = JSON.parse(
+        await readFileAsync(projectService.getProjectFilePath())
+      );
+
+      expect(fileContent).toEqual(initialProjectFileContent);
+    });
+
+    it("should not throw and start project - if netplanService is not active and project file does not exist", async () => {
+      runIPConfigServer = false;
+      createInitialProjectFile = false;
+
+      await exec();
+
+      //Testing interfaces in project
+      let projectContent = await projectService.getProjectContentFromFile();
+
+      let expectedPayload = { ipConfig: {} };
+      expect(projectContent).toEqual(expectedPayload);
+
+      //Testing content of file
+      let fileExists = await checkIfFileExistsAsync(
+        projectService.getProjectFilePath()
+      );
+
+      expect(fileExists).toEqual(true);
+
+      let fileContent = JSON.parse(
+        await readFileAsync(projectService.getProjectFilePath())
+      );
+
+      expect(fileContent).toEqual(expectedPayload);
+    });
+
+    it("should not throw and start project - if netplanService is not active and project file is not valid", async () => {
+      runIPConfigServer = false;
+      initialProjectFileContent = "[asd]dasdlsf'asd]asd";
+      await exec();
+
+      //Testing interfaces in project
+      let ipConfig = await projectService.getIPConfig();
+
+      let expectedPayload = initialProjectFileContent.ipConfig;
+      expect(ipConfig).toEqual(expectedPayload);
+
+      //Testing content of file
+      let fileExists = await checkIfFileExistsAsync(
+        projectService.getProjectFilePath()
+      );
+
+      expect(fileExists).toEqual(true);
+
+      let fileContent = JSON.parse(
+        await readFileAsync(projectService.getProjectFilePath())
+      );
+
+      expect(fileContent).toEqual(initialProjectFileContent);
+    });
   });
 });
