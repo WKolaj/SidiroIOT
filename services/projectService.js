@@ -159,6 +159,8 @@ module.exports.setIPConfigFromProjectToNetplan = async () => {
   //Setting new netplan settings if there is a difference
   if (!_.isEqual(ipConfigFromFile, ipConfigFromNetplan)) {
     await netplanService.setInterfaces(ipConfigFromFile);
+
+    let ipConfigFile = await netplanService.getInterfaces();
   }
 };
 
