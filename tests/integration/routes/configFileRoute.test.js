@@ -526,6 +526,33 @@ describe("api/user", () => {
       //#endregion CHECKING_NETPLAN_INTERFACES
     });
 
+    it("should return 200 and set new project file content - even if netplan service is down", async () => {
+      await ipConfigMockServer.Stop();
+
+      let response = await exec();
+
+      //#region CHECKING_RESPONSE
+
+      expect(response).toBeDefined();
+      expect(response.status).toEqual(200);
+
+      //#endregion CHECKING_RESPONSE
+
+      //#region CHECKING_PROJECT_FILE_CONTENT
+
+      let fileContent = JSON.parse(await readFileAsync(projectFilePath));
+
+      expect(fileContent).toEqual(postProjectFileContent);
+
+      //#endregion CHECKING_PROJECT_FILE_CONTENT
+
+      //#region CHECKING_NETPLAN_INTERFACES
+
+      expect(ipConfigMockServer.OnPostMockFn).not.toHaveBeenCalled();
+
+      //#endregion CHECKING_NETPLAN_INTERFACES
+    });
+
     it("should not change project file settings and return 500 if file path is empty in post", async () => {
       let fakeUserPayload = {
         _id: testAdmin._id,
