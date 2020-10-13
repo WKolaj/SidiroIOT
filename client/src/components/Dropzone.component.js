@@ -1,8 +1,18 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDropzone } from 'react-dropzone';
 import Typography from '@material-ui/core/Typography';
+import { useTranslation } from 'react-i18next';
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles((theme) => ({
+  dropzoneText: {
+    color: 'rgb(140 140 140)'
+  },
+}));
 
 export default function Basic(props) {
+  const classes = useStyles();
+  const { t } = useTranslation();
   const onDrop = useCallback(acceptedFiles => {
     console.log(acceptedFiles)
     // Do something with the files
@@ -55,7 +65,7 @@ export default function Basic(props) {
     <section className="container">
       <div {...getRootProps({style})} className="dropzone">
         <input {...getInputProps()} />
-        <Typography variant="body1">Drag & drop a or click to select file</Typography>
+        <Typography variant="body1" className={classes.dropzoneText}>{t('SettingsPage.DropzoneText')}</Typography>
 
       </div>
     </section>

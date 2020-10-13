@@ -24,19 +24,19 @@ function SimpleList(props) {
   return (
     <div className={classes.root}>
       <List component="nav" aria-label="device selection">
-        <ListItem button onClick={()=>props.selectDevice(0, 'mindsphere', 'MindSphere')} selected={props.selectedDevice.selectedDeviceIndex === 0 ? true : false}>
+        <ListItem button onClick={()=>props.selectDevice(0, 'Mindsphere', 'MindSphere')} selected={props.selectedDevice.selectedDeviceIndex === 0 ? true : false}>
           <ListItemIcon>
             <CloudIcon />
           </ListItemIcon>
           <ListItemText primary="MindSphere" />
         </ListItem>
-        <ListItem button onClick={()=>props.selectDevice(1, 'meter1', 'Meter')} selected={props.selectedDevice.selectedDeviceIndex === 1 ? true : false}>
+        <ListItem button onClick={()=>props.selectDevice(1, 'Meter1', 'Meter')} selected={props.selectedDevice.selectedDeviceIndex === 1 ? true : false}>
           <ListItemIcon>
             <FontAwesomeIcon icon={faCircle} color="green" />
           </ListItemIcon>
           <ListItemText primary="Meter1" />
         </ListItem>
-        <ListItem button onClick={()=>props.selectDevice(2, 'meter2', 'Meter')} selected={props.selectedDevice.selectedDeviceIndex === 2 ? true : false}>
+        <ListItem button onClick={()=>props.selectDevice(2, 'Meter2', 'Meter')} selected={props.selectedDevice.selectedDeviceIndex === 2 ? true : false}>
           <ListItemIcon>
             <FontAwesomeIcon icon={faCircle} color="red" />
           </ListItemIcon>

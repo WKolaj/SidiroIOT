@@ -15,6 +15,7 @@ import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import LastPageIcon from '@material-ui/icons/LastPage';
 import TableHead from '@material-ui/core/TableHead';
+import { useTranslation } from 'react-i18next';
 
 const useStyles1 = makeStyles((theme) => ({
   root: {
@@ -91,6 +92,7 @@ export default function CustomPaginationActionsTable(props) {
   const classes = useStyles2();
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(props.rows.length < 5 ? props.rows.length : 5);
+  const { t } = useTranslation()
 
   const emptyRows = rowsPerPage - Math.min(rowsPerPage, props.rows.length - page * rowsPerPage);
 
@@ -108,8 +110,8 @@ export default function CustomPaginationActionsTable(props) {
       <Table className={classes.table} aria-label="params table">
         <TableHead>
           <TableRow>
-            {props.columns.map(column => {
-              return <TableCell key={column}>{column}</TableCell>
+            {props.columns.map((column, colIndex) => {
+              return <TableCell key={`column-${colIndex}`}>{column}</TableCell>
             })}
           </TableRow>
         </TableHead>
@@ -118,11 +120,11 @@ export default function CustomPaginationActionsTable(props) {
             ? props.rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
             : props.rows
           ).map((row, rowIndex) => (
-            <TableRow key={rowIndex}>
-              {row.map((cell, cellIndex)=>{
-                return <TableCell key={cellIndex}>
-                {cell}
-              </TableCell>
+            <TableRow key={`row-${rowIndex}`}>
+              {row.map((cell, cellIndex) => {
+                return <TableCell key={`cell-${cellIndex}`}>
+                  {cell}
+                </TableCell>
               })}
             </TableRow>
           ))}
@@ -135,8 +137,9 @@ export default function CustomPaginationActionsTable(props) {
         <TableFooter>
           <TableRow>
             <TablePagination
-              labelRowsPerPage="Rows per page"
-              rowsPerPageOptions={[props.rows.length<5?props.rows.length:5, 10, 25, { label: 'All', value: -1 }]}
+            labelDisplayedRows={({from, to, count})=>`${from}-${to} ${t('UniversalTable.Of')} ${count}`}
+              labelRowsPerPage={t('UniversalTable.RowsPerPage')}
+              rowsPerPageOptions={[props.rows.length < 5 ? props.rows.length : 5, 10, 25]}
               colSpan={props.columns.length}
               count={props.rows.length}
               rowsPerPage={rowsPerPage}

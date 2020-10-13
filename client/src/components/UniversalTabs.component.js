@@ -79,12 +79,12 @@ function ScrollableTabsButtonForce(props) {
           aria-label="scrollable force tabs"
         >
           {props.tabs.map((tab, i) => {
-            return <Tab key={i} label={tab.label} {...a11yProps(i)} />
+            return <Tab key={`tab-${i}`} label={tab.label} {...a11yProps(i)} />
           })}
         </Tabs>
       </AppBar>
       {props.tabs.map((tab, i) => {
-        return <TabPanel key={i} value={props.tabsInstance[props.name] || 0} index={i}>
+        return <TabPanel key={`tabpanel-${i}`} value={props.tabsInstance[props.name] || 0} index={i}>
           {tab.content}
         </TabPanel>
       })}

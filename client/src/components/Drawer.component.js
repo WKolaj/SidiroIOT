@@ -17,13 +17,13 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import LanguageIcon from "@material-ui/icons/Language";
 import ViewArrayIcon from "@material-ui/icons/ViewArray";
-import { BrowserRouter as Router, Link } from "react-router-dom";
+import { BrowserRouter as Router, Link, Route, Switch } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import BottomNavigation from '@material-ui/core/BottomNavigation';
 import BottomNavigationAction from '@material-ui/core/BottomNavigationAction';
-import HomeIcon from "@material-ui/icons/Home";
+import DeviceHubIcon from "@material-ui/icons/DeviceHub";
 import useMediaQuery from '@material-ui/core/useMediaQuery';
-import Routes from '../routes/index.routes';
+import DrawerRoutes from '../routes/DrawerRoutes.routes';
 import { setLanguageDialogOpen } from '../actions/LanguageDialog.action';
 import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -36,6 +36,8 @@ import Menu from '@material-ui/core/Menu';
 import SettingsIcon from '@material-ui/icons/Settings';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Box from '@material-ui/core/Box';
+import LoginPage from './LoginPage.component';
+import { setHardwareUsage } from '../actions/HardwareUsage.action';
 
 const drawerWidth = 240;
 
@@ -156,7 +158,7 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.up('md')]: {
       display: 'flex',
     }
-  },
+  }
 }));
 
 function MiniDrawer(props) {
@@ -213,9 +215,13 @@ function MiniDrawer(props) {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleMenuClose}>My account</MenuItem>
-    </Menu>
+      <MenuItem component={Link}
+        to="/account"
+        onClick={handleMenuClose}>{t('AccountMenu.MyAccount')}</MenuItem>
+      <MenuItem component={Link}
+        to="/account"
+        onClick={handleMenuClose}>{t('AccountMenu.Logout')}</MenuItem>
+    </Menu >
   );
 
   const mobileMenuId = 'primary-search-account-menu-mobile';
@@ -230,7 +236,7 @@ function MiniDrawer(props) {
       onClose={handleMobileMenuClose}
     >
       <MenuItem>
-        <Badge badgeContent={'17%'} color="primary" >
+        <Badge badgeContent={`${props.hardwareUsage.cpuUsage}%`} color="primary" >
           <IconButton aria-label="cpu usage" color="inherit" className={classes.hardwareUsage} >
             <FontAwesomeIcon icon={faMicrochip} />
           </IconButton>
@@ -238,15 +244,7 @@ function MiniDrawer(props) {
         <p>CPU</p>
       </MenuItem>
       <MenuItem>
-        <Badge badgeContent={'35%'} color="primary" >
-          <IconButton aria-label="memory usage" color="inherit" className={classes.hardwareUsage}>
-            <FontAwesomeIcon icon={faMemory} />
-          </IconButton>
-        </Badge>
-        <p>MEM</p>
-      </MenuItem>
-      <MenuItem>
-        <Badge badgeContent={'35°C'} color="primary">
+        <Badge badgeContent={`${props.hardwareUsage.cpuTemperature}°C`} color="primary">
           <IconButton aria-label="cpu temperature" color="inherit" className={classes.hardwareUsage}>
             <FontAwesomeIcon icon={faThermometerHalf} />
           </IconButton>
@@ -254,7 +252,15 @@ function MiniDrawer(props) {
         <p>TEMP</p>
       </MenuItem>
       <MenuItem>
-        <Badge badgeContent={'55%'} color="primary">
+        <Badge badgeContent={`${props.hardwareUsage.ramUsage}%`} color="primary" >
+          <IconButton aria-label="memory usage" color="inherit" className={classes.hardwareUsage}>
+            <FontAwesomeIcon icon={faMemory} />
+          </IconButton>
+        </Badge>
+        <p>MEM</p>
+      </MenuItem>
+      <MenuItem>
+        <Badge badgeContent={`${props.hardwareUsage.diskUsage}%`} color="primary">
           <IconButton aria-label="space usage" color="inherit" className={classes.hardwareUsage}>
             <FontAwesomeIcon icon={faHdd} />
           </IconButton>
@@ -271,8 +277,9 @@ function MiniDrawer(props) {
         >
           <AccountCircle />
         </IconButton>
-        <p>Profile</p>
+        <p>{t('AccountMenu.Profile')}</p>
       </MenuItem>
+
     </Menu>
   );
 
@@ -309,13 +316,27 @@ function MiniDrawer(props) {
         marginLeft: '5px'
       },
       usageColor: {
-        color: getColorForPercentage(props.value / 100)
+        color: getColorForPercentage(props.value / 100),
+        animationDuration: '550ms',
+        position: 'absolute',
+        left: 0,
+      },
+      bottom: {
+        color: '#eeeeee1c',
       },
 
     }));
     const classes = useStyles();
     return (
       <Box position="relative" display="inline-flex" className={classes.usageGaugesGroup}>
+        <CircularProgress
+          variant="determinate"
+          className={classes.bottom}
+          size={40}
+          thickness={4}
+          {...props}
+          value={100}
+        />
         <CircularProgress variant="static" {...props} className={classes.usageColor} />
         <Box
           top={0}
@@ -336,154 +357,145 @@ function MiniDrawer(props) {
 
   return (
     <div className={classes.root}>
-      <Router>
-        <CssBaseline />
-        <AppBar
-          position="fixed"
-          className={clsx(classes.appBar, {
-            [classes.appBarShift]: open,
-          })}
-        >
-          <Toolbar>
-            <IconButton
-              color="inherit"
-              aria-label="open drawer"
-              onClick={handleDrawerOpen}
-              edge="start"
-              className={clsx(classes.menuButton, {
-                [classes.hide]: open,
-                [classes.hide]: matches
+      <Switch>
+        <Route path="/login" render={() => <LoginPage />} />
+        <Route path="/" render={() =>
+          <React.Fragment>
+            <CssBaseline />
+            <AppBar
+              position="fixed"
+              className={clsx(classes.appBar, {
+                [classes.appBarShift]: open,
               })}
             >
-              <MenuIcon />
-            </IconButton>
-            <Typography variant="h6" noWrap className={classes.title}>
-              Sidiro IoT
+              <Toolbar>
+                <IconButton
+                  color="inherit"
+                  aria-label="open drawer"
+                  onClick={handleDrawerOpen}
+                  edge="start"
+                  className={clsx(classes.menuButton, {
+                    [classes.hide]: open,
+                    [classes.hide]: matches
+                  })}
+                >
+                  <MenuIcon />
+                </IconButton>
+                <Typography variant="h6" noWrap className={classes.title}>
+                  Sidiro IoT
           </Typography>
-            <div className={classes.sectionDesktop}>
-              <Typography variant="body1">CPU</Typography>
-              <CircularProgressWithLabel value={20} unit="%" />
-              <Typography variant="body1">TEMP</Typography>
-              <CircularProgressWithLabel value={50} unit="°C" />
-              <Typography variant="body1">MEM</Typography>
-              <CircularProgressWithLabel value={70} unit="%" />
-              <Typography variant="body1">HDD</Typography>
-              <CircularProgressWithLabel value={90} unit="%" />
-              {/* <Badge badgeContent={'17%'} color="primary" >
-                <IconButton aria-label="show 17 new notifications" color="inherit" className={classes.hardwareUsage} >
-                  <FontAwesomeIcon icon={faMicrochip} />
+                <div className={classes.sectionDesktop}>
+                  <Typography variant="body1">CPU</Typography>
+                  <CircularProgressWithLabel value={props.hardwareUsage.cpuUsage} unit="%" />
+                  <Typography variant="body1">TEMP</Typography>
+                  <CircularProgressWithLabel value={props.hardwareUsage.cpuTemperature} unit="°C" />
+                  <Typography variant="body1">MEM</Typography>
+                  <CircularProgressWithLabel value={props.hardwareUsage.ramUsage} unit="%" />
+                  <Typography variant="body1">HDD</Typography>
+                  <CircularProgressWithLabel value={props.hardwareUsage.diskUsage} unit="%" />
+                </div>
+                <IconButton
+                  className={classes.loginButton}
+                  edge="end"
+                  aria-label="account of current user"
+                  aria-controls={menuId}
+                  aria-haspopup="true"
+                  onClick={handleProfileMenuOpen}
+                  color="inherit"
+                >
+                  <AccountCircle />
                 </IconButton>
-              </Badge>
-              <Badge badgeContent={'35%'} color="primary" >
-                <IconButton aria-label="show 17 new notifications" color="inherit" className={classes.hardwareUsage}>
-                  <FontAwesomeIcon icon={faMemory} />
-                </IconButton>
-              </Badge>
-              <Badge badgeContent={'35°C'} color="primary">
-                <IconButton aria-label="show 17 new notifications" color="inherit" className={classes.hardwareUsage}>
-                  <FontAwesomeIcon icon={faThermometerHalf} />
-                </IconButton>
-              </Badge>
-              <Badge badgeContent={'55%'} color="primary">
-                <IconButton aria-label="show 17 new notifications" color="inherit" className={classes.hardwareUsage}>
-                  <FontAwesomeIcon icon={faHdd} />
-                </IconButton>
-              </Badge> */}
-
-            </div>
-            <IconButton
-              className={classes.loginButton}
-              edge="end"
-              aria-label="account of current user"
-              aria-controls={menuId}
-              aria-haspopup="true"
-              onClick={handleProfileMenuOpen}
-              color="inherit"
+                <div className={classes.sectionMobile}>
+                  <IconButton
+                    aria-label="show more"
+                    aria-controls={mobileMenuId}
+                    aria-haspopup="true"
+                    onClick={handleMobileMenuOpen}
+                    color="inherit"
+                  >
+                    <MoreIcon />
+                  </IconButton>
+                </div>
+              </Toolbar>
+            </AppBar>
+            {renderMobileMenu}
+            {renderMenu}
+            <Drawer
+              variant="permanent"
+              className={clsx(classes.drawer, {
+                [classes.drawerOpen]: open,
+                [classes.drawerClose]: !open,
+              })}
+              classes={{
+                paper: clsx({
+                  [classes.drawerOpen]: open,
+                  [classes.drawerClose]: !open,
+                }),
+              }}
             >
-              <AccountCircle />
-            </IconButton>
-            <div className={classes.sectionMobile}>
-              <IconButton
-                aria-label="show more"
-                aria-controls={mobileMenuId}
-                aria-haspopup="true"
-                onClick={handleMobileMenuOpen}
-                color="inherit"
-              >
-                <MoreIcon />
-              </IconButton>
-            </div>
-          </Toolbar>
-        </AppBar>
-        {renderMobileMenu}
-        {renderMenu}
-        <Drawer
-          variant="permanent"
-          className={clsx(classes.drawer, {
-            [classes.drawerOpen]: open,
-            [classes.drawerClose]: !open,
-          })}
-          classes={{
-            paper: clsx({
-              [classes.drawerOpen]: open,
-              [classes.drawerClose]: !open,
-            }),
-          }}
-        >
-          <div className={classes.toolbar}>
-            <IconButton onClick={handleDrawerClose}>
-              {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-            </IconButton>
-          </div>
-          <Divider />
-          <List>
-            <ListItem button component={Link} to="/"  >
-              <ListItemIcon>
-                <HomeIcon />
-              </ListItemIcon>
-              <ListItemText primary={t('Drawer.1')} />
-            </ListItem>
-            <ListItem button component={Link} to="/settings" >
-              <ListItemIcon>
-                <SettingsIcon />
-              </ListItemIcon>
-              <ListItemText primary={t('Drawer.2')} />
-            </ListItem>
-            <Divider />
-            <ListItem button onClick={() => props.setLanguageDialogOpen(true)}>
-              <ListItemIcon>
-                <LanguageIcon />
-              </ListItemIcon>
-              <ListItemText primary={t('Drawer.Language')} />
-            </ListItem>
-          </List>
-        </Drawer>
-        <main className={classes.content}>
-          <div className={classes.toolbar} />
-          <Routes />
-        </main>
-        <BottomNavigation
-          showLabels={false}
-          className={classes.bottomNavi}
-        >
-          <BottomNavigationAction className={classes.bottomNaviAction} label={t('Drawer.1')} icon={<HomeIcon />} component={Link} to="/" value="/" showLabel={true} />
-          <BottomNavigationAction className={classes.bottomNaviAction} label={t('Drawer.2')} icon={<ViewArrayIcon />} component={Link} to="/settings" value="/settings" showLabel={true} />
-          <BottomNavigationAction className={classes.bottomNaviAction} label={t('Drawer.Language')} icon={<LanguageIcon />} onClick={() => props.setLanguageDialogOpen(true)}
-            showLabel={true} />
-        </BottomNavigation>
-      </Router>
+              <div className={classes.toolbar}>
+                <IconButton onClick={handleDrawerClose}>
+                  {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+                </IconButton>
+              </div>
+              <Divider />
+              <List>
+                <ListItem button component={Link} to="/"  >
+                  <ListItemIcon>
+                    <DeviceHubIcon />
+                  </ListItemIcon>
+                  <ListItemText primary={t('Drawer.Devices')} />
+                </ListItem>
+                <ListItem button component={Link} to="/login"  >
+                  <ListItemIcon>
+                    <DeviceHubIcon />
+                  </ListItemIcon>
+                  <ListItemText primary={t('Drawer.Devices')} />
+                </ListItem>
+                <ListItem button component={Link} to="/settings" >
+                  <ListItemIcon>
+                    <SettingsIcon />
+                  </ListItemIcon>
+                  <ListItemText primary={t('Drawer.Settings')} />
+                </ListItem>
+                <Divider />
+                <ListItem button onClick={() => props.setLanguageDialogOpen(true)}>
+                  <ListItemIcon>
+                    <LanguageIcon />
+                  </ListItemIcon>
+                  <ListItemText primary={t('Drawer.Language')} />
+                </ListItem>
+              </List>
+            </Drawer>
+            <main className={classes.content}>
+              <div className={classes.toolbar} />
+              <DrawerRoutes />
+            </main>
+            <BottomNavigation
+              showLabels={false}
+              className={classes.bottomNavi}
+            >
+              <BottomNavigationAction className={classes.bottomNaviAction} label={t('Drawer.Devices')} icon={<DeviceHubIcon />} component={Link} to="/" value="/" showLabel={true} />
+              <BottomNavigationAction className={classes.bottomNaviAction} label={t('Drawer.Settings')} icon={<ViewArrayIcon />} component={Link} to="/settings" value="/settings" showLabel={true} />
+              <BottomNavigationAction className={classes.bottomNaviAction} label={t('Drawer.Language')} icon={<LanguageIcon />} onClick={() => props.setLanguageDialogOpen(true)}
+                showLabel={true} />
+            </BottomNavigation>
+          </React.Fragment>
+        } />
+      </Switch>
     </div>
   );
 }
 
 const mapStateToProps = (state) => {
   return {
-
+    hardwareUsage: state.HardwareUsageReducer
   }
 }
 
 const mapDispatchToProps = {
-  setLanguageDialogOpen
+  setLanguageDialogOpen,
+  setHardwareUsage
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(MiniDrawer);
