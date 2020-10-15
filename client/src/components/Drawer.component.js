@@ -17,7 +17,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import LanguageIcon from "@material-ui/icons/Language";
 import ViewArrayIcon from "@material-ui/icons/ViewArray";
-import { BrowserRouter as Router, Link, Route, Switch } from "react-router-dom";
+import { Link, Route, Switch, useHistory } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import BottomNavigation from '@material-ui/core/BottomNavigation';
 import BottomNavigationAction from '@material-ui/core/BottomNavigationAction';
@@ -38,6 +38,12 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import Box from '@material-ui/core/Box';
 import LoginPage from './LoginPage.component';
 import { setHardwareUsage } from '../actions/HardwareUsage.action';
+import worker from 'workerize-loader!../workers/hwinfo.worker'; //eslint-disable-line import/no-webpack-loader-syntax
+import PrivateRoute from '../routes/protected.routes';
+import AuthService from "../services/auth.service";
+import { setAuthenticated } from '../actions/Authentication.action';
+import { setCreateAccountDialogOpen } from '../actions/CreateAccountDialog.action';
+import { isAdmin } from '../services/isAuthenticated.service';
 
 const drawerWidth = 240;
 
@@ -168,10 +174,41 @@ function MiniDrawer(props) {
   const { t } = useTranslation();
   const matches = useMediaQuery(`${theme.breakpoints.down('sm')} and (orientation: portrait)`)
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const [interval, setInt] = React.useState(null)
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
+  const { setHardwareUsage, authenticated, setAuthenticated } = props;
+  let history = useHistory();
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+  const instance = worker()
+
+  instance.addEventListener("message", message => {
+    const { data } = message;
+    if (data.cpuUsage !== undefined) {
+      setHardwareUsage(message.data.cpuUsage, message.data.cpuTemperature, message.data.ramUsage, message.data.diskUsage)
+    }
+  });
+
+  useEffect(() => {
+    if (authenticated === false) {
+      clearInterval(interval)
+    }
+    else {
+      instance.postMessage(JSON.parse(localStorage.getItem("user")).accessToken);
+      setInt(setInterval(() => {
+        instance.postMessage(JSON.parse(localStorage.getItem("user")).accessToken);
+      }, 10000));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authenticated])
+
+  const signout = () => {
+    setAuthenticated(false)
+    AuthService.logout()
+    handleMenuClose()
+    history.push('/login')
+  }
 
   useEffect(() => {
     if (matches) {
@@ -204,6 +241,7 @@ function MiniDrawer(props) {
     setMobileMoreAnchorEl(event.currentTarget);
   };
 
+
   const menuId = 'primary-search-account-menu';
   const renderMenu = (
     <Menu
@@ -216,11 +254,19 @@ function MiniDrawer(props) {
       onClose={handleMenuClose}
     >
       <MenuItem component={Link}
-        to="/account"
+        to="/myaccount"
         onClick={handleMenuClose}>{t('AccountMenu.MyAccount')}</MenuItem>
-      <MenuItem component={Link}
-        to="/account"
-        onClick={handleMenuClose}>{t('AccountMenu.Logout')}</MenuItem>
+      <MenuItem onClick={() => signout()}>{t('AccountMenu.Logout')}</MenuItem>
+      {isAdmin() ?
+        <div>
+          <Divider />
+          <MenuItem component={Link}
+          onClick={handleMenuClose}
+          to="/useraccounts">{t('AccountMenu.UserAccounts')}</MenuItem>
+        </div>
+        : null
+      }
+
     </Menu >
   );
 
@@ -279,7 +325,6 @@ function MiniDrawer(props) {
         </IconButton>
         <p>{t('AccountMenu.Profile')}</p>
       </MenuItem>
-
     </Menu>
   );
 
@@ -317,7 +362,6 @@ function MiniDrawer(props) {
       },
       usageColor: {
         color: getColorForPercentage(props.value / 100),
-        animationDuration: '550ms',
         position: 'absolute',
         left: 0,
       },
@@ -354,12 +398,11 @@ function MiniDrawer(props) {
     );
   }
 
-
   return (
     <div className={classes.root}>
       <Switch>
         <Route path="/login" render={() => <LoginPage />} />
-        <Route path="/" render={() =>
+        <PrivateRoute path="/">
           <React.Fragment>
             <CssBaseline />
             <AppBar
@@ -383,7 +426,7 @@ function MiniDrawer(props) {
                 </IconButton>
                 <Typography variant="h6" noWrap className={classes.title}>
                   Sidiro IoT
-          </Typography>
+                </Typography>
                 <div className={classes.sectionDesktop}>
                   <Typography variant="body1">CPU</Typography>
                   <CircularProgressWithLabel value={props.hardwareUsage.cpuUsage} unit="%" />
@@ -446,12 +489,6 @@ function MiniDrawer(props) {
                   </ListItemIcon>
                   <ListItemText primary={t('Drawer.Devices')} />
                 </ListItem>
-                <ListItem button component={Link} to="/login"  >
-                  <ListItemIcon>
-                    <DeviceHubIcon />
-                  </ListItemIcon>
-                  <ListItemText primary={t('Drawer.Devices')} />
-                </ListItem>
                 <ListItem button component={Link} to="/settings" >
                   <ListItemIcon>
                     <SettingsIcon />
@@ -481,7 +518,7 @@ function MiniDrawer(props) {
                 showLabel={true} />
             </BottomNavigation>
           </React.Fragment>
-        } />
+        </PrivateRoute>
       </Switch>
     </div>
   );
@@ -489,13 +526,16 @@ function MiniDrawer(props) {
 
 const mapStateToProps = (state) => {
   return {
-    hardwareUsage: state.HardwareUsageReducer
+    hardwareUsage: state.HardwareUsageReducer,
+    authenticated: state.AuthenticationReducer.authed
   }
 }
 
 const mapDispatchToProps = {
   setLanguageDialogOpen,
-  setHardwareUsage
+  setHardwareUsage,
+  setAuthenticated,
+  setCreateAccountDialogOpen
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(MiniDrawer);

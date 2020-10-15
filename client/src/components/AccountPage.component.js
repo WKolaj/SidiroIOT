@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
@@ -9,6 +9,8 @@ import Chip from '@material-ui/core/Chip';
 import { connect } from 'react-redux';
 import { setAccountFormCurrentPassword, setAccountFormNewPassword } from '../actions/AccountPage.action';
 import { useTranslation } from 'react-i18next';
+import UserService from '../services/user.service';
+import { setSnackbarText, setSnackbarShown } from '../actions/Snackbar.action';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -26,9 +28,20 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-function AccountPage({ currentPassword, newPassword, setAccountFormCurrentPassword, setAccountFormNewPassword }) {
+function AccountPage({ currentPassword, newPassword, setAccountFormCurrentPassword, setAccountFormNewPassword, setSnackbarText, setSnackbarShown }) {
   const classes = useStyles();
   const { t } = useTranslation();
+  const [accountDetails, setAccountDetails] = useState({})
+
+  const getMyAccountDetails = useCallback(() => {
+    UserService.getMyAccountDetails().then(res => {
+      setAccountDetails(res)
+    })
+  }, [])
+
+  useEffect(() => {
+    getMyAccountDetails()
+  }, [getMyAccountDetails])
 
   const verify = (textfield) => {
     const lengthErrorText = t('AccountPage.PasswordHelperError8characters');
@@ -62,9 +75,19 @@ function AccountPage({ currentPassword, newPassword, setAccountFormCurrentPasswo
   }
 
   const changePassword = () => {
-    //reset fields after submit
-    setAccountFormCurrentPassword('')
-    setAccountFormNewPassword('')
+    UserService.editMyPassword(accountDetails.name, accountDetails.permissions, currentPassword, newPassword).then(res => {
+      if (res._id) {
+        //reset fields after submit
+        setAccountFormCurrentPassword('')
+        setAccountFormNewPassword('')
+        setSnackbarText(t('Snackbar.SuccessfulPasswordChange'), 'success')
+        setSnackbarShown(true)
+      }
+      else {
+        setSnackbarText(t('Snackbar.UnsuccessfulPasswordChange'), 'error')
+        setSnackbarShown(true)
+      }
+    })
   }
 
   return (
@@ -85,12 +108,9 @@ function AccountPage({ currentPassword, newPassword, setAccountFormCurrentPasswo
           alignContent="center"
           item xs={12}>
           <Grid item xs={12} sm={12} md={6} lg={4} xl={3}>
-            {/* {props.userAccount.permissions & 1 === 1 ? <Chip avatar={<Avatar>U</Avatar>} label="User" /> : null}
-            {props.userAccount.permissions & 3 === 3 ? <Chip color="primary" avatar={<Avatar>A</Avatar>} label="Admin" /> : null}
-            {props.userAccount.permissions & 7 === 7 ? <Chip color="secondary" avatar={<Avatar>S</Avatar>} label="SuperAdmin" /> : null} */}
-            <Chip avatar={<Avatar>U</Avatar>} label="User" />
-            <Chip color="primary" avatar={<Avatar>A</Avatar>} label="Admin" />
-            <Chip color="secondary" avatar={<Avatar>S</Avatar>} label="SuperAdmin" />
+            {accountDetails.permissions >= 1 ? <Chip avatar={<Avatar>U</Avatar>} label="User" /> : null}
+            {accountDetails.permissions >= 3 ? <Chip color="primary" avatar={<Avatar>A</Avatar>} label="Admin" /> : null}
+            {accountDetails.permissions === 7 ? <Chip color="secondary" avatar={<Avatar>S</Avatar>} label="SuperAdmin" /> : null}
           </Grid>
         </Grid>
         <Grid container
@@ -100,10 +120,26 @@ function AccountPage({ currentPassword, newPassword, setAccountFormCurrentPasswo
           item xs={12}>
           <Grid item xs={12} sm={12} md={6} lg={4} xl={3}>
             <form className={classes.form} noValidate autoComplete="off">
-              <TextField fullWidth disabled label="ID" defaultValue="12345" />
-              <TextField fullWidth disabled label={t('AccountPage.NameTextField')} autoComplete="username" defaultValue="qwerty" />
-              <TextField type="password" autoComplete="current-password" value={currentPassword} onChange={(e) => setAccountFormCurrentPassword(e.target.value)} fullWidth label={t('AccountPage.CurrentPasswordTextField')} helperText={verify('currentPassword').text} error={verify('currentPassword').error} />
-              <TextField type="password" autoComplete="new-password" value={newPassword} onChange={(e) => setAccountFormNewPassword(e.target.value)} fullWidth label={t('AccountPage.NewPasswordTextField')} helperText={verify('newPassword').text} error={verify('newPassword').error} />
+              {accountDetails._id ? <TextField fullWidth disabled label="ID" defaultValue={accountDetails._id} /> : null}
+              {accountDetails.name ? <TextField fullWidth disabled label={t('AccountPage.NameTextField')} autoComplete="username" defaultValue={accountDetails.name} /> : null}
+              <TextField
+                type="password"
+                autoComplete="current-password"
+                value={currentPassword}
+                onChange={(e) => setAccountFormCurrentPassword(e.target.value)}
+                fullWidth
+                label={t('AccountPage.CurrentPasswordTextField')}
+                helperText={verify('currentPassword').text}
+                error={verify('currentPassword').error} />
+              <TextField
+                type="password"
+                autoComplete="new-password"
+                value={newPassword}
+                onChange={(e) => setAccountFormNewPassword(e.target.value)}
+                fullWidth
+                label={t('AccountPage.NewPasswordTextField')}
+                helperText={verify('newPassword').text}
+                error={verify('newPassword').error} />
             </form>
           </Grid>
         </Grid>
@@ -125,7 +161,9 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = {
   setAccountFormCurrentPassword,
-  setAccountFormNewPassword
+  setAccountFormNewPassword,
+  setSnackbarText,
+  setSnackbarShown
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(AccountPage);

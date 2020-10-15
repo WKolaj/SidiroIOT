@@ -16,11 +16,11 @@ export default function Settings() {
         <Grid item xs={12}>
           <Dropzone />
         </Grid>
-        <Grid item xs={12} sm={6} md={4} lg={2}>
-          <Button fullWidth variant="outlined" color="primary">{t('SettingsPage.LoadButton')}</Button>
+        <Grid item xs={6} sm={6} md={4} lg={2}>
+          <Button fullWidth variant="contained" color="primary">{t('SettingsPage.LoadButton')}</Button>
         </Grid>
-        <Grid item xs={12} sm={6} md={4} lg={2}>
-          <Button fullWidth variant="outlined" color="secondary">{t('SettingsPage.SaveButton')}</Button>
+        <Grid item xs={6} sm={6} md={4} lg={2}>
+          <Button fullWidth variant="contained" color="secondary">{t('SettingsPage.SaveButton')}</Button>
         </Grid>
       </Grid>
     </React.Fragment>

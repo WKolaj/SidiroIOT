@@ -1,9 +1,10 @@
-import { SET_FORM_USERNAME, SET_FORM_PASSWORD } from '../actions/LoginPage.action';
+import { SET_FORM_USERNAME, SET_FORM_PASSWORD, SET_FORM_USERNAME_ERROR, SET_FORM_PASSWORD_ERROR } from '../actions/LoginPage.action';
 
 const initialState = {
   username: '',
-  password: ''
-
+  usernameError: false,
+  password: '',
+  passwordError: false
 }
 
 export const LoginPageReducer = (state = initialState, action) => {
@@ -17,6 +18,16 @@ export const LoginPageReducer = (state = initialState, action) => {
       return {
         ...state,
         password: action.password
+      }
+    case SET_FORM_USERNAME_ERROR:
+      return {
+        ...state,
+        usernameError: action.error
+      }
+    case SET_FORM_PASSWORD_ERROR:
+      return {
+        ...state,
+        passwordError: action.error
       }
     default:
       return state

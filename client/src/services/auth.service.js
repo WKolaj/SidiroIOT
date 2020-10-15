@@ -1,27 +1,27 @@
-const API_URL = process.env.NODE_ENV === "production" ? "/api/auth/" : "http://localhost:5003/api/auth/";
+const API_URL = "/api/auth/";
 
 class AuthService {
   async login(username, password) {
     const response = await fetch(API_URL, {
       method: 'POST',
-      body: JSON.stringify({ user: username, password: password })
-    });
-    if (response.json().data.accessToken) {
-      localStorage.setItem("user", JSON.stringify(response.json()))
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ name: username, password: password })
+    })
+
+    if (response.status === 200) {
+      const userData = await response.json()
+      if (response.headers.get('x-auth-token')) {
+        localStorage.setItem("user", JSON.stringify({ ...userData, accessToken: response.headers.get('x-auth-token') }))
+      }
+      return userData;
     }
-    return response.json().data;
+    throw new Error(response.status)
   }
 
   logout() {
     localStorage.removeItem("user");
-  }
-
-  async register(username, password) {
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      body: JSON.stringify({ user: username, password: password })
-    })
-    return response.json().data;
   }
 
   getCurrentUser() {

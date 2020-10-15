@@ -1,4 +1,4 @@
-import { isAuthenticated } from '../services/isAuthenticated.service';
+import { isAdmin } from '../services/isAuthenticated.service';
 import React from "react";
 import {
   Route,
@@ -8,17 +8,12 @@ import { setAuthenticated } from '../actions/Authentication.action';
 import { connect } from 'react-redux';
 
 
-function PrivateRoute({ children, authenticated, setAuthenticated, ...rest }) {
-  React.useEffect(() => {
-    if (isAuthenticated()) {
-      setAuthenticated(true)
-    }
-  }, [authenticated, setAuthenticated])
+function AdminRoute({ children, authenticated, setAuthenticated, ...rest }) {
   return (
     <Route
       {...rest}
       render={({ location }) =>
-        isAuthenticated() ? (
+        isAdmin() ? (
           children
         ) : (
             <Redirect
@@ -43,4 +38,4 @@ const mapDispatchToProps = {
   setAuthenticated
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(PrivateRoute);
+export default connect(mapStateToProps, mapDispatchToProps)(AdminRoute);

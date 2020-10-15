@@ -1,22 +1,126 @@
-import authHeader from './authHeader.service';
-
-const API_URL = process.env.NODE_ENV === "production" ? '/api/' : "http://localhost:5003/api/";
+const API_URL = '/api/user';
 
 class UserService {
-  getPublicContent() {
-    //return axios.get(API_URL + 'all');
+  async getMyAccountDetails() {
+    const response = await fetch(`${API_URL}/me`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-auth-token': JSON.parse(localStorage.getItem("user")).accessToken
+      },
+    })
+    if (response.status === 200) {
+      const userData = await response.json()
+      return userData;
+    }
+    else {
+      const err = await response.text()
+      return err
+    }
   }
 
-  getS4Data() {
-    //return axios.get(API_URL + 'users4', { headers: authHeader() });
+  async getAllAccounts() {
+    const response = await fetch(`${API_URL}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-auth-token': JSON.parse(localStorage.getItem("user")).accessToken
+      },
+    })
+    if (response.status === 200) {
+      const userData = await response.json()
+      return userData;
+    }
+    else {
+      const err = await response.text()
+      return err
+    }
   }
 
-  getS8Data() {
-    //return axios.get(API_URL + 'users8', { headers: authHeader() });
+  async deleteAccount(id) {
+    const response = await fetch(`${API_URL}/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-auth-token': JSON.parse(localStorage.getItem("user")).accessToken
+      },
+    })
+    if (response.status === 200) {
+      const userData = await response.json()
+      return userData;
+    }
+    else {
+      const err = await response.text()
+      return err
+    }
   }
 
-  getAdminBoard() {
-    //return axios.get(API_URL + 'admin', { headers: authHeader() });
+  async editAccount(id, name, permissions, newPassword = false) {
+    let body = {
+      name: name,
+      permissions: permissions
+    };
+    let bodyWithPasswords;
+    if (newPassword) {
+      bodyWithPasswords = {
+        ...body,
+        password: newPassword,
+      }
+    }
+    const response = await fetch(`${API_URL}/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-auth-token': JSON.parse(localStorage.getItem("user")).accessToken
+      },
+      body: JSON.stringify(newPassword ? bodyWithPasswords : body)
+    })
+    if (response.status === 200) {
+      const userData = await response.json()
+      return userData;
+    }
+    else {
+      const err = await response.text()
+      return err
+    }
+  }
+
+  async editMyPassword(name, permissions, oldPassword, newPassword) {
+    const response = await fetch(`${API_URL}/me`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-auth-token': JSON.parse(localStorage.getItem("user")).accessToken
+      },
+      body: JSON.stringify({ name: name, permissions: permissions, oldPassword: oldPassword, password: newPassword })
+    })
+    if (response.status === 200) {
+      const userData = await response.json()
+      return userData;
+    }
+    else {
+      const err = await response.text()
+      return err
+    }
+  }
+
+  async register(username, password, permissions) {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-auth-token': JSON.parse(localStorage.getItem("user")).accessToken
+      },
+      body: JSON.stringify({ name: username, permissions: permissions, password: password })
+    })
+    if (response.status === 200) {
+      const userData = await response.json()
+      return userData;
+    }
+    else {
+      const err = await response.text()
+      return err
+    }
   }
 }
 

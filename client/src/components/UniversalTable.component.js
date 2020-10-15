@@ -88,13 +88,13 @@ const useStyles2 = makeStyles({
   },
 });
 
-export default function CustomPaginationActionsTable(props) {
+export default function CustomPaginationActionsTable({ rows, columns }) {
   const classes = useStyles2();
   const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(props.rows.length < 5 ? props.rows.length : 5);
+  const [rowsPerPage, setRowsPerPage] = React.useState(rows.length < 5 ? rows.length : 5);
   const { t } = useTranslation()
 
-  const emptyRows = rowsPerPage - Math.min(rowsPerPage, props.rows.length - page * rowsPerPage);
+  const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -105,20 +105,30 @@ export default function CustomPaginationActionsTable(props) {
     setPage(0);
   };
 
+  React.useEffect(() => {
+    if (rows.length < 5) {
+      setRowsPerPage(rows.length)
+    }
+    else {
+      setRowsPerPage(5)
+    }
+
+  }, [rows])
+
   return (
     <TableContainer component={Paper} >
       <Table className={classes.table} aria-label="params table">
         <TableHead>
           <TableRow>
-            {props.columns.map((column, colIndex) => {
+            {columns.map((column, colIndex) => {
               return <TableCell key={`column-${colIndex}`}>{column}</TableCell>
             })}
           </TableRow>
         </TableHead>
         <TableBody>
           {(rowsPerPage > 0
-            ? props.rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-            : props.rows
+            ? rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+            : rows
           ).map((row, rowIndex) => (
             <TableRow key={`row-${rowIndex}`}>
               {row.map((cell, cellIndex) => {
@@ -134,14 +144,15 @@ export default function CustomPaginationActionsTable(props) {
             </TableRow>
           )}
         </TableBody>
+
         <TableFooter>
           <TableRow>
             <TablePagination
-            labelDisplayedRows={({from, to, count})=>`${from}-${to} ${t('UniversalTable.Of')} ${count}`}
+              labelDisplayedRows={({ from, to, count }) => `${from}-${to} ${t('UniversalTable.Of')} ${count}`}
               labelRowsPerPage={t('UniversalTable.RowsPerPage')}
-              rowsPerPageOptions={[props.rows.length < 5 ? props.rows.length : 5, 10, 25]}
-              colSpan={props.columns.length}
-              count={props.rows.length}
+              rowsPerPageOptions={[rows.length < 5 ? rows.length : 5, 10, 25]}
+              colSpan={columns.length}
+              count={rows.length}
               rowsPerPage={rowsPerPage}
               page={page}
               SelectProps={{

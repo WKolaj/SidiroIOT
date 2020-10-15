@@ -1,10 +1,10 @@
 import { SET_HARDWARE_USAGE } from '../actions/HardwareUsage.action';
 
 const initialState = {
-  cpuUsage: 10,
-  cpuTemperature: 30,
-  ramUsage: 50,
-  diskUsage: 70
+  cpuUsage: 0,
+  cpuTemperature: 0,
+  ramUsage: 0,
+  diskUsage: 0
 }
 
 export const HardwareUsageReducer = (state = initialState, action) => {

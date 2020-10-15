@@ -11,8 +11,10 @@ import Zoom from '@material-ui/core/Zoom';
 import { connect } from 'react-redux';
 import { setLanguageDialogOpen } from '../actions/LanguageDialog.action';
 import { setFormUsername, setFormPassword } from '../actions/LoginPage.action';
-import { Link } from "react-router-dom";
 import useMediaQuery from '@material-ui/core/useMediaQuery';
+import AuthService from "../services/auth.service";
+import { useHistory } from "react-router-dom";
+import { setFormUsernameError, setFormPasswordError } from '../actions/LoginPage.action';
 
 const useStyles = makeStyles((theme) => ({
   contentDesktop: {
@@ -47,14 +49,30 @@ function LoginPage(props) {
   const { t } = useTranslation()
   const theme = useTheme();
   const matches = useMediaQuery(`${theme.breakpoints.down('sm')} and (orientation: landscape)`)
+  let history = useHistory();
+
+  const tryLogin = () => {
+    AuthService.login(props.login, props.password).then(() => {
+      history.push("/");
+    }).catch(() => {
+      props.setFormUsernameError(true)
+      props.setFormPasswordError(true)
+    })
+  }
 
   const handleKeyDown = (event) => {
-    if (event.key === 'Enter') {
-      console.log('do validate')
+    if (event.key === 'Enter' && props.login.length >= 3 && props.password.length >= 8) {
+      tryLogin()
     }
   }
 
+  const buttonLogin = () => {
+    tryLogin()
+  }
+
   const controlFormFields = (field, value) => {
+    props.setFormUsernameError(false)
+    props.setFormPasswordError(false)
     if (field === 'username') {
       props.setFormUsername(value)
     }
@@ -99,18 +117,17 @@ function LoginPage(props) {
         <Grid item xs={12} sm={8} md={6} lg={4} xl={3}>
           <form noValidate autoComplete="off" className={classes.form}>
             <TextField
+              error={props.loginError}
               value={props.login}
               onChange={(e) => controlFormFields('username', e.target.value)}
-              id="login" label={t('LoginPage.FormLoginTextField')} fullWidth variant="standard" autoComplete="username" onKeyDown={handleKeyDown} helperText={t('LoginPage.FormLoginTextFieldHelperText')} />
+              id="login" label={t('LoginPage.FormLoginTextField')} fullWidth variant="standard" autoComplete="username" onKeyDown={handleKeyDown} helperText={props.loginError ? t('LoginPage.InvalidLoginPassword') : t('LoginPage.FormLoginTextFieldHelperText')} />
             <TextField
+              error={props.passwordError}
               value={props.password}
               onChange={(e) => controlFormFields('password', e.target.value)}
-              id="password" type="password" label={t('LoginPage.FormPasswordTextField')} fullWidth variant="standard" autoComplete="password" onKeyDown={handleKeyDown} helperText={t('LoginPage.FormPasswordTextFieldHelperText')} />
+              id="password" type="password" label={t('LoginPage.FormPasswordTextField')} fullWidth variant="standard" autoComplete="password" onKeyDown={handleKeyDown} helperText={props.loginError ? t('LoginPage.InvalidLoginPassword') : t('LoginPage.FormPasswordTextFieldHelperText')} />
           </form>
-          <Button onClick={handleKeyDown} className={classes.loginButton} color="secondary" variant="contained" fullWidth disabled={props.login.length < 3 || props.password.length < 8}>{t('LoginPage.LoginButton')}</Button>
-        </Grid>
-        <Grid item xs={12}>
-          <Link to='/settings'><Button>testback</Button></Link>
+          <Button onClick={() => buttonLogin()} className={classes.loginButton} color="secondary" variant="contained" fullWidth disabled={props.login.length < 3 || props.password.length < 8}>{t('LoginPage.LoginButton')}</Button>
         </Grid>
       </Grid>
     </React.Fragment>
@@ -120,14 +137,18 @@ function LoginPage(props) {
 const mapStateToProps = (state) => {
   return {
     login: state.LoginPageReducer.username,
-    password: state.LoginPageReducer.password
+    loginError: state.LoginPageReducer.usernameError,
+    password: state.LoginPageReducer.password,
+    passwordError: state.LoginPageReducer.passwordError
   }
 }
 
 const mapDispatchToProps = {
   setLanguageDialogOpen,
   setFormPassword,
-  setFormUsername
+  setFormUsername,
+  setFormUsernameError,
+  setFormPasswordError
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(LoginPage);

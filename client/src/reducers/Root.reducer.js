@@ -5,6 +5,11 @@ import { DevicesListReducer } from './DevicesList.reducer';
 import { LoginPageReducer } from './LoginPage.reducer';
 import { AccountPageReducer } from './AccountPage.reducer';
 import { HardwareUsageReducer } from './HardwareUsage.reducer';
+import { AuthenticationReducer } from './Authentication.reducer';
+import { CreateAccountDialog } from './CreateAccountDialog.reducer';
+import { UserAccountsPageReducer } from './UserAccountsPage.reducer';
+import { SnackbarReducer } from './Snackbar.reducer';
+import { ConfirmDeleteUserDialogReducer } from './ConfirmDeleteUserDialog.reducer';
 
 export default combineReducers({
   LanguageDialogReducer,
@@ -12,5 +17,10 @@ export default combineReducers({
   DevicesListReducer,
   LoginPageReducer,
   AccountPageReducer,
-  HardwareUsageReducer
+  HardwareUsageReducer,
+  AuthenticationReducer,
+  CreateAccountDialog,
+  UserAccountsPageReducer,
+  SnackbarReducer,
+  ConfirmDeleteUserDialogReducer
 })

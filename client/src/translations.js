@@ -15,7 +15,11 @@ export const resources = {
         "DatapointsTab": "Data points",
         "EdgecomputingTab": "Edge computing",
         "EventsTab": "Events",
-        "DevicesTitle": "Devices"
+        "DevicesTitle": "Devices",
+        "StatusConnected": "Connected",
+        "Status": "Status",
+        "Connect": "Connect",
+        "Disconnect": "Disconnect"
       },
       "UniversalTable": {
         "RowsPerPage": "Rows per page",
@@ -33,12 +37,14 @@ export const resources = {
         "FormLoginTextField": "Login",
         "FormPasswordTextField": "Password",
         "FormLoginTextFieldHelperText": "At least 3 characters",
-        "FormPasswordTextFieldHelperText": "At least 8 characters"
+        "FormPasswordTextFieldHelperText": "At least 8 characters",
+        "InvalidLoginPassword": "Invalid login/password combination"
       },
       "AccountMenu": {
         "MyAccount": "My Account",
         "Logout": "Sign out",
-        "Profile": "Profile"
+        "Profile": "Profile",
+        "UserAccounts": "User accounts"
       },
       "AccountPage": {
         "Title": "Account settings",
@@ -48,6 +54,30 @@ export const resources = {
         "ChangePasswordButton": "Change password",
         "PasswordHelperError8characters": "Password must consist of at least 8 characters",
         "PasswordHelperErrorSamePasswords": "Current password and new password can't be the same"
+      },
+      "CreateAccountDialog": {
+        "TitleCreate": "Create new account",
+        "TitleEdit": "Edit account",
+        "Cancel": "Cancel",
+        "Create": "Create",
+        "Update": "Update",
+        "NameTextField": "Name",
+        "PasswordTextField": "Password",
+        "NewPasswordTextField": "New password",
+        "PermissionsSelect": "Permissions",
+        "HelperTextName": "At least 3 characters",
+        "HelperTextPassword": "At least 8 characters"
+      },
+      "UserAccountsPage": {
+        "CreateUser": "Create user"
+      },
+      "Snackbar": {
+        "SuccessfulUserCreation": "User created successfully",
+        "SuccessfulUserDeletion": "User deleted successfully",
+        "SuccessfulUserEdit": "User edited successfully",
+        "SuccessfulPasswordChange": "Password changed successfully",
+        "UnsuccessfulPasswordChange": "Current password is invalid",
+        "UnsuccessfulUserEdit": "User editing failed"
       }
     }
   },
@@ -67,7 +97,11 @@ export const resources = {
         "DatapointsTab": "Data pointy",
         "EdgecomputingTab": "Edge computing",
         "EventsTab": "Zdarzenia",
-        "DevicesTitle": "Urządzenia"
+        "DevicesTitle": "Urządzenia",
+        "StatusConnected": "Połączony",
+        "Status": "Stan",
+        "Connect": "Połącz",
+        "Disconnect": "Rozłącz"
       },
       "UniversalTable": {
         "RowsPerPage": "Wierszy na stronę",
@@ -85,12 +119,14 @@ export const resources = {
         "FormLoginTextField": "Login",
         "FormPasswordTextField": "Hasło",
         "FormLoginTextFieldHelperText": "Co najmniej 3 znaki",
-        "FormPasswordTextFieldHelperText": "Co najmniej 8 znaków"
+        "FormPasswordTextFieldHelperText": "Co najmniej 8 znaków",
+        "InvalidLoginPassword": "Nieprawidłowa nazwa lub hasło"
       },
       "AccountMenu": {
         "MyAccount": "Moje konto",
         "Logout": "Wyloguj",
-        "Profile": "Profil"
+        "Profile": "Profil",
+        "UserAccounts": "Konta użytkowników"
       },
       "AccountPage": {
         "Title": "Ustawienia konta",
@@ -100,6 +136,30 @@ export const resources = {
         "ChangePasswordButton": "Zmień hasło",
         "PasswordHelperError8characters": "Hasło musi się składać z co najmniej 8 znaków",
         "PasswordHelperErrorSamePasswords": "Nowe hasło nie może być takie same jak aktualne"
+      },
+      "CreateAccountDialog": {
+        "TitleCreate": "Utwórz nowe konto",
+        "TitleEdit": "Edytuj konto",
+        "Cancel": "Anuluj",
+        "Create": "Utwórz",
+        "Update": "Aktualizuj",
+        "NameTextField": "Nazwa",
+        "PasswordTextField": "Hasło",
+        "NewPasswordTextField": "Nowe hasło",
+        "PermissionsSelect": "Uprawnienia",
+        "HelperTextName": "Co najmniej 3 znaki",
+        "HelperTextPassword": "Co najmniej 8 znaków"
+      },
+      "UserAccountsPage": {
+        "CreateUser": "Utwórz użytkownika"
+      },
+      "Snackbar": {
+        "SuccessfulUserCreation": "Użytkownik pomyślnie utworzony",
+        "SuccessfulUserDeletion": "Użytkownik pomyślnie usunięty",
+        "SuccessfulUserEdit": "Edytowano pomyślnie",
+        "SuccessfulPasswordChange": "Zmieniono hasło pomyślnie",
+        "UnsuccessfulPasswordChange": "Aktualne hasło jest nieprawidłowe",
+        "UnsuccessfulUserEdit": "Nie powiodła się edycja użytkownika"
       }
     }
   }

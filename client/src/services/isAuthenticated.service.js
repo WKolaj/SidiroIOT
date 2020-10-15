@@ -1,25 +1,17 @@
 import AuthService from "../services/auth.service";
-import UserService from "../services/user.service";
 
-export const isAuthenticated = (role) => {
-  console.log(role)
-  if (AuthService.getCurrentUser() === null || AuthService.getCurrentUser().roles.indexOf(role) === -1) {
+export const isAuthenticated = () => {
+  const user = AuthService.getCurrentUser();
+  if (user === null || user._id === undefined || user.name === undefined || user.permissions === undefined || user.accessToken === undefined) {
     return false
   }
-  else {
-    if (role === 'ROLE_USERS4') {
-      UserService.getS4Data().catch(err => {
-        return false
-      })
-    }
-    else if (role === 'ROLE_USERS8') {
-      UserService.getS8Data().catch(err => {
-        return false
-      })
-    }
-    else {
-      return false
-    }
-  }
   return true
+}
+
+export const isAdmin = () => {
+  const user = AuthService.getCurrentUser();
+  if(user!==null && user.permissions>=3) {
+    return true
+  }
+  return false
 }

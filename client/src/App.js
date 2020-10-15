@@ -8,6 +8,9 @@ import { createStore } from "redux";
 import rootReducer from "./reducers/Root.reducer";
 import './i18n';
 import LanguageDialog from './components/LanguageSelectionDialog.component';
+import CreateAccountDialog from './components/CreateAccountDialog.component';
+import Snackbar from './components/Snackbar.component';
+import ConfirmDeleteUserDialog from './components/ConfirmDeleteUserDialog.component';
 
 const store = createStore(rootReducer);
 
@@ -35,8 +38,11 @@ function App() {
         <Provider store={store}>
           <Router>
             <Drawer />
+            <CreateAccountDialog/>
           </Router>
           <LanguageDialog/>
+          <Snackbar/>
+          <ConfirmDeleteUserDialog/>
         </Provider>
       </ThemeProvider>
     </React.Fragment>

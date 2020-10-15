@@ -58,13 +58,13 @@ function DevicesSelectionPage(props) {
             </React.Fragment>
           </Grid>
           <Grid item xs={12} sm={6}>
-            <Typography variant="h5">Status: Connected</Typography>
+            <Typography variant="h5">{t('DevicesSelectionPage.Status')}: {t('DevicesSelectionPage.StatusConnected')}</Typography>
           </Grid>
-          <Grid item xs={12} sm={3}>
-            <Button fullWidth variant="contained" color="primary">Connect</Button>
+          <Grid item xs={6} sm={3}>
+            <Button fullWidth variant="contained" color="primary">{t('DevicesSelectionPage.Connect')}</Button>
           </Grid>
-          <Grid item xs={12} sm={3}>
-            <Button fullWidth variant="contained" color="secondary">Disconnect</Button>
+          <Grid item xs={6} sm={3}>
+            <Button fullWidth variant="contained" color="secondary">{t('DevicesSelectionPage.Disconnect')}</Button>
           </Grid>
         </Grid>
       </Grid>
