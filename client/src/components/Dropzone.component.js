@@ -3,6 +3,9 @@ import { useDropzone } from 'react-dropzone';
 import Typography from '@material-ui/core/Typography';
 import { useTranslation } from 'react-i18next';
 import { makeStyles } from '@material-ui/core/styles';
+import FileService from '../services/file.service';
+import { setSnackbarText, setSnackbarShown } from '../actions/Snackbar.action';
+import { connect } from 'react-redux';
 
 const useStyles = makeStyles((theme) => ({
   dropzoneText: {
@@ -10,14 +13,27 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Basic(props) {
+function Dropzone({ setSnackbarText, setSnackbarShown }) {
   const classes = useStyles();
   const { t } = useTranslation();
   const onDrop = useCallback(acceptedFiles => {
-    console.log(acceptedFiles)
     // Do something with the files
-  }, [])
-  const { getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject } = useDropzone({onDrop, accept: 'image/*'});
+    FileService.uploadFile(acceptedFiles[0]).then(res => {
+      if (res === 200) {
+        setSnackbarText(t('Snackbar.SuccessfulFileUpload'), 'success')
+        setSnackbarShown(true)
+      }
+      else if(res === 403) {
+        setSnackbarText(t('Snackbar.UnsuccessfulFileUpload403'), 'error')
+        setSnackbarShown(true)
+      }
+      else if(res === 400) {
+        setSnackbarText(t('Snackbar.UnsuccessfulFileUpload400'), 'error')
+        setSnackbarShown(true)
+      }
+    })
+  }, [setSnackbarShown, setSnackbarText, t])
+  const { getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject } = useDropzone({ onDrop, accept: 'application/JSON' });
 
   const baseStyle = {
     flex: 1,
@@ -33,15 +49,15 @@ export default function Basic(props) {
     outline: 'none',
     transition: 'border .5s ease-in-out'
   };
-  
+
   const activeStyle = {
     borderColor: '#2196f3'
   };
-  
+
   const acceptStyle = {
     borderColor: '#00e676'
   };
-  
+
   const rejectStyle = {
     borderColor: '#ff1744'
   };
@@ -63,7 +79,7 @@ export default function Basic(props) {
 
   return (
     <section className="container">
-      <div {...getRootProps({style})} className="dropzone">
+      <div {...getRootProps({ style })} className="dropzone">
         <input {...getInputProps()} />
         <Typography variant="body1" className={classes.dropzoneText}>{t('SettingsPage.DropzoneText')}</Typography>
 
@@ -71,3 +87,10 @@ export default function Basic(props) {
     </section>
   );
 }
+
+const mapDispatchToProps = {
+  setSnackbarText,
+  setSnackbarShown
+}
+
+export default connect(null, mapDispatchToProps)(Dropzone);

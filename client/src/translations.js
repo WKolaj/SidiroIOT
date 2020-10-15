@@ -77,7 +77,10 @@ export const resources = {
         "SuccessfulUserEdit": "User edited successfully",
         "SuccessfulPasswordChange": "Password changed successfully",
         "UnsuccessfulPasswordChange": "Current password is invalid",
-        "UnsuccessfulUserEdit": "User editing failed"
+        "UnsuccessfulUserEdit": "User editing failed",
+        "SuccessfulFileUpload": "File sent successfully",
+        "UnsuccessfulFileUpload403": "Only admin type accounts have permission to send configuration file",
+        "UnsuccessfulFileUpload400": "Invalid file contents"
       }
     }
   },
@@ -159,7 +162,10 @@ export const resources = {
         "SuccessfulUserEdit": "Edytowano pomyślnie",
         "SuccessfulPasswordChange": "Zmieniono hasło pomyślnie",
         "UnsuccessfulPasswordChange": "Aktualne hasło jest nieprawidłowe",
-        "UnsuccessfulUserEdit": "Nie powiodła się edycja użytkownika"
+        "UnsuccessfulUserEdit": "Nie powiodła się edycja użytkownika",
+        "SuccessfulFileUpload": "Pomyślnie przesłano plik",
+        "UnsuccessfulFileUpload403": "Tylko konta admina mają uprawnienia do wysyłania pliku konfiguracyjnego",
+        "UnsuccessfulFileUpload400": "Nieprawidłowa zawartość pliku"
       }
     }
   }

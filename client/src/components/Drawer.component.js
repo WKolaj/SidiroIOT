@@ -166,7 +166,7 @@ const useStyles = makeStyles((theme) => ({
     }
   }
 }));
-
+let instance;
 function MiniDrawer(props) {
   const classes = useStyles();
   const theme = useTheme();
@@ -181,14 +181,19 @@ function MiniDrawer(props) {
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
-  const instance = worker()
+  
 
-  instance.addEventListener("message", message => {
-    const { data } = message;
-    if (data.cpuUsage !== undefined) {
-      setHardwareUsage(message.data.cpuUsage, message.data.cpuTemperature, message.data.ramUsage, message.data.diskUsage)
-    }
-  });
+  useEffect(()=>{
+    instance = worker()
+    instance.addEventListener("message", message => {
+      const { data } = message;
+      if (data.cpuUsage !== undefined) {
+        setHardwareUsage(message.data.cpuUsage, message.data.cpuTemperature, message.data.ramUsage, message.data.diskUsage)
+      }
+    });
+  },[setHardwareUsage])
+
+  
 
   useEffect(() => {
     if (authenticated === false) {
