@@ -17,7 +17,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import LanguageIcon from "@material-ui/icons/Language";
 import ViewArrayIcon from "@material-ui/icons/ViewArray";
-import { Link, Route, Switch, useHistory } from "react-router-dom";
+import { Link, Route, Switch, useHistory, useLocation } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import BottomNavigation from '@material-ui/core/BottomNavigation';
 import BottomNavigationAction from '@material-ui/core/BottomNavigationAction';
@@ -134,9 +134,6 @@ const useStyles = makeStyles((theme) => ({
     },
     textAlign: 'center',
   },
-  bottomNaviAction: {
-    color: theme.palette.secondary.main
-  },
   title: {
     flexGrow: 1,
   },
@@ -166,7 +163,9 @@ const useStyles = makeStyles((theme) => ({
     }
   }
 }));
+
 let instance;
+
 function MiniDrawer(props) {
   const classes = useStyles();
   const theme = useTheme();
@@ -176,6 +175,7 @@ function MiniDrawer(props) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [interval, setInt] = React.useState(null)
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
+  const [bottomNaviValue, setBottomNaviValue] = React.useState(0);
   const { setHardwareUsage, authenticated, setAuthenticated } = props;
   let history = useHistory();
 
@@ -193,6 +193,10 @@ function MiniDrawer(props) {
     });
   },[setHardwareUsage])
 
+  let location = useLocation();
+  useEffect(() => {
+    setBottomNaviValue(location.pathname)
+  }, [location]);
   
 
   useEffect(() => {
@@ -246,7 +250,6 @@ function MiniDrawer(props) {
     setMobileMoreAnchorEl(event.currentTarget);
   };
 
-
   const menuId = 'primary-search-account-menu';
   const renderMenu = (
     <Menu
@@ -271,7 +274,6 @@ function MiniDrawer(props) {
         </div>
         : null
       }
-
     </Menu >
   );
 
@@ -488,13 +490,13 @@ function MiniDrawer(props) {
               </div>
               <Divider />
               <List>
-                <ListItem button component={Link} to="/"  >
+                <ListItem button component={Link} to="/" selected={location.pathname==="/"?true:false} >
                   <ListItemIcon>
                     <DeviceHubIcon />
                   </ListItemIcon>
                   <ListItemText primary={t('Drawer.Devices')} />
                 </ListItem>
-                <ListItem button component={Link} to="/settings" >
+                <ListItem button component={Link} to="/settings" selected={location.pathname==="/settings"?true:false} >
                   <ListItemIcon>
                     <SettingsIcon />
                   </ListItemIcon>
@@ -516,11 +518,11 @@ function MiniDrawer(props) {
             <BottomNavigation
               showLabels={false}
               className={classes.bottomNavi}
+              value={bottomNaviValue}
             >
-              <BottomNavigationAction className={classes.bottomNaviAction} label={t('Drawer.Devices')} icon={<DeviceHubIcon />} component={Link} to="/" value="/" showLabel={true} />
-              <BottomNavigationAction className={classes.bottomNaviAction} label={t('Drawer.Settings')} icon={<ViewArrayIcon />} component={Link} to="/settings" value="/settings" showLabel={true} />
-              <BottomNavigationAction className={classes.bottomNaviAction} label={t('Drawer.Language')} icon={<LanguageIcon />} onClick={() => props.setLanguageDialogOpen(true)}
-                showLabel={true} />
+              <BottomNavigationAction value="/" label={t('Drawer.Devices')} icon={<DeviceHubIcon />} component={Link} to="/" />
+              <BottomNavigationAction value="/settings" label={t('Drawer.Settings')} icon={<ViewArrayIcon />} component={Link} to="/settings" />
+              <BottomNavigationAction label={t('Drawer.Language')} icon={<LanguageIcon />} onClick={() => props.setLanguageDialogOpen(true)} />
             </BottomNavigation>
           </React.Fragment>
         </PrivateRoute>
