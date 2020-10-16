@@ -22,7 +22,7 @@ self.addEventListener("message", message => {
       fetchHwInfo(data.token).then(res => {
         self.postMessage(res)
       })
-    }, 1000)
+    }, 10000)
   }
   else if (data.text === 'stop') {
     clearInterval(interval)
