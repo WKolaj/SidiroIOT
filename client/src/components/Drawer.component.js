@@ -173,7 +173,6 @@ function MiniDrawer(props) {
   const { t } = useTranslation();
   const matches = useMediaQuery(`${theme.breakpoints.down('sm')} and (orientation: portrait)`)
   const [anchorEl, setAnchorEl] = React.useState(null);
-  const [interval, setInt] = React.useState(null)
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
   const [bottomNaviValue, setBottomNaviValue] = React.useState(0);
   const { setHardwareUsage, authenticated, setAuthenticated } = props;
@@ -182,7 +181,6 @@ function MiniDrawer(props) {
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
   
-
   useEffect(()=>{
     instance = worker()
     instance.addEventListener("message", message => {
@@ -201,13 +199,10 @@ function MiniDrawer(props) {
 
   useEffect(() => {
     if (authenticated === false) {
-      clearInterval(interval)
+      instance.postMessage({token: null, text: 'stop'})
     }
     else {
-      instance.postMessage(JSON.parse(localStorage.getItem("user")).accessToken);
-      setInt(setInterval(() => {
-        instance.postMessage(JSON.parse(localStorage.getItem("user")).accessToken);
-      }, 10000));
+      instance.postMessage({token: JSON.parse(localStorage.getItem("user")).accessToken, text: 'start'});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authenticated])

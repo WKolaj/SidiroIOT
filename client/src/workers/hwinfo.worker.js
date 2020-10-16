@@ -1,5 +1,5 @@
 async function fetchHwInfo(accessToken) {
-  const hw = await fetch('/api/devInfo',{
+  const hw = await fetch('/api/devInfo', {
     headers: {
       "x-auth-token": accessToken
     }
@@ -8,10 +8,22 @@ async function fetchHwInfo(accessToken) {
   return response;
 }
 
-
+let interval;
 self.addEventListener("message", message => {
   const { data } = message;
-  fetchHwInfo(data).then(res=>{
-    self.postMessage(res)
-  })
+  if (data.text === 'start') {
+    //once instantly
+    fetchHwInfo(data.token).then(res => {
+      self.postMessage(res)
+    })
+    //intervally every x seconds
+    interval = setInterval(() => {
+      fetchHwInfo(data.token).then(res => {
+        self.postMessage(res)
+      })
+    }, 10000)
+  }
+  else if (data.text === 'stop') {
+    clearInterval(interval)
+  }
 });
