@@ -28,7 +28,7 @@ export const CreateAccountDialog = (state = initialState, action) => {
       return {
         ...state,
         open: action.open,
-        type: action.dialogType
+        type: action.dialogType ? action.dialogType : state.type
       }
     case SET_CREATE_ACCOUNT_DIALOG_NAME_TEXTFIELD:
       return {

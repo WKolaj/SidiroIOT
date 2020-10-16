@@ -31,6 +31,10 @@ function Dropzone({ setSnackbarText, setSnackbarShown }) {
         setSnackbarText(t('Snackbar.UnsuccessfulFileUpload400'), 'error')
         setSnackbarShown(true)
       }
+      else {
+        setSnackbarText(t('Snackbar.UnknownError'), 'error')
+        setSnackbarShown(true)
+      }
     })
   }, [setSnackbarShown, setSnackbarText, t])
   const { getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject } = useDropzone({ onDrop, accept: 'application/JSON' });

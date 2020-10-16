@@ -66,10 +66,15 @@ export const resources = {
         "NewPasswordTextField": "New password",
         "PermissionsSelect": "Permissions",
         "HelperTextName": "At least 3 characters",
-        "HelperTextPassword": "At least 8 characters"
+        "HelperTextPassword": "At least 8 characters",
+        "AccountBeingEditedSubtitle": "You are editing an account with ID: "
       },
       "UserAccountsPage": {
-        "CreateUser": "Create user"
+        "CreateUser": "Create user",
+        "IdColumn": "ID",
+        "NameColumn": "Name",
+        "PermissionsColumn": "Permissions",
+        "ActionColumn": "Actions"
       },
       "Snackbar": {
         "SuccessfulUserCreation": "User created successfully",
@@ -80,7 +85,14 @@ export const resources = {
         "UnsuccessfulUserEdit": "User editing failed",
         "SuccessfulFileUpload": "File sent successfully",
         "UnsuccessfulFileUpload403": "Only admin type accounts have permission to send configuration file",
-        "UnsuccessfulFileUpload400": "Invalid file contents"
+        "UnsuccessfulFileUpload400": "Invalid file contents",
+        "UnknownError": "Unknown error occured. Try again."
+      },
+      "ConfirmDeleteUserDialog": {
+        "Title": "Please confirm deletion. The process is irreversible.",
+        "AccountToBeDeleted": "The following account is going to be deleted: ",
+        "Confirm": "Confirm",
+        "Cancel": "Cancel"
       }
     }
   },
@@ -151,10 +163,15 @@ export const resources = {
         "NewPasswordTextField": "Nowe hasło",
         "PermissionsSelect": "Uprawnienia",
         "HelperTextName": "Co najmniej 3 znaki",
-        "HelperTextPassword": "Co najmniej 8 znaków"
+        "HelperTextPassword": "Co najmniej 8 znaków",
+        "AccountBeingEditedSubtitle": "Edytujesz konto o następującym ID: "
       },
       "UserAccountsPage": {
-        "CreateUser": "Utwórz użytkownika"
+        "CreateUser": "Utwórz użytkownika",
+        "IdColumn": "ID",
+        "NameColumn": "Nazwa",
+        "PermissionsColumn": "Uprawnienia",
+        "ActionColumn": "Akcje"
       },
       "Snackbar": {
         "SuccessfulUserCreation": "Użytkownik pomyślnie utworzony",
@@ -165,7 +182,14 @@ export const resources = {
         "UnsuccessfulUserEdit": "Nie powiodła się edycja użytkownika",
         "SuccessfulFileUpload": "Pomyślnie przesłano plik",
         "UnsuccessfulFileUpload403": "Tylko konta admina mają uprawnienia do wysyłania pliku konfiguracyjnego",
-        "UnsuccessfulFileUpload400": "Nieprawidłowa zawartość pliku"
+        "UnsuccessfulFileUpload400": "Nieprawidłowa zawartość pliku",
+        "UnknownError": "Wystąpił nieznany błąd. Spróbuj ponownie."
+      },
+      "ConfirmDeleteUserDialog": {
+        "Title": "Proszę potwierdzić usunięcie. Ten proces jest nieodwracalny.",
+        "AccountToBeDeleted": "Zostanie usunięte następujące konto: ",
+        "Confirm": "Potwierdź",
+        "Cancel": "Anuluj"
       }
     }
   }

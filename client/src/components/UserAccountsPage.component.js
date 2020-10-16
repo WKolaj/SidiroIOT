@@ -36,7 +36,6 @@ function UserAccountsPage({ setUserAccountsList,
 
   const getAllAccounts = useCallback(() => {
     UserService.getAllAccounts().then(res => {
-      console.log(res)
       if(res==='Access forbidden.') {
         console.log(res)
       }
@@ -85,7 +84,7 @@ function UserAccountsPage({ setUserAccountsList,
         {accountsList.length > 0 ?
           <Grid item xs={12}>
             <UniversalTable
-              columns={['_id', 'name', 'permissions', 'action']}
+              columns={[t('UserAccountsPage.IdColumn'), t('UserAccountsPage.NameColumn'), t('UserAccountsPage.PermissionsColumn'), t('UserAccountsPage.ActionColumn')]}
               rows={accountsList.map(acc => [acc._id, acc.name, acc.permissions===1?'User':acc.permissions===3?'Admin':'SuperAdmin', checkPermissions(acc.permissions)?<div>
                 <IconButton onClick={()=>editAcc(acc._id, acc.name, acc.permissions)} className={classes.icons} aria-label="edit">
                   <EditIcon />

@@ -316,7 +316,7 @@ function MiniDrawer(props) {
             <FontAwesomeIcon icon={faHdd} />
           </IconButton>
         </Badge>
-        <p>HDD</p>
+        <p>DISK</p>
       </MenuItem>
       <Divider />
       <MenuItem onClick={handleProfileMenuOpen}>
@@ -439,7 +439,7 @@ function MiniDrawer(props) {
                   <CircularProgressWithLabel value={props.hardwareUsage.cpuTemperature} unit="°C" />
                   <Typography variant="body1">MEM</Typography>
                   <CircularProgressWithLabel value={props.hardwareUsage.ramUsage} unit="%" />
-                  <Typography variant="body1">HDD</Typography>
+                  <Typography variant="body1">DISK</Typography>
                   <CircularProgressWithLabel value={props.hardwareUsage.diskUsage} unit="%" />
                 </div>
                 <IconButton

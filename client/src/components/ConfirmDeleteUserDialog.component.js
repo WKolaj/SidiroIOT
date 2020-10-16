@@ -33,18 +33,18 @@ import { useTranslation } from 'react-i18next';
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title">{"Please confirm deletion"}</DialogTitle>
+        <DialogTitle id="alert-dialog-title">{t('ConfirmDeleteUserDialog.Title')}</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            {`The following account is going to be deleted:`} <strong>{props.accountNameToBeDeleted}</strong>
+          {t('ConfirmDeleteUserDialog.AccountToBeDeleted')}<strong>{props.accountNameToBeDeleted}</strong>
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={()=>deletePerm()} color="secondary">
-            Confirm
+           {t('ConfirmDeleteUserDialog.Confirm')}
           </Button>
           <Button onClick={()=>props.setConfirmDeleteUserDialogOpen(false)} color="primary" autoFocus>
-            Close
+            {t('ConfirmDeleteUserDialog.Cancel')}
           </Button>
         </DialogActions>
       </Dialog>

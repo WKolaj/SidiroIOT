@@ -148,7 +148,7 @@ function CreateAccountDialog({ open,
       <DialogContent>
         {type === 'edit' ?
           <DialogContentText>
-            {`You are editing an account with ID:`} <strong>{editAccountId}</strong>
+            {t('CreateAccountDialog.AccountBeingEditedSubtitle')}<strong>{editAccountId}</strong>
           </DialogContentText>
           : null}
 
