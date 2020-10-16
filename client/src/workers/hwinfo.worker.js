@@ -1,3 +1,5 @@
+let interval;
+
 async function fetchHwInfo(accessToken) {
   const hw = await fetch('/api/devInfo', {
     headers: {
@@ -8,7 +10,6 @@ async function fetchHwInfo(accessToken) {
   return response;
 }
 
-let interval;
 self.addEventListener("message", message => {
   const { data } = message;
   if (data.text === 'start') {
@@ -21,7 +22,7 @@ self.addEventListener("message", message => {
       fetchHwInfo(data.token).then(res => {
         self.postMessage(res)
       })
-    }, 10000)
+    }, 1000)
   }
   else if (data.text === 'stop') {
     clearInterval(interval)

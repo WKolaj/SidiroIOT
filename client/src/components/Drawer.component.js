@@ -34,8 +34,6 @@ import MoreIcon from '@material-ui/icons/MoreVert';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import SettingsIcon from '@material-ui/icons/Settings';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Box from '@material-ui/core/Box';
 import LoginPage from './LoginPage.component';
 import { setHardwareUsage } from '../actions/HardwareUsage.action';
 import worker from 'workerize-loader!../workers/hwinfo.worker'; //eslint-disable-line import/no-webpack-loader-syntax
@@ -44,6 +42,7 @@ import AuthService from "../services/auth.service";
 import { setAuthenticated } from '../actions/Authentication.action';
 import { setCreateAccountDialogOpen } from '../actions/CreateAccountDialog.action';
 import { isAdmin } from '../services/isAuthenticated.service';
+import CircularProgressWithLabel from './CircularProgress.component';
 
 const drawerWidth = 240;
 
@@ -177,11 +176,12 @@ function MiniDrawer(props) {
   const [bottomNaviValue, setBottomNaviValue] = React.useState(0);
   const { setHardwareUsage, authenticated, setAuthenticated } = props;
   let history = useHistory();
+  let location = useLocation();
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
-  
-  useEffect(()=>{
+
+  useEffect(() => {
     instance = worker()
     instance.addEventListener("message", message => {
       const { data } = message;
@@ -189,20 +189,18 @@ function MiniDrawer(props) {
         setHardwareUsage(message.data.cpuUsage, message.data.cpuTemperature, message.data.ramUsage, message.data.diskUsage)
       }
     });
-  },[setHardwareUsage])
+  }, [setHardwareUsage])
 
-  let location = useLocation();
   useEffect(() => {
     setBottomNaviValue(location.pathname)
   }, [location]);
-  
 
   useEffect(() => {
     if (authenticated === false) {
-      instance.postMessage({token: null, text: 'stop'})
+      instance.postMessage({ token: null, text: 'stop' })
     }
     else {
-      instance.postMessage({token: JSON.parse(localStorage.getItem("user")).accessToken, text: 'start'});
+      instance.postMessage({ token: JSON.parse(localStorage.getItem("user")).accessToken, text: 'start' });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authenticated])
@@ -264,8 +262,8 @@ function MiniDrawer(props) {
         <div>
           <Divider />
           <MenuItem component={Link}
-          onClick={handleMenuClose}
-          to="/useraccounts">{t('AccountMenu.UserAccounts')}</MenuItem>
+            onClick={handleMenuClose}
+            to="/useraccounts">{t('AccountMenu.UserAccounts')}</MenuItem>
         </div>
         : null
       }
@@ -329,76 +327,6 @@ function MiniDrawer(props) {
       </MenuItem>
     </Menu>
   );
-
-  function CircularProgressWithLabel(props) {
-    const percentColors = [
-      { pct: 0.0, color: { r: 0x00, g: 0xff, b: 0 } },
-      { pct: 0.5, color: { r: 0xff, g: 0xff, b: 0 } },
-      { pct: 1.0, color: { r: 0xff, g: 0x00, b: 0 } }];
-
-    const getColorForPercentage = (pct) => {
-      for (var i = 1; i < percentColors.length - 1; i++) {
-        if (pct < percentColors[i].pct) {
-          break;
-        }
-      }
-      var lower = percentColors[i - 1];
-      var upper = percentColors[i];
-      var range = upper.pct - lower.pct;
-      var rangePct = (pct - lower.pct) / range;
-      var pctLower = 1 - rangePct;
-      var pctUpper = rangePct;
-      var color = {
-        r: Math.floor(lower.color.r * pctLower + upper.color.r * pctUpper),
-        g: Math.floor(lower.color.g * pctLower + upper.color.g * pctUpper),
-        b: Math.floor(lower.color.b * pctLower + upper.color.b * pctUpper)
-      };
-      return 'rgb(' + [color.r, color.g, color.b].join(',') + ')';
-      // or output as hex if preferred
-    };
-
-    const useStyles = makeStyles((theme) => ({
-      usageGaugesGroup: {
-        marginRight: '20px',
-        marginLeft: '5px'
-      },
-      usageColor: {
-        color: getColorForPercentage(props.value / 100),
-        position: 'absolute',
-        left: 0,
-      },
-      bottom: {
-        color: '#eeeeee1c',
-      },
-
-    }));
-    const classes = useStyles();
-    return (
-      <Box position="relative" display="inline-flex" className={classes.usageGaugesGroup}>
-        <CircularProgress
-          variant="determinate"
-          className={classes.bottom}
-          size={40}
-          thickness={4}
-          {...props}
-          value={100}
-        />
-        <CircularProgress variant="static" {...props} className={classes.usageColor} />
-        <Box
-          top={0}
-          left={0}
-          bottom={0}
-          right={0}
-          position="absolute"
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-        >
-          <Typography variant="caption" component="div" color="initial">{`${Math.round(props.value,)}${props.unit}`}</Typography>
-        </Box>
-      </Box>
-    );
-  }
 
   return (
     <div className={classes.root}>
@@ -485,13 +413,13 @@ function MiniDrawer(props) {
               </div>
               <Divider />
               <List>
-                <ListItem button component={Link} to="/" selected={location.pathname==="/"?true:false} >
+                <ListItem button component={Link} to="/" selected={location.pathname === "/" ? true : false} >
                   <ListItemIcon>
                     <DeviceHubIcon />
                   </ListItemIcon>
                   <ListItemText primary={t('Drawer.Devices')} />
                 </ListItem>
-                <ListItem button component={Link} to="/settings" selected={location.pathname==="/settings"?true:false} >
+                <ListItem button component={Link} to="/settings" selected={location.pathname === "/settings" ? true : false} >
                   <ListItemIcon>
                     <SettingsIcon />
                   </ListItemIcon>
