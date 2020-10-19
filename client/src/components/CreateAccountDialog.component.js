@@ -101,15 +101,22 @@ function CreateAccountDialog({ open,
 
   const register = () => {
     UserService.register(name, password, permissions).then(res => {
-      if (res._id && res.name && res.permissions) {
+      if (res.status === 200) {
         setSnackbarText(t('Snackbar.SuccessfulUserCreation'), 'success')
         setSnackbarShown(true)
         setCreateAccountDialogPasswordTextfield('')
         setCreateAccountDialogNameTextfield('')
         setCreateAccountDialogOpen(false)
         UserService.getAllAccounts().then(res => {
-          setUserAccountsList(res)
+          setUserAccountsList(res.data)
         })
+      }
+      else if (res.status === 403) {
+        setSnackbarText(t('Snackbar.Generic403'), 'error')
+        setSnackbarShown(true)
+        setCreateAccountDialogPasswordTextfield('')
+        setCreateAccountDialogNameTextfield('')
+        setCreateAccountDialogOpen(false)
       }
       else {
         setCreateAccountDialogNameTextfieldError(true)
@@ -120,23 +127,27 @@ function CreateAccountDialog({ open,
 
   const edit = () => {
     UserService.editAccount(editAccountId, name, permissions, password === '' ? false : password).then(res => {
-      if (res._id) {
+      if (res.status === 200) {
         setSnackbarText(t('Snackbar.SuccessfulUserEdit'), 'success')
         setCreateAccountDialogPasswordTextfield('')
         setCreateAccountDialogNameTextfield('')
         setSnackbarShown(true)
         setCreateAccountDialogOpen(false)
         UserService.getAllAccounts().then(res => {
-          setUserAccountsList(res)
+          setUserAccountsList(res.data)
         })
         //if edited account is currently logged in
-        if(res._id === AuthService.getCurrentUser()._id) {
+        if (res._id === AuthService.getCurrentUser()._id) {
           AuthService.logout()
           history.push('/login')
         }
       }
+      else if (res.status === 403) {
+        setSnackbarText(t('Snackbar.Generic403'), 'error')
+        setSnackbarShown(true)
+      }
       else {
-        setSnackbarText(t('Snackbar.UnsuccessfulUserEdit'), 'error')
+        setSnackbarText(t('Snackbar.UnknownError'), 'error')
         setSnackbarShown(true)
       }
     })
@@ -153,53 +164,53 @@ function CreateAccountDialog({ open,
           : null}
 
         <form className={classes.form}>
-        {AuthService.getCurrentUser()!==null?
-          <div>
-            <TextField
-            disabled={type==='edit'? true: false}
-            error={nameError}
-            helperText={nameError ? t('LoginPage.InvalidLoginPassword') : t('LoginPage.FormLoginTextFieldHelperText')}
-            onChange={handleChange}
-            name="name"
-            value={name}
-            autoFocus
-            margin="dense"
-            id="name"
-            label={t('CreateAccountDialog.NameTextField')}
-            type="text"
-            fullWidth
-          />
-          <TextField
-            error={passwordError}
-            helperText={passwordError ? t('LoginPage.InvalidLoginPassword') : t('LoginPage.FormPasswordTextFieldHelperText')}
-            onChange={handleChange}
-            autoComplete="off"
-            value={password}
-            name="password"
-            margin="dense"
-            id="password"
-            label={t('CreateAccountDialog.PasswordTextField')}
-            type="password"
-            fullWidth
-          />
-          <FormControl className={classes.formControl}>
-            <InputLabel id="permissions">{t('CreateAccountDialog.PermissionsSelect')}</InputLabel>
-            <Select
-              fullWidth
-              labelId="permissions"
-              id="permissions-select"
-              name="permissions"
-              value={permissions}
-              onChange={handleChange}
-            >
-              {AuthService.getCurrentUser().permissions >= 3 ? <MenuItem value={1}>User</MenuItem> : null}
-              {AuthService.getCurrentUser().permissions === 7 ? <MenuItem value={3}>Admin</MenuItem> : null}
-              {AuthService.getCurrentUser().permissions === 7 ? <MenuItem value={7}>SuperAdmin</MenuItem> : null}
-            </Select>
-          </FormControl>
-          </div>
-        :null}
-          
+          {AuthService.getCurrentUser() !== null ?
+            <div>
+              <TextField
+                disabled={type === 'edit' ? true : false}
+                error={nameError}
+                helperText={nameError ? t('LoginPage.InvalidLoginPassword') : t('LoginPage.FormLoginTextFieldHelperText')}
+                onChange={handleChange}
+                name="name"
+                value={name}
+                autoFocus
+                margin="dense"
+                id="name"
+                label={t('CreateAccountDialog.NameTextField')}
+                type="text"
+                fullWidth
+              />
+              <TextField
+                error={passwordError}
+                helperText={passwordError ? t('LoginPage.InvalidLoginPassword') : t('LoginPage.FormPasswordTextFieldHelperText')}
+                onChange={handleChange}
+                autoComplete="off"
+                value={password}
+                name="password"
+                margin="dense"
+                id="password"
+                label={t('CreateAccountDialog.PasswordTextField')}
+                type="password"
+                fullWidth
+              />
+              <FormControl className={classes.formControl}>
+                <InputLabel id="permissions">{t('CreateAccountDialog.PermissionsSelect')}</InputLabel>
+                <Select
+                  fullWidth
+                  labelId="permissions"
+                  id="permissions-select"
+                  name="permissions"
+                  value={permissions}
+                  onChange={handleChange}
+                >
+                  {AuthService.getCurrentUser().permissions >= 3 ? <MenuItem value={1}>User</MenuItem> : null}
+                  {AuthService.getCurrentUser().permissions === 7 ? <MenuItem value={3}>Admin</MenuItem> : null}
+                  {AuthService.getCurrentUser().permissions === 7 ? <MenuItem value={7}>SuperAdmin</MenuItem> : null}
+                </Select>
+              </FormControl>
+            </div>
+            : null}
+
         </form>
       </DialogContent>
       <DialogActions>

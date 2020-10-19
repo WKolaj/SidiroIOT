@@ -26,7 +26,7 @@ function DevicesSelectionPage(props) {
           <Typography variant="h4" className={classes.title}>{t('DevicesSelectionPage.DevicesTitle')}</Typography>
           <DevicesList />
         </Grid>
-        <Grid container item xs={12} sm={12} md={9} spacing={2}>
+        <Grid container item xs={12} sm={12} md={9} spacing={0}>
           <Grid item xs={12}>
             <Typography variant="h4" className={classes.title}>{props.selectedDevice.selectedDeviceName}</Typography>
             <React.Fragment>
@@ -54,17 +54,18 @@ function DevicesSelectionPage(props) {
                   { label: t('DevicesSelectionPage.EventsTab'), content: <UniversalTable columns={['Name', 'Parameter', 'Limit', 'TextPL', 'TextEN', 'Severity']} rows={[['Meter1', 'Voltage', 'Upper limit', 'Przekroczenie', 'Exceeding', 'Warning']]} /> }]}
                 />
               }
-
             </React.Fragment>
           </Grid>
-          <Grid item xs={12} sm={6}>
-            <Typography variant="h5">{t('DevicesSelectionPage.Status')}: {t('DevicesSelectionPage.StatusConnected')}</Typography>
-          </Grid>
-          <Grid item xs={6} sm={3}>
-            <Button fullWidth variant="contained" color="primary">{t('DevicesSelectionPage.Connect')}</Button>
-          </Grid>
-          <Grid item xs={6} sm={3}>
-            <Button fullWidth variant="contained" color="secondary">{t('DevicesSelectionPage.Disconnect')}</Button>
+          <Grid container item xs={12} spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <Typography variant="h5">{t('DevicesSelectionPage.Status')}: {t('DevicesSelectionPage.StatusConnected')}</Typography>
+            </Grid>
+            <Grid item xs={6} sm={3}>
+              <Button fullWidth variant="contained" color="primary">{t('DevicesSelectionPage.Connect')}</Button>
+            </Grid>
+            <Grid item xs={6} sm={3}>
+              <Button fullWidth variant="contained" color="secondary">{t('DevicesSelectionPage.Disconnect')}</Button>
+            </Grid>
           </Grid>
         </Grid>
       </Grid>

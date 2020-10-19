@@ -1,3 +1,5 @@
+//props = rows: array, columns: array, noPagination: bool
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
@@ -88,7 +90,7 @@ const useStyles2 = makeStyles({
   },
 });
 
-export default function CustomPaginationActionsTable({ rows, columns }) {
+export default function CustomPaginationActionsTable({ rows, columns, noPagination }) {
   const classes = useStyles2();
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(rows.length < 5 ? rows.length : 5);
@@ -126,7 +128,8 @@ export default function CustomPaginationActionsTable({ rows, columns }) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {(rowsPerPage > 0
+          {!noPagination?
+          (rowsPerPage > 0
             ? rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
             : rows
           ).map((row, rowIndex) => (
@@ -137,34 +140,46 @@ export default function CustomPaginationActionsTable({ rows, columns }) {
                 </TableCell>
               })}
             </TableRow>
-          ))}
+          )):
+          rows.map((row, rowIndex) => (
+            <TableRow key={`row-${rowIndex}`}>
+              {row.map((cell, cellIndex) => {
+                return <TableCell key={`cell-${cellIndex}`}>
+                  {cell}
+                </TableCell>
+              })}
+            </TableRow>
+          ))
+          }
           {emptyRows > 0 && (
             <TableRow style={{ height: 53 * emptyRows }}>
               <TableCell colSpan={6} />
             </TableRow>
           )}
         </TableBody>
+        {!noPagination ?
+          <TableFooter>
+            <TableRow>
+              <TablePagination
+                labelDisplayedRows={({ from, to, count }) => `${from}-${to} ${t('UniversalTable.Of')} ${count}`}
+                labelRowsPerPage={t('UniversalTable.RowsPerPage')}
+                rowsPerPageOptions={[rows.length < 5 ? rows.length : 5, 10, 25]}
+                colSpan={columns.length}
+                count={rows.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                SelectProps={{
+                  inputProps: { 'aria-label': 'rows per page' },
+                  native: true,
+                }}
+                onChangePage={handleChangePage}
+                onChangeRowsPerPage={handleChangeRowsPerPage}
+                ActionsComponent={TablePaginationActions}
+              />
+            </TableRow>
+          </TableFooter>
+      :null}
 
-        <TableFooter>
-          <TableRow>
-            <TablePagination
-              labelDisplayedRows={({ from, to, count }) => `${from}-${to} ${t('UniversalTable.Of')} ${count}`}
-              labelRowsPerPage={t('UniversalTable.RowsPerPage')}
-              rowsPerPageOptions={[rows.length < 5 ? rows.length : 5, 10, 25]}
-              colSpan={columns.length}
-              count={rows.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              SelectProps={{
-                inputProps: { 'aria-label': 'rows per page' },
-                native: true,
-              }}
-              onChangePage={handleChangePage}
-              onChangeRowsPerPage={handleChangeRowsPerPage}
-              ActionsComponent={TablePaginationActions}
-            />
-          </TableRow>
-        </TableFooter>
       </Table>
     </TableContainer>
   );

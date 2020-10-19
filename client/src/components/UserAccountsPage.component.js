@@ -15,6 +15,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { makeStyles } from '@material-ui/core/styles';
 import { setConfirmDeleteUserDialogOpen, setConfirmDeleteUserDialogUsername } from '../actions/ConfirmDeleteUserDialog.action';
 import AuthService from '../services/auth.service';
+import { setSnackbarText, setSnackbarShown } from '../actions/Snackbar.action';
 
 const useStyles = makeStyles((theme) => ({
   icons: {
@@ -29,21 +30,28 @@ function UserAccountsPage({ setUserAccountsList,
   setConfirmDeleteUserDialogUsername, 
   setCreateAccountDialogEditId,
   setCreateAccountDialogPermissionsSelect,
-  setCreateAccountDialogNameTextfield }) {
+  setCreateAccountDialogNameTextfield,
+  setSnackbarText, 
+  setSnackbarShown }) {
 
   const { t } = useTranslation();
   const classes = useStyles();
 
   const getAllAccounts = useCallback(() => {
     UserService.getAllAccounts().then(res => {
-      if(res==='Access forbidden.') {
-        console.log(res)
+      if(res.status === 200) {
+        setUserAccountsList(res.data)
+      }
+      else if(res.status === 403) {
+        setSnackbarText(t('Snackbar.Generic403'),'error')
+        setSnackbarShown(true)
       }
       else {
-        setUserAccountsList(res)
+        setSnackbarText(t('Snackbar.UnknownError'),'error')
+        setSnackbarShown(true)
       }
     })
-  }, [setUserAccountsList])
+  }, [setUserAccountsList, setSnackbarShown, setSnackbarText, t])
 
   useEffect(() => {
     getAllAccounts()
@@ -83,7 +91,7 @@ function UserAccountsPage({ setUserAccountsList,
         </Grid>
         {accountsList.length > 0 ?
           <Grid item xs={12}>
-            <UniversalTable
+            <UniversalTable noPagination
               columns={[t('UserAccountsPage.IdColumn'), t('UserAccountsPage.NameColumn'), t('UserAccountsPage.PermissionsColumn'), t('UserAccountsPage.ActionColumn')]}
               rows={accountsList.map(acc => [acc._id, acc.name, acc.permissions===1?'User':acc.permissions===3?'Admin':'SuperAdmin', checkPermissions(acc.permissions)?<div>
                 <IconButton onClick={()=>editAcc(acc._id, acc.name, acc.permissions)} className={classes.icons} aria-label="edit">
@@ -125,7 +133,9 @@ const mapDispatchToProps = {
   setConfirmDeleteUserDialogUsername,
   setCreateAccountDialogEditId,
   setCreateAccountDialogNameTextfield,
-  setCreateAccountDialogPermissionsSelect
+  setCreateAccountDialogPermissionsSelect,
+  setSnackbarText, 
+  setSnackbarShown
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(UserAccountsPage);

@@ -35,9 +35,15 @@ function AccountPage({ currentPassword, newPassword, setAccountFormCurrentPasswo
 
   const getMyAccountDetails = useCallback(() => {
     UserService.getMyAccountDetails().then(res => {
-      setAccountDetails(res)
+      if (res.status === 200) {
+        setAccountDetails(res.data)
+      }
+      else {
+        setSnackbarText(t('Snackbar.UnknownError'), 'error')
+        setSnackbarShown(true)
+      }
     })
-  }, [])
+  }, [setSnackbarShown, setSnackbarText, t])
 
   useEffect(() => {
     getMyAccountDetails()
@@ -76,7 +82,7 @@ function AccountPage({ currentPassword, newPassword, setAccountFormCurrentPasswo
 
   const changePassword = () => {
     UserService.editMyPassword(accountDetails.name, accountDetails.permissions, currentPassword, newPassword).then(res => {
-      if (res._id) {
+      if (res.status === 200) {
         //reset fields after submit
         setAccountFormCurrentPassword('')
         setAccountFormNewPassword('')

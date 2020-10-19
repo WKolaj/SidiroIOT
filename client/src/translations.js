@@ -86,7 +86,8 @@ export const resources = {
         "SuccessfulFileUpload": "File sent successfully",
         "UnsuccessfulFileUpload403": "Only admin type accounts have permission to send configuration file",
         "UnsuccessfulFileUpload400": "Invalid file contents",
-        "UnknownError": "Unknown error occured. Try again."
+        "UnknownError": "Unknown error occured. Try again.",
+        "Generic403": "Access forbidden"
       },
       "ConfirmDeleteUserDialog": {
         "Title": "Please confirm deletion. The process is irreversible.",
@@ -183,7 +184,8 @@ export const resources = {
         "SuccessfulFileUpload": "Pomyślnie przesłano plik",
         "UnsuccessfulFileUpload403": "Tylko konta admina mają uprawnienia do wysyłania pliku konfiguracyjnego",
         "UnsuccessfulFileUpload400": "Nieprawidłowa zawartość pliku",
-        "UnknownError": "Wystąpił nieznany błąd. Spróbuj ponownie."
+        "UnknownError": "Wystąpił nieznany błąd. Spróbuj ponownie.",
+        "Generic403": "Brak uprawnień"
       },
       "ConfirmDeleteUserDialog": {
         "Title": "Proszę potwierdzić usunięcie. Ten proces jest nieodwracalny.",

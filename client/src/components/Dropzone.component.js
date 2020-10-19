@@ -19,15 +19,15 @@ function Dropzone({ setSnackbarText, setSnackbarShown }) {
   const onDrop = useCallback(acceptedFiles => {
     // Do something with the files
     FileService.uploadFile(acceptedFiles[0]).then(res => {
-      if (res === 200) {
+      if (res.status === 200) {
         setSnackbarText(t('Snackbar.SuccessfulFileUpload'), 'success')
         setSnackbarShown(true)
       }
-      else if(res === 403) {
+      else if(res.status === 403) {
         setSnackbarText(t('Snackbar.UnsuccessfulFileUpload403'), 'error')
         setSnackbarShown(true)
       }
-      else if(res === 400) {
+      else if(res.status === 400) {
         setSnackbarText(t('Snackbar.UnsuccessfulFileUpload400'), 'error')
         setSnackbarShown(true)
       }

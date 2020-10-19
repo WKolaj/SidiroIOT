@@ -12,8 +12,7 @@ class FileService {
       },
       body: formData
     })
-
-    return response.status
+    return { status: response.status }
   }
 }
 

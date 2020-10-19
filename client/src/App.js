@@ -39,10 +39,10 @@ function App() {
           <Router>
             <Drawer />
             <CreateAccountDialog/>
+            <ConfirmDeleteUserDialog/>
           </Router>
           <LanguageDialog/>
           <Snackbar/>
-          <ConfirmDeleteUserDialog/>
         </Provider>
       </ThemeProvider>
     </React.Fragment>

@@ -11,11 +11,13 @@ class UserService {
     })
     if (response.status === 200) {
       const userData = await response.json()
-      return userData;
+      return {
+        status: response.status,
+        data: userData
+      }
     }
     else {
-      const err = await response.text()
-      return err
+      return { status: response.status }
     }
   }
 
@@ -29,11 +31,13 @@ class UserService {
     })
     if (response.status === 200) {
       const userData = await response.json()
-      return userData;
+      return {
+        status: response.status,
+        data: userData
+      };
     }
     else {
-      const err = await response.text()
-      return err
+      return { status: response.status }
     }
   }
 
@@ -45,14 +49,7 @@ class UserService {
         'x-auth-token': JSON.parse(localStorage.getItem("user")).accessToken
       },
     })
-    if (response.status === 200) {
-      const userData = await response.json()
-      return userData;
-    }
-    else {
-      const err = await response.text()
-      return err
-    }
+    return { status: response.status }
   }
 
   async editAccount(id, name, permissions, newPassword = false) {
@@ -75,14 +72,7 @@ class UserService {
       },
       body: JSON.stringify(newPassword ? bodyWithPasswords : body)
     })
-    if (response.status === 200) {
-      const userData = await response.json()
-      return userData;
-    }
-    else {
-      const err = await response.text()
-      return err
-    }
+    return { status: response.status }
   }
 
   async editMyPassword(name, permissions, oldPassword, newPassword) {
@@ -94,14 +84,7 @@ class UserService {
       },
       body: JSON.stringify({ name: name, permissions: permissions, oldPassword: oldPassword, password: newPassword })
     })
-    if (response.status === 200) {
-      const userData = await response.json()
-      return userData;
-    }
-    else {
-      const err = await response.text()
-      return err
-    }
+    return { status: response.status }
   }
 
   async register(username, password, permissions) {
@@ -113,14 +96,7 @@ class UserService {
       },
       body: JSON.stringify({ name: username, permissions: permissions, password: password })
     })
-    if (response.status === 200) {
-      const userData = await response.json()
-      return userData;
-    }
-    else {
-      const err = await response.text()
-      return err
-    }
+    return { status: response.status }
   }
 }
 
