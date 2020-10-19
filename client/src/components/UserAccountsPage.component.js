@@ -7,7 +7,7 @@ import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import AddIcon from '@material-ui/icons/Add';
-import { setCreateAccountDialogOpen, setCreateAccountDialogEditId, setCreateAccountDialogNameTextfield, setCreateAccountDialogPermissionsSelect} from '../actions/CreateAccountDialog.action';
+import { setCreateAccountDialogOpen, setCreateAccountDialogEditId, setCreateAccountDialogNameTextfield, setCreateAccountDialogPermissionsSelect } from '../actions/CreateAccountDialog.action';
 import { useTranslation } from 'react-i18next';
 import IconButton from '@material-ui/core/IconButton';
 import EditIcon from '@material-ui/icons/Edit';
@@ -16,6 +16,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { setConfirmDeleteUserDialogOpen, setConfirmDeleteUserDialogUsername } from '../actions/ConfirmDeleteUserDialog.action';
 import AuthService from '../services/auth.service';
 import { setSnackbarText, setSnackbarShown } from '../actions/Snackbar.action';
+import Tooltip from '@material-ui/core/Tooltip';
 
 const useStyles = makeStyles((theme) => ({
   icons: {
@@ -23,15 +24,15 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function UserAccountsPage({ setUserAccountsList, 
-  setCreateAccountDialogOpen, 
-  accountsList, 
-  setConfirmDeleteUserDialogOpen, 
-  setConfirmDeleteUserDialogUsername, 
+function UserAccountsPage({ setUserAccountsList,
+  setCreateAccountDialogOpen,
+  accountsList,
+  setConfirmDeleteUserDialogOpen,
+  setConfirmDeleteUserDialogUsername,
   setCreateAccountDialogEditId,
   setCreateAccountDialogPermissionsSelect,
   setCreateAccountDialogNameTextfield,
-  setSnackbarText, 
+  setSnackbarText,
   setSnackbarShown }) {
 
   const { t } = useTranslation();
@@ -39,15 +40,15 @@ function UserAccountsPage({ setUserAccountsList,
 
   const getAllAccounts = useCallback(() => {
     UserService.getAllAccounts().then(res => {
-      if(res.status === 200) {
+      if (res.status === 200) {
         setUserAccountsList(res.data)
       }
-      else if(res.status === 403) {
-        setSnackbarText(t('Snackbar.Generic403'),'error')
+      else if (res.status === 403) {
+        setSnackbarText(t('Snackbar.Generic403'), 'error')
         setSnackbarShown(true)
       }
       else {
-        setSnackbarText(t('Snackbar.UnknownError'),'error')
+        setSnackbarText(t('Snackbar.UnknownError'), 'error')
         setSnackbarShown(true)
       }
     })
@@ -71,13 +72,13 @@ function UserAccountsPage({ setUserAccountsList,
 
   const checkPermissions = (permissions) => {
     const currentUser = AuthService.getCurrentUser().permissions;
-    if(currentUser===7) {
+    if (currentUser === 7) {
       return true;
     }
-    if((permissions === 3 || permissions === 7) && currentUser === 3) {
+    if ((permissions === 3 || permissions === 7) && currentUser === 3) {
       return false
     }
-    if(permissions === 1 && currentUser>=3) {
+    if (permissions === 1 && currentUser >= 3) {
       return true
     }
     return true
@@ -93,14 +94,21 @@ function UserAccountsPage({ setUserAccountsList,
           <Grid item xs={12}>
             <UniversalTable noPagination
               columns={[t('UserAccountsPage.IdColumn'), t('UserAccountsPage.NameColumn'), t('UserAccountsPage.PermissionsColumn'), t('UserAccountsPage.ActionColumn')]}
-              rows={accountsList.map(acc => [acc._id, acc.name, acc.permissions===1?'User':acc.permissions===3?'Admin':'SuperAdmin', checkPermissions(acc.permissions)?<div>
-                <IconButton onClick={()=>editAcc(acc._id, acc.name, acc.permissions)} className={classes.icons} aria-label="edit">
-                  <EditIcon />
-                </IconButton>
-                <IconButton onClick={()=>deleteAcc(acc._id, acc.name)} className={classes.icons} aria-label="delete">
-                  <DeleteIcon />
-                </IconButton>
-              </div>:null])}
+              rows={accountsList.map(acc => [acc._id, acc.name, acc.permissions === 1 ? 'User' : acc.permissions === 3 ? 'Admin' : 'SuperAdmin', checkPermissions(acc.permissions) ?
+                <div>
+                  <Tooltip title={t('UserAccountsPage.TooltipEdit')} placement="top">
+                    <IconButton onClick={() => editAcc(acc._id, acc.name, acc.permissions)} className={classes.icons} aria-label="edit">
+                      <EditIcon />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title={t('UserAccountsPage.TooltipDelete')} placement="top">
+                    <IconButton onClick={() => deleteAcc(acc._id, acc.name)} className={classes.icons} aria-label="delete">
+                      <DeleteIcon />
+                    </IconButton>
+                  </Tooltip>
+                </div>
+                :
+                null])}
             />
           </Grid> : null
         }
@@ -129,12 +137,12 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = {
   setUserAccountsList,
   setCreateAccountDialogOpen,
-  setConfirmDeleteUserDialogOpen, 
+  setConfirmDeleteUserDialogOpen,
   setConfirmDeleteUserDialogUsername,
   setCreateAccountDialogEditId,
   setCreateAccountDialogNameTextfield,
   setCreateAccountDialogPermissionsSelect,
-  setSnackbarText, 
+  setSnackbarText,
   setSnackbarShown
 }
 

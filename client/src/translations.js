@@ -74,7 +74,9 @@ export const resources = {
         "IdColumn": "ID",
         "NameColumn": "Name",
         "PermissionsColumn": "Permissions",
-        "ActionColumn": "Actions"
+        "ActionColumn": "Actions",
+        "TooltipDelete": "Delete",
+        "TooltipEdit": "Edit"
       },
       "Snackbar": {
         "SuccessfulUserCreation": "User created successfully",
@@ -172,7 +174,9 @@ export const resources = {
         "IdColumn": "ID",
         "NameColumn": "Nazwa",
         "PermissionsColumn": "Uprawnienia",
-        "ActionColumn": "Akcje"
+        "ActionColumn": "Akcje",
+        "TooltipDelete": "Usuń",
+        "TooltipEdit": "Edytuj"
       },
       "Snackbar": {
         "SuccessfulUserCreation": "Użytkownik pomyślnie utworzony",
