@@ -115,9 +115,8 @@ describe("Sampler", () => {
     it("should convert tickNumber to date - multiply it by 1000 ", () => {
       let result = exec();
 
-      expect(result).toEqual(1234*1000);
+      expect(result).toEqual(1234 * 1000);
     });
-
   });
 
   describe("_shouldExternalTickBeEmitted", () => {
@@ -162,7 +161,7 @@ describe("Sampler", () => {
       active = true;
       //additional method in order to check whether externalTickHandler was awaited
       externalTickHandlerInnerMock = jest.fn();
-      externalTickHandler = jest.fn(async(tickNumber)=>{
+      externalTickHandler = jest.fn(async (tickNumber) => {
         await snooze(100);
         externalTickHandlerInnerMock(tickNumber);
       });
@@ -173,7 +172,9 @@ describe("Sampler", () => {
     let exec = () => {
       sampler._active = active;
       sampler.ExternalTickHandler = externalTickHandler;
-      shouldEmitMockFunc = jest.fn(()=>{return shouldEmit});
+      shouldEmitMockFunc = jest.fn(() => {
+        return shouldEmit;
+      });
       sampler._shouldExternalTickBeEmitted = shouldEmitMockFunc;
       return sampler._onInternalTick();
     };
@@ -186,17 +187,25 @@ describe("Sampler", () => {
       let lastDate = Sampler.convertDateToTickNumber(Date.now());
 
       expect(externalTickHandler).toHaveBeenCalledTimes(1);
-      expect(externalTickHandler.mock.calls[0][0]).toBeGreaterThanOrEqual(firstDate);
-      expect(externalTickHandler.mock.calls[0][0]).toBeLessThanOrEqual(lastDate);
+      expect(externalTickHandler.mock.calls[0][0]).toBeGreaterThanOrEqual(
+        firstDate
+      );
+      expect(externalTickHandler.mock.calls[0][0]).toBeLessThanOrEqual(
+        lastDate
+      );
 
       expect(externalTickHandlerInnerMock).toHaveBeenCalledTimes(1);
-      expect(externalTickHandlerInnerMock.mock.calls[0][0]).toBeGreaterThanOrEqual(firstDate);
-      expect(externalTickHandlerInnerMock.mock.calls[0][0]).toBeLessThanOrEqual(lastDate);
+      expect(
+        externalTickHandlerInnerMock.mock.calls[0][0]
+      ).toBeGreaterThanOrEqual(firstDate);
+      expect(externalTickHandlerInnerMock.mock.calls[0][0]).toBeLessThanOrEqual(
+        lastDate
+      );
     });
 
     it("Should not call anything if sampler is not active", async () => {
       active = false;
-      
+
       await exec();
 
       expect(externalTickHandler).not.toHaveBeenCalled();
@@ -206,7 +215,7 @@ describe("Sampler", () => {
 
     it("Should not call anything if should emit return false", async () => {
       shouldEmit = false;
-      
+
       await exec();
 
       expect(externalTickHandler).not.toHaveBeenCalled();
@@ -216,25 +225,25 @@ describe("Sampler", () => {
 
     it("Should not call anything and not throw if there is no TickHandler", async () => {
       externalTickHandler = null;
-      
+
       await exec();
     });
 
-
     it("Should not throw if external tick handler throws", async () => {
-      externalTickHandler = jest.fn(async()=>{throw new Error("test error")});
-      
-      await expect(new Promise(async(resolve,reject)=>{
-        try
-        {
-          await exec();
-          return resolve(true);
-        }
-        catch(err)
-        {
-          return reject(err);
-        }
-      })).resolves.toBeDefined();
+      externalTickHandler = jest.fn(async () => {
+        throw new Error("test error");
+      });
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
     });
   });
 
@@ -294,7 +303,7 @@ describe("Sampler", () => {
       jest.useFakeTimers();
 
       sampler.start();
-      
+
       return sampler.stop();
     };
 
@@ -305,7 +314,6 @@ describe("Sampler", () => {
       jest.advanceTimersByTime(1000);
 
       expect(onInternalTickMock).not.toHaveBeenCalled();
-
     });
 
     it("Should set active to false", () => {
@@ -352,5 +360,4 @@ describe("Sampler", () => {
       expect(exec()).toEqual(sampler._active);
     });
   });
-
 });

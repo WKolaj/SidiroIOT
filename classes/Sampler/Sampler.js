@@ -1,7 +1,9 @@
-const {exists} = require("../../utilities/utilities")
+const { exists } = require("../../utilities/utilities");
 
 class Sampler {
-/**
+  //#region ========= CONSTRUCTOR =========
+
+  /**
    * @description Class representing whole app time sampler
    */
   constructor() {
@@ -11,6 +13,10 @@ class Sampler {
     this._lastExternalTickNumber = 0;
     this._externalTickHandler = null;
   }
+
+  //#endregion ========= CONSTRUCTOR =========
+
+  //#region ========= PROPERTIES =========
 
   /**
    * @description Is sampler active
@@ -47,30 +53,19 @@ class Sampler {
     this._externalTickHandler = value;
   }
 
+  //#endregion ========= PROPERTIES =========
 
-  /**
-   * @description Method called every tick of Interval handler
-   */
-  async _onInternalTick() {
-      //Invoking only if sampler is active
-      if (this.Active) {
-        let tickNumber = Sampler.convertDateToTickNumber(Date.now());
-        if (this._shouldExternalTickBeEmitted(tickNumber) && exists(this.ExternalTickHandler)) {
-          //Preventing tick method for throwing
-          try {
-            await this.ExternalTickHandler(tickNumber); 
-          }
-          catch(err){}
-        }
-      }
-    }
+  //#region ========= PUBLIC METHODS =========
 
   /**
    * @description Method for starting sampling of sampler
    */
   start() {
     if (!this.Active) {
-      this._internalTickHandler = setInterval(async () => await this._onInternalTick(), this._internalTickInterval);
+      this._internalTickHandler = setInterval(
+        async () => await this._onInternalTick(),
+        this._internalTickInterval
+      );
       this._active = true;
     }
   }
@@ -84,6 +79,29 @@ class Sampler {
     this._active = false;
   }
 
+  //#endregion ========= PUBLIC METHODS =========
+
+  //#region ========= PRIVATE METHODS =========
+
+  /**
+   * @description Method called every tick of Interval handler
+   */
+  async _onInternalTick() {
+    //Invoking only if sampler is active
+    if (this.Active) {
+      let tickNumber = Sampler.convertDateToTickNumber(Date.now());
+      if (
+        this._shouldExternalTickBeEmitted(tickNumber) &&
+        exists(this.ExternalTickHandler)
+      ) {
+        //Preventing tick method for throwing
+        try {
+          await this.ExternalTickHandler(tickNumber);
+        } catch (err) {}
+      }
+    }
+  }
+
   /**
    * @description Should tick be emitted based on last tick time?
    * @param {number} tickNumber Actual tick time
@@ -91,6 +109,10 @@ class Sampler {
   _shouldExternalTickBeEmitted(tickNumber) {
     return tickNumber !== this._lastExternalTickNumber;
   }
+
+  //#endregion ========= PRIVATE METHODS =========
+
+  //#region ========= PUBLIC STATIC METHODS =========
 
   /**
    * @description Doest TickId matches actual tick?
@@ -116,6 +138,8 @@ class Sampler {
   static convertTickNumberToDate(tickNumber) {
     return tickNumber * 1000;
   }
+
+  //#endregion ========= PUBLIC STATIC METHODS =========
 }
 
 module.exports = Sampler;
