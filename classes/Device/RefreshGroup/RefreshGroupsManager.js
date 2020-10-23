@@ -10,7 +10,11 @@ class RefreshGroupsManager {
   /**
    * @description Class for managing refreshing groups
    */
-  constructor() {}
+  constructor() {
+    this._connectableDeviceGroups = null;
+    this._internalDeviceGroups = null;
+    this._agentDeviceGroups = null;
+  }
 
   //#endregion ========= CONSTRUCTOR =========
 
