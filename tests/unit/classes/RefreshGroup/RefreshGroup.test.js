@@ -2,6 +2,15 @@ const { snooze } = require("../../../../utilities/utilities");
 const RefreshGroup = require("../../../../classes/Device/RefreshGroup/RefreshGroup");
 const logger = require("../../../../logger/logger");
 
+const createFakeDevice = (id, name, requestGroupID, refreshMethod) => {
+  return {
+    ID: id,
+    Name: name,
+    getRefreshGroupID: () => requestGroupID,
+    refresh: refreshMethod,
+  };
+};
+
 describe("RefreshGroup", () => {
   describe("constructor", () => {
     let id;
@@ -12,9 +21,27 @@ describe("RefreshGroup", () => {
 
     beforeEach(() => {
       id = "abcd1234";
-      device1 = { ID: "deviceId1", Name: "device1Name" };
-      device2 = { ID: "deviceId2", Name: "device2Name" };
-      device3 = { ID: "deviceId3", Name: "device3Name" };
+
+      device1 = createFakeDevice(
+        "deviceId1",
+        "device1Name",
+        "deviceGroup1",
+        null
+      );
+
+      device2 = createFakeDevice(
+        "deviceId2",
+        "device2Name",
+        "deviceGroup2",
+        null
+      );
+
+      device3 = createFakeDevice(
+        "deviceId3",
+        "device3Name",
+        "deviceGroup3",
+        null
+      );
 
       devices = [device1, device2, device3];
     });
@@ -72,30 +99,35 @@ describe("RefreshGroup", () => {
       id = "abcd1234";
       //Embedding mock refresh method inside refresh after snooze - in order to check wether await is used
       //snooze time in oposite order helps to determine wether methods are invoked one after another
-      device1 = {
-        ID: "deviceId1",
-        Name: "device1Name",
-        refresh: async (tickNumber) => {
+      device1 = createFakeDevice(
+        "deviceId1",
+        "device1Name",
+        "deviceGroup1",
+        async (tickNumber) => {
           await snooze(300);
           device1RefreshMock(tickNumber);
-        },
-      };
-      device2 = {
-        ID: "deviceId2",
-        Name: "device2Name",
-        refresh: async (tickNumber) => {
+        }
+      );
+
+      device2 = createFakeDevice(
+        "deviceId2",
+        "device2Name",
+        "deviceGroup1",
+        async (tickNumber) => {
           await snooze(200);
           device2RefreshMock(tickNumber);
-        },
-      };
-      device3 = {
-        ID: "deviceId3",
-        Name: "device3Name",
-        refresh: async (tickNumber) => {
+        }
+      );
+
+      device3 = createFakeDevice(
+        "deviceId3",
+        "device3Name",
+        "deviceGroup1",
+        async (tickNumber) => {
           await snooze(100);
           device3RefreshMock(tickNumber);
-        },
-      };
+        }
+      );
 
       devices = [device1, device2, device3];
     });

@@ -28,7 +28,7 @@ class RefreshGroups {
    * @description All refreshing groups
    */
   get Groups() {
-    return this._connectableDeviceGroups;
+    return this._groups;
   }
 
   //#endregion ========= PROPERTIES =========
