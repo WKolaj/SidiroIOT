@@ -399,194 +399,804 @@ describe("RefreshGroups", () => {
     });
   });
 
-  //TODO - Add unit tests for refresh
+  describe("refresh", () => {
+    let refreshGroupManager;
+    let tickNumber;
+    let connectDevices;
+    let connectDevice1;
+    let connectDevice2;
+    let connectDevice3;
+    let internalDevices;
+    let internalDevice1;
+    let internalDevice2;
+    let internalDevice3;
+    let agentDevices;
+    let agentDevice1;
+    let agentDevice2;
+    let agentDevice3;
+    let connectDevice1MockRefresh;
+    let connectDevice2MockRefresh;
+    let connectDevice3MockRefresh;
+    let internalDevice1MockRefresh;
+    let internalDevice2MockRefresh;
+    let internalDevice3MockRefresh;
+    let agentDevice1MockRefresh;
+    let agentDevice2MockRefresh;
+    let agentDevice3MockRefresh;
+    let loggerWarnMock;
+    let loggerWarnOriginal;
 
-  //   describe("refresh", () => {
-  //     let refreshGroups;
-  //     let devices;
-  //     let device1;
-  //     let device2;
-  //     let device3;
-  //     let device1RefreshMock;
-  //     let device2RefreshMock;
-  //     let device3RefreshMock;
-  //     let tickNumber;
-  //     let loggerWarnMock;
-  //     let loggerWarnOriginal;
+    beforeEach(() => {
+      loggerWarnMock = jest.fn();
+      loggerWarnOriginal = logger.warn;
+      logger.warn = loggerWarnMock;
 
-  //     beforeEach(() => {
-  //       loggerWarnMock = jest.fn();
-  //       loggerWarnOriginal = logger.warn;
-  //       logger.warn = loggerWarnMock;
+      tickNumber = 1234;
 
-  //       tickNumber = 1234;
-  //       device1RefreshMock = jest.fn();
-  //       device2RefreshMock = jest.fn();
-  //       device3RefreshMock = jest.fn();
+      connectDevice1MockRefresh = jest.fn();
+      connectDevice2MockRefresh = jest.fn();
+      connectDevice3MockRefresh = jest.fn();
 
-  //       //Embedding mock refresh method inside refresh after snooze - in order to check wether await is used
-  //       //snooze time in different order helps to determine wether methods are invoked simuntaneusly for each group
-  //       device1 = createFakeDevice(
-  //         "deviceId1",
-  //         "device1Name",
-  //         "deviceGroup1",
-  //         async (tickNumber) => {
-  //           await snooze(200);
-  //           device1RefreshMock(tickNumber);
-  //         }
-  //       );
+      connectDevice1 = createFakeDevice(
+        "connectDeviceId1",
+        "connectDeviceName1",
+        "connectDeviceGroup1",
+        async (tickNumber) => {
+          await snooze(100);
+          connectDevice1MockRefresh(tickNumber);
+        }
+      );
 
-  //       device2 = createFakeDevice(
-  //         "deviceId2",
-  //         "device2Name",
-  //         "deviceGroup1",
-  //         async (tickNumber) => {
-  //           await snooze(200);
-  //           device2RefreshMock(tickNumber);
-  //         }
-  //       );
+      connectDevice2 = createFakeDevice(
+        "connectDeviceId2",
+        "connectDeviceName2",
+        "connectDeviceGroup1",
+        async (tickNumber) => {
+          await snooze(200);
+          connectDevice2MockRefresh(tickNumber);
+        }
+      );
 
-  //       device3 = createFakeDevice(
-  //         "deviceId3",
-  //         "device3Name",
-  //         "deviceGroup2",
-  //         async (tickNumber) => {
-  //           await snooze(300);
-  //           device3RefreshMock(tickNumber);
-  //         }
-  //       );
+      connectDevice3 = createFakeDevice(
+        "connectDeviceId3",
+        "connectDeviceName3",
+        "connectDeviceGroup2",
+        async (tickNumber) => {
+          await snooze(200);
+          connectDevice3MockRefresh(tickNumber);
+        }
+      );
 
-  //       devices = [device1, device2, device3];
-  //     });
+      connectDevices = [connectDevice1, connectDevice2, connectDevice3];
 
-  //     afterEach(() => {
-  //       logger.warn = loggerWarnOriginal;
-  //     });
+      internalDevice1MockRefresh = jest.fn();
+      internalDevice2MockRefresh = jest.fn();
+      internalDevice3MockRefresh = jest.fn();
 
-  //     let exec = async () => {
-  //       refreshGroups = new RefreshGroups(devices);
-  //       return refreshGroups.refresh(tickNumber);
-  //     };
+      internalDevice1 = createFakeDevice(
+        "internalDeviceId1",
+        "internalDeviceName1",
+        "internalDeviceGroup1",
+        async (tickNumber) => {
+          await snooze(200);
+          internalDevice1MockRefresh(tickNumber);
+        }
+      );
 
-  //     it("should refresh all devices assigned to RefreshGroups", async () => {
-  //       await exec();
+      internalDevice2 = createFakeDevice(
+        "internalDeviceId2",
+        "internalDeviceName2",
+        "internalDeviceGroup2",
+        async (tickNumber) => {
+          await snooze(100);
+          internalDevice2MockRefresh(tickNumber);
+        }
+      );
 
-  //       expect(device1RefreshMock).toHaveBeenCalledTimes(1);
-  //       expect(device1RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      internalDevice3 = createFakeDevice(
+        "internalDeviceId3",
+        "internalDeviceName3",
+        "internalDeviceGroup2",
+        async (tickNumber) => {
+          await snooze(200);
+          internalDevice3MockRefresh(tickNumber);
+        }
+      );
 
-  //       expect(device2RefreshMock).toHaveBeenCalledTimes(1);
-  //       expect(device2RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      internalDevices = [internalDevice1, internalDevice2, internalDevice3];
 
-  //       expect(device3RefreshMock).toHaveBeenCalledTimes(1);
-  //       expect(device3RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      agentDevice1MockRefresh = jest.fn();
+      agentDevice2MockRefresh = jest.fn();
+      agentDevice3MockRefresh = jest.fn();
 
-  //       //logger warn should not have been called
-  //       expect(loggerWarnMock).not.toHaveBeenCalled();
-  //     });
+      agentDevice1 = createFakeDevice(
+        "agentDeviceId1",
+        "agentDeviceName1",
+        "agentDeviceGroup1",
+        async (tickNumber) => {
+          await snooze(100);
+          agentDevice1MockRefresh(tickNumber);
+        }
+      );
 
-  //     it("should simunteusly invoke method of different groups, but one after another methods of the same group", async () => {
-  //       //Group1 -  device1 (snooze 200ms), device2 (snooze 200ms)
-  //       //Group2 -  device3 (snooze 300ms)
+      agentDevice2 = createFakeDevice(
+        "agentDeviceId2",
+        "agentDeviceName2",
+        "agentDeviceGroup1",
+        async (tickNumber) => {
+          await snooze(200);
+          agentDevice2MockRefresh(tickNumber);
+        }
+      );
 
-  //       await exec();
+      agentDevice3 = createFakeDevice(
+        "agentDeviceId3",
+        "agentDeviceName3",
+        "agentDeviceGroup2",
+        async (tickNumber) => {
+          await snooze(200);
+          agentDevice3MockRefresh(tickNumber);
+        }
+      );
 
-  //       //Methods should be inoked in order: device1, device3, device2
-  //       expect(device1RefreshMock).toHaveBeenCalledBefore(device3RefreshMock);
-  //       expect(device3RefreshMock).toHaveBeenCalledBefore(device2RefreshMock);
-  //     });
+      agentDevices = [agentDevice1, agentDevice2, agentDevice3];
+    });
 
-  //     it("should simunteusly invoke method of different groups - if every device has seperate group assigned", async () => {
-  //       device1.getRefreshGroupID = () => "deviceGroup1";
-  //       device2.getRefreshGroupID = () => "deviceGroup2";
-  //       device3.getRefreshGroupID = () => "deviceGroup3";
+    afterEach(() => {
+      logger.warn = loggerWarnOriginal;
+    });
 
-  //       device1.refresh = async (tickNumber) => {
-  //         await snooze(300);
-  //         device1RefreshMock(tickNumber);
-  //       };
+    let exec = async () => {
+      refreshGroupManager = new RefreshGroupsManager();
+      refreshGroupManager.createRefreshGroups(
+        connectDevices,
+        internalDevices,
+        agentDevices
+      );
 
-  //       device2.refresh = async (tickNumber) => {
-  //         await snooze(200);
-  //         device2RefreshMock(tickNumber);
-  //       };
+      return refreshGroupManager.refresh(tickNumber);
+    };
 
-  //       device3.refresh = async (tickNumber) => {
-  //         await snooze(100);
-  //         device3RefreshMock(tickNumber);
-  //       };
+    it("should invoke refresh of devices in proper order - if in every device type there are some devices with same group and some with only one group", async () => {
+      //Connect devices:
+      // - Group1: dev1 (snooze 100ms), dev2 (snooze 200ms)
+      // - Group2: dev3 (snooze 200ms)
+      //Internal devices:
+      // - Group1: dev1 (snooze 200ms)
+      // - Group2: dev2 (snooze 100ms), dev3 (snooze 200ms)
+      //Agent devices:
+      // - Group1: dev1 (snooze 100ms), dev2 (snooze 200ms)
+      // - Group2: dev3 (snooze 200ms)
 
-  //       //Group1 -  device1 (snooze 300ms),
-  //       //Group2 -  device2 (snooze 200ms),
-  //       //Group3 -  device3 (snooze 100ms)
+      await exec();
 
-  //       await exec();
+      //All refresh method should have been called
+      expect(connectDevice1MockRefresh).toHaveBeenCalledTimes(1);
+      expect(connectDevice2MockRefresh).toHaveBeenCalledTimes(1);
+      expect(connectDevice3MockRefresh).toHaveBeenCalledTimes(1);
 
-  //       //Methods should be inoked in order: device3, device2, device1
-  //       expect(device3RefreshMock).toHaveBeenCalledBefore(device2RefreshMock);
-  //       expect(device2RefreshMock).toHaveBeenCalledBefore(device1RefreshMock);
-  //     });
+      expect(internalDevice1MockRefresh).toHaveBeenCalledTimes(1);
+      expect(internalDevice2MockRefresh).toHaveBeenCalledTimes(1);
+      expect(internalDevice3MockRefresh).toHaveBeenCalledTimes(1);
 
-  //     it("should invoke methods one by one - if all devices are in one group", async () => {
-  //       device1.getRefreshGroupID = () => "deviceGroup1";
-  //       device2.getRefreshGroupID = () => "deviceGroup1";
-  //       device3.getRefreshGroupID = () => "deviceGroup1";
+      expect(agentDevice1MockRefresh).toHaveBeenCalledTimes(1);
+      expect(agentDevice2MockRefresh).toHaveBeenCalledTimes(1);
+      expect(agentDevice3MockRefresh).toHaveBeenCalledTimes(1);
 
-  //       device1.refresh = async (tickNumber) => {
-  //         await snooze(300);
-  //         device1RefreshMock(tickNumber);
-  //       };
+      //All refresh method should be invoked with tickNumber
+      expect(connectDevice1MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(connectDevice2MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(connectDevice3MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
 
-  //       device2.refresh = async (tickNumber) => {
-  //         await snooze(200);
-  //         device2RefreshMock(tickNumber);
-  //       };
+      expect(internalDevice1MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(internalDevice2MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(internalDevice3MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
 
-  //       device3.refresh = async (tickNumber) => {
-  //         await snooze(100);
-  //         device3RefreshMock(tickNumber);
-  //       };
+      expect(agentDevice1MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(agentDevice2MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(agentDevice3MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
 
-  //       //Group1 -  device1 (snooze 300ms),
-  //       //Group1 -  device2 (snooze 200ms),
-  //       //Group1 -  device3 (snooze 100ms)
+      //Expected order - connectDevices: dev1 -> dev3 -> dev2 -> internalDevices: dev2 -> dev1 -> dev3 -> agentDevices: dev1 -> dev3 -> dev2
+      expect(connectDevice1MockRefresh).toHaveBeenCalledBefore(
+        connectDevice3MockRefresh
+      );
+      expect(connectDevice3MockRefresh).toHaveBeenCalledBefore(
+        connectDevice2MockRefresh
+      );
+      expect(connectDevice2MockRefresh).toHaveBeenCalledBefore(
+        internalDevice2MockRefresh
+      );
+      expect(internalDevice2MockRefresh).toHaveBeenCalledBefore(
+        internalDevice1MockRefresh
+      );
+      expect(internalDevice1MockRefresh).toHaveBeenCalledBefore(
+        internalDevice3MockRefresh
+      );
+      expect(internalDevice3MockRefresh).toHaveBeenCalledBefore(
+        agentDevice1MockRefresh
+      );
+      expect(agentDevice1MockRefresh).toHaveBeenCalledBefore(
+        agentDevice3MockRefresh
+      );
+      expect(agentDevice3MockRefresh).toHaveBeenCalledBefore(
+        agentDevice2MockRefresh
+      );
+    });
 
-  //       await exec();
+    it("should invoke refresh of devices in proper order - if in every device type all devices have different group", async () => {
+      connectDevice1.getRefreshGroupID = () => "connectDeviceGroup1";
+      connectDevice1.refresh = async (tickNumber) => {
+        await snooze(300);
+        connectDevice1MockRefresh(tickNumber);
+      };
 
-  //       //Methods should be inoked in order: device1, device2, device3
-  //       expect(device1RefreshMock).toHaveBeenCalledBefore(device2RefreshMock);
-  //       expect(device2RefreshMock).toHaveBeenCalledBefore(device3RefreshMock);
-  //     });
+      connectDevice2.getRefreshGroupID = () => "connectDeviceGroup2";
+      connectDevice2.refresh = async (tickNumber) => {
+        await snooze(200);
+        connectDevice2MockRefresh(tickNumber);
+      };
 
-  //     it("should refresh all devices assigned to RefreshGroups and not throw - if one of device throws", async () => {
-  //       device1.refresh = async () => {
-  //         throw new Error("test error");
-  //       };
+      connectDevice3.getRefreshGroupID = () => "connectDeviceGroup3";
+      connectDevice3.refresh = async (tickNumber) => {
+        await snooze(100);
+        connectDevice3MockRefresh(tickNumber);
+      };
 
-  //       await exec();
+      internalDevice1.getRefreshGroupID = () => "internalDeviceGroup1";
+      internalDevice1.refresh = async (tickNumber) => {
+        await snooze(300);
+        internalDevice1MockRefresh(tickNumber);
+      };
 
-  //       expect(device2RefreshMock).toHaveBeenCalledTimes(1);
-  //       expect(device2RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      internalDevice2.getRefreshGroupID = () => "internalDeviceGroup2";
+      internalDevice2.refresh = async (tickNumber) => {
+        await snooze(200);
+        internalDevice2MockRefresh(tickNumber);
+      };
 
-  //       expect(device3RefreshMock).toHaveBeenCalledTimes(1);
-  //       expect(device3RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      internalDevice3.getRefreshGroupID = () => "internalDeviceGroup3";
+      internalDevice3.refresh = async (tickNumber) => {
+        await snooze(100);
+        internalDevice3MockRefresh(tickNumber);
+      };
 
-  //       //logger warn should have been called
-  //       expect(loggerWarnMock).toHaveBeenCalledTimes(1);
-  //       expect(loggerWarnMock.mock.calls[0][0]).toEqual("test error");
-  //     });
+      agentDevice1.getRefreshGroupID = () => "agentDeviceGroup1";
+      agentDevice1.refresh = async (tickNumber) => {
+        await snooze(300);
+        agentDevice1MockRefresh(tickNumber);
+      };
 
-  //     it("should not throw - if there is no devices", async () => {
-  //       devices = [];
+      agentDevice2.getRefreshGroupID = () => "agentDeviceGroup2";
+      agentDevice2.refresh = async (tickNumber) => {
+        await snooze(200);
+        agentDevice2MockRefresh(tickNumber);
+      };
 
-  //       await expect(
-  //         new Promise(async (resolve, reject) => {
-  //           try {
-  //             return resolve(true);
-  //           } catch (err) {
-  //             return reject(err);
-  //           }
-  //         })
-  //       ).resolves.toBeDefined();
-  //     });
-  //   });
+      agentDevice3.getRefreshGroupID = () => "agentDeviceGroup3";
+      agentDevice3.refresh = async (tickNumber) => {
+        await snooze(100);
+        agentDevice3MockRefresh(tickNumber);
+      };
+
+      //Connect devices:
+      // - Group1: dev1 (snooze 300ms)
+      // - Group2: dev2 (snooze 200ms)
+      // - Group3: dev3 (snooze 100ms)
+      //Internal devices:
+      // - Group1: dev1 (snooze 300ms)
+      // - Group2: dev2 (snooze 200ms)
+      // - Group3: dev3 (snooze 100ms)
+      //Agent devices:
+      // - Group1: dev1 (snooze 300ms)
+      // - Group2: dev2 (snooze 200ms)
+      // - Group3: dev3 (snooze 100ms)
+
+      await exec();
+
+      //All refresh method should have been called
+      expect(connectDevice1MockRefresh).toHaveBeenCalledTimes(1);
+      expect(connectDevice2MockRefresh).toHaveBeenCalledTimes(1);
+      expect(connectDevice3MockRefresh).toHaveBeenCalledTimes(1);
+
+      expect(internalDevice1MockRefresh).toHaveBeenCalledTimes(1);
+      expect(internalDevice2MockRefresh).toHaveBeenCalledTimes(1);
+      expect(internalDevice3MockRefresh).toHaveBeenCalledTimes(1);
+
+      expect(agentDevice1MockRefresh).toHaveBeenCalledTimes(1);
+      expect(agentDevice2MockRefresh).toHaveBeenCalledTimes(1);
+      expect(agentDevice3MockRefresh).toHaveBeenCalledTimes(1);
+
+      //All refresh method should be invoked with tickNumber
+      expect(connectDevice1MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(connectDevice2MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(connectDevice3MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+
+      expect(internalDevice1MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(internalDevice2MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(internalDevice3MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+
+      expect(agentDevice1MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(agentDevice2MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(agentDevice3MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+
+      //Expected order - connectDevices: dev3 -> dev2 -> dev1 -> internalDevices: dev3 -> dev2 -> dev1 -> agentDevices: dev3 -> dev2 -> dev1
+      expect(connectDevice3MockRefresh).toHaveBeenCalledBefore(
+        connectDevice2MockRefresh
+      );
+      expect(connectDevice2MockRefresh).toHaveBeenCalledBefore(
+        connectDevice1MockRefresh
+      );
+      expect(connectDevice1MockRefresh).toHaveBeenCalledBefore(
+        internalDevice3MockRefresh
+      );
+      expect(internalDevice3MockRefresh).toHaveBeenCalledBefore(
+        internalDevice2MockRefresh
+      );
+      expect(internalDevice2MockRefresh).toHaveBeenCalledBefore(
+        internalDevice1MockRefresh
+      );
+      expect(internalDevice1MockRefresh).toHaveBeenCalledBefore(
+        agentDevice3MockRefresh
+      );
+      expect(agentDevice3MockRefresh).toHaveBeenCalledBefore(
+        agentDevice2MockRefresh
+      );
+      expect(agentDevice2MockRefresh).toHaveBeenCalledBefore(
+        agentDevice1MockRefresh
+      );
+    });
+
+    it("should invoke refresh of devices in proper order - if in every device type all devices are in the same group", async () => {
+      connectDevice1.getRefreshGroupID = () => "connectDeviceGroup1";
+      connectDevice1.refresh = async (tickNumber) => {
+        await snooze(300);
+        connectDevice1MockRefresh(tickNumber);
+      };
+
+      connectDevice2.getRefreshGroupID = () => "connectDeviceGroup1";
+      connectDevice2.refresh = async (tickNumber) => {
+        await snooze(200);
+        connectDevice2MockRefresh(tickNumber);
+      };
+
+      connectDevice3.getRefreshGroupID = () => "connectDeviceGroup1";
+      connectDevice3.refresh = async (tickNumber) => {
+        await snooze(100);
+        connectDevice3MockRefresh(tickNumber);
+      };
+
+      internalDevice1.getRefreshGroupID = () => "internalDeviceGroup1";
+      internalDevice1.refresh = async (tickNumber) => {
+        await snooze(300);
+        internalDevice1MockRefresh(tickNumber);
+      };
+
+      internalDevice2.getRefreshGroupID = () => "internalDeviceGroup1";
+      internalDevice2.refresh = async (tickNumber) => {
+        await snooze(200);
+        internalDevice2MockRefresh(tickNumber);
+      };
+
+      internalDevice3.getRefreshGroupID = () => "internalDeviceGroup1";
+      internalDevice3.refresh = async (tickNumber) => {
+        await snooze(100);
+        internalDevice3MockRefresh(tickNumber);
+      };
+
+      agentDevice1.getRefreshGroupID = () => "agentDeviceGroup1";
+      agentDevice1.refresh = async (tickNumber) => {
+        await snooze(300);
+        agentDevice1MockRefresh(tickNumber);
+      };
+
+      agentDevice2.getRefreshGroupID = () => "agentDeviceGroup1";
+      agentDevice2.refresh = async (tickNumber) => {
+        await snooze(200);
+        agentDevice2MockRefresh(tickNumber);
+      };
+
+      agentDevice3.getRefreshGroupID = () => "agentDeviceGroup1";
+      agentDevice3.refresh = async (tickNumber) => {
+        await snooze(100);
+        agentDevice3MockRefresh(tickNumber);
+      };
+
+      //Connect devices:
+      // - Group1: dev1 (snooze 300ms), dev2 (snooze 200ms), dev3 (snooze 100ms)
+      //Internal devices:
+      // - Group1: dev1 (snooze 300ms), dev2 (snooze 200ms), dev3 (snooze 100ms)
+      //Agent devices:
+      // - Group1: dev1 (snooze 300ms), dev2 (snooze 200ms), dev3 (snooze 100ms)
+
+      await exec();
+
+      //All refresh method should have been called
+      expect(connectDevice1MockRefresh).toHaveBeenCalledTimes(1);
+      expect(connectDevice2MockRefresh).toHaveBeenCalledTimes(1);
+      expect(connectDevice3MockRefresh).toHaveBeenCalledTimes(1);
+
+      expect(internalDevice1MockRefresh).toHaveBeenCalledTimes(1);
+      expect(internalDevice2MockRefresh).toHaveBeenCalledTimes(1);
+      expect(internalDevice3MockRefresh).toHaveBeenCalledTimes(1);
+
+      expect(agentDevice1MockRefresh).toHaveBeenCalledTimes(1);
+      expect(agentDevice2MockRefresh).toHaveBeenCalledTimes(1);
+      expect(agentDevice3MockRefresh).toHaveBeenCalledTimes(1);
+
+      //All refresh method should be invoked with tickNumber
+      expect(connectDevice1MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(connectDevice2MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(connectDevice3MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+
+      expect(internalDevice1MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(internalDevice2MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(internalDevice3MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+
+      expect(agentDevice1MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(agentDevice2MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(agentDevice3MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+
+      //Expected order - connectDevices: dev1 -> dev2 -> dev3 -> internalDevices: dev1 -> dev2 -> dev3 -> agentDevices: dev1 -> dev2 -> dev3
+      expect(connectDevice1MockRefresh).toHaveBeenCalledBefore(
+        connectDevice2MockRefresh
+      );
+      expect(connectDevice2MockRefresh).toHaveBeenCalledBefore(
+        connectDevice3MockRefresh
+      );
+      expect(connectDevice3MockRefresh).toHaveBeenCalledBefore(
+        internalDevice1MockRefresh
+      );
+      expect(internalDevice1MockRefresh).toHaveBeenCalledBefore(
+        internalDevice2MockRefresh
+      );
+      expect(internalDevice2MockRefresh).toHaveBeenCalledBefore(
+        internalDevice3MockRefresh
+      );
+      expect(internalDevice3MockRefresh).toHaveBeenCalledBefore(
+        agentDevice1MockRefresh
+      );
+      expect(agentDevice1MockRefresh).toHaveBeenCalledBefore(
+        agentDevice2MockRefresh
+      );
+      expect(agentDevice2MockRefresh).toHaveBeenCalledBefore(
+        agentDevice3MockRefresh
+      );
+    });
+
+    it("should invoke refresh of devices in proper order - if there are no connect devices", async () => {
+      connectDevices = [];
+      //Connect devices:
+      //Internal devices:
+      // - Group1: dev1 (snooze 200ms)
+      // - Group2: dev2 (snooze 100ms), dev3 (snooze 200ms)
+      //Agent devices:
+      // - Group1: dev1 (snooze 100ms), dev2 (snooze 200ms)
+      // - Group2: dev3 (snooze 200ms)
+
+      await exec();
+
+      expect(internalDevice1MockRefresh).toHaveBeenCalledTimes(1);
+      expect(internalDevice2MockRefresh).toHaveBeenCalledTimes(1);
+      expect(internalDevice3MockRefresh).toHaveBeenCalledTimes(1);
+
+      expect(agentDevice1MockRefresh).toHaveBeenCalledTimes(1);
+      expect(agentDevice2MockRefresh).toHaveBeenCalledTimes(1);
+      expect(agentDevice3MockRefresh).toHaveBeenCalledTimes(1);
+
+      //All refresh method should be invoked with tickNumber
+
+      expect(internalDevice1MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(internalDevice2MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(internalDevice3MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+
+      expect(agentDevice1MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(agentDevice2MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(agentDevice3MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+
+      //Expected order - internalDevices: dev2 -> dev1 -> dev3 -> agentDevices: dev1 -> dev3 -> dev2
+
+      expect(internalDevice2MockRefresh).toHaveBeenCalledBefore(
+        internalDevice1MockRefresh
+      );
+      expect(internalDevice1MockRefresh).toHaveBeenCalledBefore(
+        internalDevice3MockRefresh
+      );
+      expect(internalDevice3MockRefresh).toHaveBeenCalledBefore(
+        agentDevice1MockRefresh
+      );
+      expect(agentDevice1MockRefresh).toHaveBeenCalledBefore(
+        agentDevice3MockRefresh
+      );
+      expect(agentDevice3MockRefresh).toHaveBeenCalledBefore(
+        agentDevice2MockRefresh
+      );
+    });
+
+    it("should invoke refresh of devices in proper order - if there are no internal devices", async () => {
+      internalDevices = [];
+
+      //Connect devices:
+      // - Group1: dev1 (snooze 100ms), dev2 (snooze 200ms)
+      // - Group2: dev3 (snooze 200ms)
+      //Internal devices:
+      //Agent devices:
+      // - Group1: dev1 (snooze 100ms), dev2 (snooze 200ms)
+      // - Group2: dev3 (snooze 200ms)
+
+      await exec();
+
+      //All refresh method should have been called
+      expect(connectDevice1MockRefresh).toHaveBeenCalledTimes(1);
+      expect(connectDevice2MockRefresh).toHaveBeenCalledTimes(1);
+      expect(connectDevice3MockRefresh).toHaveBeenCalledTimes(1);
+
+      expect(agentDevice1MockRefresh).toHaveBeenCalledTimes(1);
+      expect(agentDevice2MockRefresh).toHaveBeenCalledTimes(1);
+      expect(agentDevice3MockRefresh).toHaveBeenCalledTimes(1);
+
+      //All refresh method should be invoked with tickNumber
+      expect(connectDevice1MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(connectDevice2MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(connectDevice3MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+
+      expect(agentDevice1MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(agentDevice2MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(agentDevice3MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+
+      //Expected order - connectDevices: dev1 -> dev3 -> dev2 -> internalDevices: dev2 -> dev1 -> dev3 -> agentDevices: dev1 -> dev3 -> dev2
+      expect(connectDevice1MockRefresh).toHaveBeenCalledBefore(
+        connectDevice3MockRefresh
+      );
+      expect(connectDevice3MockRefresh).toHaveBeenCalledBefore(
+        connectDevice2MockRefresh
+      );
+      expect(connectDevice2MockRefresh).toHaveBeenCalledBefore(
+        agentDevice1MockRefresh
+      );
+      expect(agentDevice1MockRefresh).toHaveBeenCalledBefore(
+        agentDevice3MockRefresh
+      );
+      expect(agentDevice3MockRefresh).toHaveBeenCalledBefore(
+        agentDevice2MockRefresh
+      );
+    });
+
+    it("should invoke refresh of devices in proper order - if there are no agent devices", async () => {
+      agentDevices = [];
+
+      //Connect devices:
+      // - Group1: dev1 (snooze 100ms), dev2 (snooze 200ms)
+      // - Group2: dev3 (snooze 200ms)
+      //Internal devices:
+      // - Group1: dev1 (snooze 200ms)
+      // - Group2: dev2 (snooze 100ms), dev3 (snooze 200ms)
+      //Agent devices:
+
+      await exec();
+
+      //All refresh method should have been called
+      expect(connectDevice1MockRefresh).toHaveBeenCalledTimes(1);
+      expect(connectDevice2MockRefresh).toHaveBeenCalledTimes(1);
+      expect(connectDevice3MockRefresh).toHaveBeenCalledTimes(1);
+
+      expect(internalDevice1MockRefresh).toHaveBeenCalledTimes(1);
+      expect(internalDevice2MockRefresh).toHaveBeenCalledTimes(1);
+      expect(internalDevice3MockRefresh).toHaveBeenCalledTimes(1);
+
+      //All refresh method should be invoked with tickNumber
+      expect(connectDevice1MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(connectDevice2MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(connectDevice3MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+
+      expect(internalDevice1MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(internalDevice2MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(internalDevice3MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+
+      //Expected order - connectDevices: dev1 -> dev3 -> dev2 -> internalDevices: dev2 -> dev1 -> dev3 -> agentDevices: dev1 -> dev3 -> dev2
+      expect(connectDevice1MockRefresh).toHaveBeenCalledBefore(
+        connectDevice3MockRefresh
+      );
+      expect(connectDevice3MockRefresh).toHaveBeenCalledBefore(
+        connectDevice2MockRefresh
+      );
+      expect(connectDevice2MockRefresh).toHaveBeenCalledBefore(
+        internalDevice2MockRefresh
+      );
+      expect(internalDevice2MockRefresh).toHaveBeenCalledBefore(
+        internalDevice1MockRefresh
+      );
+      expect(internalDevice1MockRefresh).toHaveBeenCalledBefore(
+        internalDevice3MockRefresh
+      );
+    });
+
+    it("should invoke refresh of devices in proper order - if one of connect devices throws while refreshing", async () => {
+      connectDevice1.refresh = async (tickNumber) => {
+        throw new Error("Test Error");
+      };
+
+      //Connect devices:
+      // - Group1: dev1 (snooze 100ms), dev2 (snooze 200ms)
+      // - Group2: dev3 (snooze 200ms)
+      //Internal devices:
+      // - Group1: dev1 (snooze 200ms)
+      // - Group2: dev2 (snooze 100ms), dev3 (snooze 200ms)
+      //Agent devices:
+      // - Group1: dev1 (snooze 100ms), dev2 (snooze 200ms)
+      // - Group2: dev3 (snooze 200ms)
+
+      await exec();
+
+      //All refresh method should have been called
+      expect(connectDevice2MockRefresh).toHaveBeenCalledTimes(1);
+      expect(connectDevice3MockRefresh).toHaveBeenCalledTimes(1);
+
+      expect(internalDevice1MockRefresh).toHaveBeenCalledTimes(1);
+      expect(internalDevice2MockRefresh).toHaveBeenCalledTimes(1);
+      expect(internalDevice3MockRefresh).toHaveBeenCalledTimes(1);
+
+      expect(agentDevice1MockRefresh).toHaveBeenCalledTimes(1);
+      expect(agentDevice2MockRefresh).toHaveBeenCalledTimes(1);
+      expect(agentDevice3MockRefresh).toHaveBeenCalledTimes(1);
+
+      //Expected order - connectDevices: dev1 -> dev3 -> dev2 -> internalDevices: dev2 -> dev1 -> dev3 -> agentDevices: dev1 -> dev3 -> dev2
+      expect(connectDevice3MockRefresh).toHaveBeenCalledBefore(
+        connectDevice2MockRefresh
+      );
+      expect(connectDevice2MockRefresh).toHaveBeenCalledBefore(
+        internalDevice2MockRefresh
+      );
+      expect(internalDevice2MockRefresh).toHaveBeenCalledBefore(
+        internalDevice1MockRefresh
+      );
+      expect(internalDevice1MockRefresh).toHaveBeenCalledBefore(
+        internalDevice3MockRefresh
+      );
+      expect(internalDevice3MockRefresh).toHaveBeenCalledBefore(
+        agentDevice1MockRefresh
+      );
+      expect(agentDevice1MockRefresh).toHaveBeenCalledBefore(
+        agentDevice3MockRefresh
+      );
+      expect(agentDevice3MockRefresh).toHaveBeenCalledBefore(
+        agentDevice2MockRefresh
+      );
+
+      expect(loggerWarnMock).toHaveBeenCalledTimes(1);
+      expect(loggerWarnMock.mock.calls[0][0]).toEqual("Test Error");
+    });
+
+    it("should invoke refresh of devices in proper order - if one of internal devices throws while refreshing", async () => {
+      internalDevice2.refresh = async (tickNumber) => {
+        throw new Error("Test Error");
+      };
+
+      //Connect devices:
+      // - Group1: dev1 (snooze 100ms), dev2 (snooze 200ms)
+      // - Group2: dev3 (snooze 200ms)
+      //Internal devices:
+      // - Group1: dev1 (snooze 200ms)
+      // - Group2: dev2 (snooze 100ms), dev3 (snooze 200ms)
+      //Agent devices:
+      // - Group1: dev1 (snooze 100ms), dev2 (snooze 200ms)
+      // - Group2: dev3 (snooze 200ms)
+
+      await exec();
+
+      //All refresh method should have been called
+      expect(connectDevice1MockRefresh).toHaveBeenCalledTimes(1);
+      expect(connectDevice2MockRefresh).toHaveBeenCalledTimes(1);
+      expect(connectDevice3MockRefresh).toHaveBeenCalledTimes(1);
+
+      expect(internalDevice1MockRefresh).toHaveBeenCalledTimes(1);
+      expect(internalDevice3MockRefresh).toHaveBeenCalledTimes(1);
+
+      expect(agentDevice1MockRefresh).toHaveBeenCalledTimes(1);
+      expect(agentDevice2MockRefresh).toHaveBeenCalledTimes(1);
+      expect(agentDevice3MockRefresh).toHaveBeenCalledTimes(1);
+
+      //All refresh method should be invoked with tickNumber
+      expect(connectDevice1MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(connectDevice2MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(connectDevice3MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+
+      expect(internalDevice1MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(internalDevice3MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+
+      expect(agentDevice1MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(agentDevice2MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(agentDevice3MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+
+      //Expected order - connectDevices: dev1 -> dev3 -> dev2 -> internalDevices: dev2 -> dev1 -> dev3 -> agentDevices: dev1 -> dev3 -> dev2
+      expect(connectDevice1MockRefresh).toHaveBeenCalledBefore(
+        connectDevice3MockRefresh
+      );
+      expect(connectDevice3MockRefresh).toHaveBeenCalledBefore(
+        connectDevice2MockRefresh
+      );
+      expect(connectDevice2MockRefresh).toHaveBeenCalledBefore(
+        internalDevice1MockRefresh
+      );
+      expect(internalDevice1MockRefresh).toHaveBeenCalledBefore(
+        internalDevice3MockRefresh
+      );
+      expect(internalDevice3MockRefresh).toHaveBeenCalledBefore(
+        agentDevice1MockRefresh
+      );
+      expect(agentDevice1MockRefresh).toHaveBeenCalledBefore(
+        agentDevice3MockRefresh
+      );
+      expect(agentDevice3MockRefresh).toHaveBeenCalledBefore(
+        agentDevice2MockRefresh
+      );
+
+      expect(loggerWarnMock).toHaveBeenCalledTimes(1);
+      expect(loggerWarnMock.mock.calls[0][0]).toEqual("Test Error");
+    });
+
+    it("should invoke refresh of devices in proper order - if one of agent devices throws while refreshing", async () => {
+      agentDevice1.refresh = async (tickNumber) => {
+        throw new Error("Test Error");
+      };
+
+      //Connect devices:
+      // - Group1: dev1 (snooze 100ms), dev2 (snooze 200ms)
+      // - Group2: dev3 (snooze 200ms)
+      //Internal devices:
+      // - Group1: dev1 (snooze 200ms)
+      // - Group2: dev2 (snooze 100ms), dev3 (snooze 200ms)
+      //Agent devices:
+      // - Group1: dev1 (snooze 100ms), dev2 (snooze 200ms)
+      // - Group2: dev3 (snooze 200ms)
+
+      await exec();
+
+      //All refresh method should have been called
+      expect(connectDevice1MockRefresh).toHaveBeenCalledTimes(1);
+      expect(connectDevice2MockRefresh).toHaveBeenCalledTimes(1);
+      expect(connectDevice3MockRefresh).toHaveBeenCalledTimes(1);
+
+      expect(internalDevice1MockRefresh).toHaveBeenCalledTimes(1);
+      expect(internalDevice2MockRefresh).toHaveBeenCalledTimes(1);
+      expect(internalDevice3MockRefresh).toHaveBeenCalledTimes(1);
+
+      expect(agentDevice2MockRefresh).toHaveBeenCalledTimes(1);
+      expect(agentDevice3MockRefresh).toHaveBeenCalledTimes(1);
+
+      //All refresh method should be invoked with tickNumber
+      expect(connectDevice1MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(connectDevice2MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(connectDevice3MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+
+      expect(internalDevice1MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(internalDevice2MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(internalDevice3MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+
+      expect(agentDevice2MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+      expect(agentDevice3MockRefresh.mock.calls[0][0]).toEqual(tickNumber);
+
+      //Expected order - connectDevices: dev1 -> dev3 -> dev2 -> internalDevices: dev2 -> dev1 -> dev3 -> agentDevices: dev1 -> dev3 -> dev2
+      expect(connectDevice1MockRefresh).toHaveBeenCalledBefore(
+        connectDevice3MockRefresh
+      );
+      expect(connectDevice3MockRefresh).toHaveBeenCalledBefore(
+        connectDevice2MockRefresh
+      );
+      expect(connectDevice2MockRefresh).toHaveBeenCalledBefore(
+        internalDevice2MockRefresh
+      );
+      expect(internalDevice2MockRefresh).toHaveBeenCalledBefore(
+        internalDevice1MockRefresh
+      );
+      expect(internalDevice1MockRefresh).toHaveBeenCalledBefore(
+        internalDevice3MockRefresh
+      );
+      expect(internalDevice3MockRefresh).toHaveBeenCalledBefore(
+        agentDevice3MockRefresh
+      );
+      expect(agentDevice3MockRefresh).toHaveBeenCalledBefore(
+        agentDevice2MockRefresh
+      );
+    });
+  });
 });
