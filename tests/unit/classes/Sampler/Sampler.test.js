@@ -292,17 +292,20 @@ describe("Sampler", () => {
   describe("stop", () => {
     let sampler;
     let onInternalTickMock;
+    let active;
 
     beforeEach(() => {
       sampler = new Sampler();
       onInternalTickMock = jest.fn();
       sampler._onInternalTick = onInternalTickMock;
+      active = true;
     });
 
     let exec = () => {
       jest.useFakeTimers();
 
       sampler.start();
+      sampler._active = active;
 
       return sampler.stop();
     };
@@ -319,6 +322,14 @@ describe("Sampler", () => {
     it("Should set active to false", () => {
       exec();
       expect(sampler.Active).toEqual(false);
+    });
+
+    it("Should not stop handler invoking tick every 100 ms if sampler not active", () => {
+      active = false;
+      exec();
+      jest.advanceTimersByTime(1000);
+
+      expect(onInternalTickMock).toHaveBeenCalledTimes(10);
     });
   });
 

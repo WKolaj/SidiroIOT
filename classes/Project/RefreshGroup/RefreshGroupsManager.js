@@ -2,8 +2,6 @@ const { exists } = require("../../../utilities/utilities");
 const RefreshGroup = require("./RefreshGroup");
 const RefreshGroups = require("./RefreshGroups");
 
-//TODO - check (test) all mechanism of refreshing groups !!
-
 class RefreshGroupsManager {
   //#region ========= CONSTRUCTOR =========
 

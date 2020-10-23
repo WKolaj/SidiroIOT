@@ -74,9 +74,11 @@ class Sampler {
    * @description Method for stopaping
    */
   stop() {
-    clearInterval(this._internalTickHandler);
-    this._internalTickHandler = null;
-    this._active = false;
+    if (this.Active) {
+      clearInterval(this._internalTickHandler);
+      this._internalTickHandler = null;
+      this._active = false;
+    }
   }
 
   //#endregion ========= PUBLIC METHODS =========
