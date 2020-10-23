@@ -21,7 +21,7 @@ class Device {
   /**
    * @description Method for getting refresh group of devices - devices with the same group id WILL NOT be refreshed simuntaneusly. HAS TO BE OVERRIDE IN CHILD CLASSES!
    */
-  async getRefreshGroupID() {}
+  getRefreshGroupID() {}
 
   //#endregion ========= PUBLIC ABSTRACT METHODS =========
 }
