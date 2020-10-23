@@ -10,10 +10,7 @@ class RefreshGroup {
    */
   constructor(id, devices) {
     this._id = id;
-
-    //fill devices
-    this._devices = {};
-    for (let dev of devices) this._devices[dev.ID] = dev;
+    this._devices = [...devices];
   }
 
   //#endregion ========= CONSTRUCTOR =========
