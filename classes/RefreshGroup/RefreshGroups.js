@@ -1,4 +1,4 @@
-const { exists } = require("../../../utilities/utilities");
+const { exists } = require("../../utilities/utilities");
 const RefreshGroup = require("./RefreshGroup");
 
 class RefreshGroups {

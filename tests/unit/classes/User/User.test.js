@@ -1,7 +1,7 @@
 const path = require("path");
 const config = require("config");
 const jwt = require("jsonwebtoken");
-const User = require("../../../classes/User/User");
+const User = require("../../../../classes/User/User");
 const {
   setBit,
   clearBit,
@@ -10,7 +10,7 @@ const {
   hashString,
   writeFileAsync,
   readFileAsync,
-} = require("../../../utilities/utilities");
+} = require("../../../../utilities/utilities");
 
 const privateKey = config.get("jwtPrivateKey");
 const settingsDirPath = config.get("settingsPath");

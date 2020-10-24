@@ -1,5 +1,5 @@
 const { snooze } = require("../../../../utilities/utilities");
-const RefreshGroups = require("../../../../classes/Device/RefreshGroup/RefreshGroups");
+const RefreshGroups = require("../../../../classes/RefreshGroup/RefreshGroups");
 const logger = require("../../../../logger/logger");
 
 const createFakeDevice = (id, name, requestGroupID, refreshMethod) => {
