@@ -119,10 +119,10 @@ class Sampler {
   /**
    * @description Doest TickId matches actual tick?
    * @param {number} tickNumber Actual tick
-   * @param {number} tickId TickId to be checked
+   * @param {number} sampleTime TickId to be checked
    */
-  static doesTickIdMatchesTick(tickNumber, tickId) {
-    return tickNumber % tickId === 0;
+  static doesSampleTimeMatchesTick(tickNumber, sampleTime) {
+    return tickNumber % sampleTime === 0;
   }
 
   /**

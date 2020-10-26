@@ -1,21 +1,19 @@
-const User = require("./classes/User/User");
+const express = require("express");
 
-let exec = async () => {
-  let payload = {
-    name: "testUser6",
-    password: "abcd1234",
-    permissions: 3,
-  };
+const app = express();
 
-  let newUser = await User.CreateFromPayload(payload);
+const path = require("path");
 
-  await newUser.Save();
+const port = 5000;
 
-  let user = await User.GetUserFromFileByName("testUser5");
+// Serve any static files
 
-  console.log(user);
+app.use(express.static(path.join(__dirname, "client/build")));
 
-  //   await newUser.Save();
-};
+// Handle React routing, return all requests to React app
 
-exec();
+app.get("*", function (req, res) {
+  res.sendFile(path.join(__dirname, "client/build", "index.html"));
+});
+
+app.listen(port, () => console.log(`Listening on port ${port}`));

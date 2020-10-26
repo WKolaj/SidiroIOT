@@ -19,7 +19,7 @@ describe("Sampler", () => {
     });
   });
 
-  describe("doesTickIdMatchesTick", () => {
+  describe("doesSampleTimeMatchesTick", () => {
     let tickId;
     let tickNumber;
 
@@ -29,7 +29,7 @@ describe("Sampler", () => {
     });
 
     let exec = () => {
-      return Sampler.doesTickIdMatchesTick(tickNumber, tickId);
+      return Sampler.doesSampleTimeMatchesTick(tickNumber, tickId);
     };
 
     it("should return true if tickNumber matches tickId", () => {

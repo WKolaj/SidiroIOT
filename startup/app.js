@@ -58,7 +58,11 @@ module.exports = async function (workingDirName) {
   require("express-async-errors");
 
   //Turning on helmet - in order to apply basic security for express
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+    })
+  );
 
   log.info("Helmet initialized");
 
@@ -81,7 +85,7 @@ module.exports = async function (workingDirName) {
 
   //In order for react routing to work - implementing sending always for any not-recognized endpoints
   app.get("*", (req, res) => {
-    res.sendFile(path.join(workingDirName + "/client/build/index.html"));
+    res.sendFile(path.join(workingDirName, "/client/build/index.html"));
   });
 
   //#endregion ========== INITIALIZING ROUTES ==========
