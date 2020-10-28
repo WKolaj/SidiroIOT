@@ -30,5 +30,3 @@ class RequestManager {
 }
 
 module.exports = RequestManager;
-
-//TODO - test request manager
