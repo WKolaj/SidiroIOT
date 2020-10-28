@@ -3,6 +3,11 @@ const Sampler = require("../Sampler/Sampler");
 class ProtocolRequest {
   //#region========= CONSTRUCTOR =========
 
+  /**
+   * @description Class representing ProtocolRequest
+   * @param {Array} variables Variables associated with request
+   * @param {Number} sampleTime sampleTime of request
+   */
   constructor(variables, sampleTime) {
     this._variables = variables;
     this._sampleTime = sampleTime;
