@@ -53,5 +53,3 @@ class StandardProtocolRequest extends ProtocolRequest {
 }
 
 module.exports = StandardProtocolRequest;
-
-//TODO - test standard protocol request

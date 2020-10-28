@@ -3,6 +3,7 @@ const {
   exists,
   hashString,
   generateRandomNumberString,
+  snooze,
 } = require("../../utilities/utilities");
 
 const testUselessUserID = "uselessUserID";
@@ -197,4 +198,12 @@ module.exports.generateTestUserAndAdminAndSuperAdmin = async () => {
 //Method for generating string of given length
 module.exports.generateStringOfGivenLength = (sign, length) => {
   return new Array(length + 1).join(sign);
+};
+
+//Method to wrap method to be invoked after some time
+module.exports.wrapMethodToInvokeAfter = (method, snoozeTime) => {
+  return async (...args) => {
+    await snooze(snoozeTime);
+    return method(...args);
+  };
 };
