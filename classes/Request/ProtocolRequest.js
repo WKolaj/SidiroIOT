@@ -7,15 +7,32 @@ class ProtocolRequest {
    * @description Class representing ProtocolRequest
    * @param {Array} variables Variables associated with request
    * @param {Number} sampleTime sampleTime of request
+   * @param {Boolean} writeRequest is request used for writing data to physical device
    */
-  constructor(variables, sampleTime) {
+  constructor(variables, sampleTime, writeRequest) {
     this._variables = variables;
     this._sampleTime = sampleTime;
+    this._writeRequest = writeRequest;
+    this._readRequest = !writeRequest;
   }
 
   //#endregion========= CONSTRUCTOR =========
 
   //#region========= PUBLIC METHODS =========
+
+  /**
+   * @description Is request used for writing data to physical device
+   */
+  get WriteRequest() {
+    return this._writeRequest;
+  }
+
+  /**
+   * @description Is request used for reading data from physical device
+   */
+  get ReadRequest() {
+    return this._readRequest;
+  }
 
   /**
    * @description Variables associated with request

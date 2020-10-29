@@ -17,6 +17,7 @@ describe("StandardProtocolRequest", () => {
     let variable3;
     let variables;
     let sampleTime;
+    let writeRequest;
 
     beforeEach(() => {
       variable1 = createVariable("var1Id", "var1Name", 1, []);
@@ -26,10 +27,11 @@ describe("StandardProtocolRequest", () => {
       variables = [variable1, variable2, variable3];
 
       sampleTime = 123;
+      writeRequest = false;
     });
 
     let exec = () => {
-      return new StandardProtocolRequest(variables, sampleTime);
+      return new StandardProtocolRequest(variables, sampleTime, writeRequest);
     };
 
     it("should create new ProtocolRequest and assign its variable and sampleTime", () => {
@@ -39,6 +41,22 @@ describe("StandardProtocolRequest", () => {
 
       expect(result.SampleTime).toEqual(sampleTime);
       expect(result.Variables).toEqual(variables);
+    });
+
+    it("should properly assign WriteRequest and ReadRequest - if writeRequest is false", () => {
+      writeRequest = false;
+      let result = exec();
+
+      expect(result.WriteRequest).toEqual(false);
+      expect(result.ReadRequest).toEqual(true);
+    });
+
+    it("should properly assign WriteRequest and ReadRequest - if writeRequest is true", () => {
+      writeRequest = true;
+      let result = exec();
+
+      expect(result.WriteRequest).toEqual(true);
+      expect(result.ReadRequest).toEqual(false);
     });
 
     it("should properly calculate variable length", () => {
@@ -73,6 +91,7 @@ describe("StandardProtocolRequest", () => {
     let variables;
     let protocolRequest;
     let data;
+    let writeRequest;
 
     beforeEach(() => {
       variable1 = createVariable("var1Id", "var1Name", 1, [9]);
@@ -82,10 +101,15 @@ describe("StandardProtocolRequest", () => {
       variables = [variable1, variable2, variable3];
 
       data = [1, 2, 3, 4, 5, 6];
+      writeRequest = false;
     });
 
     let exec = async () => {
-      protocolRequest = new StandardProtocolRequest(variables, null);
+      protocolRequest = new StandardProtocolRequest(
+        variables,
+        null,
+        writeRequest
+      );
       return protocolRequest.writeDataToVariableValues(data);
     };
 

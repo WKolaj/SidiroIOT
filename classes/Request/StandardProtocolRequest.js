@@ -3,8 +3,8 @@ const ProtocolRequest = require("./ProtocolRequest");
 class StandardProtocolRequest extends ProtocolRequest {
   //#region========= CONSTRUCTOR =========
 
-  constructor(variables, sampleTime) {
-    super(variables, sampleTime);
+  constructor(variables, sampleTime, writeRequest) {
+    super(variables, sampleTime, writeRequest);
 
     //calculating total length
     this._length = 0;

@@ -102,7 +102,9 @@ class ConnectableDevice extends Device {
       if (request.checkIfShouldBeInvoked(tickId))
         try {
           let data = await this.Driver.invokeRequest(request);
-          if (data !== null) await request.writeDataToVariableValues(data);
+          //writing data to variables only if request is read
+          if (request.ReadRequest)
+            await request.writeDataToVariableValues(data);
         } catch (err) {
           logger.warn(err.message, err);
         }
