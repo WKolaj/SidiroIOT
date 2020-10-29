@@ -1,54 +1,41 @@
 const { snooze } = require("../../../../utilities/utilities");
-const Device = require("../../../../classes/Device/Device");
 const logger = require("../../../../logger/logger");
+const {
+  createFakeDevice,
+  createFakeCalcElement,
+  createFakeAlert,
+  wrapMethodToInvokeAfter,
+} = require("../../../utilities/testUtilities");
 
 describe("Device", () => {
-  //TODO - add load tests
+  //TODO - add init tests
+  //TODO - add activate/deactive tests
   describe("refresh", () => {
-    const createFakeDevice = (
-      id,
-      type,
-      name,
-      refreshSnooze,
-      refreshVariablesMock,
-      calcElements,
-      alerts
-    ) => {
-      let device = new Device();
-      device._id = id;
-      device._type = type;
-      device._name = name;
-      device._refreshVariables = async () => {
-        await snooze(refreshSnooze);
-        await refreshVariablesMock();
-      };
-
-      device._calcElements = {};
-      for (let calcElement of calcElements)
-        device._calcElements[calcElement.ID] = calcElement;
-
-      device._alerts = {};
-      for (let alert of alerts) device._alerts[alert.ID] = alert;
-
-      return device;
-    };
-
     let device;
+    let isDeviceActive;
     let refreshVariableMockFunc;
     let calcElement1;
     let calcElement2;
     let calcElement3;
     let calcElements;
+    let calcElement1SampleTime;
+    let calcElement2SampleTime;
+    let calcElement3SampleTime;
     let calcElement1RefreshMock;
     let calcElement2RefreshMock;
     let calcElement3RefreshMock;
+    let createCalcElements;
     let alert1;
     let alert2;
     let alert3;
     let alerts;
+    let alert1SampleTime;
+    let alert2SampleTime;
+    let alert3SampleTime;
     let alert1RefreshMock;
     let alert2RefreshMock;
     let alert3RefreshMock;
+    let createAlerts;
     let tickNumber;
     let loggerWarnMock;
     let loggerWarnOriginal;
@@ -58,6 +45,9 @@ describe("Device", () => {
       loggerWarnOriginal = logger.warn;
       logger.warn = loggerWarnMock;
 
+      createCalcElements = true;
+      createAlerts = true;
+
       tickNumber = 1234;
 
       refreshVariableMockFunc = jest.fn();
@@ -65,60 +55,20 @@ describe("Device", () => {
       calcElement1RefreshMock = jest.fn();
       calcElement2RefreshMock = jest.fn();
       calcElement3RefreshMock = jest.fn();
-      calcElement1 = {
-        ID: "calcElement1ID",
-        Name: "calcElement1Name",
-        refresh: async (tick) => {
-          await snooze(100);
-          await calcElement1RefreshMock(tick);
-        },
-      };
-      calcElement2 = {
-        ID: "calcElement2ID",
-        Name: "calcElement2Name",
-        refresh: async (tick) => {
-          await snooze(200);
-          await calcElement2RefreshMock(tick);
-        },
-      };
-      calcElement3 = {
-        ID: "calcElement3ID",
-        Name: "calcElement3Name",
-        refresh: async (tick) => {
-          await snooze(300);
-          await calcElement3RefreshMock(tick);
-        },
-      };
-      calcElements = [calcElement1, calcElement2, calcElement3];
+
+      calcElement1SampleTime = 1;
+      calcElement2SampleTime = 1;
+      calcElement3SampleTime = 1;
 
       alert1RefreshMock = jest.fn();
       alert2RefreshMock = jest.fn();
       alert3RefreshMock = jest.fn();
-      alert1 = {
-        ID: "alert1ID",
-        Name: "alert1Name",
-        refresh: async (tick) => {
-          await snooze(100);
-          await alert1RefreshMock(tick);
-        },
-      };
-      alert2 = {
-        ID: "alert2ID",
-        Name: "alert2Name",
-        refresh: async (tick) => {
-          await snooze(200);
-          await alert2RefreshMock(tick);
-        },
-      };
-      alert3 = {
-        ID: "alert3ID",
-        Name: "alert3Name",
-        refresh: async (tick) => {
-          await snooze(300);
-          await alert3RefreshMock(tick);
-        },
-      };
-      alerts = [alert1, alert2, alert3];
+
+      alert1SampleTime = 1;
+      alert2SampleTime = 1;
+      alert3SampleTime = 1;
+
+      isDeviceActive = true;
     });
 
     afterEach(() => {
@@ -126,6 +76,73 @@ describe("Device", () => {
     });
 
     let exec = async () => {
+      calcElement1 = createFakeCalcElement(
+        "calcElement1ID",
+        "calcElement1Name",
+        "FakeCalcElement",
+        0,
+        "FakeUnit",
+        calcElement1SampleTime,
+        wrapMethodToInvokeAfter(calcElement1RefreshMock, 100)
+      );
+
+      calcElement2 = createFakeCalcElement(
+        "calcElement2ID",
+        "calcElement2Name",
+        "FakeCalcElement",
+        0,
+        "FakeUnit",
+        calcElement2SampleTime,
+        wrapMethodToInvokeAfter(calcElement2RefreshMock, 200)
+      );
+
+      calcElement3 = createFakeCalcElement(
+        "calcElement3ID",
+        "calcElement3Name",
+        "FakeCalcElement",
+        0,
+        "FakeUnit",
+        calcElement3SampleTime,
+        wrapMethodToInvokeAfter(calcElement3RefreshMock, 300)
+      );
+
+      calcElements = [];
+      if (createCalcElements)
+        calcElements = [calcElement1, calcElement2, calcElement3];
+
+      alert1 = createFakeAlert(
+        "alert1ID",
+        "alert1Name",
+        "FakeAlert",
+        0,
+        "FakeUnit",
+        alert1SampleTime,
+        wrapMethodToInvokeAfter(alert1RefreshMock, 100)
+      );
+
+      alert2 = createFakeAlert(
+        "alert2ID",
+        "alert2Name",
+        "FakeAlert",
+        0,
+        "FakeUnit",
+        alert2SampleTime,
+        wrapMethodToInvokeAfter(alert2RefreshMock, 200)
+      );
+
+      alert3 = createFakeAlert(
+        "alert3ID",
+        "alert3Name",
+        "FakeAlert",
+        0,
+        "FakeUnit",
+        alert3SampleTime,
+        wrapMethodToInvokeAfter(alert3RefreshMock, 300)
+      );
+
+      alerts = [];
+      if (createAlerts) alerts = [alert1, alert2, alert3];
+
       device = createFakeDevice(
         "device1ID",
         "Device",
@@ -133,13 +150,14 @@ describe("Device", () => {
         100,
         refreshVariableMockFunc,
         calcElements,
-        alerts
+        alerts,
+        isDeviceActive
       );
 
       return device.refresh(tickNumber);
     };
 
-    it("should invoke refreshVariable first, than refresh all calcElement one by one and than refresh all alerts one by one", async () => {
+    it("should invoke refreshVariable first, than refresh all calcElement one by one and than refresh all alerts one by one - if every calcElement and alert sampleTime suits tickNumber", async () => {
       await exec();
 
       expect(refreshVariableMockFunc).toHaveBeenCalledTimes(1);
@@ -171,8 +189,60 @@ describe("Device", () => {
       expect(alert2RefreshMock).toHaveBeenCalledBefore(alert3RefreshMock);
     });
 
+    it("should not refresh anything if device is not active", async () => {
+      isDeviceActive = false;
+
+      await exec();
+
+      expect(refreshVariableMockFunc).not.toHaveBeenCalled();
+      expect(calcElement1RefreshMock).not.toHaveBeenCalled();
+      expect(calcElement2RefreshMock).not.toHaveBeenCalled();
+      expect(calcElement3RefreshMock).not.toHaveBeenCalled();
+      expect(alert1RefreshMock).not.toHaveBeenCalled();
+      expect(alert2RefreshMock).not.toHaveBeenCalled();
+      expect(alert3RefreshMock).not.toHaveBeenCalled();
+    });
+
+    it("should invoke refreshVariable first, than refresh calcElements that suits tickId one by one and than refresh alerts that suits tickId one by one", async () => {
+      calcElement1SampleTime = 1;
+      calcElement2SampleTime = 2;
+      calcElement3SampleTime = 3;
+
+      alert1SampleTime = 1;
+      alert2SampleTime = 2;
+      alert3SampleTime = 3;
+
+      tickNumber = 3;
+
+      //Only first and third should be invoked
+
+      await exec();
+
+      expect(refreshVariableMockFunc).toHaveBeenCalledTimes(1);
+      expect(calcElement1RefreshMock).toHaveBeenCalledTimes(1);
+      expect(calcElement2RefreshMock).not.toHaveBeenCalled();
+      expect(calcElement3RefreshMock).toHaveBeenCalledTimes(1);
+      expect(alert1RefreshMock).toHaveBeenCalledTimes(1);
+      expect(alert2RefreshMock).not.toHaveBeenCalled();
+      expect(alert3RefreshMock).toHaveBeenCalledTimes(1);
+
+      expect(calcElement1RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(calcElement3RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(alert1RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(alert3RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+
+      expect(refreshVariableMockFunc).toHaveBeenCalledBefore(
+        calcElement1RefreshMock
+      );
+      expect(calcElement1RefreshMock).toHaveBeenCalledBefore(
+        calcElement3RefreshMock
+      );
+      expect(calcElement3RefreshMock).toHaveBeenCalledBefore(alert1RefreshMock);
+      expect(alert1RefreshMock).toHaveBeenCalledBefore(alert3RefreshMock);
+    });
+
     it("should invoke refreshVariable first, than refresh all calcElement one by one and than refresh all alerts one by one - if there are no calcElements", async () => {
-      calcElements = [];
+      createCalcElements = false;
 
       await exec();
 
@@ -190,8 +260,8 @@ describe("Device", () => {
       expect(alert2RefreshMock).toHaveBeenCalledBefore(alert3RefreshMock);
     });
 
-    it("should invoke refreshVariable first, than refresh all calcElement one by one and than refresh all alerts one by one - if there are no calcElements", async () => {
-      alerts = [];
+    it("should invoke refreshVariable first, than refresh all calcElement one by one and than refresh all alerts one by one - if there are no alerts", async () => {
+      createAlerts = false;
 
       await exec();
 

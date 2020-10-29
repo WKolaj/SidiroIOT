@@ -124,8 +124,9 @@ class Driver {
   /**
    * @description Method for invoking request. BY DEFAULT TRIES TO CONNECT IF ACTIVATE
    * @param {ProtocolRequest} request protocol request
+   * @param {Number} tickId tickId of action
    */
-  async invokeRequest(request) {
+  async invokeRequest(request, tickId) {
     let self = this;
 
     return new Promise(async (resolve, reject) => {
@@ -133,7 +134,6 @@ class Driver {
       if (!self.IsActive) {
         return reject(new Error("Driver is not active"));
       }
-
       //Not invoking another request if current request has not yet been processed
       if (self.Busy) return reject(new Error("Driver is busy"));
       //Blocking to prevent another request from being processed
@@ -160,7 +160,7 @@ class Driver {
           return reject(new Error("Processing data timeout error"));
         }, self.Timeout);
 
-        let data = await self._processRequest(request);
+        let data = await self._processRequest(request, tickId);
 
         //Clearing timeout
         self._clearTimeoutIfExists(processRequestTimeoutHandler);
@@ -207,8 +207,9 @@ class Driver {
   /**
    * @description Method for processing request by driver. MUST BE OVERRIDEN IN CHILD CLASSES
    * @param {ProtocolRequest} protocolRequest
+   * @param {Number} tickId tickId of action
    */
-  async _processRequest(protocolRequest) {}
+  async _processRequest(protocolRequest, tickId) {}
 
   //#endregion ========= ABSTRACT PRIVATE METHODS =========
 }

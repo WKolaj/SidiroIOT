@@ -1,6 +1,6 @@
-const Element = require("../Element");
+const CalcElement = require("./CalcElement");
 
-class AverageCalculator extends Element {
+class AverageCalculator extends CalcElement {
   //#region ========= CONSTRUCTOR =========
 
   constructor() {

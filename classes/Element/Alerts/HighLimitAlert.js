@@ -1,6 +1,6 @@
-const Element = require("../Element");
+const Alert = require("./Alert");
 
-class HighLimitAlert extends Element {
+class HighLimitAlert extends Alert {
   //#region ========= CONSTRUCTOR =========
 
   constructor() {

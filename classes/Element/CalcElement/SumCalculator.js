@@ -1,6 +1,6 @@
-const Element = require("../Element");
+const CalcElement = require("./CalcElement");
 
-class SumCalculator extends Element {
+class SumCalculator extends CalcElement {
   //#region ========= CONSTRUCTOR =========
 
   constructor() {

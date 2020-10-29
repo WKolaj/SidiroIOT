@@ -1,6 +1,6 @@
-const Element = require("../Element");
+const Alert = require("./Alert");
 
-class ExactValuesAlert extends Element {
+class ExactValuesAlert extends Alert {
   //#region ========= CONSTRUCTOR =========
 
   constructor() {

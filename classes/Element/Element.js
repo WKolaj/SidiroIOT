@@ -9,6 +9,7 @@ class Element {
     this._type = null;
     this._value = null;
     this._defaultValue = null;
+    this._lastValueTick = null;
   }
 
   //#endregion ========= CONSTRUCTOR =========
@@ -44,13 +45,6 @@ class Element {
   }
 
   /**
-   * @description Value of element
-   */
-  set Value(value) {
-    this._value = value;
-  }
-
-  /**
    * @description Default value of element
    */
   get DefaultValue() {
@@ -71,6 +65,13 @@ class Element {
     return this._sampleTime;
   }
 
+  /**
+   * @description Time when last time value was set - 0 by default with default value
+   */
+  get LastValueTick() {
+    return this._lastValueTick;
+  }
+
   //#endregion ========= PROPERTIES =========
 
   //#region ========= PUBLIC METHODS =========
@@ -85,8 +86,17 @@ class Element {
     this._type = payload.type;
     this._defaultValue = payload.defaultValue;
 
-    //Setting default value of element
-    this.Value = this.DefaultValue;
+    //Setting default value of element - by default tickId is 0
+    this.Value = this.setValue(this.DefaultValue, 0);
+  }
+
+  /**
+   * @description Method for setting value of Value - to ensure setting it with tickId
+   * @param {Object} newValue new value to be set
+   * @param {Number} tickId actual tickId
+   */
+  setValue(newValue, tickId) {
+    this._setValue(newValue, tickId);
   }
 
   /**
@@ -94,7 +104,7 @@ class Element {
    * @param {Number} tickNumber tick number
    */
   checkIfShouldBeRefreshed(tickNumber) {
-    return Sampler.doesSampleTimeMatchesTick(this.SampleTime, tickNumber);
+    return Sampler.doesSampleTimeMatchesTick(tickNumber, this.SampleTime);
   }
 
   //#endregion ========= PUBLIC METHODS =========
@@ -111,9 +121,11 @@ class Element {
   /**
    * @description Abstract method for setting new value. MUST BE OVERRIDEN IN CHILD CLASSES
    * @param {Object} value value to set
+   * @param {Number} tickId actual tickid
    */
-  _setValue(value) {
+  _setValue(value, tickId) {
     this._value = value;
+    this._lastValueTick = tickId;
   }
 
   //#endregion ========= PRIVATE ABSTRACT METHODS =========

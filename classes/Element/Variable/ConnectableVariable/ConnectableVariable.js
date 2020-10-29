@@ -20,14 +20,21 @@ class ConnectableVariable extends Variable {
     return this._data;
   }
 
+  //#endregion ========= PROPERTIES =========
+
+  //#region ========= PUBLIC METHODS =========
+
   /**
-   * @description Value represented as byte array
+   * @description Method for setting new data - in order to ensure that new data cannot be set without setting new tickId
+   * @param {Array} newData new data
+   * @param {Number} tickId actual tickId
    */
-  set Data(value) {
-    this._data = value;
+  setData(newData, tickId) {
+    this._data = newData;
+    this._lastValueTick = tickId;
   }
 
-  //#endregion ========= PROPERTIES =========
+  //#endregion ========= PUBLIC METHODS =========
 
   //#region ========= PUBLIC ABSTRACT METHODS =========
 
@@ -52,18 +59,20 @@ class ConnectableVariable extends Variable {
   //#region ========= OVERRIDE PRIVATE METHODS =========
 
   /**
-   * @description Abstract method for getting value. MUST BE OVERRIDEN IN CHILD CLASSES
+   * @description Abstract method for getting value.
    */
   _getValue() {
     return this._convertDataToValue(this.Data);
   }
 
   /**
-   * @description Abstract method for setting new value. MUST BE OVERRIDEN IN CHILD CLASSES
+   * @description Abstract method for setting new value.
    * @param {Object} value value to set
+   * @param {Number} tickId actual tickid
    */
-  _setValue(value) {
+  _setValue(value, tickId) {
     this._data = this._convertValueToData(value);
+    this._lastValueTick = tickId;
   }
 
   //#endregion ========= OVERRIDE PRIVATE METHODS =========

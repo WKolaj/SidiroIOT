@@ -24,7 +24,7 @@ class StandardProtocolVariable extends ConnectableVariable {
   /**
    * @description Length (in bytes) of variable
    */
-  get _length() {
+  get Length() {
     return this._length;
   }
 

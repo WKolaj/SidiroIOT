@@ -1,6 +1,6 @@
-const Element = require("../Element");
+const CalcElement = require("./CalcElement");
 
-class ValueFromByteArrayCalculator extends Element {
+class ValueFromByteArrayCalculator extends CalcElement {
   //#region ========= CONSTRUCTOR =========
 
   constructor() {

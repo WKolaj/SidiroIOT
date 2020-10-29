@@ -1,6 +1,6 @@
-const Element = require("../Element");
+const Alert = require("./Alert");
 
-class BandwidthLimitAlert extends Element {
+class BandwidthLimitAlert extends Alert {
   //#region ========= CONSTRUCTOR =========
 
   constructor() {

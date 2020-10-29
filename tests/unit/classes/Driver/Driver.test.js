@@ -136,8 +136,10 @@ describe("Driver", () => {
     let disconnectMockFunc;
     let disconnectMockFuncDelay;
     let request;
+    let tickNumber;
 
     beforeEach(() => {
+      tickNumber = 1234;
       driverTimeout = 500;
       isActive = true;
       isConnected = true;
@@ -175,7 +177,7 @@ describe("Driver", () => {
         disconnectMockFuncDelay
       );
 
-      return driver.invokeRequest(request);
+      return driver.invokeRequest(request, tickNumber);
     };
 
     it("should invoke process request and return data from processingRequest", async () => {
@@ -183,6 +185,7 @@ describe("Driver", () => {
 
       expect(processMockFunc).toHaveBeenCalledTimes(1);
       expect(processMockFunc.mock.calls[0][0]).toEqual(request);
+      expect(processMockFunc.mock.calls[0][1]).toEqual(tickNumber);
       expect(result).toEqual(processMockFuncResult);
     });
 

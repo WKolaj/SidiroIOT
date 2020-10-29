@@ -1,5 +1,8 @@
 const StandardProtocolRequest = require("../../../../classes/Request/StandardProtocolRequest");
 const { snooze } = require("../../../../utilities/utilities");
+const {
+  createFakeStandardProtocolVariable,
+} = require("../../../utilities/testUtilities");
 
 const createVariable = (id, name, length, data) => {
   return {
@@ -92,11 +95,52 @@ describe("StandardProtocolRequest", () => {
     let protocolRequest;
     let data;
     let writeRequest;
+    let tickId;
 
     beforeEach(() => {
-      variable1 = createVariable("var1Id", "var1Name", 1, [9]);
-      variable2 = createVariable("var2Id", "var2Name", 2, [8, 7]);
-      variable3 = createVariable("var3Id", "var3Name", 3, [6, 5, 4]);
+      tickId = 1234;
+
+      variable1 = createFakeStandardProtocolVariable(
+        "var1Id",
+        "var1Name",
+        "FakeVariable",
+        0,
+        "FakeUnit",
+        1,
+        [9],
+        0,
+        1,
+        jest.fn(),
+        jest.fn()
+      );
+
+      variable2 = createFakeStandardProtocolVariable(
+        "var2Id",
+        "var2Name",
+        "FakeVariable",
+        0,
+        "FakeUnit",
+        1,
+        [8, 7],
+        0,
+        2,
+        jest.fn(),
+        jest.fn()
+      );
+
+      variable3 = createFakeStandardProtocolVariable(
+        "var3Id",
+        "var3Name",
+        "FakeVariable",
+        0,
+        "FakeUnit",
+        1,
+        [6, 5, 4],
+        0,
+        3,
+        jest.fn(),
+        jest.fn()
+      );
 
       variables = [variable1, variable2, variable3];
 
@@ -110,15 +154,19 @@ describe("StandardProtocolRequest", () => {
         null,
         writeRequest
       );
-      return protocolRequest.writeDataToVariableValues(data);
+      return protocolRequest.writeDataToVariableValues(data, tickId);
     };
 
-    it("should assign data to variables Data", async () => {
+    it("should assign data to variables Data and assign its lastTickId", async () => {
       await exec();
 
       expect(variable1.Data).toEqual([1]);
       expect(variable2.Data).toEqual([2, 3]);
       expect(variable3.Data).toEqual([4, 5, 6]);
+
+      expect(variable1.LastValueTick).toEqual(tickId);
+      expect(variable2.LastValueTick).toEqual(tickId);
+      expect(variable3.LastValueTick).toEqual(tickId);
     });
 
     it("should assign data to variables Data - if data has only 0", async () => {
@@ -129,6 +177,10 @@ describe("StandardProtocolRequest", () => {
       expect(variable1.Data).toEqual([0]);
       expect(variable2.Data).toEqual([0, 0]);
       expect(variable3.Data).toEqual([0, 0, 0]);
+
+      expect(variable1.LastValueTick).toEqual(tickId);
+      expect(variable2.LastValueTick).toEqual(tickId);
+      expect(variable3.LastValueTick).toEqual(tickId);
     });
 
     it("should throw and not set data to protocolRequest if new data is shorter then total variable length", async () => {
@@ -152,6 +204,10 @@ describe("StandardProtocolRequest", () => {
       expect(variable1.Data).toEqual([9]);
       expect(variable2.Data).toEqual([8, 7]);
       expect(variable3.Data).toEqual([6, 5, 4]);
+
+      expect(variable1.LastValueTick).toEqual(0);
+      expect(variable2.LastValueTick).toEqual(0);
+      expect(variable3.LastValueTick).toEqual(0);
 
       expect(error.message).toEqual(
         "Length of data does not correspond to length of request"
@@ -180,6 +236,10 @@ describe("StandardProtocolRequest", () => {
       expect(variable2.Data).toEqual([8, 7]);
       expect(variable3.Data).toEqual([6, 5, 4]);
 
+      expect(variable1.LastValueTick).toEqual(0);
+      expect(variable2.LastValueTick).toEqual(0);
+      expect(variable3.LastValueTick).toEqual(0);
+
       expect(error.message).toEqual(
         "Length of data does not correspond to length of request"
       );
@@ -206,6 +266,10 @@ describe("StandardProtocolRequest", () => {
       expect(variable1.Data).toEqual([9]);
       expect(variable2.Data).toEqual([8, 7]);
       expect(variable3.Data).toEqual([6, 5, 4]);
+
+      expect(variable1.LastValueTick).toEqual(0);
+      expect(variable2.LastValueTick).toEqual(0);
+      expect(variable3.LastValueTick).toEqual(0);
 
       expect(error.message).toEqual(
         "Length of data does not correspond to length of request"

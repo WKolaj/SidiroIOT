@@ -89,6 +89,13 @@ class Device {
     return this._alerts;
   }
 
+  /**
+   * @description flag determining wether elements associated with device should be refreshed
+   */
+  get IsActive() {
+    return this._getIsActiveState();
+  }
+
   //#endregion ========= PROPERTIES =========
 
   //#region ========= PUBLIC VIRTUAL METHODS =========
@@ -119,6 +126,10 @@ class Device {
     for (let alertPayload of allAlertsPayload) {
       await this._initAlert(alertPayload);
     }
+
+    //Activating or deactivating based on payload content
+    if (payload.isActive) await this.activate();
+    else await this.deactivate();
   }
 
   /**
@@ -126,6 +137,9 @@ class Device {
    * @param {Number} tickNumber tick number of actual date
    */
   async refresh(tickNumber) {
+    //Return immediatelly if device is not active
+    if (!this.IsActive) return;
+
     try {
       await this._refreshVariables(tickNumber);
     } catch (err) {
@@ -143,6 +157,20 @@ class Device {
     }
   }
 
+  /**
+   * @description Method for activating device - all elements associated with device will start refreshing. CAN BE OVERRIDEN IN CHILD CLASSES
+   */
+  async activate() {
+    this._isActive = true;
+  }
+
+  /**
+   * @description Method for deactivating device - all elements associated with device will stop refreshing. CAN BE OVERRIDEN IN CHILD CLASSES
+   */
+  async deactivate() {
+    this._isActive = false;
+  }
+
   //#endregion ========= PUBLIC VIRTUAL METHODS =========
 
   //#region ========= PRIVATE VIRTUAL METHODS =========
@@ -155,7 +183,8 @@ class Device {
     //Refreshing all calc elements one by one
     for (let calcElement of Object.values(this.CalcElements)) {
       try {
-        await calcElement.refresh(tickNumber);
+        if (calcElement.checkIfShouldBeRefreshed(tickNumber))
+          await calcElement.refresh(tickNumber);
       } catch (err) {
         logger.warn(err.message, err);
       }
@@ -170,7 +199,8 @@ class Device {
     //Refreshing all calc elements one by one
     for (let alert of Object.values(this.Alerts)) {
       try {
-        await alert.refresh(tickNumber);
+        if (alert.checkIfShouldBeRefreshed(tickNumber))
+          await alert.refresh(tickNumber);
       } catch (err) {
         logger.warn(err.message, err);
       }
@@ -337,6 +367,13 @@ class Device {
 
     //Assigning alert to Alerts
     this.Alerts[alert.ID] = alert;
+  }
+
+  /**
+   * @description Method for getting active state of device. CAN BE OVERRIDEN IN CHILD CLASSES
+   */
+  _getIsActiveState() {
+    return this._isActive;
   }
 
   //#endregion ========= PRIVATE VIRTUAL METHODS =========

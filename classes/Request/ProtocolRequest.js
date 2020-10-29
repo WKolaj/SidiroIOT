@@ -67,8 +67,9 @@ class ProtocolRequest {
   /**
    * @@description Method for writing data retrieved from request to variables. MUST BE OVERRIDDEN IN CHILD CLASSES!
    * @param {Array} data data to write to variables
+   * @param {Number} tickId actual tickId
    */
-  async writeDataToVariableValues(data) {}
+  async writeDataToVariableValues(data, tickId) {}
 
   //#endregion========= PUBLIC ABSTRACT METHODS =========
 }

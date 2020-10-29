@@ -31,8 +31,9 @@ class StandardProtocolRequest extends ProtocolRequest {
   /**
    * @@description Method for writing data retrieved from request to variables.
    * @param {Array} data data to write to variables
+   * @param {Number} tickId actual tickId
    */
-  async writeDataToVariableValues(data) {
+  async writeDataToVariableValues(data, tickId) {
     if (data.length != this.Length)
       throw new Error(
         "Length of data does not correspond to length of request"
@@ -44,7 +45,7 @@ class StandardProtocolRequest extends ProtocolRequest {
     for (let variable of this.Variables) {
       let nextOffset = currentOffset + variable.Length;
 
-      variable.Data = data.slice(currentOffset, nextOffset);
+      variable.setData(data.slice(currentOffset, nextOffset), tickId);
       currentOffset = nextOffset;
     }
   }

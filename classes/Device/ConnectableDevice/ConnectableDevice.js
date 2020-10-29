@@ -7,6 +7,7 @@ class ConnectableDevice extends Device {
   //#region ========= CONSTRUCTOR =========
 
   constructor() {
+    super();
     this._requestManager = null;
     this._driver = null;
 
@@ -32,13 +33,6 @@ class ConnectableDevice extends Device {
   }
 
   /**
-   * @description is device active
-   */
-  get IsActive() {
-    return this._getIsActiveState();
-  }
-
-  /**
    * @description is device onnected
    */
   get IsConnected() {
@@ -57,31 +51,10 @@ class ConnectableDevice extends Device {
   //#region ========= VIRTUAL PRIVATE METHODS =========
 
   /**
-   * @description Method for connecting device - activating device driver
-   */
-  async connect() {
-    return this.Driver.activate();
-  }
-
-  /**
-   * @description Method for disconnecting device - deactivating device driver
-   */
-  async disconnect() {
-    return this.Driver.deactive();
-  }
-
-  /**
    * @description Method for getting connected state
    */
   _getIsConnectedState() {
     return this.Driver.IsConnected;
-  }
-
-  /**
-   * @description Method for getting activation state
-   */
-  _getIsActiveState() {
-    return this.Driver.IsActive;
   }
 
   //#endregion ========= VIRTUAL PRIVATE METHODS =========
@@ -89,22 +62,26 @@ class ConnectableDevice extends Device {
   //#region ========= OVERRIDE PRIVATE METHODS =========
 
   /**
+   * @description Method for getting active state of device.
+   */
+  _getIsActiveState() {
+    return this.Driver.IsActive;
+  }
+
+  /**
    * @description Method for refreshing variables
    * @param {Number} tickId tick id of actual refreshing date
    */
   async _refreshVariables(tickId) {
-    //Refreshing variables only if device is active
-    if (!this.IsActive) return;
-
     //Inoking every request of request manager that suits actual tickId
     //After invoking the request, adjust variables values if they exits after invoking request
     for (let request of this.RequestManager.Requests) {
       if (request.checkIfShouldBeInvoked(tickId))
         try {
-          let data = await this.Driver.invokeRequest(request);
+          let data = await this.Driver.invokeRequest(request, tickId);
           //writing data to variables only if request is read
           if (request.ReadRequest)
-            await request.writeDataToVariableValues(data);
+            await request.writeDataToVariableValues(data, tickId);
         } catch (err) {
           logger.warn(err.message, err);
         }
@@ -114,6 +91,20 @@ class ConnectableDevice extends Device {
   //#endregion ========= OVERRIDE PRIVATE METHODS =========
 
   //#region ========= OVERRIDE PUBLIC METHODS =========
+
+  /**
+   * @description Method for activating the device - connecting the driver
+   */
+  async activate() {
+    return this.Driver.activate();
+  }
+
+  /**
+   * @description Method for deactivating the device - disconnecting the driver
+   */
+  async deactivate() {
+    return this.Driver.deactive();
+  }
 
   /**
    * @description Method for initializing device.
