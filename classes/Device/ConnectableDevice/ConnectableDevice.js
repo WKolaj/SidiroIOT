@@ -103,7 +103,7 @@ class ConnectableDevice extends Device {
    * @description Method for deactivating the device - disconnecting the driver
    */
   async deactivate() {
-    return this.Driver.deactive();
+    return this.Driver.deactivate();
   }
 
   /**

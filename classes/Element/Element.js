@@ -10,6 +10,8 @@ class Element {
     this._value = null;
     this._defaultValue = null;
     this._lastValueTick = null;
+    this._sampleTime = null;
+    this._unit = null;
   }
 
   //#endregion ========= CONSTRUCTOR =========
@@ -41,7 +43,7 @@ class Element {
    * @description Value of element
    */
   get Value() {
-    return this._value;
+    return this._getValue();
   }
 
   /**
@@ -85,9 +87,10 @@ class Element {
     this._name = payload.name;
     this._type = payload.type;
     this._defaultValue = payload.defaultValue;
+    this._sampleTime = payload.sampleTime;
 
     //Setting default value of element - by default tickId is 0
-    this.Value = this.setValue(this.DefaultValue, 0);
+    this.setValue(this.DefaultValue, 0);
   }
 
   /**
@@ -109,17 +112,17 @@ class Element {
 
   //#endregion ========= PUBLIC METHODS =========
 
-  //#region ========= PRIVATE ABSTRACT METHODS =========
+  //#region ========= PRIVATE VIRTUAL METHODS =========
 
   /**
-   * @description Abstract method for getting value. MUST BE OVERRIDEN IN CHILD CLASSES
+   * @description Virtual method for getting value. By default value is stored in _value field. CAN BE OVERRIDEN IN CHILD CLASSES
    */
   _getValue() {
     return this._value;
   }
 
   /**
-   * @description Abstract method for setting new value. MUST BE OVERRIDEN IN CHILD CLASSES
+   * @description Virtual method for setting new value. By default value is stored in _value field. CAN BE OVERRIDEN IN CHILD CLASSES
    * @param {Object} value value to set
    * @param {Number} tickId actual tickid
    */
@@ -128,7 +131,7 @@ class Element {
     this._lastValueTick = tickId;
   }
 
-  //#endregion ========= PRIVATE ABSTRACT METHODS =========
+  //#endregion ========= PRIVATE VIRTUAL METHODS =========
 }
 
 module.exports = Element;

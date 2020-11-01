@@ -6,10 +6,157 @@ const {
   createFakeAlert,
   wrapMethodToInvokeAfter,
 } = require("../../../utilities/testUtilities");
+const Device = require("../../../../classes/Device/Device");
 
 describe("Device", () => {
   //TODO - add init tests
-  //TODO - add activate/deactive tests
+
+  describe("IsActive", () => {
+    let device;
+    let isDeviceActive;
+    let getActiveMockFunc;
+    let overrideGetActiveFunc;
+    let overrideIsActive;
+
+    beforeEach(() => {
+      getActiveMockFunc = jest.fn(() => {
+        return isDeviceActive;
+      });
+      overrideGetActiveFunc = true;
+      overrideIsActive = false;
+    });
+
+    let exec = () => {
+      isDeviceActive = false;
+      device = new Device();
+      if (overrideGetActiveFunc) device._getIsActiveState = getActiveMockFunc;
+      if (overrideIsActive) device._isActive = isDeviceActive;
+      return device.IsActive;
+    };
+
+    it("should return result of getActiveMockFunc", async () => {
+      await exec();
+
+      expect(getActiveMockFunc).toHaveBeenCalledTimes(1);
+
+      expect(device.IsActive).toEqual(isDeviceActive);
+    });
+
+    it("should return _isActive if getActiveMockFunc was not overriden - isDeviceActive is true", async () => {
+      overrideGetActiveFunc = false;
+      overrideIsActive = true;
+      isDeviceActive = true;
+
+      await exec();
+
+      expect(device.IsActive).toEqual(isDeviceActive);
+    });
+
+    it("should return _isActive if getActiveMockFunc was not overriden - isDeviceActive is false", async () => {
+      overrideGetActiveFunc = false;
+      overrideIsActive = true;
+      isDeviceActive = false;
+
+      await exec();
+
+      expect(device.IsActive).toEqual(isDeviceActive);
+    });
+  });
+
+  describe("activate", () => {
+    let device;
+    let isDeviceActive;
+
+    beforeEach(() => {
+      isDeviceActive = false;
+    });
+
+    let exec = async () => {
+      device = createFakeDevice(
+        "device1Id",
+        "FakeDevice",
+        "device1Name",
+        100,
+        jest.fn(),
+        [],
+        [],
+        isDeviceActive
+      );
+      return device.activate();
+    };
+
+    it("should set device IsActive to true", async () => {
+      await exec();
+
+      expect(device.IsActive).toEqual(true);
+    });
+
+    it("should not throw id device is already active", async () => {
+      isDeviceActive = true;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
+
+      expect(device.IsActive).toEqual(true);
+    });
+  });
+
+  describe("deactivate", () => {
+    let device;
+    let isDeviceActive;
+
+    beforeEach(() => {
+      isDeviceActive = true;
+    });
+
+    let exec = async () => {
+      device = createFakeDevice(
+        "device1Id",
+        "FakeDevice",
+        "device1Name",
+        100,
+        jest.fn(),
+        [],
+        [],
+        isDeviceActive
+      );
+      return device.deactivate();
+    };
+
+    it("should set device IsActive to false", async () => {
+      await exec();
+
+      expect(device.IsActive).toEqual(false);
+    });
+
+    it("should not throw id device is deactive", async () => {
+      isDeviceActive = false;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
+
+      expect(device.IsActive).toEqual(false);
+    });
+  });
+
   describe("refresh", () => {
     let device;
     let isDeviceActive;

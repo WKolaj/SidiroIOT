@@ -11,6 +11,283 @@ const {
 const logger = require("../../../../logger/logger");
 
 describe("ConnectableDevice", () => {
+  describe("IsActive", () => {
+    let device;
+    let isDriverActive;
+    let isDriverConnected;
+    let isDriverBusy;
+    let driverConnectMock;
+    let driverDisconnectMock;
+
+    beforeEach(() => {
+      isDriverActive = false;
+      isDriverConnected = false;
+      isDriverBusy = false;
+      driverConnectMock = jest.fn();
+      driverDisconnectMock = jest.fn();
+    });
+
+    let exec = async () => {
+      device = createFakeConnectableDevice(
+        "device1Id",
+        "FakeDevice",
+        "device1Name",
+        [],
+        [],
+        [],
+        [],
+        isDriverActive,
+        isDriverConnected,
+        isDriverBusy,
+        driverConnectMock,
+        driverDisconnectMock,
+        jest.fn(),
+        100
+      );
+      return device.IsActive;
+    };
+
+    it("should return driver's active state - if state is true", async () => {
+      isDriverActive = true;
+
+      let result = await exec();
+
+      expect(result).toEqual(true);
+    });
+
+    it("should return driver's active state - if state is false", async () => {
+      isDriverActive = false;
+
+      let result = await exec();
+
+      expect(result).toEqual(false);
+    });
+  });
+
+  describe("IsConnected", () => {
+    let device;
+    let isDriverActive;
+    let isDriverConnected;
+    let isDriverBusy;
+    let driverConnectMock;
+    let driverDisconnectMock;
+
+    beforeEach(() => {
+      isDriverActive = false;
+      isDriverConnected = false;
+      isDriverBusy = false;
+      driverConnectMock = jest.fn();
+      driverDisconnectMock = jest.fn();
+    });
+
+    let exec = async () => {
+      device = createFakeConnectableDevice(
+        "device1Id",
+        "FakeDevice",
+        "device1Name",
+        [],
+        [],
+        [],
+        [],
+        isDriverActive,
+        isDriverConnected,
+        isDriverBusy,
+        driverConnectMock,
+        driverDisconnectMock,
+        jest.fn(),
+        100
+      );
+      return device.IsConnected;
+    };
+
+    it("should return driver's connected state - if state is true", async () => {
+      isDriverConnected = true;
+
+      let result = await exec();
+
+      expect(result).toEqual(true);
+    });
+
+    it("should return driver's connected state - if state is false", async () => {
+      isDriverConnected = false;
+
+      let result = await exec();
+
+      expect(result).toEqual(false);
+    });
+  });
+
+  describe("Timeout", () => {
+    let device;
+    let isDriverActive;
+    let isDriverConnected;
+    let isDriverBusy;
+    let driversTimeout;
+    let driverConnectMock;
+    let driverDisconnectMock;
+
+    beforeEach(() => {
+      isDriverActive = false;
+      isDriverConnected = false;
+      isDriverBusy = false;
+      driverConnectMock = jest.fn();
+      driverDisconnectMock = jest.fn();
+      driversTimeout = 123;
+    });
+
+    let exec = async () => {
+      device = createFakeConnectableDevice(
+        "device1Id",
+        "FakeDevice",
+        "device1Name",
+        [],
+        [],
+        [],
+        [],
+        isDriverActive,
+        isDriverConnected,
+        isDriverBusy,
+        driverConnectMock,
+        driverDisconnectMock,
+        jest.fn(),
+        driversTimeout
+      );
+      return device.Timeout;
+    };
+
+    it("should return driver's timeout", async () => {
+      let result = await exec();
+
+      expect(result).toEqual(driversTimeout);
+    });
+  });
+
+  describe("activate", () => {
+    let device;
+    let isDriverActive;
+    let isDriverConnected;
+    let isDriverBusy;
+    let driverConnectMock;
+    let driverDisconnectMock;
+
+    beforeEach(() => {
+      isDriverActive = false;
+      isDriverConnected = false;
+      isDriverBusy = false;
+      driverConnectMock = jest.fn();
+      driverDisconnectMock = jest.fn();
+    });
+
+    let exec = async () => {
+      device = createFakeConnectableDevice(
+        "device1Id",
+        "FakeDevice",
+        "device1Name",
+        [],
+        [],
+        [],
+        [],
+        isDriverActive,
+        isDriverConnected,
+        isDriverBusy,
+        driverConnectMock,
+        driverDisconnectMock,
+        jest.fn(),
+        100
+      );
+      return device.activate();
+    };
+
+    it("should set driver's and device's IsActive to true", async () => {
+      await exec();
+
+      expect(device.IsActive).toEqual(true);
+      expect(device.Driver.IsActive).toEqual(true);
+    });
+
+    it("should not throw if device is already active", async () => {
+      isDriverActive = true;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
+
+      expect(device.IsActive).toEqual(true);
+      expect(device.Driver.IsActive).toEqual(true);
+    });
+  });
+
+  describe("deactivate", () => {
+    let device;
+    let isDriverActive;
+    let isDriverConnected;
+    let isDriverBusy;
+    let driverConnectMock;
+    let driverDisconnectMock;
+
+    beforeEach(() => {
+      isDriverActive = true;
+      isDriverConnected = false;
+      isDriverBusy = false;
+      driverConnectMock = jest.fn();
+      driverDisconnectMock = jest.fn();
+    });
+
+    let exec = async () => {
+      device = createFakeConnectableDevice(
+        "device1Id",
+        "FakeDevice",
+        "device1Name",
+        [],
+        [],
+        [],
+        [],
+        isDriverActive,
+        isDriverConnected,
+        isDriverBusy,
+        driverConnectMock,
+        driverDisconnectMock,
+        jest.fn(),
+        100
+      );
+      return device.deactivate();
+    };
+
+    it("should set device's and driver's IsActive to false", async () => {
+      await exec();
+
+      expect(device.Driver.IsActive).toEqual(false);
+      expect(device.IsActive).toEqual(false);
+    });
+
+    it("should not throw if device is deactive", async () => {
+      isDriverActive = false;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
+
+      expect(device.Driver.IsActive).toEqual(false);
+      expect(device.IsActive).toEqual(false);
+    });
+  });
+
   describe("refresh", () => {
     let device;
     let isDriverActive;
