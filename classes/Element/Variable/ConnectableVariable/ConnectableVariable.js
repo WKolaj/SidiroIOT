@@ -42,17 +42,13 @@ class ConnectableVariable extends Variable {
    * @description Method for converting data (byte array) to value of variable. MUST BE OVERRIDEN IN CHILD CLASSES
    * @param {Array} data
    */
-  _convertDataToValue(data) {
-    return data;
-  }
+  _convertDataToValue(data) {}
 
   /**
    * @description Method for converting value to data (byte array) of variable. MUST BE OVERRIDEN IN CHILD CLASSES
    * @param {Array} data
    */
-  _convertValueToData(value) {
-    return value;
-  }
+  _convertValueToData(value) {}
 
   //#endregion ========= PUBLIC ABSTRACT METHODS =========
 

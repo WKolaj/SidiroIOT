@@ -135,5 +135,3 @@ class Element {
 }
 
 module.exports = Element;
-
-//TODO - add tests for element
