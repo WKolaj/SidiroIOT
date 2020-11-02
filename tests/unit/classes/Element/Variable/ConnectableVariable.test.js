@@ -26,6 +26,15 @@ describe("ConnectableVariable", () => {
 
       expect(result.Data).toEqual(null);
     });
+
+    it("should create new ConnectableVariable and set read/write/readSeperately/writeSeperately as null", () => {
+      let result = exec();
+
+      expect(result.Read).toEqual(null);
+      expect(result.Write).toEqual(null);
+      expect(result.ReadSeperately).toEqual(null);
+      expect(result.WriteSeperately).toEqual(null);
+    });
   });
 
   describe("init", () => {
@@ -41,6 +50,10 @@ describe("ConnectableVariable", () => {
         type: "testElementType",
         defaultValue: 10,
         sampleTime: "testElementSampleTime",
+        read: true,
+        write: false,
+        readAsSingle: true,
+        writeAsSingle: false,
       };
 
       //Creating mocking method for converting data to value
@@ -87,6 +100,11 @@ describe("ConnectableVariable", () => {
 
       //default Value 10 corresponds to [1,2,3,4] in Data;
       expect(variable.Data).toEqual([1, 2, 3, 4]);
+
+      expect(variable.Read).toEqual(true);
+      expect(variable.Write).toEqual(false);
+      expect(variable.ReadSeperately).toEqual(true);
+      expect(variable.WriteSeperately).toEqual(false);
     });
 
     it("should call _convertValueToDataMockFunc in order to set Data based on defaultValue", async () => {

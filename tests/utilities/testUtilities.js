@@ -301,7 +301,11 @@ module.exports.createFakeConnectableVariable = (
   sampleTime,
   data,
   convertDataToValueMockFunc,
-  convertValueToDataMockFunc
+  convertValueToDataMockFunc,
+  read = true,
+  write = false,
+  readAsSingle = false,
+  writeAsSingle = false
 ) => {
   let variable = new ConnectableVariable();
 
@@ -315,6 +319,11 @@ module.exports.createFakeConnectableVariable = (
   variable._lastValueTick = 0;
   variable._convertDataToValue = convertDataToValueMockFunc;
   variable._convertValueToData = convertValueToDataMockFunc;
+
+  variable._read = read;
+  variable._write = write;
+  variable._readSeperately = readAsSingle;
+  variable._writeSeperately = writeAsSingle;
 
   return variable;
 };
@@ -330,7 +339,11 @@ module.exports.createFakeStandardProtocolVariable = (
   offset,
   length,
   convertDataToValueMockFunc,
-  convertValueToDataMockFunc
+  convertValueToDataMockFunc,
+  read = true,
+  write = false,
+  readAsSingle = false,
+  writeAsSingle = false
 ) => {
   let variable = new StandardProtocolVariable();
 
@@ -346,6 +359,11 @@ module.exports.createFakeStandardProtocolVariable = (
   variable._lastValueTick = 0;
   variable._convertDataToValue = convertDataToValueMockFunc;
   variable._convertValueToData = convertValueToDataMockFunc;
+
+  variable._read = read;
+  variable._write = write;
+  variable._readSeperately = readAsSingle;
+  variable._writeSeperately = writeAsSingle;
 
   return variable;
 };

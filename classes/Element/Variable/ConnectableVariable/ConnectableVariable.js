@@ -7,6 +7,10 @@ class ConnectableVariable extends Variable {
     super();
 
     this._data = null;
+    this._read = null;
+    this._write = null;
+    this._readSeperately = null;
+    this._writeSeperately = null;
   }
 
   //#endregion ========= CONSTRUCTOR =========
@@ -18,6 +22,34 @@ class ConnectableVariable extends Variable {
    */
   get Data() {
     return this._data;
+  }
+
+  /**
+   * @description Is Variable used for getting data from physical device
+   */
+  get Read() {
+    return this._read;
+  }
+
+  /**
+   * @description Is Variable used for setting data to physical device
+   */
+  get Write() {
+    return this._write;
+  }
+
+  /**
+   * @description Should variable be processed seperately (in seperate request) when read from physical device
+   */
+  get ReadSeperately() {
+    return this._readSeperately;
+  }
+
+  /**
+   * @description Should variable be processed seperately (in seperate request) when write to physical device
+   */
+  get WriteSeperately() {
+    return this._writeSeperately;
   }
 
   //#endregion ========= PROPERTIES =========
@@ -51,6 +83,23 @@ class ConnectableVariable extends Variable {
   _convertValueToData(value) {}
 
   //#endregion ========= PUBLIC ABSTRACT METHODS =========
+
+  //#region ========= OVERRIDE PUBLIC METHODS =========
+
+  /**
+   * @description Method for initializing element
+   * @param {JSON} payload JSON Payload of element
+   */
+  async init(payload) {
+    await super.init(payload);
+
+    this._read = payload.read;
+    this._write = payload.write;
+    this._readSeperately = payload.readAsSingle;
+    this._writeSeperately = payload.writeAsSingle;
+  }
+
+  //#endregion ========= OVERRIDE PUBLIC METHODS =========
 
   //#region ========= OVERRIDE PRIVATE METHODS =========
 
