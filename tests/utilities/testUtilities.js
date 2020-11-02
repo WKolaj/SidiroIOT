@@ -17,6 +17,7 @@ const {
 const { sample } = require("lodash");
 const Variable = require("../../classes/Element/Variable/Variable");
 const Alert = require("../../classes/Element/Alerts/Alert");
+const MBVariable = require("../../classes/Element/Variable/ConnectableVariable/MBVariable/MBVariable");
 
 const testUselessUserID = "uselessUserID";
 const testAdminID = "adminID";
@@ -364,6 +365,53 @@ module.exports.createFakeStandardProtocolVariable = (
   variable._write = write;
   variable._readSeperately = readAsSingle;
   variable._writeSeperately = writeAsSingle;
+
+  return variable;
+};
+
+module.exports.createFakeMBVariable = (
+  id,
+  name,
+  type,
+  defaultValue,
+  unit,
+  sampleTime,
+  data,
+  offset,
+  length,
+  convertDataToValueMockFunc,
+  convertValueToDataMockFunc,
+  unitID,
+  readFCode,
+  writeFCode,
+  read = true,
+  write = false,
+  readAsSingle = false,
+  writeAsSingle = false
+) => {
+  let variable = new MBVariable();
+
+  variable._id = id;
+  variable._name = name;
+  variable._type = type;
+  variable._defaultValue = defaultValue;
+  variable._unit = unit;
+  variable._sampleTime = sampleTime;
+  variable._data = data;
+  variable._offset = offset;
+  variable._length = length;
+  variable._lastValueTick = 0;
+  variable._convertDataToValue = convertDataToValueMockFunc;
+  variable._convertValueToData = convertValueToDataMockFunc;
+
+  variable._read = read;
+  variable._write = write;
+  variable._readSeperately = readAsSingle;
+  variable._writeSeperately = writeAsSingle;
+
+  variable._unitID = unitID;
+  variable._readFCode = readFCode;
+  variable._writeFCode = writeFCode;
 
   return variable;
 };

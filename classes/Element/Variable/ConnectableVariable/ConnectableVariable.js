@@ -124,5 +124,3 @@ class ConnectableVariable extends Variable {
 }
 
 module.exports = ConnectableVariable;
-
-//TODO - add tests for connectable variable

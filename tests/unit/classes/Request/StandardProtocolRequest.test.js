@@ -4,12 +4,13 @@ const {
   createFakeStandardProtocolVariable,
 } = require("../../../utilities/testUtilities");
 
-const createVariable = (id, name, length, data) => {
+const createVariable = (id, name, length, data, offset) => {
   return {
     ID: id,
     Length: length,
     Name: name,
     Data: data,
+    Offset: offset,
   };
 };
 
@@ -23,9 +24,57 @@ describe("StandardProtocolRequest", () => {
     let writeRequest;
 
     beforeEach(() => {
-      variable1 = createVariable("var1Id", "var1Name", 1, []);
-      variable2 = createVariable("var2Id", "var2Name", 2, []);
-      variable3 = createVariable("var3Id", "var3Name", 3, []);
+      variable1 = createFakeStandardProtocolVariable(
+        "var1Id",
+        "var1Name",
+        "FakeVar",
+        0,
+        "FakeUnit",
+        123,
+        [],
+        10,
+        1,
+        () => 0,
+        () => [],
+        true,
+        false,
+        false,
+        false
+      );
+      variable2 = createFakeStandardProtocolVariable(
+        "var2Id",
+        "var2Name",
+        "FakeVar",
+        0,
+        "FakeUnit",
+        123,
+        [],
+        11,
+        2,
+        () => 0,
+        () => [],
+        true,
+        false,
+        false,
+        false
+      );
+      variable3 = createFakeStandardProtocolVariable(
+        "var3Id",
+        "var3Name",
+        "FakeVar",
+        0,
+        "FakeUnit",
+        123,
+        [],
+        13,
+        3,
+        () => 0,
+        () => [],
+        true,
+        false,
+        false,
+        false
+      );
 
       variables = [variable1, variable2, variable3];
 
@@ -46,6 +95,16 @@ describe("StandardProtocolRequest", () => {
       expect(result.Variables).toEqual(variables);
     });
 
+    it("should create new ProtocolRequest and assign its variable and sampleTime - if there are no variables", () => {
+      variables = [];
+      let result = exec();
+
+      expect(result).toBeDefined();
+
+      expect(result.SampleTime).toEqual(sampleTime);
+      expect(result.Variables).toEqual(variables);
+    });
+
     it("should properly assign WriteRequest and ReadRequest - if writeRequest is false", () => {
       writeRequest = false;
       let result = exec();
@@ -56,6 +115,12 @@ describe("StandardProtocolRequest", () => {
 
     it("should properly assign WriteRequest and ReadRequest - if writeRequest is true", () => {
       writeRequest = true;
+      variable1._read = false;
+      variable2._read = false;
+      variable3._read = false;
+      variable1._write = true;
+      variable2._write = true;
+      variable3._write = true;
       let result = exec();
 
       expect(result.WriteRequest).toEqual(true);
@@ -85,6 +150,122 @@ describe("StandardProtocolRequest", () => {
 
       expect(result.Length).toEqual(variable1.Length);
     });
+
+    it("should properly calculate variable length - if there is a total overlap between variables", () => {
+      variable2.Length = 5;
+
+      let result = exec();
+
+      expect(result.Length).toEqual(6);
+    });
+
+    it("should properly calculate variable length - if there is a partial overlap between variables", () => {
+      variable2._length = 4;
+
+      let result = exec();
+
+      expect(result.Length).toEqual(6);
+    });
+
+    it("should properly calculate variable length - if there is a total overlap between variables and overlapped variable is shorter", () => {
+      variable2._length = 5;
+
+      variable3._length = 2;
+
+      let result = exec();
+
+      expect(result.Length).toEqual(6);
+    });
+
+    it("should throw if there is a gap between variables", () => {
+      variable2._length = 1;
+
+      expect(exec).toThrow(
+        "There is a gap between variables in protocol request"
+      );
+    });
+
+    it("should throw if one of variables has different sampleTime", () => {
+      variable2._sampleTime = 2;
+
+      expect(exec).toThrow(
+        "Trying to assign variable with different sample time to one request!"
+      );
+    });
+
+    it("should throw if one of variables has different write", () => {
+      variable2._read = false;
+      variable2._write = false;
+
+      expect(exec).toThrow(
+        "Trying to assign non read variable to read request!"
+      );
+    });
+
+    it("should throw if one of variables has different read", () => {
+      writeRequest = true;
+      variable1._read = false;
+      variable2._read = true;
+      variable3._read = false;
+      variable1._write = true;
+      variable2._write = false;
+      variable3._write = true;
+
+      expect(exec).toThrow(
+        "Trying to assign non write variable to write request!"
+      );
+    });
+
+    it("should throw if one of variables has readSeperately and there are a lot of variables", () => {
+      variable2._readSeperately = true;
+
+      expect(exec).toThrow(
+        "Trying to assign readSeperately variable to request with other variables!"
+      );
+    });
+
+    it("should throw if one of variables has write Seperately and there are a lot of variables", () => {
+      writeRequest = true;
+      variable1._read = false;
+      variable2._read = false;
+      variable3._read = false;
+      variable1._write = true;
+      variable2._write = true;
+      variable3._write = true;
+
+      variable2._writeSeperately = true;
+
+      expect(exec).toThrow(
+        "Trying to assign writeSeperately variable to request with other variables!"
+      );
+    });
+
+    it("should not throw if one variable has SeperateRead and there is only one variable", () => {
+      variable2._readSeperately = true;
+      variables = [variable2];
+
+      let result = exec();
+
+      expect(result).toBeDefined();
+
+      expect(result.SampleTime).toEqual(sampleTime);
+      expect(result.Variables).toEqual(variables);
+    });
+
+    it("should not throw if one variable has SeperateWrite and there is only one variable", () => {
+      writeRequest = true;
+      variable2._writeSeperately = true;
+      variable2._read = false;
+      variable2._write = true;
+      variables = [variable2];
+
+      let result = exec();
+
+      expect(result).toBeDefined();
+
+      expect(result.SampleTime).toEqual(sampleTime);
+      expect(result.Variables).toEqual(variables);
+    });
   });
 
   describe("writeDataToVariables", () => {
@@ -108,7 +289,7 @@ describe("StandardProtocolRequest", () => {
         "FakeUnit",
         1,
         [9],
-        0,
+        10,
         1,
         jest.fn(),
         jest.fn()
@@ -122,7 +303,7 @@ describe("StandardProtocolRequest", () => {
         "FakeUnit",
         1,
         [8, 7],
-        0,
+        11,
         2,
         jest.fn(),
         jest.fn()
@@ -136,7 +317,7 @@ describe("StandardProtocolRequest", () => {
         "FakeUnit",
         1,
         [6, 5, 4],
-        0,
+        13,
         3,
         jest.fn(),
         jest.fn()
@@ -149,11 +330,7 @@ describe("StandardProtocolRequest", () => {
     });
 
     let exec = async () => {
-      protocolRequest = new StandardProtocolRequest(
-        variables,
-        null,
-        writeRequest
-      );
+      protocolRequest = new StandardProtocolRequest(variables, 1, writeRequest);
       return protocolRequest.writeDataToVariableValues(data, tickId);
     };
 

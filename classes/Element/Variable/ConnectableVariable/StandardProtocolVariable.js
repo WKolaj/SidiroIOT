@@ -47,5 +47,3 @@ class StandardProtocolVariable extends ConnectableVariable {
 }
 
 module.exports = StandardProtocolVariable;
-
-//TODO - add tests for standard protocol variable

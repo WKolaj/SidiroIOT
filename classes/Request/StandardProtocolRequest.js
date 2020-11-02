@@ -1,3 +1,4 @@
+const { values } = require("lodash");
 const ProtocolRequest = require("./ProtocolRequest");
 
 class StandardProtocolRequest extends ProtocolRequest {
@@ -6,11 +7,72 @@ class StandardProtocolRequest extends ProtocolRequest {
   constructor(variables, sampleTime, writeRequest) {
     super(variables, sampleTime, writeRequest);
 
-    //calculating total length
+    //#region calculating total length and checking variables
     this._length = 0;
-    for (let variable of this.Variables) {
-      this._length += variable.Length;
+
+    //ordering variables based on their offsets
+    let orderedVariables = this.Variables.sort((a, b) => a.Offset - b.Offset);
+
+    let beginOffset = 0;
+    let actualOffset = 0;
+
+    for (let index = 0; index < orderedVariables.length; index++) {
+      let variable = orderedVariables[index];
+
+      //#region Check variable
+
+      if (variable.SampleTime !== sampleTime) {
+        throw new Error(
+          "Trying to assign variable with different sample time to one request!"
+        );
+      }
+
+      if (writeRequest && !variable.Write)
+        throw new Error(
+          "Trying to assign non write variable to write request!"
+        );
+
+      if (!writeRequest && !variable.Read)
+        throw new Error("Trying to assign non read variable to read request!");
+
+      if (
+        writeRequest &&
+        variable.WriteSeperately &&
+        orderedVariables.length > 1
+      )
+        throw new Error(
+          "Trying to assign writeSeperately variable to request with other variables!"
+        );
+
+      if (
+        !writeRequest &&
+        variable.ReadSeperately &&
+        orderedVariables.length > 1
+      )
+        throw new Error(
+          "Trying to assign readSeperately variable to request with other variables!"
+        );
+
+      //#endregion Check variable
+
+      if (index === 0) {
+        beginOffset = variable.Offset;
+        actualOffset = variable.Offset + variable.Length;
+      } else {
+        if (actualOffset < variable.Offset)
+          throw new Error(
+            "There is a gap between variables in protocol request"
+          );
+
+        //if actualOffset is longer than variable length + actualVariableOffset (overlapped shorter variable inside longer one)
+        let newOffset = variable.Offset + variable.Length;
+        if (newOffset > actualOffset) actualOffset = newOffset;
+      }
     }
+
+    this._length = actualOffset - beginOffset;
+
+    //#endregion calculating total length and checking variables
   }
 
   //#endregion========= CONSTRUCTOR =========
