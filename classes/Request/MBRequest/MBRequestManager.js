@@ -1,8 +1,8 @@
-const Variable = require("../../Element/Variable/Variable");
+const MBRequest = require("../../Request/MBRequest/MBRequest");
 const RequestManager = require("../RequestManager");
 
 class MBRequestManager extends RequestManager {
-  //#region========= PUBLIC STATIC METHODS =========
+  //#region ========= PUBLIC STATIC METHODS =========
 
   /**
    * @description Method for grouping MBVariables that can be represented as one MBRequest. Returns a List of lists: List<List<MBVariable>> reperesenting groups of variable
@@ -199,7 +199,43 @@ class MBRequestManager extends RequestManager {
     return allGroups;
   }
 
-  //#endregion========= PUBLIC STATIC METHODS =========
+  //#endregion ========= PUBLIC STATIC METHODS =========
+
+  //#region ========= OVERRIDE PUBLIC METHODS =========
+
+  /**
+   * @description Method for creating requests out of collection of variables.
+   * @param {Array} variables collection of variable to create request from
+   */
+  async createRequests(variables) {
+    this._requests = [];
+
+    let groupedVariables = MBRequestManager.groupMBVariables(variables);
+
+    for (let group of groupedVariables) {
+      if (group.length > 0) {
+        //Getting properties for request from first variable from group
+        let sampleTime = group[0].SampleTime;
+        let unitID = group[0].UnitID;
+        let writeRequest = !group[0].Read;
+        let fCode = writeRequest ? group[0].WriteFCode : ReadFCode;
+
+        let request = new MBRequest(
+          group,
+          sampleTime,
+          writeRequest,
+          fCode,
+          unitID
+        );
+
+        this.Requests.push(request);
+      }
+    }
+  }
+
+  //#endregion ========= OVERRIDE PUBLIC METHODS =========
 }
+
+//TODO - test createRequest method
 
 module.exports = MBRequestManager;

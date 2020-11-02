@@ -11,7 +11,7 @@ class ConnectableDevice extends Device {
     this._requestManager = null;
     this._driver = null;
 
-    //TODO - driver and request manager should be created in constructor in child classes
+    //IMPORTANT! driver and request manager should be created in constructor in child classes
   }
 
   //#endregion ========= CONSTRUCTOR =========

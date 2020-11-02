@@ -9,6 +9,7 @@ class StandardProtocolRequest extends ProtocolRequest {
 
     //#region calculating total length and checking variables
     this._length = 0;
+    this._offset = 0;
 
     //ordering variables based on their offsets
     let orderedVariables = this.Variables.sort((a, b) => a.Offset - b.Offset);
@@ -71,6 +72,7 @@ class StandardProtocolRequest extends ProtocolRequest {
     }
 
     this._length = actualOffset - beginOffset;
+    this._offset = beginOffset;
 
     //#endregion calculating total length and checking variables
   }
@@ -78,6 +80,13 @@ class StandardProtocolRequest extends ProtocolRequest {
   //#endregion========= CONSTRUCTOR =========
 
   //#region========= PROPERTIES =========
+
+  /**
+   * @description Offset of protocol request (in bytes)
+   */
+  get Offset() {
+    return this._offset;
+  }
 
   /**
    * @description Total length of all variables in request (in bytes)
@@ -88,7 +97,41 @@ class StandardProtocolRequest extends ProtocolRequest {
 
   //#endregion========= PROPERTIES =========
 
-  //#region========= OVERRIDE PUBLIC METHODS =========
+  //#region PUBLIC METHODS
+
+  /**
+   * @description Method for gathering all data from all variables
+   */
+  getTotalData() {
+    //TODO - test this method!
+    let dataToReturn = [];
+
+    //Filling all data of variables with 0
+    for (let index = 0; index < this.Length; index++) {
+      dataToReturn.push(0);
+    }
+
+    //Filling data from variables based on their offset and data content
+    for (let index = 0; index < this.Variables.length; index++) {
+      {
+        let variable = this.Variables[index];
+        let beginIndex = variable.Offset - this.Offset;
+        let endIndex = variable.Offset + variable.Length - this.Offset;
+
+        let data = variable.Data;
+
+        for (let index = beginIndex; index < endIndex; index++) {
+          dataToReturn[index] = data[index];
+        }
+      }
+    }
+
+    return dataToReturn;
+  }
+
+  //#endregion PUBLIC METHODS
+
+  //#region ========= OVERRIDE PUBLIC METHODS =========
 
   /**
    * @@description Method for writing data retrieved from request to variables.
@@ -112,7 +155,7 @@ class StandardProtocolRequest extends ProtocolRequest {
     }
   }
 
-  //#endregion========= OVERRIDE PUBLIC METHODS =========
+  //#endregion ========= OVERRIDE PUBLIC METHODS =========
 }
 
 module.exports = StandardProtocolRequest;

@@ -3784,10 +3784,6 @@ describe("MBRequestManager", () => {
         ],
       ];
 
-      console.log(
-        result.map((groupVar) => groupVar.map((variable) => variable.Name))
-      );
-
       expect(result).toEqual(expectedResult);
     });
 
@@ -3947,10 +3943,6 @@ describe("MBRequestManager", () => {
           variable10,
         ],
       ];
-
-      console.log(
-        result.map((groupVar) => groupVar.map((variable) => variable.Name))
-      );
 
       expect(result).toEqual(expectedResult);
     });

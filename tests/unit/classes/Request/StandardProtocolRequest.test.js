@@ -127,47 +127,52 @@ describe("StandardProtocolRequest", () => {
       expect(result.ReadRequest).toEqual(false);
     });
 
-    it("should properly calculate variable length", () => {
+    it("should properly calculate variable length and offset", () => {
       let result = exec();
 
       expect(result.Length).toEqual(
         variable1.Length + variable2.Length + variable3.Length
       );
+      expect(result.Offset).toEqual(10);
     });
 
-    it("should properly calculate variable length - if there are no variables", () => {
+    it("should properly calculate variable length and offset - if there are no variables", () => {
       variables = [];
 
       let result = exec();
 
       expect(result.Length).toEqual(0);
+      expect(result.Offset).toEqual(0);
     });
 
-    it("should properly calculate variable length - if there is only one variable", () => {
+    it("should properly calculate variable length and offset - if there is only one variable", () => {
       variables = [variable1];
 
       let result = exec();
 
       expect(result.Length).toEqual(variable1.Length);
+      expect(result.Offset).toEqual(10);
     });
 
-    it("should properly calculate variable length - if there is a total overlap between variables", () => {
+    it("should properly calculate variable length and offset - if there is a total overlap between variables", () => {
       variable2.Length = 5;
 
       let result = exec();
 
       expect(result.Length).toEqual(6);
+      expect(result.Offset).toEqual(10);
     });
 
-    it("should properly calculate variable length - if there is a partial overlap between variables", () => {
+    it("should properly calculate variable length and offset - if there is a partial overlap between variables", () => {
       variable2._length = 4;
 
       let result = exec();
 
       expect(result.Length).toEqual(6);
+      expect(result.Offset).toEqual(10);
     });
 
-    it("should properly calculate variable length - if there is a total overlap between variables and overlapped variable is shorter", () => {
+    it("should properly calculate variable length and offset - if there is a total overlap between variables and overlapped variable is shorter", () => {
       variable2._length = 5;
 
       variable3._length = 2;
@@ -175,6 +180,7 @@ describe("StandardProtocolRequest", () => {
       let result = exec();
 
       expect(result.Length).toEqual(6);
+      expect(result.Offset).toEqual(10);
     });
 
     it("should throw if there is a gap between variables", () => {
@@ -250,6 +256,8 @@ describe("StandardProtocolRequest", () => {
 
       expect(result.SampleTime).toEqual(sampleTime);
       expect(result.Variables).toEqual(variables);
+      expect(result.Offset).toEqual(11);
+      expect(result.Length).toEqual(2);
     });
 
     it("should not throw if one variable has SeperateWrite and there is only one variable", () => {
@@ -265,6 +273,8 @@ describe("StandardProtocolRequest", () => {
 
       expect(result.SampleTime).toEqual(sampleTime);
       expect(result.Variables).toEqual(variables);
+      expect(result.Offset).toEqual(11);
+      expect(result.Length).toEqual(2);
     });
   });
 
