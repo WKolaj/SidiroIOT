@@ -38,8 +38,6 @@ class MBVariable extends StandardProtocolVariable {
 
   //#endregion ========= PROPERTIES =========
 
-  //#endregion ========= PUBLIC ABSTRACT METHODS =========
-
   //#region ========= OVERRIDE PUBLIC METHODS =========
 
   /**
