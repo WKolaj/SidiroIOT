@@ -1,5 +1,6 @@
 let interval;
 
+/* eslint-disable */
 async function fetchHwInfo(accessToken) {
   const hw = await fetch('/api/devInfo', {
     headers: {

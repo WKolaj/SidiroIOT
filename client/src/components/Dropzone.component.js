@@ -39,46 +39,46 @@ function Dropzone({ setSnackbarText, setSnackbarShown }) {
   }, [setSnackbarShown, setSnackbarText, t])
   const { getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject } = useDropzone({ onDrop, accept: 'application/JSON' });
 
-  const baseStyle = {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    padding: '40px',
-    borderWidth: 2,
-    borderRadius: 2,
-    borderColor: 'rgb(187 187 187)',
-    borderStyle: 'dashed',
-    backgroundColor: 'rgb(255 255 255)',
-    outline: 'none',
-    transition: 'border .5s ease-in-out'
-  };
-
-  const activeStyle = {
-    borderColor: '#2196f3'
-  };
-
-  const acceptStyle = {
-    borderColor: '#00e676'
-  };
-
-  const rejectStyle = {
-    borderColor: '#ff1744'
-  };
-
-  const style = useMemo(() => ({
-    ...baseStyle,
-    ...(isDragActive ? activeStyle : {}),
-    ...(isDragAccept ? acceptStyle : {}),
-    ...(isDragReject ? rejectStyle : {})
-  }), [
+  
+  const style = useMemo(() => {
+    const baseStyle = {
+      flex: 1,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      padding: '40px',
+      borderWidth: 2,
+      borderRadius: 2,
+      borderColor: 'rgb(187 187 187)',
+      borderStyle: 'dashed',
+      backgroundColor: 'rgb(255 255 255)',
+      outline: 'none',
+      transition: 'border .5s ease-in-out'
+    };
+  
+    const activeStyle = {
+      borderColor: '#2196f3'
+    };
+  
+    const acceptStyle = {
+      borderColor: '#00e676'
+    };
+  
+    const rejectStyle = {
+      borderColor: '#ff1744'
+    };
+  
+    return {
+      ...baseStyle,
+      ...(isDragActive ? activeStyle : {}),
+      ...(isDragAccept ? acceptStyle : {}),
+      ...(isDragReject ? rejectStyle : {})
+    }
+    
+  }, [
     isDragActive,
     isDragReject,
-    isDragAccept,
-    baseStyle,
-    activeStyle,
-    acceptStyle,
-    rejectStyle
+    isDragAccept
   ]);
 
   return (

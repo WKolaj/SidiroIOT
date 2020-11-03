@@ -1,7 +1,6 @@
 //props = rows: array, columns: array, noPagination: bool
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -77,13 +76,6 @@ function TablePaginationActions(props) {
   );
 }
 
-TablePaginationActions.propTypes = {
-  count: PropTypes.number.isRequired,
-  onChangePage: PropTypes.func.isRequired,
-  page: PropTypes.number.isRequired,
-  rowsPerPage: PropTypes.number.isRequired,
-};
-
 const useStyles2 = makeStyles({
   table: {
     //minWidth: 500,
@@ -114,7 +106,6 @@ export default function CustomPaginationActionsTable({ rows, columns, noPaginati
     else {
       setRowsPerPage(5)
     }
-
   }, [rows])
 
   return (
@@ -136,7 +127,7 @@ export default function CustomPaginationActionsTable({ rows, columns, noPaginati
             <TableRow key={`row-${rowIndex}`}>
               {row.map((cell, cellIndex) => {
                 return <TableCell key={`cell-${cellIndex}`}>
-                  {cell}
+                  {typeof cell === "boolean"? cell.toString() : typeof cell === "object"? JSON.stringify(cell) : cell}
                 </TableCell>
               })}
             </TableRow>
@@ -145,7 +136,7 @@ export default function CustomPaginationActionsTable({ rows, columns, noPaginati
             <TableRow key={`row-${rowIndex}`}>
               {row.map((cell, cellIndex) => {
                 return <TableCell key={`cell-${cellIndex}`}>
-                  {cell}
+                  {typeof cell === "boolean"? cell.toString() : cell}
                 </TableCell>
               })}
             </TableRow>

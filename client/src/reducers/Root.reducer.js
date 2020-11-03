@@ -10,6 +10,7 @@ import { CreateAccountDialog } from './CreateAccountDialog.reducer';
 import { UserAccountsPageReducer } from './UserAccountsPage.reducer';
 import { SnackbarReducer } from './Snackbar.reducer';
 import { ConfirmDeleteUserDialogReducer } from './ConfirmDeleteUserDialog.reducer';
+import { DevicesSelectionPageReducer } from './DevicesSelectionPage.reducer';
 
 export default combineReducers({
   LanguageDialogReducer,
@@ -22,5 +23,6 @@ export default combineReducers({
   CreateAccountDialog,
   UserAccountsPageReducer,
   SnackbarReducer,
-  ConfirmDeleteUserDialogReducer
+  ConfirmDeleteUserDialogReducer,
+  DevicesSelectionPageReducer
 })

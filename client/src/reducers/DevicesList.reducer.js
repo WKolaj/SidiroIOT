@@ -2,8 +2,8 @@ import { SELECT_DEVICE } from '../actions/DevicesList.action';
 
 const initialState = {
     selectedDeviceIndex: 0,
-    selectedDeviceName: 'MindSphere',
-    selectedDeviceType: 'mindsphere',
+    selectedDeviceName: '',
+    selectedDeviceType: '',
     
 }
 

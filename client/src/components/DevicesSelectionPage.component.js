@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
@@ -8,6 +8,9 @@ import { connect } from 'react-redux';
 import UniversalTable from './UniversalTable.component';
 import { useTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
+import { mockFetch, MBDevice, S7Device, InternalDevice, MSAgent, calcElement, alert } from '../mock/index.mock';
+import { setAllDevices } from '../actions/DevicesSelectionPage.action';
+import CollapsibleTable from './CollapsibleTable.component';
 
 const useStyles = makeStyles((theme) => ({
   title: {
@@ -18,6 +21,68 @@ const useStyles = makeStyles((theme) => ({
 function DevicesSelectionPage(props) {
   const classes = useStyles();
   const { t } = useTranslation();
+  const { setAllDevices, allDevices, selectedDevice } = props
+
+  useEffect(() => {
+    mockFetch([MBDevice(calcElement('AverageCalculator'), alert('HighLimitAlert')),
+    S7Device(calcElement('FactorCalculator'), alert('LowLimitAlert')),
+    InternalDevice(calcElement('IncreaseCalculator'), alert('BandwidthLimitAlert')),
+    MSAgent(calcElement('SumCalculator'), alert('ExactValuesAlert'))]).then(res => {
+      setAllDevices(res)
+    })
+  }, [setAllDevices])
+
+  const createTabs = (devices, selectedDevice) => {
+    let columns = []
+    let rows = []
+    let tabs = []
+    devices.map((device, index) => {
+      const entries = Object.entries(device)
+      for (const [, properties] of entries) {
+        if (properties.name === selectedDevice.selectedDeviceName) {
+          const propertiesEntries = Object.entries(properties)
+          for (const [column, cell] of propertiesEntries) {
+            if (typeof cell !== 'object') {
+              //INFO tab
+              columns.push(column)
+              rows.push(cell)
+            }
+            else {
+              const tab = createTab(cell)
+              tabs.push({
+                label: column,
+                content: <UniversalTable columns={tab.columns} rows={[tab.rows]}/>
+              })
+            }
+          }
+        }
+      }
+      return null
+    })
+    tabs.push({
+      label: 'Info',
+      content: <UniversalTable columns={columns} rows={[rows]} />
+    })
+
+    return <DeviceSelectionTabs
+      name={selectedDevice.selectedDeviceType}
+      tabs={tabs}
+    />
+  }
+
+  const createTab = (obj) => {
+    let columns = []
+    let rows = []
+    const entries = Object.entries(obj)
+    for (const [, properties] of entries) {
+      const propertiesEntries = Object.entries(properties)
+      for (const [column, cell] of propertiesEntries) {
+        columns.push(column)
+        rows.push(cell)
+      }
+    }
+    return { rows, columns }
+  }
 
   return (
     <React.Fragment>
@@ -28,32 +93,9 @@ function DevicesSelectionPage(props) {
         </Grid>
         <Grid container item xs={12} sm={12} md={9} spacing={0}>
           <Grid item xs={12}>
-            <Typography variant="h4" className={classes.title}>{props.selectedDevice.selectedDeviceName}</Typography>
+            <Typography variant="h4" className={classes.title}>{selectedDevice.selectedDeviceName}</Typography>
             <React.Fragment>
-              {props.selectedDevice.selectedDeviceType === 'Meter' ?
-                <DeviceSelectionTabs
-                  name='meterTabs'
-                  tabs={[
-                    {
-                      label: t('DevicesSelectionPage.DatapointsTab'),
-                      content: <UniversalTable columns={['Parameter', 'type', 'sampleTime', 'offset', 'length', 'fCode', 'Unit', 'Value']} rows={[['Voltage', 'double', '1', '1', '1', '1', 'V', '230'], ['Voltage', 'double', '1', '1', '1', '1', 'V', '230']]} />
-                    },
-                    {
-                      label: t('DevicesSelectionPage.EdgecomputingTab'),
-                      content: <UniversalTable columns={['Parameter', 'type', 'sampleTime', 'calcInterval', 'variableName', 'factor', 'overflow', 'unit', 'value']} rows={[['Voltage', 'double', '1', '60', 'varname', 'factor1', 'overflow1', 'V', '230'], ['Voltage', 'double', '1', '60', 'varname', 'factor1', 'overflow1', 'V', '230']]} />
-                    },
-                    {
-                      label: t('DevicesSelectionPage.EventsTab'),
-                      content: <UniversalTable columns={['Parameter', 'Limit', 'Value', 'textPL', 'textEN', 'severity']} rows={[['Voltage', 'Lower limit', '180', 'Przekroczenie dolnego progu', 'Lower threshold exceeding', 'Warning'], ['Voltage', 'Lower limit', '180', 'Przekroczenie dolnego progu', 'Lower threshold exceeding', 'Warning']]} />
-                    }
-                  ]} />
-                :
-                <DeviceSelectionTabs
-                  name="mindsphereTabs"
-                  tabs={[{ label: t('DevicesSelectionPage.DatapointsTab'), content: <UniversalTable columns={['Name', 'Parameter', 'ConfigId', 'DpId', 'Interval', 'Format', 'Length', 'Unit', 'Value']} rows={[['Meter1', 'Voltage', '1', '1', '1min', 'double', '32', 'V', '230'], ['Meter1', 'Voltage', '1', '1', '1min', 'double', '32', 'V', '230']]} /> },
-                  { label: t('DevicesSelectionPage.EventsTab'), content: <UniversalTable columns={['Name', 'Parameter', 'Limit', 'TextPL', 'TextEN', 'Severity']} rows={[['Meter1', 'Voltage', 'Upper limit', 'Przekroczenie', 'Exceeding', 'Warning']]} /> }]}
-                />
-              }
+              {createTabs(allDevices, selectedDevice)}
             </React.Fragment>
           </Grid>
           <Grid container item xs={12} spacing={2}>
@@ -75,8 +117,13 @@ function DevicesSelectionPage(props) {
 
 const mapStateToProps = (state) => {
   return {
-    selectedDevice: state.DevicesListReducer
+    selectedDevice: state.DevicesListReducer,
+    allDevices: state.DevicesSelectionPageReducer.devices
   }
 }
 
-export default connect(mapStateToProps)(DevicesSelectionPage)
+const mapDispatchToProps = {
+  setAllDevices
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(DevicesSelectionPage)
