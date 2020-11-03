@@ -1,19 +1,52 @@
-const express = require("express");
+const readline = require("readline");
+const MBInt16Variable = require("./classes/Element/Variable/ConnectableVariable/MBVariable/MBInt16");
+const MBDevice = require("./classes/Device/ConnectableDevice/MBDevice");
 
-const app = express();
+let variable = new MBInt16Variable();
+variable._id = "variable1ID";
+variable._name = "variable1Name";
+variable._offset = 2;
+variable._readFCode = 3;
+variable._readSeperately = false;
+variable._read = true;
+variable._sampleTime = 1;
+variable._unitID = 1;
+variable._length = 1;
+variable._data = [0];
 
-const path = require("path");
+let device = new MBDevice();
+device._variables = {};
+device._calcElements = {};
+device._alerts = {};
+device.Variables[variable.ID] = variable;
 
-const port = 5000;
+device.RequestManager.createRequests(Object.values(device.Variables));
 
-// Serve any static files
+device.Driver._ipAddress = "192.168.10.100";
+device.Driver._portNumber = 502;
 
-app.use(express.static(path.join(__dirname, "client/build")));
+function askQuestion(query) {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
 
-// Handle React routing, return all requests to React app
+  return new Promise((resolve) =>
+    rl.question(query, (ans) => {
+      rl.close();
+      resolve(ans);
+    })
+  );
+}
 
-app.get("*", function (req, res) {
-  res.sendFile(path.join(__dirname, "client/build", "index.html"));
-});
+let exec = async () => {
+  await device.activate();
 
-app.listen(port, () => console.log(`Listening on port ${port}`));
+  while (1) {
+    await device.refresh(1);
+    console.log(variable.Value);
+    await askQuestion("Insert any key to continue...");
+  }
+};
+
+exec();

@@ -218,7 +218,7 @@ class MBRequestManager extends RequestManager {
         let sampleTime = group[0].SampleTime;
         let unitID = group[0].UnitID;
         let writeRequest = !group[0].Read;
-        let fCode = writeRequest ? group[0].WriteFCode : ReadFCode;
+        let fCode = writeRequest ? group[0].WriteFCode : group[0].ReadFCode;
 
         let request = new MBRequest(
           group,

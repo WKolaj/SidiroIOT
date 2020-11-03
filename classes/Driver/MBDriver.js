@@ -88,9 +88,9 @@ class MBDriver extends Driver {
    */
   async _processRequest(protocolRequest, tickId) {
     if (protocolRequest.ReadRequest) {
-      return this._proccessReadingRequest();
+      return this._proccessReadingRequest(protocolRequest, tickId);
     } else if (protocolRequest.WriteRequest) {
-      return this._proccessWritingRequest();
+      return this._proccessWritingRequest(protocolRequest, tickId);
     }
   }
 
@@ -154,10 +154,12 @@ class MBDriver extends Driver {
    */
   async _proccessFCode1(protocolRequest, tickId) {
     this.Client.setID(protocolRequest.UnitID);
-    return this.Client.readCoils(
+    let result = await this.Client.readCoils(
       protocolRequest.Offset,
       protocolRequest.Length
     );
+
+    return result.data;
   }
 
   /**
@@ -167,10 +169,12 @@ class MBDriver extends Driver {
    */
   async _proccessFCode2(protocolRequest, tickId) {
     this.Client.setID(protocolRequest.UnitID);
-    return this.Client.readDiscreteInputs(
+    let result = await this.Client.readDiscreteInputs(
       protocolRequest.Offset,
       protocolRequest.Length
     );
+
+    return result.data;
   }
 
   /**
@@ -179,10 +183,12 @@ class MBDriver extends Driver {
    * @param {Number} tickId tickId of action
    */
   async _proccessFCode3(protocolRequest, tickId) {
-    return this.Client.readHoldingRegisters(
+    let result = await this.Client.readHoldingRegisters(
       protocolRequest.Offset,
       protocolRequest.Length
     );
+
+    return result.data;
   }
 
   /**
@@ -191,10 +197,12 @@ class MBDriver extends Driver {
    * @param {Number} tickId tickId of action
    */
   async _proccessFCode4(protocolRequest, tickId) {
-    return this.Client.readInputRegisters(
+    let result = await this.Client.readInputRegisters(
       protocolRequest.Offset,
       protocolRequest.Length
     );
+
+    return result.data;
   }
 
   /**
@@ -204,7 +212,9 @@ class MBDriver extends Driver {
    * @param {Array} data data to be set
    */
   async _proccessFCode15(protocolRequest, tickId, data) {
-    return this.Client.writeCoils(protocolRequest.Offset, data);
+    let result = await this.Client.writeCoils(protocolRequest.Offset, data);
+
+    return result.data;
   }
 
   /**
@@ -214,7 +224,9 @@ class MBDriver extends Driver {
    * @param {Array} data data to be set
    */
   async _proccessFCode16(protocolRequest, tickId, data) {
-    return this.Client.writeRegisters(protocolRequest.Offset, data);
+    let result = await this.Client.writeRegisters(protocolRequest.Offset, data);
+
+    return result.data;
   }
 
   //#endregion ========= PRIVATE METHODS =========
