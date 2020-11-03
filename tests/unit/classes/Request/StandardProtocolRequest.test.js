@@ -459,4 +459,153 @@ describe("StandardProtocolRequest", () => {
       );
     });
   });
+
+  describe("getTotalData", () => {
+    let variable1;
+    let variable2;
+    let variable3;
+    let variables;
+    let protocolRequest;
+
+    beforeEach(() => {
+      variable1 = createFakeStandardProtocolVariable(
+        "var1Id",
+        "var1Name",
+        "FakeVariable",
+        0,
+        "FakeUnit",
+        1,
+        [9],
+        10,
+        1,
+        jest.fn(),
+        jest.fn(),
+        false,
+        true,
+        false,
+        false
+      );
+
+      variable2 = createFakeStandardProtocolVariable(
+        "var2Id",
+        "var2Name",
+        "FakeVariable",
+        0,
+        "FakeUnit",
+        1,
+        [8, 7],
+        11,
+        2,
+        jest.fn(),
+        jest.fn(),
+        false,
+        true,
+        false,
+        false
+      );
+
+      variable3 = createFakeStandardProtocolVariable(
+        "var3Id",
+        "var3Name",
+        "FakeVariable",
+        0,
+        "FakeUnit",
+        1,
+        [6, 5, 4],
+        13,
+        3,
+        jest.fn(),
+        jest.fn(),
+        false,
+        true,
+        false,
+        false
+      );
+
+      variables = [variable1, variable2, variable3];
+    });
+
+    let exec = () => {
+      protocolRequest = new StandardProtocolRequest(variables, 1, true);
+      return protocolRequest.getTotalData();
+    };
+
+    it("should return combined data of all variables", () => {
+      let result = exec();
+
+      expect(result).toEqual([9, 8, 7, 6, 5, 4]);
+    });
+
+    it("should return combined data of all variables - if all variables have data length of 1", () => {
+      variable1._length = 1;
+      variable2._length = 1;
+      variable3._length = 1;
+
+      variable1._offset = 1;
+      variable2._offset = 2;
+      variable3._offset = 3;
+
+      variable1._data = [5];
+      variable2._data = [4];
+      variable3._data = [3];
+
+      let result = exec();
+
+      expect(result).toEqual([5, 4, 3]);
+    });
+
+    it("should return combined data of all variables - if there is a fully overlapped variabled", () => {
+      variable1._length = 2;
+      variable2._length = 2;
+      variable3._length = 2;
+
+      variable1._offset = 1;
+      variable2._offset = 2;
+      variable3._offset = 3;
+
+      variable1._data = [1, 2];
+      variable2._data = [3, 4];
+      variable3._data = [5, 6];
+
+      let result = exec();
+
+      expect(result).toEqual([1, 3, 5, 6]);
+    });
+
+    it("should return combined data of all variables - if there is a partialy overlapped variabled", () => {
+      variable1._length = 2;
+      variable2._length = 2;
+      variable3._length = 2;
+
+      variable1._offset = 1;
+      variable2._offset = 2;
+      variable3._offset = 4;
+
+      variable1._data = [1, 2];
+      variable2._data = [3, 4];
+      variable3._data = [5, 6];
+
+      let result = exec();
+
+      expect(result).toEqual([1, 3, 4, 5, 6]);
+    });
+
+    it("should return combined data of all variables - if there is a fully overlapped short variable", () => {
+      variable1._length = 4;
+      variable2._length = 2;
+      variable3._length = 2;
+
+      variable1._offset = 1;
+      variable2._offset = 2;
+      variable3._offset = 5;
+
+      variable1._data = [1, 2, 3, 4];
+      variable2._data = [5, 6];
+      variable3._data = [7, 8];
+
+      let result = exec();
+
+      expect(result).toEqual([1, 5, 6, 4, 7, 8]);
+    });
+  });
 });
