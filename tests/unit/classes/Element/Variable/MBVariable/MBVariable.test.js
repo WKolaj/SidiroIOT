@@ -52,8 +52,15 @@ describe("MBVariable", () => {
     let variable;
     let convertValueToDataMockFunc;
     let convertDataToValueMockFunc;
+    let possibleReadCodes;
+    let possibleWriteCodes;
+    let getPossibleReadCodesMockFunc;
+    let getPossibleWriteCodesMockFunc;
 
     beforeEach(() => {
+      possibleReadCodes = [1, 2, 3, 4];
+      possibleWriteCodes = [16];
+
       payload = {
         id: "testElementId",
         name: "testElementName",
@@ -68,7 +75,7 @@ describe("MBVariable", () => {
         writeAsSingle: false,
         unitID: 12,
         readFCode: 4,
-        writeFCode: 10,
+        writeFCode: 16,
       };
 
       //Creating mocking method for converting data to value
@@ -91,12 +98,17 @@ describe("MBVariable", () => {
         }
         return dataToReturn;
       });
+
+      getPossibleReadCodesMockFunc = jest.fn(() => possibleReadCodes);
+      getPossibleWriteCodesMockFunc = jest.fn(() => possibleWriteCodes);
     });
 
     let exec = async () => {
       variable = new MBVariable();
       variable._convertDataToValue = convertDataToValueMockFunc;
       variable._convertValueToData = convertValueToDataMockFunc;
+      variable._getReadPossibleFunctionCodes = getPossibleReadCodesMockFunc;
+      variable._getWritePossibleFunctionCodes = getPossibleWriteCodesMockFunc;
 
       return variable.init(payload);
     };
@@ -126,7 +138,7 @@ describe("MBVariable", () => {
 
       expect(variable.UnitID).toEqual(12);
       expect(variable.ReadFCode).toEqual(4);
-      expect(variable.WriteFCode).toEqual(10);
+      expect(variable.WriteFCode).toEqual(16);
     });
 
     it("should call _convertValueToDataMockFunc in order to set Data based on defaultValue", async () => {
@@ -135,6 +147,164 @@ describe("MBVariable", () => {
       //ConvertValueToData should have been called
       expect(convertValueToDataMockFunc).toHaveBeenCalledTimes(1);
       expect(convertValueToDataMockFunc.mock.calls[0][0]).toEqual(10);
+    });
+
+    it("should not initialize any property and throw - if readFCode is not included in readFCodes from getReadFCodes and read is set to true", async () => {
+      payload.read = true;
+      payload.write = false;
+      payload.readFCode = 30;
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(error.message).toEqual(
+        "Trying to assign invalid read FCode for MBVariable"
+      );
+
+      //Variable should not have been initialized
+      expect(variable.ID).toEqual(null);
+      expect(variable.Name).toEqual(null);
+      expect(variable.Type).toEqual(null);
+      expect(variable.DefaultValue).toEqual(null);
+      expect(variable.LastValueTick).toEqual(null);
+      expect(variable.Unit).toEqual(null);
+      expect(variable.SampleTime).toEqual(null);
+      expect(variable.Offset).toEqual(null);
+      expect(variable.Length).toEqual(null);
+    });
+
+    it("should initialize and not throw - if readFCode is not included in readFCodes from getReadFCodes bute read is set to false", async () => {
+      payload.read = false;
+      payload.write = true;
+      payload.readFCode = 30;
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
+
+      expect(variable.ID).toEqual("testElementId");
+      expect(variable.Name).toEqual("testElementName");
+      expect(variable.Type).toEqual("testElementType");
+      expect(variable.DefaultValue).toEqual(10);
+      expect(variable.SampleTime).toEqual("testElementSampleTime");
+
+      expect(variable.Value).toEqual(10);
+      expect(variable.LastValueTick).toEqual(0);
+
+      expect(variable.Offset).toEqual(123);
+      expect(variable.Length).toEqual(456);
+
+      //default Value 10 corresponds to [1,2,3,4] in Data;
+      expect(variable.Data).toEqual([1, 2, 3, 4]);
+
+      expect(variable.Read).toEqual(false);
+      expect(variable.Write).toEqual(true);
+      expect(variable.ReadSeperately).toEqual(true);
+      expect(variable.WriteSeperately).toEqual(false);
+
+      expect(variable.UnitID).toEqual(12);
+      expect(variable.ReadFCode).toEqual(30);
+      expect(variable.WriteFCode).toEqual(16);
+    });
+
+    it("should not initialize any property and throw - if writeFCode is not included in writeFCodes from getWriteFCodes and write is set to true", async () => {
+      payload.read = false;
+      payload.write = true;
+      payload.writeFCode = 30;
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(error.message).toEqual(
+        "Trying to assign invalid write FCode for MBVariable"
+      );
+
+      //Variable should not have been initialized
+      expect(variable.ID).toEqual(null);
+      expect(variable.Name).toEqual(null);
+      expect(variable.Type).toEqual(null);
+      expect(variable.DefaultValue).toEqual(null);
+      expect(variable.LastValueTick).toEqual(null);
+      expect(variable.Unit).toEqual(null);
+      expect(variable.SampleTime).toEqual(null);
+      expect(variable.Offset).toEqual(null);
+      expect(variable.Length).toEqual(null);
+    });
+
+    it("should initialize and not throw - if writeFCode is not included in writeFCodes from getWriteFCodes bute write is set to false", async () => {
+      payload.read = true;
+      payload.write = false;
+      payload.writeFCode = 30;
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
+
+      expect(variable.ID).toEqual("testElementId");
+      expect(variable.Name).toEqual("testElementName");
+      expect(variable.Type).toEqual("testElementType");
+      expect(variable.DefaultValue).toEqual(10);
+      expect(variable.SampleTime).toEqual("testElementSampleTime");
+
+      expect(variable.Value).toEqual(10);
+      expect(variable.LastValueTick).toEqual(0);
+
+      expect(variable.Offset).toEqual(123);
+      expect(variable.Length).toEqual(456);
+
+      //default Value 10 corresponds to [1,2,3,4] in Data;
+      expect(variable.Data).toEqual([1, 2, 3, 4]);
+
+      expect(variable.Read).toEqual(true);
+      expect(variable.Write).toEqual(false);
+      expect(variable.ReadSeperately).toEqual(true);
+      expect(variable.WriteSeperately).toEqual(false);
+
+      expect(variable.UnitID).toEqual(12);
+      expect(variable.ReadFCode).toEqual(4);
+      expect(variable.WriteFCode).toEqual(30);
     });
   });
 });

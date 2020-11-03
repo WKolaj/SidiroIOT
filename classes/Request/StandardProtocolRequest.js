@@ -103,7 +103,6 @@ class StandardProtocolRequest extends ProtocolRequest {
    * @description Method for gathering all data from all variables
    */
   getTotalData() {
-    //TODO - test this method!
     let dataToReturn = [];
 
     //Filling all data of variables with 0

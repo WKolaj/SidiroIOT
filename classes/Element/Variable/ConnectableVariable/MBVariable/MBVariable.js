@@ -45,6 +45,16 @@ class MBVariable extends StandardProtocolVariable {
    * @param {JSON} payload JSON Payload of element
    */
   async init(payload) {
+    //TODO - test this method in child classes
+    //Checking all possible function codes before initialzing (even before initializng in base class to completly prevent initialization in case of error)
+    let possibleReadFCodes = this._getReadPossibleFunctionCodes();
+    if (payload.read && !possibleReadFCodes.includes(payload.readFCode))
+      throw new Error("Trying to assign invalid read FCode for MBVariable");
+
+    let possibleWriteFCodes = this._getWritePossibleFunctionCodes();
+    if (payload.write && !possibleWriteFCodes.includes(payload.writeFCode))
+      throw new Error("Trying to assign invalid write FCode for MBVariable");
+
     await super.init(payload);
 
     this._readFCode = payload.readFCode;
@@ -53,6 +63,20 @@ class MBVariable extends StandardProtocolVariable {
   }
 
   //#endregion ========= OVERRIDE PUBLIC METHODS =========
+
+  //#region ========= PRIVATE ABSTRACT METHODS =========
+
+  /**
+   * @description Method for getting all possible function codes for this type of variable (when reading). MUST BE OVERRIDEN IN CHILD CLASSES
+   */
+  _getReadPossibleFunctionCodes() {}
+
+  /**
+   * @description Method for getting all possible function codes for this type of variable (when writing). MUST BE OVERRIDEN IN CHILD CLASSES
+   */
+  _getWritePossibleFunctionCodes() {}
+
+  //#endregion ========= PRIVATE ABSTRACT METHODS =========
 }
 
 module.exports = MBVariable;

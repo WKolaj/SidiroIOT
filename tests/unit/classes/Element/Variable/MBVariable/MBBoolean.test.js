@@ -55,4 +55,34 @@ describe("MBBoolean", () => {
       expect(result).toEqual([false]);
     });
   });
+
+  describe("_getReadPossibleFunctionCodes", () => {
+    let mbVariable;
+
+    let exec = async () => {
+      mbVariable = new MBBoolean();
+      return mbVariable._getReadPossibleFunctionCodes();
+    };
+
+    it("should return functions 1 and 2", async () => {
+      let result = await exec();
+
+      expect(result).toEqual([1, 2]);
+    });
+  });
+
+  describe("_getWritePossibleFunctionCodes", () => {
+    let mbVariable;
+
+    let exec = async () => {
+      mbVariable = new MBBoolean();
+      return mbVariable._getWritePossibleFunctionCodes();
+    };
+
+    it("should return empty array - MBBoolean cannot be written", async () => {
+      let result = await exec();
+
+      expect(result).toEqual([]);
+    });
+  });
 });

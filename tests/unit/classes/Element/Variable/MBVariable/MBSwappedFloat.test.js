@@ -41,4 +41,34 @@ describe("MBSwappedFloat", () => {
       expect(result).toEqual([17142, 59769]);
     });
   });
+
+  describe("_getReadPossibleFunctionCodes", () => {
+    let mbVariable;
+
+    let exec = async () => {
+      mbVariable = new MBSwappedFloat();
+      return mbVariable._getReadPossibleFunctionCodes();
+    };
+
+    it("should return functions 3 and 4", async () => {
+      let result = await exec();
+
+      expect(result).toEqual([3, 4]);
+    });
+  });
+
+  describe("_getWritePossibleFunctionCodes", () => {
+    let mbVariable;
+
+    let exec = async () => {
+      mbVariable = new MBSwappedFloat();
+      return mbVariable._getWritePossibleFunctionCodes();
+    };
+
+    it("should return function 16", async () => {
+      let result = await exec();
+
+      expect(result).toEqual([16]);
+    });
+  });
 });

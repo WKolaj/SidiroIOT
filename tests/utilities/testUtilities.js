@@ -387,7 +387,9 @@ module.exports.createFakeMBVariable = (
   read = true,
   write = false,
   readAsSingle = false,
-  writeAsSingle = false
+  writeAsSingle = false,
+  getReadFunctionCodesMockFunc = () => [1, 2, 3, 4],
+  getWriteFunctionCodesMockFunc = () => [16]
 ) => {
   let variable = new MBVariable();
 
@@ -412,6 +414,9 @@ module.exports.createFakeMBVariable = (
   variable._unitID = unitID;
   variable._readFCode = readFCode;
   variable._writeFCode = writeFCode;
+
+  variable._getReadPossibleFunctionCodes = getReadFunctionCodesMockFunc;
+  variable._getWritePossibleFunctionCodes = getWriteFunctionCodesMockFunc;
 
   return variable;
 };
