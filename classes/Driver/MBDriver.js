@@ -12,7 +12,7 @@ class MBDriver extends Driver {
     this._ipAddress = "192.168.0.1";
     this._portNumber = 502;
     this._readingFCodes = [2, 3, 4];
-    this._writingFCodes = [15, 16];
+    this._writingFCodes = [16];
   }
 
   //#endregion ========= CONSTRUCTOR =========
@@ -133,9 +133,6 @@ class MBDriver extends Driver {
   async _proccessWritingRequest(protocolRequest, tickId) {
     let data = protocolRequest.getTotalData();
     switch (protocolRequest.FCode) {
-      case 15: {
-        return this._proccessFCode15(protocolRequest, tickId, data);
-      }
       case 16: {
         return this._proccessFCode16(protocolRequest, tickId, data);
       }
@@ -183,6 +180,7 @@ class MBDriver extends Driver {
    * @param {Number} tickId tickId of action
    */
   async _proccessFCode3(protocolRequest, tickId) {
+    this.Client.setID(protocolRequest.UnitID);
     let result = await this.Client.readHoldingRegisters(
       protocolRequest.Offset,
       protocolRequest.Length
@@ -197,22 +195,11 @@ class MBDriver extends Driver {
    * @param {Number} tickId tickId of action
    */
   async _proccessFCode4(protocolRequest, tickId) {
+    this.Client.setID(protocolRequest.UnitID);
     let result = await this.Client.readInputRegisters(
       protocolRequest.Offset,
       protocolRequest.Length
     );
-
-    return result.data;
-  }
-
-  /**
-   * @description Method for process write request of FCode 15
-   * @param {MBRequest} protocolRequest
-   * @param {Number} tickId tickId of action
-   * @param {Array} data data to be set
-   */
-  async _proccessFCode15(protocolRequest, tickId, data) {
-    let result = await this.Client.writeCoils(protocolRequest.Offset, data);
 
     return result.data;
   }
@@ -224,6 +211,7 @@ class MBDriver extends Driver {
    * @param {Array} data data to be set
    */
   async _proccessFCode16(protocolRequest, tickId, data) {
+    this.Client.setID(protocolRequest.UnitID);
     let result = await this.Client.writeRegisters(protocolRequest.Offset, data);
 
     return result.data;

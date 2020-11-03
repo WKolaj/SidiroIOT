@@ -397,11 +397,11 @@ describe("StandardProtocolRequest", () => {
       expect(variable3.LastValueTick).toEqual(0);
 
       expect(error.message).toEqual(
-        "Length of data does not correspond to length of request"
+        "Length of data is lesser then length of request"
       );
     });
 
-    it("should throw and not set data to protocolRequest if new data is longer then total variable length", async () => {
+    it("should not throw and not set data to protocolRequest if new data is longer then total variable length", async () => {
       data = [1, 2, 3, 4, 5, 6, 7];
 
       let error = null;
@@ -416,20 +416,16 @@ describe("StandardProtocolRequest", () => {
             return reject(err);
           }
         })
-      ).rejects.toBeDefined();
+      ).resolves.toBeDefined();
 
       //variables data should not be changed
-      expect(variable1.Data).toEqual([9]);
-      expect(variable2.Data).toEqual([8, 7]);
-      expect(variable3.Data).toEqual([6, 5, 4]);
+      expect(variable1.Data).toEqual([1]);
+      expect(variable2.Data).toEqual([2, 3]);
+      expect(variable3.Data).toEqual([4, 5, 6]);
 
-      expect(variable1.LastValueTick).toEqual(0);
-      expect(variable2.LastValueTick).toEqual(0);
-      expect(variable3.LastValueTick).toEqual(0);
-
-      expect(error.message).toEqual(
-        "Length of data does not correspond to length of request"
-      );
+      expect(variable1.LastValueTick).toEqual(tickId);
+      expect(variable2.LastValueTick).toEqual(tickId);
+      expect(variable3.LastValueTick).toEqual(tickId);
     });
 
     it("should throw and not set data to protocolRequest if new data is empty", async () => {
@@ -459,7 +455,7 @@ describe("StandardProtocolRequest", () => {
       expect(variable3.LastValueTick).toEqual(0);
 
       expect(error.message).toEqual(
-        "Length of data does not correspond to length of request"
+        "Length of data is lesser then length of request"
       );
     });
   });

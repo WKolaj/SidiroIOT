@@ -119,9 +119,8 @@ class StandardProtocolRequest extends ProtocolRequest {
         let endIndex = variable.Offset + variable.Length - this.Offset;
 
         let data = variable.Data;
-
         for (let index = beginIndex; index < endIndex; index++) {
-          dataToReturn[index] = data[index];
+          dataToReturn[index] = data[index - beginIndex];
         }
       }
     }
@@ -139,10 +138,9 @@ class StandardProtocolRequest extends ProtocolRequest {
    * @param {Number} tickId actual tickId
    */
   async writeDataToVariableValues(data, tickId) {
-    if (data.length != this.Length)
-      throw new Error(
-        "Length of data does not correspond to length of request"
-      );
+    //HAS TO CHECK ONLY IF LENGTH IS NOT LESSER - SOME FUNCTIONS LIKE 2 RETURNS DATA OF WHOLE BYTE!
+    if (data.length < this.Length)
+      throw new Error("Length of data is lesser then length of request");
 
     let currentOffset = 0;
 
