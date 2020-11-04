@@ -11,8 +11,6 @@ class MBDriver extends Driver {
     this._client = new ModbusRTU();
     this._ipAddress = "192.168.0.1";
     this._portNumber = 502;
-    this._readingFCodes = [2, 3, 4];
-    this._writingFCodes = [16];
   }
 
   //#endregion ========= CONSTRUCTOR =========
@@ -38,20 +36,6 @@ class MBDriver extends Driver {
    */
   get PortNumber() {
     return this._portNumber;
-  }
-
-  /**
-   * @description All accessible reading FCodes
-   */
-  get ReadingFCodes() {
-    return this._readingFCodes;
-  }
-
-  /**
-   * @description All accessible writing FCodes
-   */
-  get WriteFCodes() {
-    return this._writingFCodes;
   }
 
   //#endregion ========= PROPERTIES =========
@@ -138,7 +122,7 @@ class MBDriver extends Driver {
       }
       default: {
         throw new Error(
-          `Invalid MB read function code ${protocolRequest.FCode}`
+          `Invalid MB write function code ${protocolRequest.FCode}`
         );
       }
     }
@@ -212,9 +196,9 @@ class MBDriver extends Driver {
    */
   async _proccessFCode16(protocolRequest, tickId, data) {
     this.Client.setID(protocolRequest.UnitID);
-    let result = await this.Client.writeRegisters(protocolRequest.Offset, data);
+    await this.Client.writeRegisters(protocolRequest.Offset, data);
 
-    return result.data;
+    //after processing data end - there is no need to return anything - device should not process data if request was no read only
   }
 
   //#endregion ========= PRIVATE METHODS =========
