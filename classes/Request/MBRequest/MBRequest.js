@@ -58,5 +58,3 @@ class MBRequest extends StandardProtocolRequest {
 }
 
 module.exports = MBRequest;
-
-//TODO - TEST MBREQUEST CLASS

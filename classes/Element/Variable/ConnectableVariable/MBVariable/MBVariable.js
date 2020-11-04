@@ -79,5 +79,3 @@ class MBVariable extends StandardProtocolVariable {
 }
 
 module.exports = MBVariable;
-
-//TODO - TEST INIT METHOD OF EACH MB VARIABLE!

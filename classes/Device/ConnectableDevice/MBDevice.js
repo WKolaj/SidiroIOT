@@ -32,3 +32,5 @@ class MBDevice extends ConnectableDevice {
 }
 
 module.exports = MBDevice;
+
+//TODO Test MBDevice
