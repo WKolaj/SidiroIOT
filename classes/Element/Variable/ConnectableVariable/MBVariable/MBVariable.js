@@ -45,7 +45,6 @@ class MBVariable extends StandardProtocolVariable {
    * @param {JSON} payload JSON Payload of element
    */
   async init(payload) {
-    //TODO - test this method in child classes
     //Checking all possible function codes before initialzing (even before initializng in base class to completly prevent initialization in case of error)
     let possibleReadFCodes = this._getReadPossibleFunctionCodes();
     if (payload.read && !possibleReadFCodes.includes(payload.readFCode))
@@ -80,3 +79,5 @@ class MBVariable extends StandardProtocolVariable {
 }
 
 module.exports = MBVariable;
+
+//TODO - TEST INIT METHOD OF EACH MB VARIABLE!

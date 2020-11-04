@@ -64,12 +64,11 @@ class MBByteArray extends MBVariable {
    * @param {JSON} payload JSON Payload of element
    */
   async init(payload) {
-    //Setting fixed type of variable - before invoking init in parent class - for whole process of data check to work
-    payload.type = "MBByteArray";
+    if (payload.type !== "MBByteArray")
+      throw new Error("Invalid type in payload of MBByteArray");
 
     await super.init(payload);
   }
-
   //#endregion ========= OVERRIDE PUBLIC METHODS =========
 
   //#region ========= OVERRIDE PRIVATE METHODS =========

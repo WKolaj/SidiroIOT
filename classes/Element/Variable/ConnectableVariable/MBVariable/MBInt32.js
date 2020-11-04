@@ -94,9 +94,10 @@ class MBInt32 extends MBVariable {
    * @param {JSON} payload JSON Payload of element
    */
   async init(payload) {
-    //Setting fixed type of variable and length - before invoking init in parent class - for whole process of data check to work
-    payload.type = "MBInt32";
-    payload.length = 2;
+    if (payload.type !== "MBInt32")
+      throw new Error("Invalid type in payload of MBInt32");
+    if (payload.length !== 2)
+      throw new Error("Invalid length in payload of MBInt32");
 
     await super.init(payload);
   }

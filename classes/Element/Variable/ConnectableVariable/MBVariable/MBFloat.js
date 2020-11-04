@@ -94,9 +94,10 @@ class MBFloat extends MBVariable {
    * @param {JSON} payload JSON Payload of element
    */
   async init(payload) {
-    //Setting fixed type of variable and length - before invoking init in parent class - for whole process of data check to work
-    payload.type = "MBFloat";
-    payload.length = 2;
+    if (payload.type !== "MBFloat")
+      throw new Error("Invalid type in payload of MBFloat");
+    if (payload.length !== 2)
+      throw new Error("Invalid length in payload of MBFloat");
 
     await super.init(payload);
   }
