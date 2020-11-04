@@ -236,6 +236,4 @@ class MBRequestManager extends RequestManager {
   //#endregion ========= OVERRIDE PUBLIC METHODS =========
 }
 
-//TODO - TEST MBREQUESTMANAGER CLASS - ESPECIALLY createRequest METHOD
-
 module.exports = MBRequestManager;

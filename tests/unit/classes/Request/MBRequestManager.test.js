@@ -1,3 +1,4 @@
+const { result } = require("lodash");
 const MBRequestManager = require("../../../../classes/Request/MBRequest/MBRequestManager");
 const { createFakeMBVariable } = require("../../../utilities/testUtilities");
 
@@ -3945,6 +3946,724 @@ describe("MBRequestManager", () => {
       ];
 
       expect(result).toEqual(expectedResult);
+    });
+  });
+
+  describe("createRequests", () => {
+    let initialRequests;
+
+    let variable1;
+    let variable2;
+    let variable3;
+    let variable4;
+    let variable5;
+    let variable6;
+    let variable7;
+    let variable8;
+    let variable9;
+    let variable10;
+
+    let addVariable1;
+    let addVariable2;
+    let addVariable3;
+    let addVariable4;
+    let addVariable5;
+    let addVariable6;
+    let addVariable7;
+    let addVariable8;
+    let addVariable9;
+    let addVariable10;
+
+    let variable1UnitId;
+    let variable1ReadFCode;
+    let variable1WriteFCode;
+    let variable1Offset;
+    let variable1Length;
+    let variable1Write;
+    let variable1Read;
+    let variable1WriteSingle;
+    let variable1ReadSingle;
+    let variable1SampleTime;
+
+    let variable2UnitId;
+    let variable2ReadFCode;
+    let variable2WriteFCode;
+    let variable2Offset;
+    let variable2Length;
+    let variable2Write;
+    let variable2Read;
+    let variable2WriteSingle;
+    let variable2ReadSingle;
+    let variable2SampleTime;
+
+    let variable3UnitId;
+    let variable3ReadFCode;
+    let variable3WriteFCode;
+    let variable3Offset;
+    let variable3Length;
+    let variable3Write;
+    let variable3Read;
+    let variable3WriteSingle;
+    let variable3ReadSingle;
+    let variable3SampleTime;
+
+    let variable4UnitId;
+    let variable4ReadFCode;
+    let variable4WriteFCode;
+    let variable4Offset;
+    let variable4Length;
+    let variable4Write;
+    let variable4Read;
+    let variable4WriteSingle;
+    let variable4ReadSingle;
+    let variable4SampleTime;
+
+    let variable5UnitId;
+    let variable5ReadFCode;
+    let variable5WriteFCode;
+    let variable5Offset;
+    let variable5Length;
+    let variable5Write;
+    let variable5Read;
+    let variable5WriteSingle;
+    let variable5ReadSingle;
+    let variable5SampleTime;
+
+    let variable6UnitId;
+    let variable6ReadFCode;
+    let variable6WriteFCode;
+    let variable6Offset;
+    let variable6Length;
+    let variable6Write;
+    let variable6Read;
+    let variable6WriteSingle;
+    let variable6ReadSingle;
+    let variable6SampleTime;
+
+    let variable7UnitId;
+    let variable7ReadFCode;
+    let variable7WriteFCode;
+    let variable7Offset;
+    let variable7Length;
+    let variable7Write;
+    let variable7Read;
+    let variable7WriteSingle;
+    let variable7ReadSingle;
+    let variable7SampleTime;
+
+    let variable8UnitId;
+    let variable8ReadFCode;
+    let variable8WriteFCode;
+    let variable8Offset;
+    let variable8Length;
+    let variable8Write;
+    let variable8Read;
+    let variable8WriteSingle;
+    let variable8ReadSingle;
+    let variable8SampleTime;
+
+    let variable9UnitId;
+    let variable9ReadFCode;
+    let variable9WriteFCode;
+    let variable9Offset;
+    let variable9Length;
+    let variable9Write;
+    let variable9Read;
+    let variable9WriteSingle;
+    let variable9ReadSingle;
+    let variable9SampleTime;
+
+    let variable10UnitId;
+    let variable10ReadFCode;
+    let variable10WriteFCode;
+    let variable10Offset;
+    let variable10Length;
+    let variable10Write;
+    let variable10Read;
+    let variable10WriteSingle;
+    let variable10ReadSingle;
+    let variable10SampleTime;
+
+    let variables;
+
+    let requestManager;
+
+    beforeEach(() => {
+      /**
+       * By default we have 10 variables - 5 for read, 5 for write
+       *
+       * read: UnitId: 1, FCode: 4
+       *              var1: offset : 1, len: 3, sampleTime: 15
+       *              var7: offset : 4, len: 2, sampleTime: 15,
+       *              var5: offset : 6, len: 2, sampleTime: 10,
+       *              var3: offset : 8, len: 2, sampleTime: 10, readSingle: true,
+       *              var8: offset : 10, len: 1, sampleTime: 10
+       *
+       * write: UnitId: 1, FCode: 10
+       *              var4: offset : 20, len: 1, sampleTime: 15
+       *              var2: offset : 21, len: 2, sampleTime: 15,
+       *              var6: offset : 24, len: 1, sampleTime: 15,
+       *              var10: offset : 25, len: 1, sampleTime: 15, writeSingle: true
+       *              var9: offset : 26, len: 1, sampleTime: 10
+       */
+
+      variable1UnitId = 1;
+      variable1ReadFCode = 4;
+      variable1WriteFCode = 16;
+      variable1Offset = 1;
+      variable1Length = 3;
+      variable1SampleTime = 15;
+      variable1Write = false;
+      variable1Read = true;
+      variable1WriteSingle = false;
+      variable1ReadSingle = false;
+
+      variable7UnitId = 1;
+      variable7ReadFCode = 4;
+      variable7WriteFCode = 16;
+      variable7Offset = 4;
+      variable7Length = 2;
+      variable7SampleTime = 15;
+      variable7Write = false;
+      variable7Read = true;
+      variable7WriteSingle = false;
+      variable7ReadSingle = false;
+
+      variable5UnitId = 1;
+      variable5ReadFCode = 4;
+      variable5WriteFCode = 16;
+      variable5Offset = 6;
+      variable5Length = 2;
+      variable5SampleTime = 10;
+      variable5Write = false;
+      variable5Read = true;
+      variable5WriteSingle = false;
+      variable5ReadSingle = false;
+
+      variable3UnitId = 1;
+      variable3ReadFCode = 4;
+      variable3WriteFCode = 16;
+      variable3Offset = 8;
+      variable3Length = 2;
+      variable3SampleTime = 10;
+      variable3Write = false;
+      variable3Read = true;
+      variable3WriteSingle = false;
+      variable3ReadSingle = true;
+
+      variable8UnitId = 1;
+      variable8ReadFCode = 4;
+      variable8WriteFCode = 16;
+      variable8Offset = 10;
+      variable8Length = 1;
+      variable8SampleTime = 10;
+      variable8Write = false;
+      variable8Read = true;
+      variable8WriteSingle = false;
+      variable8ReadSingle = false;
+
+      variable4UnitId = 1;
+      variable4ReadFCode = 4;
+      variable4WriteFCode = 16;
+      variable4Offset = 20;
+      variable4Length = 1;
+      variable4SampleTime = 15;
+      variable4Write = true;
+      variable4Read = false;
+      variable4WriteSingle = false;
+      variable4ReadSingle = false;
+
+      variable2UnitId = 1;
+      variable2ReadFCode = 4;
+      variable2WriteFCode = 16;
+      variable2Offset = 21;
+      variable2Length = 2;
+      variable2SampleTime = 15;
+      variable2Write = true;
+      variable2Read = false;
+      variable2WriteSingle = false;
+      variable2ReadSingle = false;
+
+      variable6UnitId = 1;
+      variable6ReadFCode = 4;
+      variable6WriteFCode = 16;
+      variable6Offset = 24;
+      variable6Length = 1;
+      variable6SampleTime = 15;
+      variable6Write = true;
+      variable6Read = false;
+      variable6WriteSingle = false;
+      variable6ReadSingle = false;
+
+      variable10UnitId = 1;
+      variable10ReadFCode = 4;
+      variable10WriteFCode = 16;
+      variable10Offset = 25;
+      variable10Length = 1;
+      variable10SampleTime = 15;
+      variable10Write = true;
+      variable10Read = false;
+      variable10WriteSingle = true;
+      variable10ReadSingle = false;
+
+      variable9UnitId = 1;
+      variable9ReadFCode = 4;
+      variable9WriteFCode = 16;
+      variable9Offset = 26;
+      variable9Length = 1;
+      variable9SampleTime = 10;
+      variable9Write = true;
+      variable9Read = false;
+      variable9WriteSingle = false;
+      variable9ReadSingle = false;
+
+      addVariable1 = true;
+      addVariable2 = true;
+      addVariable3 = true;
+      addVariable4 = true;
+      addVariable5 = true;
+      addVariable6 = true;
+      addVariable7 = true;
+      addVariable8 = true;
+      addVariable9 = true;
+      addVariable10 = true;
+
+      initialRequests = [];
+    });
+
+    let exec = () => {
+      variable1 = createFakeMBVariable(
+        "variabl1Id",
+        "variable1Name",
+        "FakeMBVariable",
+        0,
+        "FakeUnit",
+        variable1SampleTime,
+        [],
+        variable1Offset,
+        variable1Length,
+        () => 0,
+        () => [],
+        variable1UnitId,
+        variable1ReadFCode,
+        variable1WriteFCode,
+        variable1Read,
+        variable1Write,
+        variable1ReadSingle,
+        variable1WriteSingle
+      );
+      variable2 = createFakeMBVariable(
+        "variabl2Id",
+        "variable2Name",
+        "FakeMBVariable",
+        0,
+        "FakeUnit",
+        variable2SampleTime,
+        [],
+        variable2Offset,
+        variable2Length,
+        () => 0,
+        () => [],
+        variable2UnitId,
+        variable2ReadFCode,
+        variable2WriteFCode,
+        variable2Read,
+        variable2Write,
+        variable2ReadSingle,
+        variable2WriteSingle
+      );
+      variable3 = createFakeMBVariable(
+        "variabl3Id",
+        "variable3Name",
+        "FakeMBVariable",
+        0,
+        "FakeUnit",
+        variable3SampleTime,
+        [],
+        variable3Offset,
+        variable3Length,
+        () => 0,
+        () => [],
+        variable3UnitId,
+        variable3ReadFCode,
+        variable3WriteFCode,
+        variable3Read,
+        variable3Write,
+        variable3ReadSingle,
+        variable3WriteSingle
+      );
+      variable4 = createFakeMBVariable(
+        "variabl4Id",
+        "variable4Name",
+        "FakeMBVariable",
+        0,
+        "FakeUnit",
+        variable4SampleTime,
+        [],
+        variable4Offset,
+        variable4Length,
+        () => 0,
+        () => [],
+        variable4UnitId,
+        variable4ReadFCode,
+        variable4WriteFCode,
+        variable4Read,
+        variable4Write,
+        variable4ReadSingle,
+        variable4WriteSingle
+      );
+      variable5 = createFakeMBVariable(
+        "variabl5Id",
+        "variable5Name",
+        "FakeMBVariable",
+        0,
+        "FakeUnit",
+        variable5SampleTime,
+        [],
+        variable5Offset,
+        variable5Length,
+        () => 0,
+        () => [],
+        variable5UnitId,
+        variable5ReadFCode,
+        variable5WriteFCode,
+        variable5Read,
+        variable5Write,
+        variable5ReadSingle,
+        variable5WriteSingle
+      );
+      variable6 = createFakeMBVariable(
+        "variabl6Id",
+        "variable6Name",
+        "FakeMBVariable",
+        0,
+        "FakeUnit",
+        variable6SampleTime,
+        [],
+        variable6Offset,
+        variable6Length,
+        () => 0,
+        () => [],
+        variable6UnitId,
+        variable6ReadFCode,
+        variable6WriteFCode,
+        variable6Read,
+        variable6Write,
+        variable6ReadSingle,
+        variable6WriteSingle
+      );
+      variable7 = createFakeMBVariable(
+        "variabl7Id",
+        "variable7Name",
+        "FakeMBVariable",
+        0,
+        "FakeUnit",
+        variable7SampleTime,
+        [],
+        variable7Offset,
+        variable7Length,
+        () => 0,
+        () => [],
+        variable7UnitId,
+        variable7ReadFCode,
+        variable7WriteFCode,
+        variable7Read,
+        variable7Write,
+        variable7ReadSingle,
+        variable7WriteSingle
+      );
+      variable8 = createFakeMBVariable(
+        "variabl8Id",
+        "variable8Name",
+        "FakeMBVariable",
+        0,
+        "FakeUnit",
+        variable8SampleTime,
+        [],
+        variable8Offset,
+        variable8Length,
+        () => 0,
+        () => [],
+        variable8UnitId,
+        variable8ReadFCode,
+        variable8WriteFCode,
+        variable8Read,
+        variable8Write,
+        variable8ReadSingle,
+        variable8WriteSingle
+      );
+      variable9 = createFakeMBVariable(
+        "variabl9Id",
+        "variable9Name",
+        "FakeMBVariable",
+        0,
+        "FakeUnit",
+        variable9SampleTime,
+        [],
+        variable9Offset,
+        variable9Length,
+        () => 0,
+        () => [],
+        variable9UnitId,
+        variable9ReadFCode,
+        variable9WriteFCode,
+        variable9Read,
+        variable9Write,
+        variable9ReadSingle,
+        variable9WriteSingle
+      );
+      variable10 = createFakeMBVariable(
+        "variabl10Id",
+        "variable10Name",
+        "FakeMBVariable",
+        0,
+        "FakeUnit",
+        variable10SampleTime,
+        [],
+        variable10Offset,
+        variable10Length,
+        () => 0,
+        () => [],
+        variable10UnitId,
+        variable10ReadFCode,
+        variable10WriteFCode,
+        variable10Read,
+        variable10Write,
+        variable10ReadSingle,
+        variable10WriteSingle
+      );
+
+      variables = [];
+
+      if (addVariable1) variables.push(variable1);
+      if (addVariable2) variables.push(variable2);
+      if (addVariable3) variables.push(variable3);
+      if (addVariable4) variables.push(variable4);
+      if (addVariable5) variables.push(variable5);
+      if (addVariable6) variables.push(variable6);
+      if (addVariable7) variables.push(variable7);
+      if (addVariable8) variables.push(variable8);
+      if (addVariable9) variables.push(variable9);
+      if (addVariable10) variables.push(variable10);
+
+      requestManager = new MBRequestManager();
+      requestManager._requests = initialRequests;
+
+      return requestManager.createRequests(variables);
+    };
+
+    it("should divide variables into group and create requests based on created groups", async () => {
+      /**
+       * By default we have 10 variables - 5 for read, 5 for write
+       *
+       * read: UnitId: 1, FCode: 4
+       *              var1: offset : 1, len: 3, sampleTime: 15
+       *              var7: offset : 4, len: 2, sampleTime: 15,
+       *              var5: offset : 6, len: 2, sampleTime: 10,
+       *              var3: offset : 8, len: 2, sampleTime: 10, readSingle: true,
+       *              var8: offset : 10, len: 1, sampleTime: 10
+       *
+       * write: UnitId: 1, FCode: 16
+       *              var4: offset : 20, len: 1, sampleTime: 15
+       *              var2: offset : 21, len: 2, sampleTime: 15,
+       *              var6: offset : 24, len: 1, sampleTime: 15,
+       *              var10: offset : 25, len: 1, sampleTime: 15, writeSingle: true
+       *              var9: offset : 26, len: 1, sampleTime: 10
+       */
+
+      await exec();
+
+      expect(requestManager.Requests).toBeDefined();
+
+      //8 requests should be created
+      // 0) offset: 8, length: 2, sampleTime: 10, read: true, write: false, fCode: 4, variables: var3
+      // 1) offset: 25, length: 1, sampleTime: 15, read: false, write: true, fCode: 16, variables: var10
+      // 2) offset: 6, length: 2, sampleTime: 10, read: true, write: false, fCode: 4, variables: var5
+      // 3) offset: 10, length: 1, sampleTime: 10, read: true, write: false, fCode: 4, variables: var8
+      // 4) offset: 1, length: 5, sampleTime: 15, read: true, write: false, fCode: 4, variables: var1, var7
+      // 5) offset: 26, length: 1, sampleTime: 10, read: false, write: true, fCode: 16, variables: var9
+      // 6) offset: 20, length: 3, sampleTime: 15, read: false, write: true, fCode: 16, variables: var4,var2
+      // 7) offset: 24, length: 1, sampleTime: 15, read: false, write: true, fCode: 16, variables: var6
+
+      expect(requestManager.Requests.length).toEqual(8);
+
+      expect(requestManager.Requests[0].Offset).toEqual(8);
+      expect(requestManager.Requests[0].Length).toEqual(2);
+      expect(requestManager.Requests[0].SampleTime).toEqual(10);
+      expect(requestManager.Requests[0].ReadRequest).toEqual(true);
+      expect(requestManager.Requests[0].WriteRequest).toEqual(false);
+      expect(requestManager.Requests[0].FCode).toEqual(4);
+      expect(requestManager.Requests[0].Variables).toEqual([variable3]);
+
+      expect(requestManager.Requests[1].Offset).toEqual(25);
+      expect(requestManager.Requests[1].Length).toEqual(1);
+      expect(requestManager.Requests[1].SampleTime).toEqual(15);
+      expect(requestManager.Requests[1].ReadRequest).toEqual(false);
+      expect(requestManager.Requests[1].WriteRequest).toEqual(true);
+      expect(requestManager.Requests[1].FCode).toEqual(16);
+      expect(requestManager.Requests[1].Variables).toEqual([variable10]);
+
+      expect(requestManager.Requests[2].Offset).toEqual(6);
+      expect(requestManager.Requests[2].Length).toEqual(2);
+      expect(requestManager.Requests[2].SampleTime).toEqual(10);
+      expect(requestManager.Requests[2].ReadRequest).toEqual(true);
+      expect(requestManager.Requests[2].WriteRequest).toEqual(false);
+      expect(requestManager.Requests[2].FCode).toEqual(4);
+      expect(requestManager.Requests[2].Variables).toEqual([variable5]);
+
+      expect(requestManager.Requests[3].Offset).toEqual(10);
+      expect(requestManager.Requests[3].Length).toEqual(1);
+      expect(requestManager.Requests[3].SampleTime).toEqual(10);
+      expect(requestManager.Requests[3].ReadRequest).toEqual(true);
+      expect(requestManager.Requests[3].WriteRequest).toEqual(false);
+      expect(requestManager.Requests[3].FCode).toEqual(4);
+      expect(requestManager.Requests[3].Variables).toEqual([variable8]);
+
+      expect(requestManager.Requests[4].Offset).toEqual(1);
+      expect(requestManager.Requests[4].Length).toEqual(5);
+      expect(requestManager.Requests[4].SampleTime).toEqual(15);
+      expect(requestManager.Requests[4].ReadRequest).toEqual(true);
+      expect(requestManager.Requests[4].WriteRequest).toEqual(false);
+      expect(requestManager.Requests[4].FCode).toEqual(4);
+      expect(requestManager.Requests[4].Variables).toEqual([
+        variable1,
+        variable7,
+      ]);
+
+      expect(requestManager.Requests[5].Offset).toEqual(26);
+      expect(requestManager.Requests[5].Length).toEqual(1);
+      expect(requestManager.Requests[5].SampleTime).toEqual(10);
+      expect(requestManager.Requests[5].ReadRequest).toEqual(false);
+      expect(requestManager.Requests[5].WriteRequest).toEqual(true);
+      expect(requestManager.Requests[5].FCode).toEqual(16);
+      expect(requestManager.Requests[5].Variables).toEqual([variable9]);
+
+      expect(requestManager.Requests[6].Offset).toEqual(20);
+      expect(requestManager.Requests[6].Length).toEqual(3);
+      expect(requestManager.Requests[6].SampleTime).toEqual(15);
+      expect(requestManager.Requests[6].ReadRequest).toEqual(false);
+      expect(requestManager.Requests[6].WriteRequest).toEqual(true);
+      expect(requestManager.Requests[6].FCode).toEqual(16);
+      expect(requestManager.Requests[6].Variables).toEqual([
+        variable4,
+        variable2,
+      ]);
+
+      expect(requestManager.Requests[7].Offset).toEqual(24);
+      expect(requestManager.Requests[7].Length).toEqual(1);
+      expect(requestManager.Requests[7].SampleTime).toEqual(15);
+      expect(requestManager.Requests[7].ReadRequest).toEqual(false);
+      expect(requestManager.Requests[7].WriteRequest).toEqual(true);
+      expect(requestManager.Requests[7].FCode).toEqual(16);
+      expect(requestManager.Requests[7].Variables).toEqual([variable6]);
+    });
+
+    it("should divide variables into group  - if there are no variables", async () => {
+      addVariable1 = false;
+      addVariable2 = false;
+      addVariable3 = false;
+      addVariable4 = false;
+      addVariable5 = false;
+      addVariable6 = false;
+      addVariable7 = false;
+      addVariable8 = false;
+      addVariable9 = false;
+      addVariable10 = false;
+
+      await exec();
+
+      expect(requestManager.Requests).toBeDefined();
+
+      expect(requestManager.Requests).toEqual([]);
+    });
+
+    it("should override requests - if the already exists", async () => {
+      initialRequest = ["fake", "requests", "array"];
+      await exec();
+
+      expect(requestManager.Requests).toBeDefined();
+
+      //8 requests should be created
+      // 0) offset: 8, length: 2, sampleTime: 10, read: true, write: false, fCode: 4, variables: var3
+      // 1) offset: 25, length: 1, sampleTime: 15, read: false, write: true, fCode: 16, variables: var10
+      // 2) offset: 6, length: 2, sampleTime: 10, read: true, write: false, fCode: 4, variables: var5
+      // 3) offset: 10, length: 1, sampleTime: 10, read: true, write: false, fCode: 4, variables: var8
+      // 4) offset: 1, length: 5, sampleTime: 15, read: true, write: false, fCode: 4, variables: var1, var7
+      // 5) offset: 26, length: 1, sampleTime: 10, read: false, write: true, fCode: 16, variables: var9
+      // 6) offset: 20, length: 3, sampleTime: 15, read: false, write: true, fCode: 16, variables: var4,var2
+      // 7) offset: 24, length: 1, sampleTime: 15, read: false, write: true, fCode: 16, variables: var6
+
+      expect(requestManager.Requests.length).toEqual(8);
+
+      expect(requestManager.Requests[0].Offset).toEqual(8);
+      expect(requestManager.Requests[0].Length).toEqual(2);
+      expect(requestManager.Requests[0].SampleTime).toEqual(10);
+      expect(requestManager.Requests[0].ReadRequest).toEqual(true);
+      expect(requestManager.Requests[0].WriteRequest).toEqual(false);
+      expect(requestManager.Requests[0].FCode).toEqual(4);
+      expect(requestManager.Requests[0].Variables).toEqual([variable3]);
+
+      expect(requestManager.Requests[1].Offset).toEqual(25);
+      expect(requestManager.Requests[1].Length).toEqual(1);
+      expect(requestManager.Requests[1].SampleTime).toEqual(15);
+      expect(requestManager.Requests[1].ReadRequest).toEqual(false);
+      expect(requestManager.Requests[1].WriteRequest).toEqual(true);
+      expect(requestManager.Requests[1].FCode).toEqual(16);
+      expect(requestManager.Requests[1].Variables).toEqual([variable10]);
+
+      expect(requestManager.Requests[2].Offset).toEqual(6);
+      expect(requestManager.Requests[2].Length).toEqual(2);
+      expect(requestManager.Requests[2].SampleTime).toEqual(10);
+      expect(requestManager.Requests[2].ReadRequest).toEqual(true);
+      expect(requestManager.Requests[2].WriteRequest).toEqual(false);
+      expect(requestManager.Requests[2].FCode).toEqual(4);
+      expect(requestManager.Requests[2].Variables).toEqual([variable5]);
+
+      expect(requestManager.Requests[3].Offset).toEqual(10);
+      expect(requestManager.Requests[3].Length).toEqual(1);
+      expect(requestManager.Requests[3].SampleTime).toEqual(10);
+      expect(requestManager.Requests[3].ReadRequest).toEqual(true);
+      expect(requestManager.Requests[3].WriteRequest).toEqual(false);
+      expect(requestManager.Requests[3].FCode).toEqual(4);
+      expect(requestManager.Requests[3].Variables).toEqual([variable8]);
+
+      expect(requestManager.Requests[4].Offset).toEqual(1);
+      expect(requestManager.Requests[4].Length).toEqual(5);
+      expect(requestManager.Requests[4].SampleTime).toEqual(15);
+      expect(requestManager.Requests[4].ReadRequest).toEqual(true);
+      expect(requestManager.Requests[4].WriteRequest).toEqual(false);
+      expect(requestManager.Requests[4].FCode).toEqual(4);
+      expect(requestManager.Requests[4].Variables).toEqual([
+        variable1,
+        variable7,
+      ]);
+
+      expect(requestManager.Requests[5].Offset).toEqual(26);
+      expect(requestManager.Requests[5].Length).toEqual(1);
+      expect(requestManager.Requests[5].SampleTime).toEqual(10);
+      expect(requestManager.Requests[5].ReadRequest).toEqual(false);
+      expect(requestManager.Requests[5].WriteRequest).toEqual(true);
+      expect(requestManager.Requests[5].FCode).toEqual(16);
+      expect(requestManager.Requests[5].Variables).toEqual([variable9]);
+
+      expect(requestManager.Requests[6].Offset).toEqual(20);
+      expect(requestManager.Requests[6].Length).toEqual(3);
+      expect(requestManager.Requests[6].SampleTime).toEqual(15);
+      expect(requestManager.Requests[6].ReadRequest).toEqual(false);
+      expect(requestManager.Requests[6].WriteRequest).toEqual(true);
+      expect(requestManager.Requests[6].FCode).toEqual(16);
+      expect(requestManager.Requests[6].Variables).toEqual([
+        variable4,
+        variable2,
+      ]);
+
+      expect(requestManager.Requests[7].Offset).toEqual(24);
+      expect(requestManager.Requests[7].Length).toEqual(1);
+      expect(requestManager.Requests[7].SampleTime).toEqual(15);
+      expect(requestManager.Requests[7].ReadRequest).toEqual(false);
+      expect(requestManager.Requests[7].WriteRequest).toEqual(true);
+      expect(requestManager.Requests[7].FCode).toEqual(16);
+      expect(requestManager.Requests[7].Variables).toEqual([variable6]);
     });
   });
 });
