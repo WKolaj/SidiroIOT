@@ -121,3 +121,5 @@ class ConnectableDevice extends Device {
 }
 
 module.exports = ConnectableDevice;
+
+//TODO - Add tests to this class

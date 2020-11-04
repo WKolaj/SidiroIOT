@@ -13,6 +13,24 @@ class MBDevice extends ConnectableDevice {
 
   //#endregion ========= CONSTRUCTOR =========
 
+  //#region ========= PROPERTIES =========
+
+  /**
+   * @description Address of physical device
+   */
+  get IPAddress() {
+    return this.Driver.IPAddress;
+  }
+
+  /**
+   * @description Port number of device
+   */
+  get PortNumber() {
+    return this.Driver.PortNumber;
+  }
+
+  //#endregion ========= PROPERTIES =========
+
   //#region ========= OVERRIDE PUBLIC METHODS =========
 
   /**
@@ -20,12 +38,15 @@ class MBDevice extends ConnectableDevice {
    * @param {JSON} payload Payload to initialize
    */
   async init(payload) {
-    await super.init(payload);
+    if (payload.type !== "MBDevice")
+      throw new Error(`Trying to set type ${payload.type} to MBDevice!`);
 
+    //Driver has to be initialized before - super init calls activate/deactivate based on isActive in payload
     this.Driver._ipAddress = payload.ipAddress;
     this.Driver._portNumber = payload.portNumber;
     this.Driver._timeout = payload.timeout;
-    this.Driver._isActive = payload.isActive;
+
+    await super.init(payload);
   }
 
   //#endregion ========= OVERRIDE PUBLIC METHODS =========

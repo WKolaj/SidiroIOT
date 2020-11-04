@@ -110,18 +110,21 @@ class Device {
     this._type = payload.type;
 
     //Initializing variables
+    this._variables = {};
     let allVariablesPayload = Object.values(payload.variables);
     for (let variablePayload of allVariablesPayload) {
       await this._initVariable(variablePayload);
     }
 
     //Initializing calcElements
+    this._calcElements = {};
     let allCalcElementsPayload = Object.values(payload.calcElements);
     for (let calcElementPayload of allCalcElementsPayload) {
       await this._initCalcElement(calcElementPayload);
     }
 
-    //Initializing alers
+    //Initializing alerts
+    this._alerts = {};
     let allAlertsPayload = Object.values(payload.alerts);
     for (let alertPayload of allAlertsPayload) {
       await this._initAlert(alertPayload);
@@ -399,3 +402,5 @@ class Device {
 }
 
 module.exports = Device;
+
+//TODO - add device init tests
