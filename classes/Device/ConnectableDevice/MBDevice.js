@@ -70,7 +70,7 @@ class MBDevice extends ConnectableDevice {
    * @description Method for creating variables based on type - throws if type is not a valid type.
    * @param {String} type type of variable
    */
-  async _createVariableBasedOnPayload(type) {
+  _createVariableBasedOnPayload(type) {
     switch (type) {
       case "AssociatedVariable":
         return new AssociatedVariable();

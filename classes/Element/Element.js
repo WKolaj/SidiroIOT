@@ -88,6 +88,7 @@ class Element {
     this._type = payload.type;
     this._defaultValue = payload.defaultValue;
     this._sampleTime = payload.sampleTime;
+    this._unit = payload.unit;
 
     //Setting default value of element - by default tickId is 0
     this.setValue(this.DefaultValue, 0);

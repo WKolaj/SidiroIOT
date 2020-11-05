@@ -18,6 +18,7 @@ const { sample } = require("lodash");
 const Variable = require("../../classes/Element/Variable/Variable");
 const Alert = require("../../classes/Element/Alerts/Alert");
 const MBVariable = require("../../classes/Element/Variable/ConnectableVariable/MBVariable/MBVariable");
+const MBRequest = require("../../classes/Request/MBRequest/MBRequest");
 
 const testUselessUserID = "uselessUserID";
 const testAdminID = "adminID";
@@ -419,6 +420,58 @@ module.exports.createFakeMBVariable = (
   variable._getWritePossibleFunctionCodes = getWriteFunctionCodesMockFunc;
 
   return variable;
+};
+
+module.exports.testMBVariable = (
+  variable,
+  payload,
+  value,
+  lastTickValue,
+  variableClass,
+  exactValue = false
+) => {
+  expect(variable instanceof variableClass).toEqual(true);
+  expect(variable.ID).toEqual(payload.id);
+  expect(variable.Name).toEqual(payload.name);
+  expect(variable.Type).toEqual(payload.type);
+  expect(variable.Unit).toEqual(payload.unit);
+  expect(variable.SampleTime).toEqual(payload.sampleTime);
+  if (exactValue) expect(variable.DefaultValue).toEqual(payload.defaultValue);
+  else expect(variable.DefaultValue).toBeCloseTo(payload.defaultValue);
+  expect(variable.LastValueTick).toEqual(lastTickValue);
+  if (exactValue) expect(variable.Value).toEqual(value);
+  else expect(variable.Value).toBeCloseTo(value);
+  expect(variable.Offset).toEqual(payload.offset);
+  expect(variable.Length).toEqual(payload.length);
+  expect(variable.Read).toEqual(payload.read);
+  expect(variable.Write).toEqual(payload.write);
+  expect(variable.ReadFCode).toEqual(payload.readFCode);
+  expect(variable.WriteFCode).toEqual(payload.writeFCode);
+  expect(variable.UnitID).toEqual(payload.unitID);
+  expect(variable.ReadSeperately).toEqual(payload.readAsSingle);
+  expect(variable.WriteSeperately).toEqual(payload.writeAsSingle);
+};
+
+module.exports.testMBRequest = (
+  request,
+  sampleTime,
+  fCode,
+  offset,
+  length,
+  unitID,
+  writeRequest,
+  readRequest,
+  variables
+) => {
+  expect(request instanceof MBRequest).toEqual(true);
+  expect(request.SampleTime).toEqual(sampleTime);
+  expect(request.Offset).toEqual(offset);
+  expect(request.Length).toEqual(length);
+  expect(request.UnitID).toEqual(unitID);
+  expect(request.FCode).toEqual(fCode);
+  expect(request.WriteRequest).toEqual(writeRequest);
+  expect(request.ReadRequest).toEqual(readRequest);
+  expect(request.Variables).toEqual(variables);
 };
 
 module.exports.createFakeCalcElement = (
