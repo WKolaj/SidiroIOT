@@ -9,8 +9,26 @@ const {
   createFakeDevice,
 } = require("../../../utilities/testUtilities");
 const logger = require("../../../../logger/logger");
+const ConnectableDevice = require("../../../../classes/Device/ConnectableDevice/ConnectableDevice");
 
 describe("ConnectableDevice", () => {
+  describe("constructor", () => {
+    let exec = () => {
+      return new ConnectableDevice();
+    };
+
+    it("should create new ConnectableDevice and set RequestManager and Driver to null", () => {
+      let driver = exec();
+
+      expect(driver).toBeDefined();
+
+      expect(driver.RequestManager).toEqual(null);
+      expect(driver.Driver).toEqual(null);
+    });
+  });
+
+  //TODO - test init of ConnectableDevice
+
   describe("IsActive", () => {
     let device;
     let isDriverActive;
