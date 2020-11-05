@@ -194,19 +194,7 @@ class Device {
   async _initVariable(variablePayload) {
     let type = variablePayload.type;
 
-    let variable = null;
-
-    switch (type) {
-      case "AssociatedVariable":
-        variable = new AssociatedVariable();
-        break;
-      case "InternalVariable":
-        variable = new InternalVariable();
-        break;
-
-      default:
-        throw new Error(`Unrecognized Variable type: ${type}`);
-    }
+    let variable = this._createVariableBasedOnPayload(type);
 
     //Initializing variables
     await variable.init(variablePayload);
@@ -291,6 +279,21 @@ class Device {
    */
   _getIsActiveState() {
     return this._isActive;
+  }
+
+  /**
+   * @description Method for creating variables based on type - throws if type is not a valid type. CAN BE OVERRIDEN IN CHILD CLASSES
+   * @param {String} type type of variable
+   */
+  async _createVariableBasedOnPayload(type) {
+    switch (type) {
+      case "AssociatedVariable":
+        return new AssociatedVariable();
+      case "InternalVariable":
+        return new InternalVariable();
+      default:
+        throw new Error(`Unrecognized Variable type: ${type}`);
+    }
   }
 
   //#endregion ========= PRIVATE VIRTUAL METHODS =========

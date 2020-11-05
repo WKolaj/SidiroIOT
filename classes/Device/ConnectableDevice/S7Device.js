@@ -44,58 +44,37 @@ class MBDevice extends ConnectableDevice {
   //#region ========= OVERRIDE PRIVATE METHODS =========
 
   /**
-   * @description Method for creating, assigining and initializing variable based on its type and payload.
-   * @param {JSON} variablePayload payload of variable (including variable type)
+   * @description Method for creating variables based on type - throws if type is not a valid type.
+   * @param {String} type type of variable
    */
-  async _initVariable(variablePayload) {
-    let type = variablePayload.type;
-
-    let variable = null;
-
+  async _createVariableBasedOnPayload(type) {
     switch (type) {
       case "AssociatedVariable":
-        variable = new AssociatedVariable();
-        break;
+        return new AssociatedVariable();
       case "InternalVariable":
-        variable = new InternalVariable();
-        break;
+        return new InternalVariable();
       case "S7ByteArray":
-        variable = new S7ByteArray();
-        break;
+        return new S7ByteArray();
       case "S7DTL":
-        variable = new S7DTL();
-        break;
+        return new S7DTL();
       case "S7Float":
-        variable = new S7Float();
-        break;
+        return new S7Float();
       case "S7Int8":
-        variable = new S7Int8();
-        break;
+        return new S7Int8();
       case "S7Int16":
-        variable = new S7Int16();
-        break;
+        return new S7Int16();
       case "S7Int32":
-        variable = new S7Int32();
-        break;
+        return new S7Int32();
       case "S7UInt8":
-        variable = new S7UInt8();
-        break;
+        return new S7UInt8();
       case "S7UInt16":
-        variable = new S7UInt16();
-        break;
+        return new S7UInt16();
       case "S7UInt32":
-        variable = new S7UInt32();
-        break;
+        return new S7UInt32();
 
       default:
         throw new Error(`Unrecognized Variable type: ${type}`);
     }
-
-    //Initializing variables
-    await variable.init(variablePayload);
-
-    //Assigning variable to Variables
-    this.Variables[variable.ID] = variable;
   }
 
   //#endregion ========= OVERRIDE PRIVATE METHODS =========

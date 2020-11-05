@@ -67,67 +67,42 @@ class MBDevice extends ConnectableDevice {
   //#region ========= OVERRIDE PRIVATE METHODS =========
 
   /**
-   * @description Method for creating, assigining and initializing variable based on its type and payload. CAN BE OVERRIDEN IN CHILD CLASSES
-   * @param {JSON} variablePayload payload of variable (including variable type)
+   * @description Method for creating variables based on type - throws if type is not a valid type.
+   * @param {String} type type of variable
    */
-  async _initVariable(variablePayload) {
-    let type = variablePayload.type;
-
-    let variable = null;
-
+  async _createVariableBasedOnPayload(type) {
     switch (type) {
       case "AssociatedVariable":
-        variable = new AssociatedVariable();
-        break;
+        return new AssociatedVariable();
       case "InternalVariable":
-        variable = new InternalVariable();
-        break;
+        return new InternalVariable();
       case "MBBoolean":
-        variable = new MBBoolean();
-        break;
+        return new MBBoolean();
       case "MBByteArray":
-        variable = new MBByteArray();
-        break;
+        return new MBByteArray();
       case "MBDouble":
-        variable = new MBDouble();
-        break;
+        return new MBDouble();
       case "MBFloat":
-        variable = new MBFloat();
-        break;
+        return new MBFloat();
       case "MBInt16":
-        variable = new MBInt16();
-        break;
+        return new MBInt16();
       case "MBInt32":
-        variable = new MBInt32();
-        break;
+        return new MBInt32();
       case "MBSwappedFloat":
-        variable = new MBSwappedFloat();
-        break;
+        return new MBSwappedFloat();
       case "MBSwappedDouble":
-        variable = new MBSwappedDouble();
-        break;
+        return new MBSwappedDouble();
       case "MBSwappedInt32":
-        variable = new MBSwappedInt32();
-        break;
+        return new MBSwappedInt32();
       case "MBSwappedUInt32":
-        variable = new MBSwappedUInt32();
-        break;
+        return new MBSwappedUInt32();
       case "MBUInt16":
-        variable = new MBUInt16();
-        break;
+        return new MBUInt16();
       case "MBUInt32":
-        variable = new MBUInt32();
-        break;
-
+        return new MBUInt32();
       default:
         throw new Error(`Unrecognized Variable type: ${type}`);
     }
-
-    //Initializing variables
-    await variable.init(variablePayload);
-
-    //Assigning variable to Variables
-    this.Variables[variable.ID] = variable;
   }
 
   //#endregion ========= OVERRIDE PRIVATE METHODS =========
