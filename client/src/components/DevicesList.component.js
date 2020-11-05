@@ -15,6 +15,7 @@ const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
     //backgroundColor: theme.palette.background.paper,
+    
   },
   active: {
     color: 'green'
@@ -55,25 +56,6 @@ function SimpleList(props) {
           }
           return null
         })}
-
-        {/* <ListItem button onClick={() => props.selectDevice(0, 'Mindsphere', 'MindSphere')} selected={props.selectedDevice.selectedDeviceIndex === 0 ? true : false}>
-          <ListItemIcon>
-            <CloudIcon />
-          </ListItemIcon>
-          <ListItemText primary="MindSphere" />
-        </ListItem>
-        <ListItem button onClick={() => props.selectDevice(1, 'Meter1', 'Meter')} selected={props.selectedDevice.selectedDeviceIndex === 1 ? true : false}>
-          <ListItemIcon>
-            <FontAwesomeIcon icon={faCircle} color="green" />
-          </ListItemIcon>
-          <ListItemText primary="Meter1" />
-        </ListItem>
-        <ListItem button onClick={() => props.selectDevice(2, 'Meter2', 'Meter')} selected={props.selectedDevice.selectedDeviceIndex === 2 ? true : false}>
-          <ListItemIcon>
-            <FontAwesomeIcon icon={faCircle} color="red" />
-          </ListItemIcon>
-          <ListItemText primary="Meter2" />
-        </ListItem> */}
       </List>
     </div>
   );

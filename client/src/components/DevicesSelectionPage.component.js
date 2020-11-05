@@ -44,14 +44,15 @@ function DevicesSelectionPage(props) {
           for (const [column, cell] of propertiesEntries) {
             if (typeof cell !== 'object') {
               //INFO tab
-              columns.push(column)
+              columns.push(t(`DevicesSelectionPage.Properties.${column}`))
+              //columns.push(column)
               rows.push(cell)
             }
             else {
               const tab = createTab(cell)
               tabs.push({
-                label: column,
-                content: <UniversalTable columns={tab.columns} rows={[tab.rows]}/>
+                label: t(`DevicesSelectionPage.Tabs.${column}`),
+                content: <CollapsibleTable columns={tab.columns} rows={[tab.rows]}/>
               })
             }
           }
@@ -60,8 +61,8 @@ function DevicesSelectionPage(props) {
       return null
     })
     tabs.push({
-      label: 'Info',
-      content: <UniversalTable columns={columns} rows={[rows]} />
+      label: t(`DevicesSelectionPage.Tabs.info`),
+      content: <CollapsibleTable columns={columns} rows={[rows]} />
     })
 
     return <DeviceSelectionTabs
@@ -77,7 +78,7 @@ function DevicesSelectionPage(props) {
     for (const [, properties] of entries) {
       const propertiesEntries = Object.entries(properties)
       for (const [column, cell] of propertiesEntries) {
-        columns.push(column)
+        columns.push(t(`DevicesSelectionPage.Properties.${column}`))
         rows.push(cell)
       }
     }
@@ -98,7 +99,7 @@ function DevicesSelectionPage(props) {
               {createTabs(allDevices, selectedDevice)}
             </React.Fragment>
           </Grid>
-          <Grid container item xs={12} spacing={2}>
+          <Grid container item xs={12} spacing={1}>
             <Grid item xs={12} sm={6}>
               <Typography variant="h5">{t('DevicesSelectionPage.Status')}: {t('DevicesSelectionPage.StatusConnected')}</Typography>
             </Grid>

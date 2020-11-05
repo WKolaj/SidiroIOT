@@ -253,8 +253,14 @@ export const alert = (type) => {
           variableId: 'variableId',
           highLimit: 100,
           texts: {
-            lang: 'en',
-            text: 'High Limit Alert 1'
+            en: { 
+              alert1: "Going above limit", 
+              alert2: "Going below limit" 
+            },
+            pl: { 
+              alert1: "Przekroczenie limitu", 
+              alert2: "Powrót do poprawnej wartości" 
+            }
           },
           severity: 1,
           hysteresis: 10,
@@ -276,8 +282,14 @@ export const alert = (type) => {
           variableId: 'variableId',
           lowLimit: 10,
           texts: {
-            lang: 'en',
-            text: 'Low Limit Alert 1'
+            en: { 
+              alert1: "Going above limit", 
+              alert2: "Going below limit" 
+            },
+            pl: { 
+              alert1: "Przekroczenie limitu", 
+              alert2: "Powrót do poprawnej wartości" 
+            }
           },
           severity: 1,
           hysteresis: 10,
