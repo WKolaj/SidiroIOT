@@ -61,6 +61,19 @@ class MBVariable extends StandardProtocolVariable {
     this._unitID = payload.unitID;
   }
 
+  /**
+   * @description Method for generating payload of element.
+   */
+  generatePayload() {
+    let superPayload = super.generatePayload();
+
+    superPayload.readFCode = this.ReadFCode;
+    superPayload.writeFCode = this.WriteFCode;
+    superPayload.unitID = this.UnitID;
+
+    return superPayload;
+  }
+
   //#endregion ========= OVERRIDE PUBLIC METHODS =========
 
   //#region ========= PRIVATE ABSTRACT METHODS =========

@@ -119,6 +119,18 @@ class ConnectableDevice extends Device {
     await this.RequestManager.createRequests(Object.values(this.Variables));
   }
 
+  /**
+   * @description Method for generating payload of device. CAN BE OVERRIDEN IN CHILD CLASSES
+   */
+  generatePayload() {
+    let superPayload = super.generatePayload();
+
+    superPayload.isConnected = this.IsConnected;
+    superPayload.timeout = this.Timeout;
+
+    return superPayload;
+  }
+
   //#endregion ========= OVERRIDE PUBLIC METHODS =========
 }
 

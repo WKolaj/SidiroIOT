@@ -104,6 +104,18 @@ class MBDevice extends ConnectableDevice {
     }
   }
 
+  /**
+   * @description Method for generating payload of device.
+   */
+  generatePayload() {
+    let superPayload = super.generatePayload();
+
+    superPayload.ipAddress = this.IPAddress;
+    superPayload.portNumber = this.PortNumber;
+
+    return superPayload;
+  }
+
   //#endregion ========= OVERRIDE PRIVATE METHODS =========
 }
 

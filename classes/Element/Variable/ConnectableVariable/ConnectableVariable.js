@@ -99,6 +99,20 @@ class ConnectableVariable extends Variable {
     this._writeSeperately = payload.writeAsSingle;
   }
 
+  /**
+   * @description Method for generating payload of element. CAN BE OVERRIDEN IN CHILD CLASSES
+   */
+  generatePayload() {
+    let superPayload = super.generatePayload();
+
+    superPayload.read = this.Read;
+    superPayload.write = this.Write;
+    superPayload.readAsSingle = this.ReadSeperately;
+    superPayload.writeAsSingle = this.WriteSeperately;
+
+    return superPayload;
+  }
+
   //#endregion ========= OVERRIDE PUBLIC METHODS =========
 
   //#region ========= OVERRIDE PRIVATE METHODS =========

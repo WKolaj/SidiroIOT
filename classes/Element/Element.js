@@ -132,7 +132,25 @@ class Element {
     this._lastValueTick = tickId;
   }
 
+  /**
+   * @description Method for generating payload of element. CAN BE OVERRIDEN IN CHILD CLASSES
+   */
+  generatePayload() {
+    return {
+      id: this.ID,
+      name: this.Name,
+      type: this.Type,
+      value: this.Value,
+      defaultValue: this.DefaultValue,
+      unit: this.Unit,
+      sampleTime: this.SampleTime,
+      lastValueTick: this.LastValueTick,
+    };
+  }
+
   //#endregion ========= PRIVATE VIRTUAL METHODS =========
 }
+
+//TODO - add element generatePayload test
 
 module.exports = Element;

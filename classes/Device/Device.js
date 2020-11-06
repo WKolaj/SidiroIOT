@@ -75,6 +75,25 @@ class Device {
 
   //#endregion ========= PROPERTIES =========
 
+  //#region ========= PRIVATE METHODS =========
+
+  /**
+   * @description Method for generating payload of elements collection
+   * @param {Object} elementCollection elements collection
+   */
+  _generateElementsPayload(elementCollection) {
+    let allElements = Object.values(elementCollection);
+    let objectToReturn = {};
+
+    for (let element of allElements) {
+      objectToReturn[element.ID] = element.generatePayload();
+    }
+
+    return objectToReturn;
+  }
+
+  //#endregion ========= PRIVATE METHODS =========
+
   //#region ========= PUBLIC VIRTUAL METHODS =========
 
   /**
@@ -149,6 +168,21 @@ class Device {
    */
   async deactivate() {
     this._isActive = false;
+  }
+
+  /**
+   * @description Method for generating payload of device. CAN BE OVERRIDEN IN CHILD CLASSES
+   */
+  generatePayload() {
+    return {
+      id: this.ID,
+      name: this.Name,
+      type: this.Type,
+      variables: this._generateElementsPayload(this.Variables),
+      calcElements: this._generateElementsPayload(this.CalcElements),
+      alerts: this._generateElementsPayload(this.Alerts),
+      isActive: this.IsActive,
+    };
   }
 
   //#endregion ========= PUBLIC VIRTUAL METHODS =========
@@ -319,5 +353,7 @@ class Device {
 }
 
 module.exports = Device;
+
+//TODO - add element generatePayload test
 
 //TODO - add device init tests
