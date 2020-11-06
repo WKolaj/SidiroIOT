@@ -113,6 +113,8 @@ class ConnectableDevice extends Device {
   async init(payload) {
     await super.init(payload);
 
+    this.Driver._timeout = payload.timeout;
+
     //After initializing variables, protocol request should be created
     await this.RequestManager.createRequests(Object.values(this.Variables));
   }
@@ -121,5 +123,3 @@ class ConnectableDevice extends Device {
 }
 
 module.exports = ConnectableDevice;
-
-//TODO - Add tests to this class

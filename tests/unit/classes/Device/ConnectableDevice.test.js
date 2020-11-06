@@ -10,6 +10,8 @@ const {
 } = require("../../../utilities/testUtilities");
 const logger = require("../../../../logger/logger");
 const ConnectableDevice = require("../../../../classes/Device/ConnectableDevice/ConnectableDevice");
+const RequestManager = require("../../../../classes/Request/RequestManager");
+const Driver = require("../../../../classes/Driver/Driver");
 
 describe("ConnectableDevice", () => {
   describe("constructor", () => {
@@ -27,7 +29,67 @@ describe("ConnectableDevice", () => {
     });
   });
 
-  //TODO - test init of ConnectableDevice
+  describe("init", () => {
+    let device;
+    let payload;
+    let requestManagerMock;
+    let driverMock;
+
+    beforeEach(() => {
+      payload = {
+        id: "testDeviceID",
+        name: "testDeviceName",
+        type: "ConncectableDevice",
+        variables: {},
+        calcElements: {},
+        alerts: {},
+        isActive: true,
+        timeout: 2500,
+      };
+      requestManagerMock = new RequestManager();
+      requestManagerMock.createRequests = jest.fn();
+      driverMock = new Driver();
+      driverMock.activate = jest.fn();
+      driverMock.deactivate = jest.fn();
+    });
+
+    let exec = async () => {
+      device = new ConnectableDevice();
+      device._requestManager = requestManagerMock;
+      device._driver = driverMock;
+      return device.init(payload);
+    };
+
+    it("should initialize connectableDevice based on payload", async () => {
+      await exec();
+
+      expect(device.ID).toEqual(payload.id);
+      expect(device.Name).toEqual(payload.name);
+      expect(device.Type).toEqual(payload.type);
+      expect(device.Variables).toEqual(payload.variables);
+      expect(device.CalcElements).toEqual(payload.calcElements);
+      expect(device.Alerts).toEqual(payload.alerts);
+      expect(device.Timeout).toEqual(payload.timeout);
+    });
+
+    it("should call activate of driver if is active is set to true", async () => {
+      payload.isActive = true;
+
+      await exec();
+
+      expect(driverMock.activate).toHaveBeenCalledTimes(1);
+      expect(driverMock.deactivate).not.toHaveBeenCalled();
+    });
+
+    it("should call deactivate of driver if is active is set to false", async () => {
+      payload.isActive = false;
+
+      await exec();
+
+      expect(driverMock.activate).not.toHaveBeenCalled();
+      expect(driverMock.deactivate).toHaveBeenCalledTimes(1);
+    });
+  });
 
   describe("IsActive", () => {
     let device;

@@ -57,7 +57,6 @@ class MBDevice extends ConnectableDevice {
     //Driver has to be initialized before - super init calls activate/deactivate based on isActive in payload
     this.Driver._ipAddress = payload.ipAddress;
     this.Driver._portNumber = payload.portNumber;
-    this.Driver._timeout = payload.timeout;
 
     await super.init(payload);
   }
