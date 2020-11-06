@@ -31,6 +31,7 @@ describe("Element", () => {
         type: "testElementType",
         defaultValue: "testElementDefaultValue",
         sampleTime: "testElementSampleTime",
+        unit: "testUnit",
       };
     });
 
@@ -47,6 +48,7 @@ describe("Element", () => {
       expect(element.Type).toEqual("testElementType");
       expect(element.DefaultValue).toEqual("testElementDefaultValue");
       expect(element.SampleTime).toEqual("testElementSampleTime");
+      expect(element.Unit).toEqual("testUnit");
 
       //Value should be set according to DefaultValue and lastTick should be set to 0
       expect(element.Value).toEqual("testElementDefaultValue");
@@ -113,6 +115,45 @@ describe("Element", () => {
 
       expect(element.Value).toEqual(value);
       expect(element.LastValueTick).toEqual(tickId);
+    });
+  });
+
+  describe("generatePayload", () => {
+    let payload;
+    let element;
+
+    beforeEach(() => {
+      payload = {
+        id: "testElementId",
+        name: "testElementName",
+        type: "FakeElemenType",
+        defaultValue: 1234,
+        sampleTime: 15,
+        unit: "testUnit",
+      };
+    });
+
+    let exec = async () => {
+      element = new Element();
+      await element.init(payload);
+      return element.generatePayload();
+    };
+
+    it("should initialize element's properties based on their payload", async () => {
+      let result = await exec();
+
+      let expectedResult = {
+        id: "testElementId",
+        name: "testElementName",
+        type: "FakeElemenType",
+        defaultValue: 1234,
+        value: 1234,
+        lastValueTick: 0,
+        sampleTime: 15,
+        unit: "testUnit",
+      };
+
+      expect(result).toEqual(expectedResult);
     });
   });
 });

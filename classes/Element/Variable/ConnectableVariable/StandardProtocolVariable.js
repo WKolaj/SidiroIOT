@@ -43,6 +43,18 @@ class StandardProtocolVariable extends ConnectableVariable {
     this._length = payload.length;
   }
 
+  /**
+   * @description Method for generating payload of element. CAN BE OVERRIDEN IN CHILD CLASSES
+   */
+  generatePayload() {
+    let superPayload = super.generatePayload();
+
+    superPayload.offset = this.Offset;
+    superPayload.length = this.Length;
+
+    return superPayload;
+  }
+
   //#endregion ========= OVERRIDE PUBLIC METHODS =========
 }
 

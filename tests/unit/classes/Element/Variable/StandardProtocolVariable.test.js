@@ -122,4 +122,59 @@ describe("StandardProtocolVariable", () => {
       expect(convertValueToDataMockFunc.mock.calls[0][0]).toEqual(10);
     });
   });
+
+  describe("generatePayload", () => {
+    let payload;
+    let getValueMockFunc;
+    let element;
+
+    beforeEach(() => {
+      payload = {
+        id: "testElementId",
+        name: "testElementName",
+        type: "testElementType",
+        offset: 123,
+        length: 456,
+        defaultValue: 10,
+        sampleTime: 15,
+        read: true,
+        write: false,
+        readAsSingle: true,
+        writeAsSingle: false,
+        unit: "testUnit",
+      };
+
+      getValueMockFunc = jest.fn(() => 123);
+    });
+
+    let exec = async () => {
+      element = new StandardProtocolVariable();
+      await element.init(payload);
+      element._getValue = getValueMockFunc;
+      return element.generatePayload();
+    };
+
+    it("should initialize element's properties based on their payload", async () => {
+      let result = await exec();
+
+      let expectedResult = {
+        id: "testElementId",
+        name: "testElementName",
+        type: "testElementType",
+        sampleTime: 15,
+        read: true,
+        write: false,
+        readAsSingle: true,
+        writeAsSingle: false,
+        unit: "testUnit",
+        defaultValue: 10,
+        value: 123,
+        lastValueTick: 0,
+        offset: 123,
+        length: 456,
+      };
+
+      expect(result).toEqual(expectedResult);
+    });
+  });
 });

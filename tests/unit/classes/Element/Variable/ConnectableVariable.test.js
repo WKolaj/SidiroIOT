@@ -54,6 +54,7 @@ describe("ConnectableVariable", () => {
         write: false,
         readAsSingle: true,
         writeAsSingle: false,
+        unit: "testUnit",
       };
 
       //Creating mocking method for converting data to value
@@ -94,6 +95,7 @@ describe("ConnectableVariable", () => {
       expect(variable.Type).toEqual("testElementType");
       expect(variable.DefaultValue).toEqual(10);
       expect(variable.SampleTime).toEqual("testElementSampleTime");
+      expect(variable.Unit).toEqual("testUnit");
 
       expect(variable.Value).toEqual(10);
       expect(variable.LastValueTick).toEqual(0);
@@ -290,6 +292,57 @@ describe("ConnectableVariable", () => {
       await exec();
 
       expect(variable.Value).toEqual(10);
+    });
+  });
+
+  describe("generatePayload", () => {
+    let payload;
+    let getValueMockFunc;
+    let element;
+
+    beforeEach(() => {
+      payload = {
+        id: "testElementId",
+        name: "testElementName",
+        type: "testElementType",
+        defaultValue: 10,
+        sampleTime: 15,
+        read: true,
+        write: false,
+        readAsSingle: true,
+        writeAsSingle: false,
+        unit: "testUnit",
+      };
+
+      getValueMockFunc = jest.fn(() => 123);
+    });
+
+    let exec = async () => {
+      element = new ConnectableVariable();
+      await element.init(payload);
+      element._getValue = getValueMockFunc;
+      return element.generatePayload();
+    };
+
+    it("should initialize element's properties based on their payload", async () => {
+      let result = await exec();
+
+      let expectedResult = {
+        id: "testElementId",
+        name: "testElementName",
+        type: "testElementType",
+        sampleTime: 15,
+        read: true,
+        write: false,
+        readAsSingle: true,
+        writeAsSingle: false,
+        unit: "testUnit",
+        defaultValue: 10,
+        value: 123,
+        lastValueTick: 0,
+      };
+
+      expect(result).toEqual(expectedResult);
     });
   });
 });
