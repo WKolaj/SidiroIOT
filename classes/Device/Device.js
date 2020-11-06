@@ -86,7 +86,9 @@ class Device {
     let objectToReturn = {};
 
     for (let element of allElements) {
-      objectToReturn[element.ID] = element.generatePayload();
+      let elementPayload = element.generatePayload();
+      elementPayload.deviceId = this.ID;
+      objectToReturn[element.ID] = elementPayload;
     }
 
     return objectToReturn;
@@ -354,6 +356,5 @@ class Device {
 
 module.exports = Device;
 
-//TODO - add element generatePayload test
-
+//TODO - add device generate payload tests
 //TODO - add device init tests

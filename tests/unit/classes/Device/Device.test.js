@@ -1,6 +1,7 @@
 const { snooze } = require("../../../../utilities/utilities");
 const logger = require("../../../../logger/logger");
 const {
+  createFakeVariable,
   createFakeDevice,
   createFakeCalcElement,
   createFakeAlert,
@@ -154,6 +155,416 @@ describe("Device", () => {
       ).resolves.toBeDefined();
 
       expect(device.IsActive).toEqual(false);
+    });
+  });
+
+  describe("generatePayload", () => {
+    let device;
+    let deviceId;
+    let deviceName;
+    let deviceType;
+    let deviceActive;
+    let variable1;
+    let variable2;
+    let variable3;
+    let variable4;
+    let variable5;
+    let variables;
+    let variable1ConvertDataToValueMockFunc;
+    let variable2ConvertDataToValueMockFunc;
+    let variable3ConvertDataToValueMockFunc;
+    let variable4ConvertDataToValueMockFunc;
+    let variable5ConvertDataToValueMockFunc;
+    let variable1ConvertValueToDataMockFunc;
+    let variable2ConvertValueToDataMockFunc;
+    let variable3ConvertValueToDataMockFunc;
+    let variable4ConvertValueToDataMockFunc;
+    let variable5ConvertValueToDataMockFunc;
+    let calcElement1;
+    let calcElement2;
+    let calcElement3;
+    let calcElements;
+    let calcElement1SampleTime;
+    let calcElement2SampleTime;
+    let calcElement3SampleTime;
+    let calcElement1RefreshMock;
+    let calcElement2RefreshMock;
+    let calcElement3RefreshMock;
+    let alert1;
+    let alert2;
+    let alert3;
+    let alerts;
+    let alert1SampleTime;
+    let alert2SampleTime;
+    let alert3SampleTime;
+    let alert1RefreshMock;
+    let alert2RefreshMock;
+    let alert3RefreshMock;
+    let addVariable1;
+    let addVariable2;
+    let addVariable3;
+    let addVariable4;
+    let addVariable5;
+    let addCalcElement1;
+    let addCalcElement2;
+    let addCalcElement3;
+    let addAlert1;
+    let addAlert2;
+    let addAlert3;
+
+    beforeEach(() => {
+      deviceId = "device1ID";
+      deviceName = "device1Name";
+      deviceType = "FakeDevice";
+      deviceActive = true;
+
+      addVariable1 = true;
+      addVariable2 = true;
+      addVariable3 = true;
+      addVariable4 = true;
+      addVariable5 = true;
+      addCalcElement1 = true;
+      addCalcElement2 = true;
+      addCalcElement3 = true;
+      addAlert1 = true;
+      addAlert2 = true;
+      addAlert3 = true;
+
+      //#region init variables
+
+      variable1ConvertDataToValueMockFunc = jest.fn().mockReturnValue(1111);
+      variable1ConvertValueToDataMockFunc = jest
+        .fn()
+        .mockReturnValue([1, 1, 1, 1]);
+
+      variable2ConvertDataToValueMockFunc = jest.fn().mockReturnValue(2222);
+      variable2ConvertValueToDataMockFunc = jest
+        .fn()
+        .mockReturnValue([2, 2, 2, 2]);
+
+      variable3ConvertDataToValueMockFunc = jest.fn().mockReturnValue(3333);
+      variable3ConvertValueToDataMockFunc = jest
+        .fn()
+        .mockReturnValue([3, 3, 3, 3]);
+
+      variable4ConvertDataToValueMockFunc = jest.fn().mockReturnValue(4444);
+      variable4ConvertValueToDataMockFunc = jest
+        .fn()
+        .mockReturnValue([4, 4, 4, 4]);
+
+      variable5ConvertDataToValueMockFunc = jest.fn().mockReturnValue(5555);
+      variable5ConvertValueToDataMockFunc = jest
+        .fn()
+        .mockReturnValue([5, 5, 5, 5]);
+
+      //#endregion init variables
+
+      //#region init calcElements
+
+      calcElement1RefreshMock = jest.fn();
+      calcElement2RefreshMock = jest.fn();
+      calcElement3RefreshMock = jest.fn();
+
+      calcElement1SampleTime = 1;
+      calcElement2SampleTime = 2;
+      calcElement3SampleTime = 3;
+
+      //#endregion init calcElements
+
+      //#region init alerts
+
+      alert1RefreshMock = jest.fn();
+      alert2RefreshMock = jest.fn();
+      alert3RefreshMock = jest.fn();
+
+      alert1SampleTime = 1;
+      alert2SampleTime = 2;
+      alert3SampleTime = 3;
+
+      //#endregion init alerts
+    });
+
+    let exec = async () => {
+      //#region create variables
+
+      variables = [];
+
+      variable1 = createFakeVariable(
+        "variable1ID",
+        "variable1Name",
+        "FakeVariable",
+        1,
+        "FakeUnit",
+        1
+      );
+
+      variable2 = createFakeVariable(
+        "variable2ID",
+        "variable2Name",
+        "FakeVariable",
+        2,
+        "FakeUnit",
+        2
+      );
+
+      variable3 = createFakeVariable(
+        "variable3ID",
+        "variable3Name",
+        "FakeVariable",
+        3,
+        "FakeUnit",
+        3
+      );
+
+      variable4 = createFakeVariable(
+        "variable4ID",
+        "variable4Name",
+        "FakeVariable",
+        4,
+        "FakeUnit",
+        1
+      );
+
+      variable5 = createFakeVariable(
+        "variable5ID",
+        "variable5Name",
+        "FakeVariable",
+        5,
+        "FakeUnit",
+        2
+      );
+
+      if (addVariable1) variables.push(variable1);
+      if (addVariable2) variables.push(variable2);
+      if (addVariable3) variables.push(variable3);
+      if (addVariable4) variables.push(variable4);
+      if (addVariable5) variables.push(variable5);
+
+      //#endregion create variables
+
+      //#region create calcElements
+
+      calcElements = [];
+
+      calcElement1 = createFakeCalcElement(
+        "calcElement1ID",
+        "calcElement1Name",
+        "FakeCalcElement",
+        1,
+        "FakeUnit",
+        calcElement1SampleTime,
+        calcElement1RefreshMock
+      );
+
+      calcElement2 = createFakeCalcElement(
+        "calcElement2ID",
+        "calcElement2Name",
+        "FakeCalcElement",
+        2,
+        "FakeUnit",
+        calcElement2SampleTime,
+        calcElement2RefreshMock
+      );
+
+      calcElement3 = createFakeCalcElement(
+        "calcElement3ID",
+        "calcElement3Name",
+        "FakeCalcElement",
+        3,
+        "FakeUnit",
+        calcElement3SampleTime,
+        calcElement3RefreshMock
+      );
+
+      if (addCalcElement1) calcElements.push(calcElement1);
+      if (addCalcElement2) calcElements.push(calcElement2);
+      if (addCalcElement3) calcElements.push(calcElement3);
+
+      //#endregion create calcElements
+
+      //#region create alerts
+
+      alerts = [];
+
+      alert1 = createFakeAlert(
+        "alert1ID",
+        "alert1Name",
+        "FakeAlert",
+        true,
+        "FakeUnit",
+        alert1SampleTime,
+        alert1RefreshMock
+      );
+
+      alert2 = createFakeAlert(
+        "alert2ID",
+        "alert2Name",
+        "FakeAlert",
+        true,
+        "FakeUnit",
+        alert2SampleTime,
+        alert2RefreshMock
+      );
+
+      alert3 = createFakeAlert(
+        "alert3ID",
+        "alert3Name",
+        "FakeAlert",
+        true,
+        "FakeUnit",
+        alert3SampleTime,
+        alert3RefreshMock
+      );
+
+      if (addAlert1) alerts.push(alert1);
+      if (addAlert2) alerts.push(alert2);
+      if (addAlert3) alerts.push(alert3);
+
+      //#endregion create alerts
+
+      device = new Device();
+
+      await device.init({
+        id: deviceId,
+        name: deviceName,
+        type: deviceType,
+        isActive: deviceActive,
+        calcElements: {},
+        variables: {},
+        alerts: {},
+      });
+
+      for (let variable of variables) {
+        device.Variables[variable.ID] = variable;
+      }
+
+      for (let calcElement of calcElements) {
+        device.CalcElements[calcElement.ID] = calcElement;
+      }
+
+      for (let alert of alerts) {
+        device.Alerts[alert.ID] = alert;
+      }
+
+      return device.generatePayload();
+    };
+
+    it("should return valid payload of device - if active is true", async () => {
+      isDeviceActive = true;
+
+      let result = await exec();
+
+      let expectedPayload = {
+        id: deviceId,
+        type: deviceType,
+        name: deviceName,
+        isActive: deviceActive,
+        variables: {},
+        alerts: {},
+        calcElements: {},
+      };
+
+      for (let variable of variables) {
+        let payload = variable.generatePayload();
+        payload.deviceId = deviceId;
+        expectedPayload.variables[variable.ID] = payload;
+      }
+
+      for (let calcElement of calcElements) {
+        let payload = calcElement.generatePayload();
+        payload.deviceId = deviceId;
+        expectedPayload.calcElements[calcElement.ID] = payload;
+      }
+
+      for (let alert of alerts) {
+        let payload = alert.generatePayload();
+        payload.deviceId = deviceId;
+        expectedPayload.alerts[alert.ID] = payload;
+      }
+
+      expect(result).toEqual(expectedPayload);
+    });
+
+    it("should return valid payload of device - if active is false", async () => {
+      isDeviceActive = false;
+
+      let result = await exec();
+
+      let expectedPayload = {
+        id: deviceId,
+        type: deviceType,
+        name: deviceName,
+        isActive: deviceActive,
+        variables: {},
+        alerts: {},
+        calcElements: {},
+      };
+
+      for (let variable of variables) {
+        let payload = variable.generatePayload();
+        payload.deviceId = deviceId;
+        expectedPayload.variables[variable.ID] = payload;
+      }
+
+      for (let calcElement of calcElements) {
+        let payload = calcElement.generatePayload();
+        payload.deviceId = deviceId;
+        expectedPayload.calcElements[calcElement.ID] = payload;
+      }
+
+      for (let alert of alerts) {
+        let payload = alert.generatePayload();
+        payload.deviceId = deviceId;
+        expectedPayload.alerts[alert.ID] = payload;
+      }
+
+      expect(result).toEqual(expectedPayload);
+    });
+
+    it("should return valid payload of device - there are no variables, calcElements or alerts", async () => {
+      addVariable1 = false;
+      addVariable2 = false;
+      addVariable3 = false;
+      addVariable4 = false;
+      addVariable5 = false;
+      addCalcElement1 = false;
+      addCalcElement2 = false;
+      addCalcElement3 = false;
+      addAlert1 = false;
+      addAlert2 = false;
+      addAlert3 = false;
+
+      let result = await exec();
+
+      let expectedPayload = {
+        id: deviceId,
+        type: deviceType,
+        name: deviceName,
+        isActive: deviceActive,
+        variables: {},
+        alerts: {},
+        calcElements: {},
+      };
+
+      for (let variable of variables) {
+        let payload = variable.generatePayload();
+        payload.deviceId = deviceId;
+        expectedPayload.variables[variable.ID] = payload;
+      }
+
+      for (let calcElement of calcElements) {
+        let payload = calcElement.generatePayload();
+        payload.deviceId = deviceId;
+        expectedPayload.calcElements[calcElement.ID] = payload;
+      }
+
+      for (let alert of alerts) {
+        let payload = alert.generatePayload();
+        payload.deviceId = deviceId;
+        expectedPayload.alerts[alert.ID] = payload;
+      }
+
+      expect(result).toEqual(expectedPayload);
     });
   });
 

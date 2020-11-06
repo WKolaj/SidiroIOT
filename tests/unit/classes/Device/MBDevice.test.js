@@ -8,6 +8,8 @@ const MBSwappedInt32 = require("../../../../classes/Element/Variable/Connectable
 const MBSwappedUInt32 = require("../../../../classes/Element/Variable/ConnectableVariable/MBVariable/MBSwappedUInt32");
 const MBRequestManager = require("../../../../classes/Request/MBRequest/MBRequestManager");
 const {
+  createFakeCalcElement,
+  createFakeAlert,
   testMBVariable,
   testMBRequest,
 } = require("../../../utilities/testUtilities");
@@ -1539,6 +1541,450 @@ describe("MBDevice", () => {
       );
 
       //#endregion Checking requests
+    });
+  });
+
+  describe("generatePayload", () => {
+    let payload;
+    let device;
+    let connectDevice;
+    let calcElement1;
+    let calcElement2;
+    let calcElement3;
+    let calcElements;
+    let calcElement1SampleTime;
+    let calcElement2SampleTime;
+    let calcElement3SampleTime;
+    let calcElement1RefreshMock;
+    let calcElement2RefreshMock;
+    let calcElement3RefreshMock;
+    let alert1;
+    let alert2;
+    let alert3;
+    let alerts;
+    let alert1SampleTime;
+    let alert2SampleTime;
+    let alert3SampleTime;
+    let alert1RefreshMock;
+    let alert2RefreshMock;
+    let alert3RefreshMock;
+    let addCalcElement1;
+    let addCalcElement2;
+    let addCalcElement3;
+    let addAlert1;
+    let addAlert2;
+    let addAlert3;
+
+    beforeEach(() => {
+      connectDevice = false;
+      payload = {
+        id: "testDeviceID",
+        name: "testDeviceName",
+        type: "MBDevice",
+        variables: {
+          testVariable1ID: {
+            id: "testVariable1ID",
+            deviceId: "testDeviceID",
+            name: "testVariable1Name",
+            type: "MBDouble",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123.456,
+            offset: 10,
+            length: 4,
+            read: true,
+            write: false,
+            readFCode: 3,
+            writeFCode: 16,
+            unitID: 1,
+            readAsSingle: false,
+            writeAsSingle: false,
+          },
+          testVariable2ID: {
+            id: "testVariable2ID",
+            deviceId: "testDeviceID",
+            name: "testVariable2Name",
+            type: "MBDouble",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 321.654,
+            offset: 14,
+            length: 4,
+            read: true,
+            write: false,
+            readFCode: 3,
+            writeFCode: 16,
+            unitID: 1,
+            readAsSingle: false,
+            writeAsSingle: false,
+          },
+          testVariable3ID: {
+            id: "testVariable3ID",
+            deviceId: "testDeviceID",
+            name: "testVariable3Name",
+            type: "MBDouble",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 789.654,
+            offset: 18,
+            length: 4,
+            read: true,
+            write: false,
+            readFCode: 3,
+            writeFCode: 16,
+            unitID: 1,
+            readAsSingle: false,
+            writeAsSingle: false,
+          },
+        },
+        calcElements: {},
+        alerts: {},
+        isActive: true,
+        ipAddress: "192.168.100.100",
+        portNumber: 602,
+        timeout: 2500,
+      };
+
+      //#region init calcElements
+
+      calcElement1RefreshMock = jest.fn();
+      calcElement2RefreshMock = jest.fn();
+      calcElement3RefreshMock = jest.fn();
+
+      calcElement1SampleTime = 1;
+      calcElement2SampleTime = 2;
+      calcElement3SampleTime = 3;
+
+      //#endregion init calcElements
+
+      //#region init alerts
+
+      alert1RefreshMock = jest.fn();
+      alert2RefreshMock = jest.fn();
+      alert3RefreshMock = jest.fn();
+
+      alert1SampleTime = 1;
+      alert2SampleTime = 2;
+      alert3SampleTime = 3;
+
+      //#endregion init alerts
+    });
+
+    let exec = async () => {
+      device = new MBDevice();
+      await device.init(payload);
+
+      //#region create calcElements
+
+      calcElements = [];
+
+      calcElement1 = createFakeCalcElement(
+        "calcElement1ID",
+        "calcElement1Name",
+        "FakeCalcElement",
+        1,
+        "FakeUnit",
+        calcElement1SampleTime,
+        calcElement1RefreshMock
+      );
+
+      calcElement2 = createFakeCalcElement(
+        "calcElement2ID",
+        "calcElement2Name",
+        "FakeCalcElement",
+        2,
+        "FakeUnit",
+        calcElement2SampleTime,
+        calcElement2RefreshMock
+      );
+
+      calcElement3 = createFakeCalcElement(
+        "calcElement3ID",
+        "calcElement3Name",
+        "FakeCalcElement",
+        3,
+        "FakeUnit",
+        calcElement3SampleTime,
+        calcElement3RefreshMock
+      );
+
+      if (addCalcElement1) calcElements.push(calcElement1);
+      if (addCalcElement2) calcElements.push(calcElement2);
+      if (addCalcElement3) calcElements.push(calcElement3);
+
+      //#endregion create calcElements
+
+      //#region create alerts
+
+      alerts = [];
+
+      alert1 = createFakeAlert(
+        "alert1ID",
+        "alert1Name",
+        "FakeAlert",
+        true,
+        "FakeUnit",
+        alert1SampleTime,
+        alert1RefreshMock
+      );
+
+      alert2 = createFakeAlert(
+        "alert2ID",
+        "alert2Name",
+        "FakeAlert",
+        true,
+        "FakeUnit",
+        alert2SampleTime,
+        alert2RefreshMock
+      );
+
+      alert3 = createFakeAlert(
+        "alert3ID",
+        "alert3Name",
+        "FakeAlert",
+        true,
+        "FakeUnit",
+        alert3SampleTime,
+        alert3RefreshMock
+      );
+
+      if (addAlert1) alerts.push(alert1);
+      if (addAlert2) alerts.push(alert2);
+      if (addAlert3) alerts.push(alert3);
+
+      //#endregion create alerts
+
+      for (let calcElement of calcElements)
+        device.CalcElements[calcElement.ID] = calcElement;
+
+      for (let alert of alerts) device.Alerts[alert.ID] = alert;
+
+      if (connectDevice) await device.Driver._connect();
+      return device.generatePayload();
+    };
+
+    it("should return valid payload of device and its variables - if is connected is false", async () => {
+      let result = await exec();
+
+      expect(result).toBeDefined();
+
+      let expectedPayload = {
+        id: "testDeviceID",
+        name: "testDeviceName",
+        type: "MBDevice",
+        variables: {
+          testVariable1ID: {
+            id: "testVariable1ID",
+            deviceId: "testDeviceID",
+            name: "testVariable1Name",
+            type: "MBDouble",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123.456,
+            value: 123.456,
+            lastValueTick: 0,
+            offset: 10,
+            length: 4,
+            read: true,
+            write: false,
+            readFCode: 3,
+            writeFCode: 16,
+            unitID: 1,
+            readAsSingle: false,
+            writeAsSingle: false,
+          },
+          testVariable2ID: {
+            id: "testVariable2ID",
+            deviceId: "testDeviceID",
+            name: "testVariable2Name",
+            type: "MBDouble",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 321.654,
+            value: 321.654,
+            lastValueTick: 0,
+            offset: 14,
+            length: 4,
+            read: true,
+            write: false,
+            readFCode: 3,
+            writeFCode: 16,
+            unitID: 1,
+            readAsSingle: false,
+            writeAsSingle: false,
+          },
+          testVariable3ID: {
+            id: "testVariable3ID",
+            deviceId: "testDeviceID",
+            name: "testVariable3Name",
+            type: "MBDouble",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 789.654,
+            value: 789.654,
+            lastValueTick: 0,
+            offset: 18,
+            length: 4,
+            read: true,
+            write: false,
+            readFCode: 3,
+            writeFCode: 16,
+            unitID: 1,
+            readAsSingle: false,
+            writeAsSingle: false,
+          },
+        },
+        calcElements: {},
+        alerts: {},
+        isActive: true,
+        isConnected: false,
+        ipAddress: "192.168.100.100",
+        portNumber: 602,
+        timeout: 2500,
+      };
+
+      for (let calcElement of calcElements) {
+        let payload = calcElement.generatePayload();
+        payload.deviceId = deviceId;
+        expectedPayload.calcElements[calcElement.ID] = payload;
+      }
+
+      for (let alert of alerts) {
+        let payload = alert.generatePayload();
+        payload.deviceId = deviceId;
+        expectedPayload.alerts[alert.ID] = payload;
+      }
+
+      expect(result).toEqual(expectedPayload);
+    });
+
+    it("should return valid payload of device and its variables - if is connected is true", async () => {
+      connectDevice = true;
+
+      let result = await exec();
+
+      expect(result).toBeDefined();
+
+      let expectedPayload = {
+        id: "testDeviceID",
+        name: "testDeviceName",
+        type: "MBDevice",
+        variables: {
+          testVariable1ID: {
+            id: "testVariable1ID",
+            deviceId: "testDeviceID",
+            name: "testVariable1Name",
+            type: "MBDouble",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123.456,
+            value: 123.456,
+            lastValueTick: 0,
+            offset: 10,
+            length: 4,
+            read: true,
+            write: false,
+            readFCode: 3,
+            writeFCode: 16,
+            unitID: 1,
+            readAsSingle: false,
+            writeAsSingle: false,
+          },
+          testVariable2ID: {
+            id: "testVariable2ID",
+            deviceId: "testDeviceID",
+            name: "testVariable2Name",
+            type: "MBDouble",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 321.654,
+            value: 321.654,
+            lastValueTick: 0,
+            offset: 14,
+            length: 4,
+            read: true,
+            write: false,
+            readFCode: 3,
+            writeFCode: 16,
+            unitID: 1,
+            readAsSingle: false,
+            writeAsSingle: false,
+          },
+          testVariable3ID: {
+            id: "testVariable3ID",
+            deviceId: "testDeviceID",
+            name: "testVariable3Name",
+            type: "MBDouble",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 789.654,
+            value: 789.654,
+            lastValueTick: 0,
+            offset: 18,
+            length: 4,
+            read: true,
+            write: false,
+            readFCode: 3,
+            writeFCode: 16,
+            unitID: 1,
+            readAsSingle: false,
+            writeAsSingle: false,
+          },
+        },
+        calcElements: {},
+        alerts: {},
+        isActive: true,
+        isConnected: true,
+        ipAddress: "192.168.100.100",
+        portNumber: 602,
+        timeout: 2500,
+      };
+
+      for (let calcElement of calcElements) {
+        let payload = calcElement.generatePayload();
+        payload.deviceId = deviceId;
+        expectedPayload.calcElements[calcElement.ID] = payload;
+      }
+
+      for (let alert of alerts) {
+        let payload = alert.generatePayload();
+        payload.deviceId = deviceId;
+        expectedPayload.alerts[alert.ID] = payload;
+      }
+
+      expect(result).toEqual(expectedPayload);
+    });
+
+    it("should return valid payload of device and its variables - if there are no variables, calcElements and alerts", async () => {
+      payload.variables = {};
+
+      addCalcElement1 = false;
+      addCalcElement2 = false;
+      addCalcElement3 = false;
+
+      addAlert1 = false;
+      addAlert2 = false;
+      addAlert3 = false;
+
+      let result = await exec();
+
+      expect(result).toBeDefined();
+
+      let expectedPayload = {
+        id: "testDeviceID",
+        name: "testDeviceName",
+        type: "MBDevice",
+        variables: {},
+        calcElements: {},
+        alerts: {},
+        isActive: true,
+        isConnected: false,
+        ipAddress: "192.168.100.100",
+        portNumber: 602,
+        timeout: 2500,
+      };
+
+      expect(result).toEqual(expectedPayload);
     });
   });
 });

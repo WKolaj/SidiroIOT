@@ -91,6 +91,507 @@ describe("ConnectableDevice", () => {
     });
   });
 
+  describe("generatePayload", () => {
+    let device;
+    let deviceId;
+    let deviceName;
+    let deviceType;
+    let isDriverActive;
+    let isDriverConnected;
+    let isDriverBusy;
+    let driverConnectMock;
+    let driverDisconnectMock;
+    let driverProcessRequestMock;
+    let driverTimeout;
+    let driverConnectDelay;
+    let driverDisconnectDelay;
+    let driverProcessRequestDelay;
+    let driverProcessRequestResult;
+    let variable1;
+    let variable2;
+    let variable3;
+    let variable4;
+    let variable5;
+    let variables;
+    let variable1ConvertDataToValueMockFunc;
+    let variable2ConvertDataToValueMockFunc;
+    let variable3ConvertDataToValueMockFunc;
+    let variable4ConvertDataToValueMockFunc;
+    let variable5ConvertDataToValueMockFunc;
+    let variable1ConvertValueToDataMockFunc;
+    let variable2ConvertValueToDataMockFunc;
+    let variable3ConvertValueToDataMockFunc;
+    let variable4ConvertValueToDataMockFunc;
+    let variable5ConvertValueToDataMockFunc;
+    let request1;
+    let request2;
+    let request3;
+    let requests;
+    let request1Variables;
+    let request2Variables;
+    let request3Variables;
+    let request1SampleTime;
+    let request2SampleTime;
+    let request3SampleTime;
+    let request1Write;
+    let request2Write;
+    let request3Write;
+    let request1WriteDataToVariablesMockFunc;
+    let request2WriteDataToVariablesMockFunc;
+    let request3WriteDataToVariablesMockFunc;
+    let calcElement1;
+    let calcElement2;
+    let calcElement3;
+    let calcElements;
+    let calcElement1SampleTime;
+    let calcElement2SampleTime;
+    let calcElement3SampleTime;
+    let calcElement1RefreshMock;
+    let calcElement2RefreshMock;
+    let calcElement3RefreshMock;
+    let alert1;
+    let alert2;
+    let alert3;
+    let alerts;
+    let alert1SampleTime;
+    let alert2SampleTime;
+    let alert3SampleTime;
+    let alert1RefreshMock;
+    let alert2RefreshMock;
+    let alert3RefreshMock;
+    let addVariable1;
+    let addVariable2;
+    let addVariable3;
+    let addVariable4;
+    let addVariable5;
+    let addCalcElement1;
+    let addCalcElement2;
+    let addCalcElement3;
+    let addAlert1;
+    let addAlert2;
+    let addAlert3;
+
+    beforeEach(() => {
+      deviceId = "device1ID";
+      deviceName = "device1Name";
+      deviceType = "FakeDevice";
+      addVariable1 = true;
+      addVariable2 = true;
+      addVariable3 = true;
+      addVariable4 = true;
+      addVariable5 = true;
+      addCalcElement1 = true;
+      addCalcElement2 = true;
+      addCalcElement3 = true;
+      addAlert1 = true;
+      addAlert2 = true;
+      addAlert3 = true;
+
+      driverProcessRequestResult = [1, 2, 3, 4];
+
+      //#region init device
+
+      isDriverActive = true;
+      isDriverConnected = true;
+      isDriverBusy = false;
+      driverConnectMock = jest.fn();
+      driverDisconnectMock = jest.fn();
+      driverProcessRequestMock = jest.fn(() => {
+        return driverProcessRequestResult;
+      });
+      driverTimeout = 500;
+      driverConnectDelay = 100;
+      driverDisconnectDelay = 100;
+      driverProcessRequestDelay = 100;
+
+      //#endregion init device
+
+      //#region init variables
+
+      variable1ConvertDataToValueMockFunc = jest.fn().mockReturnValue(1111);
+      variable1ConvertValueToDataMockFunc = jest
+        .fn()
+        .mockReturnValue([1, 1, 1, 1]);
+
+      variable2ConvertDataToValueMockFunc = jest.fn().mockReturnValue(2222);
+      variable2ConvertValueToDataMockFunc = jest
+        .fn()
+        .mockReturnValue([2, 2, 2, 2]);
+
+      variable3ConvertDataToValueMockFunc = jest.fn().mockReturnValue(3333);
+      variable3ConvertValueToDataMockFunc = jest
+        .fn()
+        .mockReturnValue([3, 3, 3, 3]);
+
+      variable4ConvertDataToValueMockFunc = jest.fn().mockReturnValue(4444);
+      variable4ConvertValueToDataMockFunc = jest
+        .fn()
+        .mockReturnValue([4, 4, 4, 4]);
+
+      variable5ConvertDataToValueMockFunc = jest.fn().mockReturnValue(5555);
+      variable5ConvertValueToDataMockFunc = jest
+        .fn()
+        .mockReturnValue([5, 5, 5, 5]);
+
+      //#endregion init variables
+
+      //#region init calcElements
+
+      calcElement1RefreshMock = jest.fn();
+      calcElement2RefreshMock = jest.fn();
+      calcElement3RefreshMock = jest.fn();
+
+      calcElement1SampleTime = 1;
+      calcElement2SampleTime = 2;
+      calcElement3SampleTime = 3;
+
+      //#endregion init calcElements
+
+      //#region init alerts
+
+      alert1RefreshMock = jest.fn();
+      alert2RefreshMock = jest.fn();
+      alert3RefreshMock = jest.fn();
+
+      alert1SampleTime = 1;
+      alert2SampleTime = 2;
+      alert3SampleTime = 3;
+
+      //#endregion init alerts
+
+      //#region init request
+
+      request1WriteDataToVariablesMockFunc = jest.fn();
+      request2WriteDataToVariablesMockFunc = jest.fn();
+      request3WriteDataToVariablesMockFunc = jest.fn();
+
+      request1Variables = [variable1, variable4];
+      request2Variables = [variable2, variable5];
+      request3Variables = [variable3];
+
+      request1SampleTime = 1;
+      request2SampleTime = 2;
+      request3SampleTime = 3;
+
+      request1Write = false;
+      request2Write = true;
+      request3Write = false;
+
+      //#endregion init request
+    });
+
+    let exec = async () => {
+      //#region create variables
+
+      variables = [];
+
+      variable1 = createFakeConnectableVariable(
+        "variable1ID",
+        "variable1Name",
+        "FakeVariable",
+        1,
+        "FakeUnit",
+        1,
+        [1, 1],
+        variable1ConvertDataToValueMockFunc,
+        variable1ConvertValueToDataMockFunc
+      );
+
+      variable2 = createFakeConnectableVariable(
+        "variable2ID",
+        "variable2Name",
+        "FakeVariable",
+        2,
+        "FakeUnit",
+        2,
+        [2, 2],
+        variable2ConvertDataToValueMockFunc,
+        variable2ConvertValueToDataMockFunc
+      );
+
+      variable3 = createFakeConnectableVariable(
+        "variable3ID",
+        "variable3Name",
+        "FakeVariable",
+        3,
+        "FakeUnit",
+        3,
+        [3, 3],
+        variable3ConvertDataToValueMockFunc,
+        variable3ConvertValueToDataMockFunc
+      );
+
+      variable4 = createFakeConnectableVariable(
+        "variable4ID",
+        "variable4Name",
+        "FakeVariable",
+        4,
+        "FakeUnit",
+        1,
+        [4, 4],
+        variable4ConvertDataToValueMockFunc,
+        variable4ConvertValueToDataMockFunc
+      );
+
+      variable5 = createFakeConnectableVariable(
+        "variable5ID",
+        "variable5Name",
+        "FakeVariable",
+        5,
+        "FakeUnit",
+        2,
+        [5, 5],
+        variable5ConvertDataToValueMockFunc,
+        variable5ConvertValueToDataMockFunc
+      );
+
+      if (addVariable1) variables.push(variable1);
+      if (addVariable2) variables.push(variable2);
+      if (addVariable3) variables.push(variable3);
+      if (addVariable4) variables.push(variable4);
+      if (addVariable5) variables.push(variable5);
+
+      //#endregion create variables
+
+      //#region create calcElements
+
+      calcElements = [];
+
+      calcElement1 = createFakeCalcElement(
+        "calcElement1ID",
+        "calcElement1Name",
+        "FakeCalcElement",
+        1,
+        "FakeUnit",
+        calcElement1SampleTime,
+        calcElement1RefreshMock
+      );
+
+      calcElement2 = createFakeCalcElement(
+        "calcElement2ID",
+        "calcElement2Name",
+        "FakeCalcElement",
+        2,
+        "FakeUnit",
+        calcElement2SampleTime,
+        calcElement2RefreshMock
+      );
+
+      calcElement3 = createFakeCalcElement(
+        "calcElement3ID",
+        "calcElement3Name",
+        "FakeCalcElement",
+        3,
+        "FakeUnit",
+        calcElement3SampleTime,
+        calcElement3RefreshMock
+      );
+
+      if (addCalcElement1) calcElements.push(calcElement1);
+      if (addCalcElement2) calcElements.push(calcElement2);
+      if (addCalcElement3) calcElements.push(calcElement3);
+
+      //#endregion create calcElements
+
+      //#region create alerts
+
+      alerts = [];
+
+      alert1 = createFakeAlert(
+        "alert1ID",
+        "alert1Name",
+        "FakeAlert",
+        true,
+        "FakeUnit",
+        alert1SampleTime,
+        alert1RefreshMock
+      );
+
+      alert2 = createFakeAlert(
+        "alert2ID",
+        "alert2Name",
+        "FakeAlert",
+        true,
+        "FakeUnit",
+        alert2SampleTime,
+        alert2RefreshMock
+      );
+
+      alert3 = createFakeAlert(
+        "alert3ID",
+        "alert3Name",
+        "FakeAlert",
+        true,
+        "FakeUnit",
+        alert3SampleTime,
+        alert3RefreshMock
+      );
+
+      if (addAlert1) alerts.push(alert1);
+      if (addAlert2) alerts.push(alert2);
+      if (addAlert3) alerts.push(alert3);
+
+      //#endregion create alerts
+
+      //#region create request
+
+      request1 = createFakeProtocolRequest(
+        request1Variables,
+        request1SampleTime,
+        request1Write,
+        wrapMethodToInvokeAfter(request1WriteDataToVariablesMockFunc, 100)
+      );
+
+      request2 = createFakeProtocolRequest(
+        request2Variables,
+        request2SampleTime,
+        request2Write,
+        wrapMethodToInvokeAfter(request2WriteDataToVariablesMockFunc, 100)
+      );
+
+      request3 = createFakeProtocolRequest(
+        request3Variables,
+        request3SampleTime,
+        request3Write,
+        wrapMethodToInvokeAfter(request3WriteDataToVariablesMockFunc, 100)
+      );
+
+      requests = [request1, request2, request3];
+
+      //#endregion create requests
+
+      device = createFakeConnectableDevice(
+        deviceId,
+        deviceType,
+        deviceName,
+        variables,
+        requests,
+        calcElements,
+        alerts,
+        isDriverActive,
+        isDriverConnected,
+        isDriverBusy,
+        wrapMethodToInvokeAfter(driverConnectMock, driverConnectDelay),
+        wrapMethodToInvokeAfter(driverDisconnectMock, driverDisconnectDelay),
+        wrapMethodToInvokeAfter(
+          driverProcessRequestMock,
+          driverProcessRequestDelay
+        ),
+        driverTimeout
+      );
+
+      return device.generatePayload();
+    };
+
+    it("should return valid payload of device - if active is true and connected is true", async () => {
+      isDriverActive = true;
+      isDriverConnected = true;
+
+      let result = await exec();
+
+      let expectedPayload = {
+        id: deviceId,
+        type: deviceType,
+        name: deviceName,
+        isActive: isDriverActive,
+        isConnected: isDriverConnected,
+        timeout: driverTimeout,
+        variables: {},
+        alerts: {},
+        calcElements: {},
+      };
+
+      for (let variable of variables) {
+        let payload = variable.generatePayload();
+        payload.deviceId = deviceId;
+        expectedPayload.variables[variable.ID] = payload;
+      }
+
+      for (let calcElement of calcElements) {
+        let payload = calcElement.generatePayload();
+        payload.deviceId = deviceId;
+        expectedPayload.calcElements[calcElement.ID] = payload;
+      }
+
+      for (let alert of alerts) {
+        let payload = alert.generatePayload();
+        payload.deviceId = deviceId;
+        expectedPayload.alerts[alert.ID] = payload;
+      }
+
+      expect(result).toEqual(expectedPayload);
+    });
+
+    it("should return valid payload of device - if active is false and connected is false", async () => {
+      isDriverActive = false;
+      isDriverConnected = false;
+
+      let result = await exec();
+
+      let expectedPayload = {
+        id: deviceId,
+        type: deviceType,
+        name: deviceName,
+        isActive: isDriverActive,
+        isConnected: isDriverConnected,
+        timeout: driverTimeout,
+        variables: {},
+        alerts: {},
+        calcElements: {},
+      };
+
+      for (let variable of variables) {
+        let payload = variable.generatePayload();
+        payload.deviceId = deviceId;
+        expectedPayload.variables[variable.ID] = payload;
+      }
+
+      for (let calcElement of calcElements) {
+        let payload = calcElement.generatePayload();
+        payload.deviceId = deviceId;
+        expectedPayload.calcElements[calcElement.ID] = payload;
+      }
+
+      for (let alert of alerts) {
+        let payload = alert.generatePayload();
+        payload.deviceId = deviceId;
+        expectedPayload.alerts[alert.ID] = payload;
+      }
+
+      expect(result).toEqual(expectedPayload);
+    });
+
+    it("should return valid payload of device - if there are no variables, calcElements and alerts", async () => {
+      addVariable1 = false;
+      addVariable2 = false;
+      addVariable3 = false;
+      addVariable4 = false;
+      addVariable5 = false;
+      addAlert1 = false;
+      addAlert2 = false;
+      addAlert3 = false;
+      addCalcElement1 = false;
+      addCalcElement2 = false;
+      addCalcElement3 = false;
+
+      let result = await exec();
+
+      let expectedPayload = {
+        id: deviceId,
+        type: deviceType,
+        name: deviceName,
+        isActive: isDriverActive,
+        isConnected: isDriverConnected,
+        timeout: driverTimeout,
+        variables: {},
+        alerts: {},
+        calcElements: {},
+      };
+
+      expect(result).toEqual(expectedPayload);
+    });
+  });
+
   describe("IsActive", () => {
     let device;
     let isDriverActive;
