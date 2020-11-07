@@ -148,7 +148,7 @@ class Driver {
         if (!self.IsConnected) {
           let connectionEstablished = await self._tryConnect();
           if (!connectionEstablished) {
-            this._busy = false;
+            self._busy = false;
             return reject(new Error("Error while trying to connect"));
           }
         }
@@ -156,7 +156,7 @@ class Driver {
         //Setting timeout function
         processRequestTimeoutHandler = setTimeout(async () => {
           await self._tryDisconnect();
-          this._busy = false;
+          self._busy = false;
           return reject(new Error("Processing data timeout error"));
         }, self.Timeout);
 
