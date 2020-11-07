@@ -1,5 +1,6 @@
 const MBDriver = require("../../../../classes/Driver/MBDriver");
 const MBRequest = require("../../../../classes/Request/MBRequest/MBRequest");
+const { snooze } = require("../../../../utilities/utilities");
 const { createFakeMBVariable } = require("../../../utilities/testUtilities");
 
 describe("MBDriver", () => {
@@ -80,16 +81,48 @@ describe("MBDriver", () => {
 
   describe("_disconnect", () => {
     let driver;
+    let disconnectThrow;
+
+    beforeEach(() => {
+      disconnectThrow = false;
+    });
 
     let exec = async () => {
       driver = new MBDriver();
+      if (disconnectThrow)
+        driver.Client.close = async () => {
+          await snooze(100);
+          throw new Error("Test disconnect error");
+        };
+
       return driver._disconnect();
     };
 
-    it("should call close of Modbus RTU client ", async () => {
+    it("should call close of Modbus RTU client and wait for callback to be called", async () => {
       await exec();
 
       expect(driver.Client.close).toHaveBeenCalledTimes(1);
+      expect(driver.Client._internalDisconnect).toHaveBeenCalledTimes(1);
+    });
+
+    it("should not hang and throw if disconnect throws", async () => {
+      disconnectThrow = true;
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(error.message).toEqual("Test disconnect error");
     });
   });
 

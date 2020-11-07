@@ -106,10 +106,14 @@ class FakeModbusRTU {
       self.isOpen = true;
     });
 
-    this.close = jest.fn(async (callback) => {
-      await snooze(100);
+    this._internalDisconnect = jest.fn(() => {
       self.busy = false;
       self.isOpen = false;
+    });
+
+    this.close = jest.fn(async (callback) => {
+      await snooze(100);
+      this._internalDisconnect();
       callback();
     });
 

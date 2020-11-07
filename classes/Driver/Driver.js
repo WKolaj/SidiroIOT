@@ -175,7 +175,7 @@ class Driver {
         self._clearTimeoutIfExists(processRequestTimeoutHandler);
 
         //Disconnects in case of error
-        let disconnected = await self._tryDisconnect();
+        await self._tryDisconnect();
 
         //Releasing busy flag
         self._busy = false;
