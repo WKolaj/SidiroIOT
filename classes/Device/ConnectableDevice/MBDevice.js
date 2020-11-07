@@ -61,6 +61,13 @@ class MBDevice extends ConnectableDevice {
     await super.init(payload);
   }
 
+  /**
+   * @description Method for getting refresh group of devices - devices with the same group id WILL NOT be refreshed simuntaneusly.
+   */
+  getRefreshGroupID() {
+    return `${this.IPAddress}:${this.PortNumber}`;
+  }
+
   //#endregion ========= OVERRIDE PUBLIC METHODS =========
 
   //#region ========= OVERRIDE PRIVATE METHODS =========

@@ -106,9 +106,11 @@ class FakeModbusRTU {
       self.isOpen = true;
     });
 
-    this.close = jest.fn(async () => {
+    this.close = jest.fn(async (callback) => {
+      await snooze(100);
       self.busy = false;
       self.isOpen = false;
+      callback();
     });
 
     this.readCoils = jest.fn(async (adress, length) => {

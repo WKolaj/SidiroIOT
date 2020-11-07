@@ -62,7 +62,15 @@ class MBDriver extends Driver {
    * @description Method for disconnecting TCP session with device. MUST BE OVERRIDEN IN CHILD CLASSES
    */
   async _disconnect() {
-    return this.Client.close();
+    return new Promise(async (resolve, reject) => {
+      try {
+        await this.Client.close(() => {
+          return resolve();
+        });
+      } catch (err) {
+        return reject(err);
+      }
+    });
   }
 
   /**

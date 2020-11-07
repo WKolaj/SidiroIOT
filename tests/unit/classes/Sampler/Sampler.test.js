@@ -203,6 +203,28 @@ describe("Sampler", () => {
       );
     });
 
+    it("Should set lastExternalTickId to new timeNumber", async () => {
+      externalTickHandler = jest.fn(async () => {
+        throw new Error("test error");
+      });
+
+      let beginDate = Sampler.convertDateToTickNumber(Date.now());
+      await exec();
+      let endDate = Sampler.convertDateToTickNumber(Date.now());
+
+      expect(sampler.LastExternalTickNumber >= beginDate).toEqual(true);
+      expect(sampler.LastExternalTickNumber <= endDate).toEqual(true);
+    });
+
+    it("Should set lastExternalTickId to new timeNumber - even if external tick handler throws", async () => {
+      let beginDate = Sampler.convertDateToTickNumber(Date.now());
+      await exec();
+      let endDate = Sampler.convertDateToTickNumber(Date.now());
+
+      expect(sampler.LastExternalTickNumber >= beginDate).toEqual(true);
+      expect(sampler.LastExternalTickNumber <= endDate).toEqual(true);
+    });
+
     it("Should not call anything if sampler is not active", async () => {
       active = false;
 

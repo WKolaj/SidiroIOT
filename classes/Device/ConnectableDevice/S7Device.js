@@ -10,7 +10,7 @@ const S7UInt8 = require("../../Element/Variable/ConnectableVariable/S7Variable/S
 const S7UInt16 = require("../../Element/Variable/ConnectableVariable/S7Variable/S7UInt16");
 const S7UInt32 = require("../../Element/Variable/ConnectableVariable/S7Variable/S7UInt32");
 
-class MBDevice extends ConnectableDevice {
+class S7Device extends ConnectableDevice {
   //#region ========= CONSTRUCTOR =========
 
   constructor() {
@@ -32,7 +32,7 @@ class MBDevice extends ConnectableDevice {
    */
   async init(payload) {
     if (payload.type !== "S7Device")
-      throw new Error(`Trying to set type ${payload.type} to MBDevice!`);
+      throw new Error(`Trying to set type ${payload.type} to S7Device!`);
 
     //initialize properties of S7Device and S7Driver
 
@@ -80,4 +80,4 @@ class MBDevice extends ConnectableDevice {
   //#endregion ========= OVERRIDE PRIVATE METHODS =========
 }
 
-module.exports = MBDevice;
+module.exports = S7Device;

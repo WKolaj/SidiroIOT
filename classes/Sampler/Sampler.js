@@ -98,6 +98,7 @@ class Sampler {
       ) {
         //Preventing tick method for throwing
         try {
+          this._lastExternalTickNumber = tickNumber;
           await this.ExternalTickHandler(tickNumber);
         } catch (err) {}
       }
