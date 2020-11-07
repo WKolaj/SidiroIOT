@@ -39,7 +39,7 @@ class RefreshGroup {
    * @description Method for getting a Promise to refresh group - in order to invoke it in Promise.all block
    * @param {Number} tickId tick number
    */
-  createRefreshPromise(tickId) {
+  async createRefreshPromise(tickId) {
     //Getting this as self - in order to prevent lack of this;
     let self = this;
 

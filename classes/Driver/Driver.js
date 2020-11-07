@@ -7,6 +7,10 @@ class Driver {
     this._isActive = false;
     this._timeout = 500;
     this._busy = false;
+    this._disconnectOnConnectFail = true;
+    this._disconnectOnProcessTimeout = true;
+    this._disconnectOnProcessError = true;
+    this._enableProcessTimeout = true;
   }
 
   //#endregion ========= CONSTRUCTOR =========
@@ -38,7 +42,7 @@ class Driver {
    * @description Timeout of processing request
    */
   get Timeout() {
-    return this._timeout;
+    return this._getTimeout();
   }
 
   //#endregion ========= PROPERTIES =========
@@ -88,7 +92,7 @@ class Driver {
         return resolve(true);
       } catch (err) {
         self._clearTimeoutIfExists(connectingRequestTimeoutHandler);
-        await self._tryDisconnect();
+        if (self._disconnectOnConnectFail) await self._tryDisconnect();
         return resolve(false);
       }
     });
@@ -154,11 +158,12 @@ class Driver {
         }
 
         //Setting timeout function
-        processRequestTimeoutHandler = setTimeout(async () => {
-          await self._tryDisconnect();
-          self._busy = false;
-          return reject(new Error("Processing data timeout error"));
-        }, self.Timeout);
+        if (self._enableProcessTimeout)
+          processRequestTimeoutHandler = setTimeout(async () => {
+            if (self._disconnectOnProcessTimeout) await self._tryDisconnect();
+            self._busy = false;
+            return reject(new Error("Processing data timeout error"));
+          }, self.Timeout);
 
         let data = await self._processRequest(request, tickId);
 
@@ -175,7 +180,7 @@ class Driver {
         self._clearTimeoutIfExists(processRequestTimeoutHandler);
 
         //Disconnects in case of error
-        await self._tryDisconnect();
+        if (self._disconnectOnProcessError) await self._tryDisconnect();
 
         //Releasing busy flag
         self._busy = false;
@@ -185,7 +190,25 @@ class Driver {
     });
   }
 
+  /**
+   * @description method for setting timeout. CAN BE OVERRIDEN IN CHILD CLASSES
+   */
+  setTimeout(value) {
+    this._timeout = value;
+  }
+
   //#endregion ========= VIRTUAL PUBLIC METHODS =========
+
+  //#region ========= VIRTUAL PRIVATE METHODS =========
+
+  /**
+   * @description method for getting timeout. CAN BE OVERRIDEN IN CHILD CLASSES
+   */
+  _getTimeout() {
+    return this._timeout;
+  }
+
+  //#endregion ========= VIRTUAL PRIVATE METHODS =========
 
   //#region ========= ABSTRACT PRIVATE METHODS =========
 
@@ -215,3 +238,9 @@ class Driver {
 }
 
 module.exports = Driver;
+
+//TODO - tests new driver refresh method - based on _disconnectFlags
+
+//TODO - tests new driver refresh method - based on _enableTimeoutHandlerFlags
+
+//TODO - tests new driver refresh method - setTimeout and getTimeout

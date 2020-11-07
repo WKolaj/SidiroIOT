@@ -1,4 +1,5 @@
 const ModbusRTU = require("modbus-serial");
+const logger = require("../../logger/logger");
 const MBRequest = require("../Request/MBRequest/MBRequest");
 const Driver = require("./Driver");
 
@@ -11,6 +12,10 @@ class MBDriver extends Driver {
     this._client = new ModbusRTU();
     this._ipAddress = "192.168.0.1";
     this._portNumber = 502;
+    this._disconnectOnConnectFail = false;
+    this._disconnectOnProcessTimeout = false;
+    this._disconnectOnProcessError = false;
+    this._enableProcessTimeout = false;
   }
 
   //#endregion ========= CONSTRUCTOR =========
@@ -40,6 +45,17 @@ class MBDriver extends Driver {
 
   //#endregion ========= PROPERTIES =========
 
+  //#region ========= OVERRIDE PUBLIC METHODS =========
+
+  /**
+   * @description method for setting timeout. CAN BE OVERRIDEN IN CHILD CLASSES
+   */
+  setTimeout(value) {
+    this.Client.setTimeout(value);
+  }
+
+  //#endregion ========= OVERRIDE PUBLIC METHODS =========
+
   //#region ========= OVERRIDE PRIVATE METHODS =========
 
   /**
@@ -62,15 +78,7 @@ class MBDriver extends Driver {
    * @description Method for disconnecting TCP session with device. MUST BE OVERRIDEN IN CHILD CLASSES
    */
   async _disconnect() {
-    return new Promise(async (resolve, reject) => {
-      try {
-        await this.Client.close(() => {
-          return resolve();
-        });
-      } catch (err) {
-        return reject(err);
-      }
-    });
+    if (this.IsConnected) this.Client.close();
   }
 
   /**
@@ -84,6 +92,13 @@ class MBDriver extends Driver {
     } else if (protocolRequest.WriteRequest) {
       return this._proccessWritingRequest(protocolRequest, tickId);
     }
+  }
+
+  /**
+   * @description method for getting timeout
+   */
+  _getTimeout() {
+    return this.Client.getTimeout();
   }
 
   //#endregion ========= OVERRIDE PRIVATE METHODS =========
@@ -213,3 +228,9 @@ class MBDriver extends Driver {
 }
 
 module.exports = MBDriver;
+
+//TODO - tests new driver refresh method - new values of _disconnectFlags
+
+//TODO - tests new driver refresh method - new values of _enableTimeoutHandlerFlags
+
+//TODO - tests new driver refresh method - new values of setTimeout and getTimeout
