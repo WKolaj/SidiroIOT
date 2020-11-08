@@ -730,11 +730,11 @@ describe("MBDriver", () => {
         0,
         "FakeUnit",
         variable1SampleTime,
-        [],
+        [1, 1],
         variable1Offset,
         variable1Length,
         () => 0,
-        () => [0],
+        () => [1, 1],
         variable1UnitID,
         variable1ReadFCode,
         variable1WriteFCode,
@@ -753,11 +753,11 @@ describe("MBDriver", () => {
         0,
         "FakeUnit",
         variable2SampleTime,
-        [],
+        [2, 2, 2],
         variable2Offset,
         variable2Length,
         () => 0,
-        () => [0],
+        () => [2, 2, 2],
         variable2UnitID,
         variable2ReadFCode,
         variable2WriteFCode,
@@ -776,11 +776,11 @@ describe("MBDriver", () => {
         0,
         "FakeUnit",
         variable3SampleTime,
-        [],
+        [3, 3],
         variable3Offset,
         variable3Length,
         () => 0,
-        () => [0],
+        () => [3, 3],
         variable3UnitID,
         variable3ReadFCode,
         variable3WriteFCode,
@@ -1028,6 +1028,57 @@ describe("MBDriver", () => {
       expect(driver.Client.busy).toEqual(false);
     });
 
-    //TODO - add tests for write request
+    it("should connect first (if not connected) and then properly call _processRequest  - call setID to set proper unitID and than writeHoldingRegisters - if request is to write", async () => {
+      writeRequest = true;
+      fCode = 16;
+
+      variable1Write = true;
+      variable2Write = true;
+      variable3Write = true;
+
+      variable1Read = false;
+      variable2Read = false;
+      variable3Read = false;
+
+      let result = await exec();
+
+      //Checking id connect was called
+      expect(driver.Client.connectTCP).toHaveBeenCalledTimes(1);
+      expect(driver.Client.connectTCP.mock.calls[0][0]).toEqual(
+        driver.IPAddress
+      );
+      expect(driver.Client.connectTCP.mock.calls[0][1]).toEqual({
+        port: driver.PortNumber,
+      });
+
+      //connect should be called before setID
+      expect(driver.Client.connectTCP).toHaveBeenCalledBefore(
+        driver.Client.setID
+      );
+
+      expect(driver.Client.setID).toHaveBeenCalledTimes(1);
+      expect(driver.Client.setID.mock.calls[0][0]).toEqual(unitID);
+
+      //Setting unitID has to be called before
+      expect(driver.Client.setID).toHaveBeenCalledBefore(
+        driver.Client.writeRegisters
+      );
+
+      expect(driver.Client.writeRegisters).toHaveBeenCalledTimes(1);
+      //total offset is 1 and data is [1,1,2,2,2,3,3]
+      expect(driver.Client.writeRegisters.mock.calls[0][0]).toEqual(1);
+      expect(driver.Client.writeRegisters.mock.calls[0][1]).toEqual([
+        1,
+        1,
+        2,
+        2,
+        2,
+        3,
+        3,
+      ]);
+
+      //Busy should be false at the end
+      expect(driver.Client.busy).toEqual(false);
+    });
   });
 });
