@@ -1,3 +1,4 @@
+const { exists } = require("../../../../../utilities/utilities");
 const StandardProtocolVariable = require("../StandardProtocolVariable");
 
 class MBVariable extends StandardProtocolVariable {
@@ -67,9 +68,9 @@ class MBVariable extends StandardProtocolVariable {
   generatePayload() {
     let superPayload = super.generatePayload();
 
-    superPayload.readFCode = this.ReadFCode;
-    superPayload.writeFCode = this.WriteFCode;
     superPayload.unitID = this.UnitID;
+    if (exists(this.ReadFCode)) superPayload.readFCode = this.ReadFCode;
+    if (exists(this.WriteFCode)) superPayload.writeFCode = this.WriteFCode;
 
     return superPayload;
   }

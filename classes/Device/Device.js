@@ -356,5 +356,4 @@ class Device {
 
 module.exports = Device;
 
-//TODO - add device generate payload tests
 //TODO - add device init tests

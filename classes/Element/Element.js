@@ -1,4 +1,5 @@
 const Sampler = require("../Sampler/Sampler");
+const Joi = require("joi");
 
 class Element {
   //#region ========= CONSTRUCTOR =========
@@ -150,7 +151,5 @@ class Element {
 
   //#endregion ========= PRIVATE VIRTUAL METHODS =========
 }
-
-//TODO - add element generatePayload test
 
 module.exports = Element;

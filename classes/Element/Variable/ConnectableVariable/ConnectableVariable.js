@@ -1,3 +1,4 @@
+const Joi = require("joi");
 const Variable = require("../Variable");
 
 class ConnectableVariable extends Variable {

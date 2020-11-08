@@ -349,7 +349,7 @@ describe("MBVariable", () => {
       return element.generatePayload();
     };
 
-    it("should initialize element's properties based on their payload", async () => {
+    it("should generate valid payload of MBVariable", async () => {
       let result = await exec();
 
       let expectedResult = {
@@ -369,6 +369,60 @@ describe("MBVariable", () => {
         length: 456,
         unitID: 12,
         readFCode: 4,
+        writeFCode: 16,
+      };
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should generate valid payload of MBVariable - if write is false and writeFCode is undefined", async () => {
+      delete payload.writeFCode;
+      let result = await exec();
+
+      let expectedResult = {
+        id: "testElementId",
+        name: "testElementName",
+        type: "testElementType",
+        sampleTime: 15,
+        read: true,
+        write: false,
+        readAsSingle: true,
+        writeAsSingle: false,
+        unit: "testUnit",
+        defaultValue: 10,
+        value: 123,
+        lastValueTick: 0,
+        offset: 123,
+        length: 456,
+        unitID: 12,
+        readFCode: 4,
+      };
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should generate valid payload of MBVariable - if read is false and readFCode is undefined", async () => {
+      payload.read = false;
+      payload.write = true;
+      delete payload.readFCode;
+      let result = await exec();
+
+      let expectedResult = {
+        id: "testElementId",
+        name: "testElementName",
+        type: "testElementType",
+        sampleTime: 15,
+        read: false,
+        write: true,
+        readAsSingle: true,
+        writeAsSingle: false,
+        unit: "testUnit",
+        defaultValue: 10,
+        value: 123,
+        lastValueTick: 0,
+        offset: 123,
+        length: 456,
+        unitID: 12,
         writeFCode: 16,
       };
 

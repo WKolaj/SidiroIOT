@@ -234,9 +234,3 @@ class MBDriver extends Driver {
 }
 
 module.exports = MBDriver;
-
-//TODO - tests new driver refresh method - new values of _disconnectFlags
-
-//TODO - tests new driver refresh method - new values of _enableTimeoutHandlerFlags
-
-//TODO - tests new driver refresh method - new values of setTimeout and getTimeout
