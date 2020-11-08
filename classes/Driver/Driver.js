@@ -1,3 +1,4 @@
+const { snooze } = require("../../utilities/utilities");
 const ProtocolRequest = require("../Request/ProtocolRequest");
 
 class Driver {
@@ -81,7 +82,6 @@ class Driver {
    */
   async _tryConnect() {
     let self = this;
-
     return new Promise(async (resolve, reject) => {
       //Setting timeout function for connecting
       let connectingRequestTimeoutHandler = null;
@@ -125,7 +125,7 @@ class Driver {
 
     this._isActive = false;
     //Additionally disconnect the driver instantly
-    await this._disconnect();
+    await this._tryDisconnect();
 
     //Setting busy to false
     this._busy = false;

@@ -6,6 +6,7 @@ class FakeModbusRTU {
     let self = this;
     //delay of answering in ms
     this.timeDelay = 5;
+    this._timeout = null;
 
     //Data to be returned - key is unitId
     this.coilsData = {
@@ -88,22 +89,31 @@ class FakeModbusRTU {
     });
 
     this.setTimeout = jest.fn((duration) => {
-      self._timeout = timeout;
+      self._timeout = duration;
     });
 
-    this.getTimeout = jest.fn((duration) => {
+    this.getTimeout = jest.fn(() => {
       return self._timeout;
     });
 
     this.connectTCP = jest.fn(async (ipAdress, args) => {
       if (!args.port) throw new Error("Port was not given");
+      return new Promise(async (resolve, reject) => {
+        let handler = null;
+        if (self._timeout) {
+          handler = setTimeout(() => {
+            return reject(new Error("Connection timeout"));
+          }, self._timeout);
+        }
 
-      //Waiting several ms
-      await snooze(self.timeDelay);
+        //Waiting several ms
+        await snooze(self.timeDelay);
 
-      self.ipAdress = ipAdress;
-      self.portNumber = args.port;
-      self.isOpen = true;
+        self.ipAdress = ipAdress;
+        self.portNumber = args.port;
+        self.isOpen = true;
+        return resolve();
+      });
     });
 
     this._internalDisconnect = jest.fn(() => {
@@ -112,122 +122,219 @@ class FakeModbusRTU {
     });
 
     this.close = jest.fn(async (callback) => {
-      await snooze(100);
+      //disconnecting takes more or less half the time of timeout
+      let timeout = self._timeout ? Math.round(self._timeout) / 2 : 100;
+      await snooze(timeout);
       this._internalDisconnect();
-      callback();
+      if (callback) callback();
     });
 
     this.readCoils = jest.fn(async (adress, length) => {
-      if (!self.isOpen) throw new Error("Device is not connected");
-      if (self.busy) throw new Error("Driver is busy");
-      self.busy = true;
-      //Waiting several ms
-      await snooze(self.timeDelay);
+      return new Promise(async (resolve, reject) => {
+        if (!self.isOpen) throw new Error("Device is not connected");
+        if (self.busy) throw new Error("Driver is busy");
 
-      self.busy = false;
-      return {
-        data: self.getPartOfArray(self.coilsData[self._id], adress, length),
-      };
+        let handler = null;
+        if (self._timeout) {
+          handler = setTimeout(() => {
+            self.busy = false;
+            return reject(new Error("Handler timeout"));
+          }, self._timeout);
+        }
+
+        self.busy = true;
+        //Waiting several ms
+        await snooze(self.timeDelay);
+        if (handler) clearTimeout(handler);
+
+        self.busy = false;
+        return resolve({
+          data: self.getPartOfArray(self.coilsData[self._id], adress, length),
+        });
+      });
     });
 
     this.readDiscreteInputs = jest.fn(async (adress, length) => {
-      if (!self.isOpen) throw new Error("Device is not connected");
-      if (self.busy) throw new Error("Driver is busy");
-      self.busy = true;
-      //Waiting several ms
-      await snooze(self.timeDelay);
+      return new Promise(async (resolve, reject) => {
+        if (!self.isOpen) throw new Error("Device is not connected");
+        if (self.busy) throw new Error("Driver is busy");
 
-      self.busy = false;
-      return {
-        data: self.getPartOfArray(
-          self.discreteInputsData[self._id],
-          adress,
-          length
-        ),
-      };
+        let handler = null;
+        if (self._timeout) {
+          handler = setTimeout(() => {
+            self.busy = false;
+            return reject(new Error("Handler timeout"));
+          }, self._timeout);
+        }
+
+        self.busy = true;
+        //Waiting several ms
+        await snooze(self.timeDelay);
+        if (handler) clearTimeout(handler);
+
+        self.busy = false;
+        return resolve({
+          data: self.getPartOfArray(
+            self.discreteInputsData[self._id],
+            adress,
+            length
+          ),
+        });
+      });
     });
 
     this.readHoldingRegisters = jest.fn(async (adress, length) => {
-      if (!self.isOpen) throw new Error("Device is not connected");
-      if (self.busy) throw new Error("Driver is busy");
-      self.busy = true;
-      //Waiting several ms
-      await snooze(self.timeDelay);
+      return new Promise(async (resolve, reject) => {
+        if (!self.isOpen) throw new Error("Device is not connected");
+        if (self.busy) throw new Error("Driver is busy");
 
-      self.busy = false;
+        let handler = null;
+        if (self._timeout) {
+          handler = setTimeout(() => {
+            self.busy = false;
+            return reject(new Error("Handler timeout"));
+          }, self._timeout);
+        }
 
-      return {
-        data: self.getPartOfArray(
-          self.holdingRegistersData[self._id],
-          adress,
-          length
-        ),
-      };
+        self.busy = true;
+        //Waiting several ms
+        await snooze(self.timeDelay);
+        if (handler) clearTimeout(handler);
+
+        self.busy = false;
+        return resolve({
+          data: self.getPartOfArray(
+            self.holdingRegistersData[self._id],
+            adress,
+            length
+          ),
+        });
+      });
     });
 
     this.readInputRegisters = jest.fn(async (adress, length) => {
-      if (!self.isOpen) throw new Error("Device is not connected");
-      if (self.busy) throw new Error("Driver is busy");
-      self.busy = true;
-      //Waiting several ms
-      await snooze(self.timeDelay);
+      return new Promise(async (resolve, reject) => {
+        if (!self.isOpen) throw new Error("Device is not connected");
+        if (self.busy) throw new Error("Driver is busy");
 
-      self.busy = false;
-      return {
-        data: self.getPartOfArray(
-          self.inputRegistersData[self._id],
-          adress,
-          length
-        ),
-      };
+        let handler = null;
+        if (self._timeout) {
+          handler = setTimeout(() => {
+            self.busy = false;
+            return reject(new Error("Handler timeout"));
+          }, self._timeout);
+        }
+
+        self.busy = true;
+        //Waiting several ms
+        await snooze(self.timeDelay);
+        if (handler) clearTimeout(handler);
+
+        self.busy = false;
+        return resolve({
+          data: self.getPartOfArray(
+            self.inputRegistersData[self._id],
+            adress,
+            length
+          ),
+        });
+      });
     });
 
     this.writeCoils = jest.fn(async (adress, data) => {
-      if (!self.isOpen) throw new Error("Device is not connected");
-      if (self.busy) throw new Error("Driver is busy");
-      self.busy = true;
-      //Waiting several ms
-      await snooze(self.timeDelay);
+      return new Promise(async (resolve, reject) => {
+        if (!self.isOpen) throw new Error("Device is not connected");
+        if (self.busy) throw new Error("Driver is busy");
 
-      self.busy = false;
-      return self.setPartOfArray(self.coilsData[self._id], adress, data);
+        let handler = null;
+        if (self._timeout) {
+          handler = setTimeout(() => {
+            self.busy = false;
+            return reject(new Error("Handler timeout"));
+          }, self._timeout);
+        }
+
+        self.busy = true;
+        //Waiting several ms
+        await snooze(self.timeDelay);
+        if (handler) clearTimeout(handler);
+
+        self.busy = false;
+        return resolve(
+          self.setPartOfArray(self.coilsData[self._id], adress, data)
+        );
+      });
     });
 
     this.writeRegisters = jest.fn(async (adress, data) => {
-      if (!self.isOpen) throw new Error("Device is not connected");
-      if (self.busy) throw new Error("Driver is busy");
-      self.busy = true;
-      //Waiting several ms
-      await snooze(self.timeDelay);
+      return new Promise(async (resolve, reject) => {
+        if (!self.isOpen) throw new Error("Device is not connected");
+        if (self.busy) throw new Error("Driver is busy");
 
-      self.busy = false;
-      return self.setPartOfArray(
-        self.holdingRegistersData[self._id],
-        adress,
-        data
-      );
+        let handler = null;
+        if (self._timeout) {
+          handler = setTimeout(() => {
+            self.busy = false;
+            return reject(new Error("Handler timeout"));
+          }, self._timeout);
+        }
+
+        self.busy = true;
+        //Waiting several ms
+        await snooze(self.timeDelay);
+        if (handler) clearTimeout(handler);
+
+        self.busy = false;
+        return resolve(
+          self.setPartOfArray(self.holdingRegistersData[self._id], adress, data)
+        );
+      });
     });
 
     this.writeRegister = jest.fn(async (adress, value) => {
-      if (!self.isOpen) throw new Error("Device is not connected");
-      if (self.busy) throw new Error("Driver is busy");
-      self.busy = true;
-      //Waiting several ms
-      await snooze(self.timeDelay);
+      return new Promise(async (resolve, reject) => {
+        if (!self.isOpen) throw new Error("Device is not connected");
+        if (self.busy) throw new Error("Driver is busy");
 
-      self.busy = false;
-      return (self.holdingRegistersData[self._id][adress] = value);
+        let handler = null;
+        if (self._timeout) {
+          handler = setTimeout(() => {
+            self.busy = false;
+            return reject(new Error("Handler timeout"));
+          }, self._timeout);
+        }
+
+        self.busy = true;
+        //Waiting several ms
+        await snooze(self.timeDelay);
+        if (handler) clearTimeout(handler);
+
+        self.busy = false;
+        return resolve((self.holdingRegistersData[self._id][adress] = value));
+      });
     });
 
     this.writeCoil = jest.fn(async (adress, value) => {
-      if (!self.isOpen) throw new Error("Device is not connected");
-      if (self.busy) throw new Error("Driver is busy");
-      self.busy = true;
-      //Waiting several ms
-      await snooze(self.timeDelay);
+      return new Promise(async (resolve, reject) => {
+        if (!self.isOpen) throw new Error("Device is not connected");
+        if (self.busy) throw new Error("Driver is busy");
 
-      self.busy = false;
-      return (self.coilsData[self._id][adress] = value);
+        let handler = null;
+        if (self._timeout) {
+          handler = setTimeout(() => {
+            self.busy = false;
+            return reject(new Error("Handler timeout"));
+          }, self._timeout);
+        }
+
+        self.busy = true;
+        //Waiting several ms
+        await snooze(self.timeDelay);
+        if (handler) clearTimeout(handler);
+
+        self.busy = false;
+        return resolve((self.coilsData[self._id][adress] = value));
+      });
     });
   }
 
