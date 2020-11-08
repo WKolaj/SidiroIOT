@@ -1,5 +1,6 @@
 const ModbusRTU = require("modbus-serial");
 const logger = require("../../logger/logger");
+const { snooze } = require("../../utilities/utilities");
 const MBRequest = require("../Request/MBRequest/MBRequest");
 const Driver = require("./Driver");
 
@@ -78,7 +79,11 @@ class MBDriver extends Driver {
    * @description Method for disconnecting TCP session with device. MUST BE OVERRIDEN IN CHILD CLASSES
    */
   async _disconnect() {
-    if (this.IsConnected) this.Client.close();
+    if (this.IsConnected) {
+      this.Client.close();
+      //Waiting for the client to close - await timeout
+      if (this.Timeout) await snooze(this.Timeout);
+    }
   }
 
   /**

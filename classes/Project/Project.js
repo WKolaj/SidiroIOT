@@ -103,7 +103,7 @@ class Project {
    * @description Method for disconnecting all devices in order - connectable, internal, agents
    */
   async _disconnectAllDevices() {
-    for (let device of Object.keys(this.ConnectableDevices)) {
+    for (let device of Object.values(this.ConnectableDevices)) {
       try {
         await device.deactivate();
       } catch (err) {
@@ -111,7 +111,7 @@ class Project {
       }
     }
 
-    for (let device of Object.keys(this.InternalDevices)) {
+    for (let device of Object.values(this.InternalDevices)) {
       try {
         await device.deactivate();
       } catch (err) {
@@ -119,7 +119,7 @@ class Project {
       }
     }
 
-    for (let device of Object.keys(this.AgentDevices)) {
+    for (let device of Object.values(this.AgentDevices)) {
       try {
         await device.deactivate();
       } catch (err) {
