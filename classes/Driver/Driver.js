@@ -7,10 +7,13 @@ class Driver {
     this._isActive = false;
     this._timeout = 500;
     this._busy = false;
-    this._disconnectOnConnectFail = true;
+    this._enableConnectTimeout = true;
+    this._disconnectOnConnectTimeout = true;
+    this._disconnectOnConnectError = true;
     this._disconnectOnProcessTimeout = true;
     this._disconnectOnProcessError = true;
     this._enableProcessTimeout = true;
+    this._connectWhenDisconnectedOnProcess = true;
   }
 
   //#endregion ========= CONSTRUCTOR =========
@@ -81,10 +84,13 @@ class Driver {
 
     return new Promise(async (resolve, reject) => {
       //Setting timeout function for connecting
-      let connectingRequestTimeoutHandler = setTimeout(async () => {
-        await self._tryDisconnect();
-        return resolve(false);
-      }, self.Timeout);
+      let connectingRequestTimeoutHandler = null;
+      if (self._enableConnectTimeout) {
+        connectingRequestTimeoutHandler = setTimeout(async () => {
+          if (self._disconnectOnConnectTimeout) await self._tryDisconnect();
+          return resolve(false);
+        }, self.Timeout);
+      }
 
       try {
         await self._connect();
@@ -92,7 +98,7 @@ class Driver {
         return resolve(true);
       } catch (err) {
         self._clearTimeoutIfExists(connectingRequestTimeoutHandler);
-        if (self._disconnectOnConnectFail) await self._tryDisconnect();
+        if (self._disconnectOnConnectError) await self._tryDisconnect();
         return resolve(false);
       }
     });
@@ -148,12 +154,14 @@ class Driver {
 
       //Try catch in order to force setting processingRequest to false
       try {
-        //Connecting if not connected
-        if (!self.IsConnected) {
-          let connectionEstablished = await self._tryConnect();
-          if (!connectionEstablished) {
-            self._busy = false;
-            return reject(new Error("Error while trying to connect"));
+        if (self._connectWhenDisconnectedOnProcess) {
+          //Connecting if not connected
+          if (!self.IsConnected) {
+            let connectionEstablished = await self._tryConnect();
+            if (!connectionEstablished) {
+              self._busy = false;
+              return reject(new Error("Error while trying to connect"));
+            }
           }
         }
 
@@ -238,9 +246,3 @@ class Driver {
 }
 
 module.exports = Driver;
-
-//TODO - tests new driver refresh method - based on _disconnectFlags
-
-//TODO - tests new driver refresh method - based on _enableTimeoutHandlerFlags
-
-//TODO - tests new driver refresh method - setTimeout and getTimeout

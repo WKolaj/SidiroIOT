@@ -13,10 +13,13 @@ class MBDriver extends Driver {
     this._client = new ModbusRTU();
     this._ipAddress = "192.168.0.1";
     this._portNumber = 502;
-    this._disconnectOnConnectFail = false;
+    this._enableConnectTimeout = false;
+    this._disconnectOnConnectTimeout = false;
+    this._disconnectOnConnectError = false;
     this._disconnectOnProcessTimeout = false;
     this._disconnectOnProcessError = false;
     this._enableProcessTimeout = false;
+    this._connectWhenDisconnectedOnProcess = true;
   }
 
   //#endregion ========= CONSTRUCTOR =========

@@ -1,3 +1,4 @@
+const { time } = require("systeminformation");
 const Driver = require("../../../../classes/Driver/Driver");
 const { snooze } = require("../../../../utilities/utilities");
 const { wrapMethodToInvokeAfter } = require("../../../utilities/testUtilities");
@@ -16,6 +17,18 @@ describe("Driver", () => {
       expect(result.IsActive).toEqual(false);
       expect(result.Timeout).toEqual(500);
       expect(result.Busy).toEqual(false);
+    });
+
+    it("should properly set flags associated with invoking requests", () => {
+      let result = exec();
+
+      expect(result._enableConnectTimeout).toEqual(true);
+      expect(result._disconnectOnConnectTimeout).toEqual(true);
+      expect(result._disconnectOnConnectError).toEqual(true);
+      expect(result._disconnectOnProcessTimeout).toEqual(true);
+      expect(result._disconnectOnProcessError).toEqual(true);
+      expect(result._enableProcessTimeout).toEqual(true);
+      expect(result._connectWhenDisconnectedOnProcess).toEqual(true);
     });
   });
 
@@ -135,6 +148,13 @@ describe("Driver", () => {
     let connectMockFuncDelay;
     let disconnectMockFunc;
     let disconnectMockFuncDelay;
+    let enableConnectTimeout;
+    let disconnectOnConnectTimeout;
+    let disconnectOnConnectError;
+    let disconnectOnProcessTimeout;
+    let disconnectOnProcessError;
+    let enableProcessTimeout;
+    let connectWhenDisconnectedOnProcess;
     let request;
     let tickNumber;
 
@@ -155,6 +175,13 @@ describe("Driver", () => {
       connectMockFunc = jest.fn();
       disconnectMockFuncDelay = 100;
       disconnectMockFunc = jest.fn();
+      enableConnectTimeout = true;
+      disconnectOnConnectTimeout = true;
+      disconnectOnConnectError = true;
+      disconnectOnProcessTimeout = true;
+      disconnectOnProcessError = true;
+      enableProcessTimeout = true;
+      connectWhenDisconnectedOnProcess = true;
     });
 
     let exec = async () => {
@@ -176,6 +203,14 @@ describe("Driver", () => {
         disconnectMockFunc,
         disconnectMockFuncDelay
       );
+
+      driver._enableConnectTimeout = enableConnectTimeout;
+      driver._disconnectOnConnectTimeout = disconnectOnConnectTimeout;
+      driver._disconnectOnConnectError = disconnectOnConnectError;
+      driver._disconnectOnProcessTimeout = disconnectOnProcessTimeout;
+      driver._disconnectOnProcessError = disconnectOnProcessError;
+      driver._enableProcessTimeout = enableProcessTimeout;
+      driver._connectWhenDisconnectedOnProcess = connectWhenDisconnectedOnProcess;
 
       return driver.invokeRequest(request, tickNumber);
     };
@@ -217,7 +252,7 @@ describe("Driver", () => {
       expect(disconnectMockFunc).not.toHaveBeenCalled();
     });
 
-    it("should reject, not invoke process request and connect and disconnect and leave busy set to true - if driver is busy", async () => {
+    it("should reject, not invoke process request and connect and disconnect and leave busy set to true - if driver is busy - all flags set to true", async () => {
       //Invoking connect only if device is not connected
       isConnected = false;
       isBusy = true;
@@ -246,7 +281,7 @@ describe("Driver", () => {
       expect(driver.Busy).toEqual(true);
     });
 
-    it("should reject, not invoke process request and connect and disconnect and leave busy set to false - if driver is not active", async () => {
+    it("should reject, not invoke process request and connect and disconnect and leave busy set to false - if driver is not active - all flags set to true", async () => {
       //Invoking connect only if device is not connected
       isConnected = false;
       isActive = false;
@@ -275,7 +310,7 @@ describe("Driver", () => {
       expect(driver.Busy).toEqual(false);
     });
 
-    it("should reject, not invoke process request and invoke disconnect and leave busy set to false - if connect throws", async () => {
+    it("should reject, not invoke process request and invoke disconnect and leave busy set to false - if connect throws - all flags set to true", async () => {
       //Invoking connect only if device is not connected
       isConnected = false;
 
@@ -309,7 +344,7 @@ describe("Driver", () => {
       expect(driver.Busy).toEqual(false);
     });
 
-    it("should reject, not invoke process request and leave busy set to false - if connect throws and than disconnect throws", async () => {
+    it("should reject, not invoke process request and leave busy set to false - if connect throws and than disconnect throws - all flags set to true", async () => {
       //Invoking connect only if device is not connected
       isConnected = false;
 
@@ -344,7 +379,7 @@ describe("Driver", () => {
       expect(driver.Busy).toEqual(false);
     });
 
-    it("should reject, not invoke process request and invoke disconnect and leave busy set to false - if connecting takes more time than timeout", async () => {
+    it("should reject, not invoke process request and invoke disconnect and leave busy set to false - if connecting takes more time than timeout - all flags set to true", async () => {
       //Invoking connect only if device is not connected
       isConnected = false;
 
@@ -376,7 +411,7 @@ describe("Driver", () => {
       expect(driver.Busy).toEqual(false);
     });
 
-    it("should reject and invoke disconnect and leave busy set to false - if processing request takes more time than timeout", async () => {
+    it("should reject and invoke disconnect and leave busy set to false - if processing request takes more time than timeout - all flags set to true", async () => {
       processMockFuncDelay = 1000;
 
       let error = null;
@@ -405,7 +440,7 @@ describe("Driver", () => {
       expect(driver.Busy).toEqual(false);
     });
 
-    it("should reject and invoke disconnect and leave busy set to false - if processing request takes more time than timeout and disconnect throws", async () => {
+    it("should reject and invoke disconnect and leave busy set to false - if processing request takes more time than timeout and disconnect throws - all flags set to true", async () => {
       processMockFuncDelay = 1000;
 
       disconnectMockFunc = () => {
@@ -435,7 +470,7 @@ describe("Driver", () => {
       expect(driver.Busy).toEqual(false);
     });
 
-    it("should reject and invoke disconnect and leave busy set to false - if processing throws an error", async () => {
+    it("should reject and invoke disconnect and leave busy set to false - if processing throws an error - all flags set to true", async () => {
       processMockFunc = () => {
         throw new Error("testError");
       };
@@ -466,7 +501,7 @@ describe("Driver", () => {
       expect(driver.Busy).toEqual(false);
     });
 
-    it("should reject and invoke disconnect and leave busy set to false - if processing throws an error and disconnect throws", async () => {
+    it("should reject and invoke disconnect and leave busy set to false - if processing throws an error and disconnect throws - all flags set to true", async () => {
       processMockFunc = () => {
         throw new Error("testError1");
       };
@@ -498,7 +533,7 @@ describe("Driver", () => {
       expect(driver.Busy).toEqual(false);
     });
 
-    it("should reject, not invoke process request or connect or disconnect - if device is busy due to data processing and there is no need to connect", async () => {
+    it("should reject, not invoke process request or connect or disconnect - if device is busy due to data processing and there is no need to connect - all flags set to true", async () => {
       //isConnected set to true - no need to connect
       isConnected = true;
 
@@ -567,7 +602,7 @@ describe("Driver", () => {
       expect(driver.Busy).toEqual(false);
     });
 
-    it("should reject, not invoke process request or connect or disconnect - if device is busy due to data processing and there is a need to connect", async () => {
+    it("should reject, not invoke process request or connect or disconnect - if device is busy due to data processing and there is a need to connect - all flags set to true", async () => {
       //isConnected set to true - a need to connect
       isConnected = false;
 
@@ -634,6 +669,233 @@ describe("Driver", () => {
 
       //busy should be set to false at the end
       expect(driver.Busy).toEqual(false);
+    });
+
+    it("should reject, not invoke process request but also no invoke disconnect and leave busy set to false - if connect throws - flag disconnectOnConnectFail is set to false", async () => {
+      //Invoking connect only if device is not connected
+      isConnected = false;
+
+      connectMockFunc = () => {
+        throw new Error("testError");
+      };
+
+      disconnectOnConnectError = false;
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(error.message).toEqual("Error while trying to connect");
+
+      //process should not be invoked
+      expect(processMockFunc).not.toHaveBeenCalled();
+
+      //disconnect should be invoked
+      expect(disconnectMockFunc).not.toHaveBeenCalled();
+
+      //busy should be set to false
+      expect(driver.Busy).toEqual(false);
+    });
+
+    it("should not invoke connect before processing request - if device is not connected - flag connectWhenDisconnectedOnProcess set to false", async () => {
+      isConnected = false;
+      connectWhenDisconnectedOnProcess = false;
+
+      await exec();
+
+      expect(connectMockFunc).not.toHaveBeenCalled();
+      expect(processMockFunc).toHaveBeenCalledTimes(1);
+
+      //Disconnect should not have been called
+
+      expect(disconnectMockFunc).not.toHaveBeenCalled();
+    });
+
+    it("should reject, not invoke process request, not invoke disconnect and leave busy set to false - if connecting takes more time than timeout - disconnectOnConnectTimeout flag is set to false", async () => {
+      //Invoking connect only if device is not connected
+      isConnected = false;
+      disconnectOnConnectTimeout = false;
+
+      connectMockFuncDelay = 1000;
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(error.message).toEqual("Error while trying to connect");
+
+      //process should not be invoked
+      expect(processMockFunc).not.toHaveBeenCalled();
+
+      //disconnect should be invoked
+      expect(disconnectMockFunc).not.toHaveBeenCalled();
+
+      //busy should be set to false
+      expect(driver.Busy).toEqual(false);
+    });
+
+    it("should not reject, and invoke process request, not invoke disconnect and leave busy set to false - if connecting takes more time than timeout - enableConnectTimeout flag is set to false", async () => {
+      //Invoking connect only if device is not connected
+      isConnected = false;
+      enableConnectTimeout = false;
+
+      connectMockFuncDelay = 1000;
+
+      let result = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            result = await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
+
+      //process should be invoked normally
+      expect(processMockFunc).toHaveBeenCalledTimes(1);
+      expect(processMockFunc.mock.calls[0][0]).toEqual(request);
+      expect(processMockFunc.mock.calls[0][1]).toEqual(tickNumber);
+      expect(result).toEqual(processMockFuncResult);
+
+      //disconnect should be invoked
+      expect(disconnectMockFunc).not.toHaveBeenCalled();
+
+      //busy should be set to false
+      expect(driver.Busy).toEqual(false);
+    });
+
+    it("should reject but not invoke disconnect and leave busy set to false - if processing request takes more time than timeout - disconnectOnProcessTimeout is set to true", async () => {
+      disconnectOnProcessTimeout = false;
+      processMockFuncDelay = 1000;
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(error.message).toEqual("Processing data timeout error");
+
+      //connect should not be invoked
+      expect(connectMockFunc).not.toHaveBeenCalled();
+
+      //disconnect should not be invoked
+      expect(disconnectMockFunc).not.toHaveBeenCalled();
+
+      //busy should be set to false
+      expect(driver.Busy).toEqual(false);
+    });
+
+    it("should not reject, and invoke process request, not invoke disconnect and leave busy set to false - if processing request takes more time than timeout - enableProcessTimeout flag is set to false", async () => {
+      enableProcessTimeout = false;
+
+      processMockFuncDelay = 1000;
+
+      let result = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            result = await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
+
+      //process should be invoked normally
+      expect(processMockFunc).toHaveBeenCalledTimes(1);
+      expect(processMockFunc.mock.calls[0][0]).toEqual(request);
+      expect(processMockFunc.mock.calls[0][1]).toEqual(tickNumber);
+      expect(result).toEqual(processMockFuncResult);
+
+      //disconnect should be invoked
+      expect(disconnectMockFunc).not.toHaveBeenCalled();
+
+      //busy should be set to false
+      expect(driver.Busy).toEqual(false);
+    });
+
+    it("should reject but not invoke disconnect and leave busy set to false - if processing throws - disconnectOnProcessError is set to true", async () => {
+      disconnectOnProcessError = false;
+
+      processMockFunc = () => {
+        throw new Error("testError");
+      };
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(error.message).toEqual("testError");
+
+      //disconnect should not be invoked
+      expect(disconnectMockFunc).not.toHaveBeenCalled();
+
+      //busy should be set to false
+      expect(driver.Busy).toEqual(false);
+    });
+  });
+
+  describe("setTimeout", () => {
+    let driver;
+    let timeout;
+
+    beforeEach(() => {
+      timeout = 1234;
+    });
+
+    let exec = () => {
+      driver = new Driver();
+      driver.setTimeout(timeout);
+    };
+
+    it("should set timeout of the driber", () => {
+      exec();
+
+      expect(driver.Timeout).toEqual(timeout);
     });
   });
 });
