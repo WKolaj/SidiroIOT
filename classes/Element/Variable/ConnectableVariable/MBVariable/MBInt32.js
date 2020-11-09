@@ -50,7 +50,7 @@ class MBInt32 extends MBVariable {
    * @description Method for checking if payload is a valid device payload. Returns null if yes. Returns message if not.
    * @param {JSON} payload Payload to check
    */
-  static async validatePayload(payload) {
+  static validatePayload(payload) {
     let result = joiSchema.validate(payload);
     if (result.error) return result.error.details[0].message;
     else return null;
