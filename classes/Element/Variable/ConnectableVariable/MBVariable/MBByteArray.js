@@ -1,6 +1,8 @@
 const MBVariable = require("./MBVariable");
 const Joi = require("joi");
 
+//#region ========= PAYLOAD VALIDATION =========
+
 const byteSchema = Joi.number().integer().min(0).max(255);
 
 const joiSchema = Joi.object({
@@ -40,6 +42,8 @@ const joiSchema = Joi.object({
   writeAsSingle: Joi.boolean().required(),
 });
 
+//#endregion ========= PAYLOAD VALIDATION =========
+
 class MBByteArray extends MBVariable {
   //#region ========= CONSTRUCTOR =========
 
@@ -61,7 +65,7 @@ class MBByteArray extends MBVariable {
     else return null;
   }
 
-  //#region  ========= PUBLIC STATIC METHODS =========
+  //#endregion  ========= PUBLIC STATIC METHODS =========
 
   //#region ========= OVERRIDE PUBLIC METHODS =========
 

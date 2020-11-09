@@ -14,15 +14,15 @@ const MBSwappedInt32 = require("../../Element/Variable/ConnectableVariable/MBVar
 const MBSwappedUInt32 = require("../../Element/Variable/ConnectableVariable/MBVariable/MBSwappedUInt32");
 const MBUInt16 = require("../../Element/Variable/ConnectableVariable/MBVariable/MBUInt16");
 const MBUInt32 = require("../../Element/Variable/ConnectableVariable/MBVariable/MBUInt32");
-
-const Joi = require("joi");
 const AssociatedVariable = require("../../Element/Variable/AssociatedVariable");
+const InternalVariable = require("../../Element/Variable/InternalVariable");
+const Joi = require("joi");
+
+//#region ========= PAYLOAD VALIDATION =========
 
 const validateVariablesPayload = (variablesPayload, helpers) => {
   const { message } = helpers;
 
-  if (variablesPayload === undefined)
-    return message("any.custom"`"variables" has to be defined`);
   if (variablesPayload === null) return message(`"variables" cannot be null`);
 
   for (let variableID of Object.keys(variablesPayload)) {
@@ -78,7 +78,7 @@ const validateVariablesPayload = (variablesPayload, helpers) => {
         validationMessage = "variable type not recognized";
     }
 
-    if (validationMessage) return message(validationMessage);
+    if (validationMessage !== null) return message(validationMessage);
 
     let variableIDFromPayload = variablePayload.id;
 
@@ -92,8 +92,6 @@ const validateVariablesPayload = (variablesPayload, helpers) => {
 const validateCalcElementsPayload = (calcElementsPayload, helpers) => {
   const { message } = helpers;
 
-  if (calcElementsPayload === undefined)
-    return message(`"calcElements" has to be defined`);
   if (calcElementsPayload === null)
     return message(`"calcElements" cannot be null`);
 
@@ -123,7 +121,6 @@ const validateCalcElementsPayload = (calcElementsPayload, helpers) => {
 const validateAlertsPayload = (alertsPayload, helpers) => {
   const { message } = helpers;
 
-  if (alertsPayload === undefined) return message(`"alerts" has to be defined`);
   if (alertsPayload === null) return message(`"alerts" cannot be null`);
 
   for (let alertID of Object.keys(alertsPayload)) {
@@ -149,9 +146,6 @@ const validateAlertsPayload = (alertsPayload, helpers) => {
   return alertsPayload;
 };
 
-/**
- * @description Schema for ipV4 withouth cidr
- */
 const ipV4Schema = Joi.string().ip({
   version: ["ipv4"],
   cidr: "forbidden",
@@ -176,6 +170,8 @@ const joiSchema = Joi.object({
   isActive: Joi.boolean().required(),
 });
 
+//#endregion ========= PAYLOAD VALIDATION =========
+
 class MBDevice extends ConnectableDevice {
   //#region ========= CONSTRUCTOR =========
 
@@ -199,7 +195,7 @@ class MBDevice extends ConnectableDevice {
     else return null;
   }
 
-  //#region  ========= PUBLIC STATIC METHODS =========
+  //#endregion  ========= PUBLIC STATIC METHODS =========
 
   //#region ========= PROPERTIES =========
 
@@ -243,6 +239,18 @@ class MBDevice extends ConnectableDevice {
     return `${this.IPAddress}:${this.PortNumber}`;
   }
 
+  /**
+   * @description Method for generating payload of device.
+   */
+  generatePayload() {
+    let superPayload = super.generatePayload();
+
+    superPayload.ipAddress = this.IPAddress;
+    superPayload.portNumber = this.PortNumber;
+
+    return superPayload;
+  }
+
   //#endregion ========= OVERRIDE PUBLIC METHODS =========
 
   //#region ========= OVERRIDE PRIVATE METHODS =========
@@ -284,18 +292,6 @@ class MBDevice extends ConnectableDevice {
       default:
         throw new Error(`Unrecognized Variable type: ${type}`);
     }
-  }
-
-  /**
-   * @description Method for generating payload of device.
-   */
-  generatePayload() {
-    let superPayload = super.generatePayload();
-
-    superPayload.ipAddress = this.IPAddress;
-    superPayload.portNumber = this.PortNumber;
-
-    return superPayload;
   }
 
   //#endregion ========= OVERRIDE PRIVATE METHODS =========

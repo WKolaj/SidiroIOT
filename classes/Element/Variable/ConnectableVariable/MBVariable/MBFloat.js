@@ -1,6 +1,8 @@
 const MBVariable = require("./MBVariable");
 const Joi = require("joi");
 
+//#region ========= PAYLOAD VALIDATION =========
+
 const joiSchema = Joi.object({
   id: Joi.string().min(1).required(),
   name: Joi.string().min(1).required(),
@@ -31,6 +33,8 @@ const joiSchema = Joi.object({
   writeAsSingle: Joi.boolean().required(),
 });
 
+//#endregion ========= PAYLOAD VALIDATION =========
+
 class MBFloat extends MBVariable {
   //#region ========= CONSTRUCTOR =========
 
@@ -52,7 +56,7 @@ class MBFloat extends MBVariable {
     else return null;
   }
 
-  //#region  ========= PUBLIC STATIC METHODS =========
+  //#endregion  ========= PUBLIC STATIC METHODS =========
 
   //#region ========= OVERRIDE PUBLIC METHODS =========
 
