@@ -6,6 +6,119 @@ const AgentDevice = require("../Device/AgentDevice/AgentDevice");
 const logger = require("../../logger/logger");
 const MBDevice = require("../Device/ConnectableDevice/MBDevice");
 const S7Device = require("../Device/ConnectableDevice/S7Device");
+const Joi = require("joi");
+
+//#region ========= PAYLOAD VALIDATION =========
+
+const validateConnectableDevicesPayload = (devicesPayload, helpers) => {
+  const { message } = helpers;
+
+  if (devicesPayload === null)
+    return message(`"connectableDevices" cannot be null`);
+
+  for (let deviceID of Object.keys(devicesPayload)) {
+    let devicePayload = devicesPayload[deviceID];
+
+    let deviceType = devicePayload.type;
+    let validationMessage = null;
+
+    switch (deviceType) {
+      case "MBDevice":
+        validationMessage = MBDevice.validatePayload(devicePayload);
+        break;
+      case "S7Device":
+        validationMessage = S7Device.validatePayload(devicePayload);
+        break;
+      default:
+        validationMessage = "connectable device type not recognized";
+    }
+
+    if (validationMessage !== null) return message(validationMessage);
+
+    let deviceIDFromPayload = devicePayload.id;
+
+    if (deviceID !== deviceIDFromPayload)
+      return message("connectable device's id as key and in payload differ!");
+  }
+
+  return devicesPayload;
+};
+
+const validateInternalDevicesPayload = (devicesPayload, helpers) => {
+  const { message } = helpers;
+
+  if (devicesPayload === null)
+    return message(`"internalDevices" cannot be null`);
+
+  for (let deviceID of Object.keys(devicesPayload)) {
+    let devicePayload = devicesPayload[deviceID];
+
+    let deviceType = devicePayload.type;
+    let validationMessage = null;
+
+    //TODO - add checking device payload based on type
+    switch (deviceType) {
+      default:
+        validationMessage = "internal device type not recognized";
+    }
+
+    if (validationMessage !== null) return message(validationMessage);
+
+    let deviceIDFromPayload = devicePayload.id;
+
+    if (deviceID !== deviceIDFromPayload)
+      return message("internal device's id as key and in payload differ!");
+  }
+
+  return devicesPayload;
+};
+
+const validateAgentDevicesPayload = (devicesPayload, helpers) => {
+  const { message } = helpers;
+
+  if (devicesPayload === null) return message(`"agentDevices" cannot be null`);
+
+  for (let deviceID of Object.keys(devicesPayload)) {
+    let devicePayload = devicesPayload[deviceID];
+
+    let deviceType = devicePayload.type;
+    let validationMessage = null;
+
+    //TODO - add checking device payload based on type
+    switch (deviceType) {
+      default:
+        validationMessage = "agent device type not recognized";
+    }
+
+    if (validationMessage !== null) return message(validationMessage);
+
+    let deviceIDFromPayload = devicePayload.id;
+
+    if (deviceID !== deviceIDFromPayload)
+      return message("agent device's id as key and in payload differ!");
+  }
+
+  return devicesPayload;
+};
+
+const ipV4Schema = Joi.string().ip({
+  version: ["ipv4"],
+  cidr: "forbidden",
+});
+
+const joiSchema = Joi.object({
+  connectableDevices: Joi.any()
+    .custom(validateConnectableDevicesPayload, "custom validation")
+    .required(),
+  internalDevices: Joi.any()
+    .custom(validateInternalDevicesPayload, "custom validation")
+    .required(),
+  agentDevices: Joi.any()
+    .custom(validateAgentDevicesPayload, "custom validation")
+    .required(),
+});
+
+//#endregion ========= PAYLOAD VALIDATION =========
 
 //TODO - test this class
 
@@ -27,6 +140,20 @@ class Project {
   }
 
   //#endregion ========= CONSTRUCTOR =========
+
+  //#region ========= PUBLIC STATIC METHODS =========
+
+  /**
+   * @description Method for checking if payload is a valid project payload. Returns null if yes. Returns message if not.
+   * @param {JSON} payload Payload to check
+   */
+  static validatePayload(payload) {
+    let result = joiSchema.validate(payload);
+    if (result.error) return result.error.details[0].message;
+    else return null;
+  }
+
+  //#endregion  ========= PUBLIC STATIC METHODS =========
 
   //#region ========= PROPERTIES =========
 
@@ -214,6 +341,11 @@ class Project {
    * @param {JSON} payload Payload of the project configuration
    */
   async load(payload) {
+    //Checking payload
+    let validatePayloadMessage = Project.validatePayload(payload);
+    if (validatePayloadMessage !== null)
+      throw new Error(`Invalid payload for initialization: ${validatePayload}`);
+
     //stopping sampler temporarly
     this.Sampler.stop();
 
