@@ -1,4 +1,35 @@
 const MBVariable = require("./MBVariable");
+const Joi = require("joi");
+
+const joiSchema = Joi.object({
+  id: Joi.string().min(1).required(),
+  name: Joi.string().min(1).required(),
+  type: Joi.string().valid("MBSwappedFloat").required(),
+  unit: Joi.string().min(1).required(),
+  sampleTime: Joi.number().integer().min(1).required(),
+  offset: Joi.number().integer().min(0).required(),
+  length: Joi.valid(2).required(),
+  defaultValue: Joi.number().required(),
+  unitID: Joi.number().integer().min(1).max(255).required(),
+  read: Joi.boolean().required(),
+  write: Joi.when("read", {
+    is: true,
+    then: Joi.valid(false).required(),
+    otherwise: Joi.valid(true).required(),
+  }),
+  readFCode: Joi.when("read", {
+    is: true,
+    then: Joi.number().valid(3, 4).required(),
+    otherwise: Joi.number().valid(3, 4).optional(),
+  }),
+  writeFCode: Joi.when("write", {
+    is: true,
+    then: Joi.number().valid(16).required(),
+    otherwise: Joi.number().valid(16).optional(),
+  }),
+  readAsSingle: Joi.boolean().required(),
+  writeAsSingle: Joi.boolean().required(),
+});
 
 class MBSwappedFloat extends MBVariable {
   //#region ========= CONSTRUCTOR =========
@@ -8,6 +39,20 @@ class MBSwappedFloat extends MBVariable {
   }
 
   //#endregion ========= CONSTRUCTOR =========
+
+  //#region ========= PUBLIC STATIC METHODS =========
+
+  /**
+   * @description Method for checking if payload is a valid device payload. Returns null if yes. Returns message if not.
+   * @param {JSON} payload Payload to check
+   */
+  static async validatePayload(payload) {
+    let result = joiSchema.validate(payload);
+    if (result.error) return result.error.details[0].message;
+    else return null;
+  }
+
+  //#region  ========= PUBLIC STATIC METHODS =========
 
   //#region ========= OVERRIDE PUBLIC METHODS =========
 

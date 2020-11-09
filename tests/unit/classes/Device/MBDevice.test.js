@@ -367,7 +367,7 @@ describe("MBDevice", () => {
       payload.variables["testVariable2ID"].defaultValue = 432.234;
       payload.variables["testVariable3ID"].type = "MBByteArray";
       payload.variables["testVariable3ID"].offset = 18;
-      payload.variables["testVariable3ID"].length = 4;
+      payload.variables["testVariable3ID"].length = 2;
       payload.variables["testVariable3ID"].defaultValue = [1, 2, 3, 4];
 
       await exec();
@@ -434,7 +434,7 @@ describe("MBDevice", () => {
         15,
         3,
         10,
-        12,
+        10,
         1,
         false,
         true,

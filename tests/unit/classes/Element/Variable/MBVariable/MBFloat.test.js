@@ -340,4 +340,582 @@ describe("MBFloat", () => {
       expect(variable.Length).toEqual(null);
     });
   });
+
+  describe("validatePayload", () => {
+    let payload;
+
+    beforeEach(() => {
+      payload = {
+        id: "testElementId",
+        name: "testElementName",
+        type: "MBFloat",
+        defaultValue: 123.321,
+        sampleTime: 876,
+        offset: 123,
+        length: 2,
+        read: true,
+        write: false,
+        readAsSingle: true,
+        writeAsSingle: false,
+        unitID: 12,
+        readFCode: 4,
+        writeFCode: 16,
+        unit: "FakeUnit",
+      };
+    });
+
+    let exec = async () => {
+      return MBFloat.validatePayload(payload);
+    };
+
+    it("should return null if payload is valid", async () => {
+      let result = await exec();
+      expect(result).toEqual(null);
+    });
+
+    it("should return message if id is not defined", async () => {
+      delete payload.id;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"id" is required`);
+    });
+
+    it("should return message if id is null", async () => {
+      payload.id = null;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"id" must be a string`);
+    });
+
+    it("should return message if id is empty string", async () => {
+      payload.id = "";
+
+      let result = await exec();
+
+      expect(result).toEqual(`"id" is not allowed to be empty`);
+    });
+
+    it("should return message if name is not defined", async () => {
+      delete payload.name;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"name" is required`);
+    });
+
+    it("should return message if name is null", async () => {
+      payload.name = null;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"name" must be a string`);
+    });
+
+    it("should return message if name is empty string", async () => {
+      payload.name = "";
+
+      let result = await exec();
+
+      expect(result).toEqual(`"name" is not allowed to be empty`);
+    });
+
+    it("should return message if type is not defined", async () => {
+      delete payload.type;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"type" is required`);
+    });
+
+    it("should return message if type is null", async () => {
+      payload.type = null;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"type" must be [MBFloat]`);
+    });
+
+    it("should return message if type is empty string", async () => {
+      payload.type = "";
+
+      let result = await exec();
+
+      expect(result).toEqual(`"type" must be [MBFloat]`);
+    });
+
+    it("should return message if type is invalid string", async () => {
+      payload.type = "MBVariable";
+
+      let result = await exec();
+
+      expect(result).toEqual(`"type" must be [MBFloat]`);
+    });
+
+    it("should return message if unit is not defined", async () => {
+      delete payload.unit;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"unit" is required`);
+    });
+
+    it("should return message if unit is null", async () => {
+      payload.unit = null;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"unit" must be a string`);
+    });
+
+    it("should return message if unit is empty string", async () => {
+      payload.unit = "";
+
+      let result = await exec();
+
+      expect(result).toEqual(`"unit" is not allowed to be empty`);
+    });
+
+    it("should return message if sampleTime is not defined", async () => {
+      delete payload.sampleTime;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"sampleTime" is required`);
+    });
+
+    it("should return message if sampleTime is null", async () => {
+      payload.sampleTime = null;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"sampleTime" must be a number`);
+    });
+
+    it("should return message if sampleTime is 0", async () => {
+      payload.sampleTime = 0;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"sampleTime" must be greater than or equal to 1`);
+    });
+
+    it("should return message if sampleTime is a float", async () => {
+      payload.sampleTime = 123.321;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"sampleTime" must be an integer`);
+    });
+
+    it("should return message if defaultValue is not defined", async () => {
+      delete payload.defaultValue;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"defaultValue" is required`);
+    });
+
+    it("should return message if defaultValue is null", async () => {
+      payload.defaultValue = null;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"defaultValue" must be a number`);
+    });
+
+    it("should return message if defaultValue is not a number", async () => {
+      payload.defaultValue = "test value";
+
+      let result = await exec();
+
+      expect(result).toEqual(`"defaultValue" must be a number`);
+    });
+
+    it("should return message if offset is not defined", async () => {
+      delete payload.offset;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"offset" is required`);
+    });
+
+    it("should return message if offset is null", async () => {
+      payload.offset = null;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"offset" must be a number`);
+    });
+
+    it("should return message if offset is -1", async () => {
+      payload.offset = -1;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"offset" must be greater than or equal to 0`);
+    });
+
+    it("should return message if offset is a float", async () => {
+      payload.offset = 123.321;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"offset" must be an integer`);
+    });
+
+    it("should return message if length is not defined", async () => {
+      delete payload.length;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"length" is required`);
+    });
+
+    it("should return message if length is null", async () => {
+      payload.length = null;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"length" must be [2]`);
+    });
+
+    it("should return message if length is 0", async () => {
+      payload.length = 0;
+      //together with length, a default value should be calculated
+      payload.defaultValue = [];
+
+      let result = await exec();
+
+      expect(result).toEqual(`"length" must be [2]`);
+    });
+
+    it("should return message if unitID is not defined", async () => {
+      delete payload.unitID;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"unitID" is required`);
+    });
+
+    it("should return message if unitID is null", async () => {
+      payload.unitID = null;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"unitID" must be a number`);
+    });
+
+    it("should return message if unitID is 0", async () => {
+      payload.unitID = 0;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"unitID" must be greater than or equal to 1`);
+    });
+
+    it("should return message if unitID is a float", async () => {
+      payload.unitID = 123.321;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"unitID" must be an integer`);
+    });
+
+    it("should return message if unitID greater than 255", async () => {
+      payload.unitID = 256;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"unitID" must be less than or equal to 255`);
+    });
+
+    it("should return message if read is not defined", async () => {
+      delete payload.read;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"read" is required`);
+    });
+
+    it("should return message if read is null", async () => {
+      payload.read = null;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"read" must be a boolean`);
+    });
+
+    it("should return message if read is not defined - and write is false", async () => {
+      payload.write = false;
+      delete payload.read;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"read" is required`);
+    });
+
+    it("should return message if write is null - and write is false", async () => {
+      payload.write = false;
+      payload.read = null;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"read" must be a boolean`);
+    });
+
+    it("should return message if read is true as well as write", async () => {
+      payload.read = true;
+      payload.write = true;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"write" must be [false]`);
+    });
+
+    it("should return message if read is false as well as write", async () => {
+      payload.read = false;
+      payload.write = false;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"write" must be [true]`);
+    });
+
+    it("should return message if write is not defined", async () => {
+      delete payload.write;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"write" is required`);
+    });
+
+    it("should return message if write is null", async () => {
+      payload.write = null;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"write" must be [false]`);
+    });
+
+    it("should return message if write is not defined - and read is false", async () => {
+      payload.read = false;
+      delete payload.write;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"write" is required`);
+    });
+
+    it("should return message if write is null - and read is false", async () => {
+      payload.read = false;
+      payload.write = null;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"write" must be [true]`);
+    });
+
+    it("should return message if readFCode is not defined - and read is set to true", async () => {
+      delete payload.readFCode;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"readFCode" is required`);
+    });
+
+    it("should return message if readFCode is null - and read is set to true", async () => {
+      payload.readFCode = null;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"readFCode" must be one of [3, 4]`);
+    });
+
+    it("should return message if readFCode is 0  - and read is set to true", async () => {
+      payload.readFCode = 0;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"readFCode" must be one of [3, 4]`);
+    });
+
+    it("should return message if readFCode is a float  - and read is set to true", async () => {
+      payload.readFCode = 123.321;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"readFCode" must be one of [3, 4]`);
+    });
+
+    it("should return null if readFCode is not defined - and read is set to false", async () => {
+      payload.read = false;
+      payload.write = true;
+      delete payload.readFCode;
+
+      let result = await exec();
+
+      expect(result).toEqual(null);
+    });
+
+    it("should return message if readFCode is null - and read is set to false", async () => {
+      payload.read = false;
+      payload.write = true;
+      payload.readFCode = null;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"readFCode" must be one of [3, 4]`);
+    });
+
+    it("should return message if readFCode is 0  - and read is set to false", async () => {
+      payload.read = false;
+      payload.write = true;
+      payload.readFCode = 0;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"readFCode" must be one of [3, 4]`);
+    });
+
+    it("should return message if readFCode is a float  - and read is set to false", async () => {
+      payload.read = false;
+      payload.write = true;
+      payload.readFCode = 123.321;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"readFCode" must be one of [3, 4]`);
+    });
+
+    it("should return message if writeFCode is not defined - and write is set to true", async () => {
+      payload.write = true;
+      payload.read = false;
+
+      delete payload.writeFCode;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"writeFCode" is required`);
+    });
+
+    it("should return message if writeFCode is null - and write is set to true", async () => {
+      payload.write = true;
+      payload.read = false;
+      payload.writeFCode = null;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"writeFCode" must be [16]`);
+    });
+
+    it("should return message if writeFCode is 0  - and write is set to true", async () => {
+      payload.write = true;
+      payload.read = false;
+      payload.writeFCode = 0;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"writeFCode" must be [16]`);
+    });
+
+    it("should return message if writeFCode is a float  - and write is set to true", async () => {
+      payload.write = true;
+      payload.read = false;
+      payload.writeFCode = 123.321;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"writeFCode" must be [16]`);
+    });
+
+    it("should return null if writeFCode is not defined - and write is set to false", async () => {
+      payload.write = false;
+      payload.read = true;
+      delete payload.writeFCode;
+
+      let result = await exec();
+
+      expect(result).toEqual(null);
+    });
+
+    it("should return message if writeFCode is null - and write is set to false", async () => {
+      payload.write = false;
+      payload.read = true;
+      payload.writeFCode = null;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"writeFCode" must be [16]`);
+    });
+
+    it("should return message if writeFCode is 0  - and write is set to false", async () => {
+      payload.write = false;
+      payload.read = true;
+      payload.writeFCode = 0;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"writeFCode" must be [16]`);
+    });
+
+    it("should return message if writeFCode is a float  - and write is set to false", async () => {
+      payload.write = false;
+      payload.read = true;
+      payload.writeFCode = 123.321;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"writeFCode" must be [16]`);
+    });
+
+    it("should return message if readAsSingle is not defined", async () => {
+      delete payload.readAsSingle;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"readAsSingle" is required`);
+    });
+
+    it("should return message if readAsSingle is null", async () => {
+      payload.readAsSingle = null;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"readAsSingle" must be a boolean`);
+    });
+
+    it("should return message if readAsSingle is not a boolean", async () => {
+      payload.readAsSingle = 123;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"readAsSingle" must be a boolean`);
+    });
+
+    it("should return message if writeAsSingle is not defined", async () => {
+      delete payload.writeAsSingle;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"writeAsSingle" is required`);
+    });
+
+    it("should return message if writeAsSingle is null", async () => {
+      payload.writeAsSingle = null;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"writeAsSingle" must be a boolean`);
+    });
+
+    it("should return message if writeAsSingle is not a boolean", async () => {
+      payload.writeAsSingle = 123;
+
+      let result = await exec();
+
+      expect(result).toEqual(`"writeAsSingle" must be a boolean`);
+    });
+  });
 });

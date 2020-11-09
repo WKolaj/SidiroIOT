@@ -1,6 +1,5 @@
 const MBVariable = require("./MBVariable");
 const Joi = require("joi");
-const { valid } = require("joi");
 
 const joiSchema = Joi.object({
   id: Joi.string().min(1).required(),
