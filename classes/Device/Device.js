@@ -15,6 +15,14 @@ const HighLimitAlert = require("../Element/Alerts/HighLimitAlert");
 const LowLimitAlert = require("../Element/Alerts/LowLimitAlert");
 
 class Device {
+  //#region ========= CONSTRUCTOR =========
+
+  constructor(project) {
+    this._project = project;
+  }
+
+  //#endregion ========= CONSTRUCTOR =========
+
   //#region ========= PROPERTIES =========
 
   /**
@@ -192,6 +200,22 @@ class Device {
   //#region ========= PRIVATE VIRTUAL METHODS =========
 
   /**
+   * @description Method for refreshing variables of device - invoked per tick. CAN BE OVERRIDE IN CHILD CLASSES
+   * @param {Number} tickNumber tick number of actual date
+   */
+  async _refreshVariables(tickNumber) {
+    //Refreshing all variables one by one
+    for (let variable of Object.values(this.Variables)) {
+      try {
+        if (variable.checkIfShouldBeRefreshed(tickNumber))
+          await variable.refresh(tickNumber);
+      } catch (err) {
+        logger.warn(err.message, err);
+      }
+    }
+  }
+
+  /**
    * @description Method for refreshing all calc elements - one by one. CAN BE OVERRIDEN IN CHILD CLASSES
    * @param {Number} tickNumber tick number of actual date
    */
@@ -324,9 +348,9 @@ class Device {
   async _createVariableBasedOnPayload(type) {
     switch (type) {
       case "AssociatedVariable":
-        return new AssociatedVariable();
+        return new AssociatedVariable(this._project, this);
       case "InternalVariable":
-        return new InternalVariable();
+        return new InternalVariable(this._project, this);
       default:
         throw new Error(`Unrecognized Variable type: ${type}`);
     }
@@ -335,12 +359,6 @@ class Device {
   //#endregion ========= PRIVATE VIRTUAL METHODS =========
 
   //#region ========= PRIVATE ABSTRACT METHODS =========
-
-  /**
-   * @description Method for refreshing variables of device - invoked per tick. HAS TO BE OVERRIDE IN CHILD CLASSES!
-   * @param {Number} tickNumber tick number of actual date
-   */
-  async _refreshVariables(tickNumber) {}
 
   //#endregion ========= PRIVATE ABSTRACT METHODS =========
 

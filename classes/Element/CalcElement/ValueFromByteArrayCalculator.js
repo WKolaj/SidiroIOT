@@ -3,8 +3,8 @@ const CalcElement = require("./CalcElement");
 class ValueFromByteArrayCalculator extends CalcElement {
   //#region ========= CONSTRUCTOR =========
 
-  constructor() {
-    super();
+  constructor(project, device) {
+    super(project, device);
   }
 
   //#endregion ========= CONSTRUCTOR =========

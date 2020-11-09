@@ -47,8 +47,8 @@ const joiSchema = Joi.object({
 class MBByteArray extends MBVariable {
   //#region ========= CONSTRUCTOR =========
 
-  constructor() {
-    super();
+  constructor(project, device) {
+    super(project, device);
   }
 
   //#endregion ========= CONSTRUCTOR =========

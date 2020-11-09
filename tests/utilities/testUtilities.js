@@ -223,6 +223,7 @@ module.exports.wrapMethodToInvokeAfter = (method, snoozeTime) => {
 };
 
 module.exports.createFakeConnectableDevice = (
+  project,
   id,
   type,
   name,
@@ -238,7 +239,7 @@ module.exports.createFakeConnectableDevice = (
   driverProcessRequestMock,
   driverTimeout
 ) => {
-  let device = new ConnectableDevice();
+  let device = new ConnectableDevice(project);
   device._id = id;
   device._type = type;
   device._name = name;
@@ -274,14 +275,17 @@ module.exports.createFakeConnectableDevice = (
 };
 
 module.exports.createFakeVariable = (
+  project,
+  device,
   id,
   name,
   type,
   defaultValue,
   unit,
-  sampleTime
+  sampleTime,
+  refreshMockFunc
 ) => {
-  let variable = new Variable();
+  let variable = new Variable(project, device);
 
   variable._id = id;
   variable._name = name;
@@ -290,11 +294,14 @@ module.exports.createFakeVariable = (
   variable._unit = unit;
   variable._sampleTime = sampleTime;
   variable._lastValueTick = 0;
+  variable.refresh = refreshMockFunc;
 
   return variable;
 };
 
 module.exports.createFakeConnectableVariable = (
+  project,
+  device,
   id,
   name,
   type,
@@ -309,7 +316,7 @@ module.exports.createFakeConnectableVariable = (
   readAsSingle = false,
   writeAsSingle = false
 ) => {
-  let variable = new ConnectableVariable();
+  let variable = new ConnectableVariable(project, device);
 
   variable._id = id;
   variable._name = name;
@@ -331,6 +338,8 @@ module.exports.createFakeConnectableVariable = (
 };
 
 module.exports.createFakeStandardProtocolVariable = (
+  project,
+  device,
   id,
   name,
   type,
@@ -347,7 +356,7 @@ module.exports.createFakeStandardProtocolVariable = (
   readAsSingle = false,
   writeAsSingle = false
 ) => {
-  let variable = new StandardProtocolVariable();
+  let variable = new StandardProtocolVariable(project, device);
 
   variable._id = id;
   variable._name = name;
@@ -371,6 +380,8 @@ module.exports.createFakeStandardProtocolVariable = (
 };
 
 module.exports.createFakeMBVariable = (
+  project,
+  device,
   id,
   name,
   type,
@@ -392,7 +403,7 @@ module.exports.createFakeMBVariable = (
   getReadFunctionCodesMockFunc = () => [1, 2, 3, 4],
   getWriteFunctionCodesMockFunc = () => [16]
 ) => {
-  let variable = new MBVariable();
+  let variable = new MBVariable(project, device);
 
   variable._id = id;
   variable._name = name;
@@ -475,6 +486,8 @@ module.exports.testMBRequest = (
 };
 
 module.exports.createFakeCalcElement = (
+  project,
+  device,
   id,
   name,
   type,
@@ -483,7 +496,7 @@ module.exports.createFakeCalcElement = (
   sampleTime,
   refreshMockFunc
 ) => {
-  let calcElement = new CalcElement();
+  let calcElement = new CalcElement(project, device);
 
   calcElement._id = id;
   calcElement._name = name;
@@ -498,6 +511,8 @@ module.exports.createFakeCalcElement = (
 };
 
 module.exports.createFakeAlert = (
+  project,
+  device,
   id,
   name,
   type,
@@ -506,7 +521,7 @@ module.exports.createFakeAlert = (
   sampleTime,
   refreshMockFunc
 ) => {
-  let alert = new Alert();
+  let alert = new Alert(project, device);
 
   alert._id = id;
   alert._name = name;
@@ -550,23 +565,22 @@ module.exports.createFakeStandardProtocolRequest = (
 };
 
 module.exports.createFakeDevice = (
+  project,
   id,
   type,
   name,
-  refreshSnooze,
-  refreshVariablesMock,
   calcElements,
   alerts,
+  variables,
   isActive
 ) => {
-  let device = new Device();
+  let device = new Device(project);
   device._id = id;
   device._type = type;
   device._name = name;
-  device._refreshVariables = async () => {
-    await snooze(refreshSnooze);
-    await refreshVariablesMock();
-  };
+
+  device._variables = {};
+  for (let variable of variables) device._variables[variable.ID] = variable;
 
   device._calcElements = {};
   for (let calcElement of calcElements)

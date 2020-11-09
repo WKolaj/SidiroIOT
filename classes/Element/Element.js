@@ -4,7 +4,14 @@ const Joi = require("joi");
 class Element {
   //#region ========= CONSTRUCTOR =========
 
-  constructor() {
+  /**
+   * @description Class representing element
+   * @param {Object} project project associated with element
+   * @param {Object} device device associated with variable
+   */
+  constructor(project, device) {
+    this._project = project;
+    this._device = device;
     this._id = null;
     this._name = null;
     this._type = null;
@@ -111,6 +118,12 @@ class Element {
   checkIfShouldBeRefreshed(tickNumber) {
     return Sampler.doesSampleTimeMatchesTick(tickNumber, this.SampleTime);
   }
+
+  /**
+   * @description Method called every tick that suits sampleTime. CAN BE OVERRIDEN IN CHILD CLASSES
+   * @param {Number} tickId actual tick id
+   */
+  async refresh(tickId) {}
 
   //#endregion ========= PUBLIC METHODS =========
 

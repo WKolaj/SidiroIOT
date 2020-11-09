@@ -3,8 +3,8 @@ const ConnectableVariable = require("./ConnectableVariable");
 class StandardProtocolVariable extends ConnectableVariable {
   //#region ========= CONSTRUCTOR =========
 
-  constructor() {
-    super();
+  constructor(project, device) {
+    super(project, device);
 
     this._offset = null;
     this._length = null;

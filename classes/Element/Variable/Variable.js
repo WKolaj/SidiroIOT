@@ -3,8 +3,8 @@ const Element = require("../Element");
 class Variable extends Element {
   //#region ========= CONSTRUCTOR =========
 
-  constructor() {
-    super();
+  constructor(project, device) {
+    super(project, device);
   }
 
   //#endregion ========= CONSTRUCTOR =========

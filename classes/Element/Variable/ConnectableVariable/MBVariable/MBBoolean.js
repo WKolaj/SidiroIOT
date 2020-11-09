@@ -33,8 +33,8 @@ const joiSchema = Joi.object({
 class MBBoolean extends MBVariable {
   //#region ========= CONSTRUCTOR =========
 
-  constructor() {
-    super();
+  constructor(project, device) {
+    super(project, device);
   }
 
   //#endregion ========= CONSTRUCTOR =========

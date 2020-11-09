@@ -4,8 +4,8 @@ const StandardProtocolVariable = require("../StandardProtocolVariable");
 class MBVariable extends StandardProtocolVariable {
   //#region ========= CONSTRUCTOR =========
 
-  constructor() {
-    super();
+  constructor(project, device) {
+    super(project, device);
 
     this._readFCode = null;
     this._writeFCode = null;

@@ -13,8 +13,8 @@ const S7UInt32 = require("../../Element/Variable/ConnectableVariable/S7Variable/
 class S7Device extends ConnectableDevice {
   //#region ========= CONSTRUCTOR =========
 
-  constructor() {
-    super();
+  constructor(project) {
+    super(project);
     //TODO - add creation of S7RequestManager and S7Driver
   }
 

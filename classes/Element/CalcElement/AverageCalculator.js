@@ -3,8 +3,8 @@ const CalcElement = require("./CalcElement");
 class AverageCalculator extends CalcElement {
   //#region ========= CONSTRUCTOR =========
 
-  constructor() {
-    super();
+  constructor(project, device) {
+    super(project, device);
   }
 
   //#endregion ========= CONSTRUCTOR =========

@@ -3,8 +3,8 @@ const Variable = require("./Variable");
 class InternalVariable extends Variable {
   //#region ========= CONSTRUCTOR =========
 
-  constructor() {
-    super();
+  constructor(project, device) {
+    super(project, device);
   }
 
   //#endregion ========= CONSTRUCTOR =========

@@ -3,8 +3,8 @@ const StandardProtocolVariable = require("../StandardProtocolVariable");
 class S7Variable extends StandardProtocolVariable {
   //#region ========= CONSTRUCTOR =========
 
-  constructor() {
-    super();
+  constructor(project, device) {
+    super(project, device);
   }
 
   //#endregion ========= CONSTRUCTOR =========

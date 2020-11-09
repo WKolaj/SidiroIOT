@@ -38,8 +38,8 @@ const joiSchema = Joi.object({
 class MBSwappedUInt32 extends MBVariable {
   //#region ========= CONSTRUCTOR =========
 
-  constructor() {
-    super();
+  constructor(project, device) {
+    super(project, device);
   }
 
   //#endregion ========= CONSTRUCTOR =========

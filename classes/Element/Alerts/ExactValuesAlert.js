@@ -3,8 +3,8 @@ const Alert = require("./Alert");
 class ExactValuesAlert extends Alert {
   //#region ========= CONSTRUCTOR =========
 
-  constructor() {
-    super();
+  constructor(project, device) {
+    super(project, device);
   }
 
   //#endregion ========= CONSTRUCTOR =========

@@ -7,6 +7,9 @@ const logger = require("../../logger/logger");
 const MBDevice = require("../Device/ConnectableDevice/MBDevice");
 const S7Device = require("../Device/ConnectableDevice/S7Device");
 const Joi = require("joi");
+const { exists } = require("../../utilities/utilities");
+
+//TODO - TEST ALL ELEMENT AGAIN WITH ASSIGNING PROJECT TO THEIR CONSTRUCTOR!
 
 //#region ========= PAYLOAD VALIDATION =========
 
@@ -320,13 +323,13 @@ class Project {
   _createDeviceBasedOnType(type) {
     switch (type) {
       case "MBDevice": {
-        return new MBDevice();
+        return new MBDevice(this);
       }
       case "S7Device": {
-        return new S7Device();
+        return new S7Device(this);
       }
       case "InternalDevice": {
-        return new InternalDevice();
+        return new InternalDevice(this);
       }
       case "AgentDevice": {
         return new AgentDevice();
@@ -370,6 +373,25 @@ class Project {
 
     //Start the sampler again
     this.Sampler.start();
+  }
+
+  /**
+   * @description Method for getting object of element. Throws if element does not exists
+   * @param {String} deviceID device id of element
+   * @param {String} elementID element id
+   */
+  getElementValue(deviceID, elementID) {
+    let device = this.Devices[deviceID];
+    if (!exists(device))
+      throw new Error(`Device of id: ${deviceID} does not exist`);
+
+    let element = device.Elements[elementID];
+    if (!exists(element))
+      throw new Error(
+        `Element of id: ${elementID} does not exist in device: ${deviceID}`
+      );
+
+    return element;
   }
 
   //#endregion ========= PUBLIC METHODS =========

@@ -319,4 +319,14 @@ module.exports.loadProjectFile = async () => {
   project.load(projectContent.data);
 };
 
+/**
+ * @description Method for getting element from project. Throws if there is no element of given ids
+ * @param {String} deviceId  deviceID of element
+ * @param {String} elementId elementID
+ */
+module.exports.getElement = (deviceId, elementId) => {
+  //TODO - test this method
+  return project.getElement(deviceId, elementId);
+};
+
 //TODO - add tests with project validation

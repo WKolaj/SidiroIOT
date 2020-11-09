@@ -3,8 +3,8 @@ const S7Variable = require("./S7Variable");
 class S7DTL extends S7Variable {
   //#region ========= CONSTRUCTOR =========
 
-  constructor() {
-    super();
+  constructor(project, device) {
+    super(project, device);
   }
 
   //#endregion ========= CONSTRUCTOR =========

@@ -4,8 +4,8 @@ const Variable = require("../Variable");
 class ConnectableVariable extends Variable {
   //#region ========= CONSTRUCTOR =========
 
-  constructor() {
-    super();
+  constructor(project, device) {
+    super(project, device);
 
     this._data = null;
     this._read = null;
@@ -113,6 +113,12 @@ class ConnectableVariable extends Variable {
 
     return superPayload;
   }
+
+  /**
+   * @description Method called every tick that suits sampleTime. Does nothing - connectable variables are refreshed via requests
+   * @param {Number} tickId actual tick id
+   */
+  async refresh(tickId) {}
 
   //#endregion ========= OVERRIDE PUBLIC METHODS =========
 

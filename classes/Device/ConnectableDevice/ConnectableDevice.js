@@ -6,8 +6,8 @@ const logger = require("../../../logger/logger");
 class ConnectableDevice extends Device {
   //#region ========= CONSTRUCTOR =========
 
-  constructor() {
-    super();
+  constructor(project) {
+    super(project);
     this._requestManager = null;
     this._driver = null;
 
@@ -86,6 +86,9 @@ class ConnectableDevice extends Device {
           logger.warn(err.message, err);
         }
     }
+
+    //After refreshing requests - refreshing all other variables
+    await super._refreshVariables();
   }
 
   //#endregion ========= OVERRIDE PRIVATE METHODS =========

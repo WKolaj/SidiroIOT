@@ -175,8 +175,8 @@ const joiSchema = Joi.object({
 class MBDevice extends ConnectableDevice {
   //#region ========= CONSTRUCTOR =========
 
-  constructor() {
-    super();
+  constructor(project) {
+    super(project);
     this._requestManager = new MBRequestManager();
     this._driver = new MBDriver();
   }
@@ -262,33 +262,33 @@ class MBDevice extends ConnectableDevice {
   _createVariableBasedOnPayload(type) {
     switch (type) {
       case "AssociatedVariable":
-        return new AssociatedVariable();
+        return new AssociatedVariable(this._project, this);
       case "InternalVariable":
-        return new InternalVariable();
+        return new InternalVariable(this._project, this);
       case "MBBoolean":
-        return new MBBoolean();
+        return new MBBoolean(this._project, this);
       case "MBByteArray":
-        return new MBByteArray();
+        return new MBByteArray(this._project, this);
       case "MBDouble":
-        return new MBDouble();
+        return new MBDouble(this._project, this);
       case "MBFloat":
-        return new MBFloat();
+        return new MBFloat(this._project, this);
       case "MBInt16":
-        return new MBInt16();
+        return new MBInt16(this._project, this);
       case "MBInt32":
-        return new MBInt32();
+        return new MBInt32(this._project, this);
       case "MBSwappedFloat":
-        return new MBSwappedFloat();
+        return new MBSwappedFloat(this._project, this);
       case "MBSwappedDouble":
-        return new MBSwappedDouble();
+        return new MBSwappedDouble(this._project, this);
       case "MBSwappedInt32":
-        return new MBSwappedInt32();
+        return new MBSwappedInt32(this._project, this);
       case "MBSwappedUInt32":
-        return new MBSwappedUInt32();
+        return new MBSwappedUInt32(this._project, this);
       case "MBUInt16":
-        return new MBUInt16();
+        return new MBUInt16(this._project, this);
       case "MBUInt32":
-        return new MBUInt32();
+        return new MBUInt32(this._project, this);
       default:
         throw new Error(`Unrecognized Variable type: ${type}`);
     }
