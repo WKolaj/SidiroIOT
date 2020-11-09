@@ -1,3 +1,4 @@
+const Project = require("../classes/Project/Project");
 const netplanService = require("../services/netplanService");
 const {
   exists,
@@ -8,11 +9,115 @@ const {
   statAsync,
 } = require("../utilities/utilities");
 const _ = require("lodash");
+const Joi = require("joi");
+
+/**
+ * @description Method for validate projectDataPayload for Joi schema
+ * @param {JSON} projectDataPayload payload to check
+ * @param {Object} helpers joi helper
+ */
+const validateProjectDataPayload = (projectDataPayload, helpers) => {
+  const { message } = helpers;
+
+  let validationMessage = Project.validatePayload(projectDataPayload);
+  if (validationMessage)
+    return message(`Invalid project data: ${validationMessage}`);
+
+  return projectDataPayload;
+};
+
+/**
+ * @description Schema for ipV4 withouth cidr
+ */
+const ipV4Schema = Joi.string().ip({
+  version: ["ipv4"],
+  cidr: "forbidden",
+});
+
+/**
+ * @description Schema for netplan interface configuration - extended with optional parameter
+ */
+const netplanInterfaceJoiSchemaWithOptional = Joi.object({
+  name: Joi.string().min(1).required(),
+  dhcp: Joi.boolean().required(),
+  optional: Joi.boolean().required(),
+  ipAddress: Joi.any().when("dhcp", {
+    is: true,
+    then: ipV4Schema.optional(),
+    otherwise: ipV4Schema.required(),
+  }),
+  subnetMask: Joi.any().when("dhcp", {
+    is: true,
+    then: ipV4Schema.optional(),
+    otherwise: ipV4Schema.required(),
+  }),
+  gateway: Joi.any().when("dhcp", {
+    is: true,
+    then: ipV4Schema.optional(),
+    otherwise: ipV4Schema.required(),
+  }),
+  dns: Joi.any().when("dhcp", {
+    is: true,
+    then: Joi.array().items(ipV4Schema).optional(),
+    otherwise: Joi.array().items(ipV4Schema).required(),
+  }),
+});
+
+/**
+ * @description Method for validate projectIPConfig payload for Joi schema
+ * @param {JSON} ipConfig payload to check
+ * @param {Object} helpers joi helper
+ */
+const validateIPConfigPayload = (ipConfig, helpers) => {
+  const { message } = helpers;
+
+  if (ipConfig === null) return message(`"ipConfig" cannot be null`);
+
+  for (let interfaceName of Object.keys(ipConfig)) {
+    let interfacePayload = ipConfig[interfaceName];
+
+    let result = netplanInterfaceJoiSchemaWithOptional.validate(
+      interfacePayload
+    );
+    if (result.error) return message(result.error.details[0].message);
+
+    let interfaceNameFromPayload = interfacePayload.name;
+
+    if (interfaceName !== interfaceNameFromPayload)
+      return message("interface name as key and in payload differ!");
+  }
+
+  return ipConfig;
+};
+
+const joiSchema = Joi.object({
+  ipConfig: Joi.any()
+    .custom(validateIPConfigPayload, "custom validation")
+    .required(),
+  data: Joi.any()
+    .custom(validateProjectDataPayload, "custom validation")
+    .required(),
+});
+
+/**
+ * @description Main project object
+ */
+let project = null;
 
 /**
  * @description project file path
  */
 let projectFilePath = null;
+
+/**
+ * @description Method for checking if payload is a valid project payload. Returns null if yes. Returns message if not.
+ * @param {JSON} payload Payload to check
+ */
+module.exports.validateProjectPayload = (payload) => {
+  let result = joiSchema.validate(payload);
+  if (result.error) return result.error.details[0].message;
+  else return null;
+};
 
 /**
  * @description Method for getting project file path
@@ -27,6 +132,7 @@ module.exports.getProjectFilePath = () => {
  */
 module.exports.init = async (filePath) => {
   projectFilePath = filePath;
+  project = new Project();
 };
 
 /**
@@ -52,7 +158,9 @@ module.exports.saveProjectContentToFile = async (projectContent) => {
 
   if (!exists(projectContent)) throw new Error("project content must exists!");
 
-  //TODO - add validation in the future
+  //Validating project content
+  let validationResult = module.exports.validateProjectPayload(projectContent);
+  if (validationResult !== null) throw new Error(validationResult);
 
   //Writing new project content to file
   return writeFileAsync(
@@ -68,6 +176,11 @@ module.exports.saveProjectContentToFile = async (projectContent) => {
 const getInitialProjectContent = async () => {
   let payloadToReturn = {
     ipConfig: {},
+    data: {
+      connectableDevices: {},
+      internalDevices: {},
+      agentDevices: {},
+    },
   };
 
   return payloadToReturn;
@@ -108,7 +221,14 @@ module.exports.checkIfProjFileExistsAndIsValid = async () => {
     return false;
   }
 
-  //TODO - add validation of project
+  //Parsing content to JSON
+  let jsonContent = JSON.parse(fileContent);
+
+  //Validating project content
+  let validationResult = module.exports.validateProjectPayload(jsonContent);
+  if (validationResult !== null) {
+    return false;
+  }
 
   return true;
 };
@@ -195,5 +315,8 @@ module.exports.loadProjectFile = async () => {
   //Getting new content from project file
   let projectContent = await module.exports.getProjectContentFromFile();
 
-  //TODO - add mechanism for loading project - creating devices, variables etc.
+  //Initializing project based on file content
+  project.load(projectContent.data);
 };
+
+//TODO - add tests with project validation

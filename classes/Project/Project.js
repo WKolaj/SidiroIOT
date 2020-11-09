@@ -101,11 +101,6 @@ const validateAgentDevicesPayload = (devicesPayload, helpers) => {
   return devicesPayload;
 };
 
-const ipV4Schema = Joi.string().ip({
-  version: ["ipv4"],
-  cidr: "forbidden",
-});
-
 const joiSchema = Joi.object({
   connectableDevices: Joi.any()
     .custom(validateConnectableDevicesPayload, "custom validation")
@@ -224,6 +219,15 @@ class Project {
   async _handleSamplerTick(tickNumber) {
     //Refreshing group manager on every tick
     await this.RefreshGroupManager.refresh(tickNumber);
+
+    //Only to test - TODO - remove after
+    for (let device of Object.values(this.ConnectableDevices)) {
+      for (let variable of Object.values(device.Variables)) {
+        console.log(
+          `${device.ID}:${variable.ID}:${variable.LastValueTick}:${variable.Value}`
+        );
+      }
+    }
   }
 
   /**
