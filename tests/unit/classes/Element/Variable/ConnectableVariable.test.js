@@ -2,8 +2,16 @@ const ConnectableVariable = require("../../../../../classes/Element/Variable/Con
 
 describe("ConnectableVariable", () => {
   describe("constructor", () => {
+    let project;
+    let device;
+
+    beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
+    });
+
     let exec = () => {
-      return new ConnectableVariable();
+      return new ConnectableVariable(project, device);
     };
 
     it("should create new ConnectableVariable and set all its properties to null", () => {
@@ -19,6 +27,13 @@ describe("ConnectableVariable", () => {
       expect(result.LastValueTick).toEqual(null);
       expect(result.Unit).toEqual(null);
       expect(result.SampleTime).toEqual(null);
+    });
+
+    it("should assign project and device", () => {
+      let result = exec();
+
+      expect(result._project).toEqual(project);
+      expect(result._device).toEqual(device);
     });
 
     it("should create new ConnectableVariable and set data to null", () => {
@@ -38,12 +53,16 @@ describe("ConnectableVariable", () => {
   });
 
   describe("init", () => {
+    let project;
+    let device;
     let payload;
     let variable;
     let convertValueToDataMockFunc;
     let convertDataToValueMockFunc;
 
     beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
       payload = {
         id: "testElementId",
         name: "testElementName",
@@ -80,7 +99,7 @@ describe("ConnectableVariable", () => {
     });
 
     let exec = async () => {
-      variable = new ConnectableVariable();
+      variable = new ConnectableVariable(project, device);
       variable._convertDataToValue = convertDataToValueMockFunc;
       variable._convertValueToData = convertValueToDataMockFunc;
 
@@ -119,12 +138,16 @@ describe("ConnectableVariable", () => {
   });
 
   describe("get Value", () => {
+    let project;
+    let device;
     let data;
     let variable;
     let convertValueToDataMockFunc;
     let convertDataToValueMockFunc;
 
     beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
       //[1,2,3,4] corresponds to value of 10
       data = [1, 2, 3, 4];
 
@@ -151,7 +174,7 @@ describe("ConnectableVariable", () => {
     });
 
     let exec = async () => {
-      variable = new ConnectableVariable();
+      variable = new ConnectableVariable(project, device);
       variable._convertDataToValue = convertDataToValueMockFunc;
       variable._convertValueToData = convertValueToDataMockFunc;
 
@@ -176,6 +199,8 @@ describe("ConnectableVariable", () => {
   });
 
   describe("setValue", () => {
+    let project;
+    let device;
     let value;
     let tickId;
     let variable;
@@ -183,6 +208,8 @@ describe("ConnectableVariable", () => {
     let convertDataToValueMockFunc;
 
     beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
       //10 corresponds to data of [1,2,3,4]
       value = 10;
       tickId = 123;
@@ -210,7 +237,7 @@ describe("ConnectableVariable", () => {
     });
 
     let exec = async () => {
-      variable = new ConnectableVariable();
+      variable = new ConnectableVariable(project, device);
       variable._convertDataToValue = convertDataToValueMockFunc;
       variable._convertValueToData = convertValueToDataMockFunc;
       variable.setValue(value, tickId);
@@ -240,6 +267,8 @@ describe("ConnectableVariable", () => {
   });
 
   describe("setData", () => {
+    let project;
+    let device;
     let data;
     let tickId;
     let variable;
@@ -247,6 +276,8 @@ describe("ConnectableVariable", () => {
     let convertDataToValueMockFunc;
 
     beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
       //[1,2,3,4] corresponds to 10
       data = [1, 2, 3, 4];
       tickId = 123;
@@ -274,7 +305,7 @@ describe("ConnectableVariable", () => {
     });
 
     let exec = async () => {
-      variable = new ConnectableVariable();
+      variable = new ConnectableVariable(project, device);
       variable._convertDataToValue = convertDataToValueMockFunc;
       variable._convertValueToData = convertValueToDataMockFunc;
       variable.setData(data, tickId);
@@ -296,11 +327,15 @@ describe("ConnectableVariable", () => {
   });
 
   describe("generatePayload", () => {
+    let project;
+    let device;
     let payload;
     let getValueMockFunc;
     let element;
 
     beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
       payload = {
         id: "testElementId",
         name: "testElementName",
@@ -318,7 +353,7 @@ describe("ConnectableVariable", () => {
     });
 
     let exec = async () => {
-      element = new ConnectableVariable();
+      element = new ConnectableVariable(project, device);
       await element.init(payload);
       element._getValue = getValueMockFunc;
       return element.generatePayload();

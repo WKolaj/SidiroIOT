@@ -2,8 +2,16 @@ const Element = require("../../../../classes/Element/Element");
 
 describe("Element", () => {
   describe("constructor", () => {
+    let project;
+    let device;
+
+    beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
+    });
+
     let exec = () => {
-      return new Element();
+      return new Element(project, device);
     };
 
     it("should create new Element and set all its properties to null", () => {
@@ -18,13 +26,24 @@ describe("Element", () => {
       expect(result.Unit).toEqual(null);
       expect(result.SampleTime).toEqual(null);
     });
+
+    it("should assign project and device", () => {
+      let result = exec();
+
+      expect(result._project).toEqual(project);
+      expect(result._device).toEqual(device);
+    });
   });
 
   describe("init", () => {
+    let project;
+    let device;
     let payload;
     let element;
 
     beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
       payload = {
         id: "testElementId",
         name: "testElementName",
@@ -36,7 +55,7 @@ describe("Element", () => {
     });
 
     let exec = async () => {
-      element = new Element();
+      element = new Element(project, device);
       return element.init(payload);
     };
 
@@ -57,17 +76,21 @@ describe("Element", () => {
   });
 
   describe("checkIfShouldBeRefreshed", () => {
+    let project;
+    let device;
     let sampleTime;
     let tickNumber;
     let element;
 
     beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
       sampleTime = 15;
       tickNumber = 150;
     });
 
     let exec = () => {
-      element = new Element();
+      element = new Element(project, device);
       element._sampleTime = sampleTime;
       return element.checkIfShouldBeRefreshed(tickNumber);
     };
@@ -96,17 +119,21 @@ describe("Element", () => {
   });
 
   describe("setValue", () => {
+    let project;
+    let device;
     let element;
     let value;
     let tickId;
 
     beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
       value = 1234.5678;
       tickId = 987654321;
     });
 
     let exec = () => {
-      element = new Element();
+      element = new Element(project, device);
       return element._setValue(value, tickId);
     };
 
@@ -119,10 +146,14 @@ describe("Element", () => {
   });
 
   describe("generatePayload", () => {
+    let project;
+    let device;
     let payload;
     let element;
 
     beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
       payload = {
         id: "testElementId",
         name: "testElementName",
@@ -134,7 +165,7 @@ describe("Element", () => {
     });
 
     let exec = async () => {
-      element = new Element();
+      element = new Element(project, device);
       await element.init(payload);
       return element.generatePayload();
     };

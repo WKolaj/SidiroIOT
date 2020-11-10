@@ -2,8 +2,15 @@ const StandardProtocolVariable = require("../../../../../classes/Element/Variabl
 
 describe("StandardProtocolVariable", () => {
   describe("constructor", () => {
+    let project;
+    let device;
+
+    beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
+    });
     let exec = () => {
-      return new StandardProtocolVariable();
+      return new StandardProtocolVariable(project, device);
     };
 
     it("should create new StandardProtocolVariable and set all its properties to null", () => {
@@ -23,6 +30,13 @@ describe("StandardProtocolVariable", () => {
       expect(result.Length).toEqual(null);
     });
 
+    it("should assign project and device", () => {
+      let result = exec();
+
+      expect(result._project).toEqual(project);
+      expect(result._device).toEqual(device);
+    });
+
     it("should create new StandardProtocolVariable and set data to null", () => {
       let result = exec();
 
@@ -40,12 +54,16 @@ describe("StandardProtocolVariable", () => {
   });
 
   describe("init", () => {
+    let project;
+    let device;
     let payload;
     let variable;
     let convertValueToDataMockFunc;
     let convertDataToValueMockFunc;
 
     beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
       payload = {
         id: "testElementId",
         name: "testElementName",
@@ -83,7 +101,7 @@ describe("StandardProtocolVariable", () => {
     });
 
     let exec = async () => {
-      variable = new StandardProtocolVariable();
+      variable = new StandardProtocolVariable(project, device);
       variable._convertDataToValue = convertDataToValueMockFunc;
       variable._convertValueToData = convertValueToDataMockFunc;
 
@@ -124,11 +142,15 @@ describe("StandardProtocolVariable", () => {
   });
 
   describe("generatePayload", () => {
+    let project;
+    let device;
     let payload;
     let getValueMockFunc;
     let element;
 
     beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
       payload = {
         id: "testElementId",
         name: "testElementName",
@@ -148,7 +170,7 @@ describe("StandardProtocolVariable", () => {
     });
 
     let exec = async () => {
-      element = new StandardProtocolVariable();
+      element = new StandardProtocolVariable(project, device);
       await element.init(payload);
       element._getValue = getValueMockFunc;
       return element.generatePayload();

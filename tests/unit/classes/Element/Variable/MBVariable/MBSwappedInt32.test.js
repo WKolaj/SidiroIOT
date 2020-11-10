@@ -1,11 +1,51 @@
 const MBSwappedInt32 = require("../../../../../../classes/Element/Variable/ConnectableVariable/MBVariable/MBSwappedInt32");
 
 describe("MBSwappedInt32", () => {
+  describe("constructor", () => {
+    let project;
+    let device;
+
+    beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
+    });
+
+    let exec = () => {
+      return new MBSwappedInt32(project, device);
+    };
+
+    it("should create new ConnectableVariable and set all its properties to null", () => {
+      let result = exec();
+
+      expect(result.ID).toEqual(null);
+      expect(result.Name).toEqual(null);
+      expect(result.Type).toEqual(null);
+
+      //Value should not be checked - method _convertDataToValue is not set
+      //expect(result.Value).toEqual(null);
+      expect(result.DefaultValue).toEqual(null);
+      expect(result.LastValueTick).toEqual(null);
+      expect(result.Unit).toEqual(null);
+      expect(result.SampleTime).toEqual(null);
+    });
+
+    it("should assign project and device", () => {
+      let result = exec();
+
+      expect(result._project).toEqual(project);
+      expect(result._device).toEqual(device);
+    });
+  });
+
   describe("_convertDataToValue", () => {
+    let project;
+    let device;
     let mbVariable;
     let dataToConvert;
 
     beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
       //65535 => 5678 * 65535 = 372113408
       //1234 => + 1234
       // 372114642
@@ -13,7 +53,7 @@ describe("MBSwappedInt32", () => {
     });
 
     let exec = async () => {
-      mbVariable = new MBSwappedInt32();
+      mbVariable = new MBSwappedInt32(project, device);
 
       return mbVariable._convertDataToValue(dataToConvert);
     };
@@ -37,15 +77,19 @@ describe("MBSwappedInt32", () => {
   });
 
   describe("_convertValueToData", () => {
+    let project;
+    let device;
     let mbVariable;
     let valueToConvert;
 
     beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
       valueToConvert = 372114642;
     });
 
     let exec = async () => {
-      mbVariable = new MBSwappedInt32();
+      mbVariable = new MBSwappedInt32(project, device);
       return mbVariable._convertValueToData(valueToConvert);
     };
 
@@ -64,10 +108,17 @@ describe("MBSwappedInt32", () => {
   });
 
   describe("_getReadPossibleFunctionCodes", () => {
+    let project;
+    let device;
     let mbVariable;
 
+    beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
+    });
+
     let exec = async () => {
-      mbVariable = new MBSwappedInt32();
+      mbVariable = new MBSwappedInt32(project, device);
       return mbVariable._getReadPossibleFunctionCodes();
     };
 
@@ -79,10 +130,17 @@ describe("MBSwappedInt32", () => {
   });
 
   describe("_getWritePossibleFunctionCodes", () => {
+    let project;
+    let device;
     let mbVariable;
 
+    beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
+    });
+
     let exec = async () => {
-      mbVariable = new MBSwappedInt32();
+      mbVariable = new MBSwappedInt32(project, device);
       return mbVariable._getWritePossibleFunctionCodes();
     };
 
@@ -94,10 +152,14 @@ describe("MBSwappedInt32", () => {
   });
 
   describe("init", () => {
+    let project;
+    let device;
     let payload;
     let variable;
 
     beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
       payload = {
         id: "testElementId",
         name: "testElementName",
@@ -117,7 +179,7 @@ describe("MBSwappedInt32", () => {
     });
 
     let exec = async () => {
-      variable = new MBSwappedInt32();
+      variable = new MBSwappedInt32(project, device);
 
       return variable.init(payload);
     };

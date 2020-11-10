@@ -1,16 +1,56 @@
 const MBBoolean = require("../../../../../../classes/Element/Variable/ConnectableVariable/MBVariable/MBBoolean");
 
 describe("MBBoolean", () => {
+  describe("constructor", () => {
+    let project;
+    let device;
+
+    beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
+    });
+
+    let exec = () => {
+      return new MBBoolean(project, device);
+    };
+
+    it("should create new ConnectableVariable and set all its properties to null", () => {
+      let result = exec();
+
+      expect(result.ID).toEqual(null);
+      expect(result.Name).toEqual(null);
+      expect(result.Type).toEqual(null);
+
+      //Value should not be checked - method _convertDataToValue is not set
+      //expect(result.Value).toEqual(null);
+      expect(result.DefaultValue).toEqual(null);
+      expect(result.LastValueTick).toEqual(null);
+      expect(result.Unit).toEqual(null);
+      expect(result.SampleTime).toEqual(null);
+    });
+
+    it("should assign project and device", () => {
+      let result = exec();
+
+      expect(result._project).toEqual(project);
+      expect(result._device).toEqual(device);
+    });
+  });
+
   describe("_convertDataToValue", () => {
+    let project;
+    let device;
     let mbVariable;
     let dataToConvert;
 
     beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
       dataToConvert = [true];
     });
 
     let exec = async () => {
-      mbVariable = new MBBoolean();
+      mbVariable = new MBBoolean(project, device);
 
       return mbVariable._convertDataToValue(dataToConvert);
     };
@@ -30,15 +70,19 @@ describe("MBBoolean", () => {
   });
 
   describe("_convertValueToData", () => {
+    let project;
+    let device;
     let mbVariable;
     let valueToConvert;
 
     beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
       valueToConvert = true;
     });
 
     let exec = async () => {
-      mbVariable = new MBBoolean();
+      mbVariable = new MBBoolean(project, device);
       return mbVariable._convertValueToData(valueToConvert);
     };
 
@@ -57,10 +101,17 @@ describe("MBBoolean", () => {
   });
 
   describe("_getReadPossibleFunctionCodes", () => {
+    let project;
+    let device;
     let mbVariable;
 
+    beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
+    });
+
     let exec = async () => {
-      mbVariable = new MBBoolean();
+      mbVariable = new MBBoolean(project, device);
       return mbVariable._getReadPossibleFunctionCodes();
     };
 
@@ -72,10 +123,17 @@ describe("MBBoolean", () => {
   });
 
   describe("_getWritePossibleFunctionCodes", () => {
+    let project;
+    let device;
     let mbVariable;
 
+    beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
+    });
+
     let exec = async () => {
-      mbVariable = new MBBoolean();
+      mbVariable = new MBBoolean(project, device);
       return mbVariable._getWritePossibleFunctionCodes();
     };
 
@@ -87,6 +145,8 @@ describe("MBBoolean", () => {
   });
 
   describe("init", () => {
+    let project;
+    let device;
     let payload;
     let variable;
     let convertValueToDataMockFunc;
@@ -97,6 +157,8 @@ describe("MBBoolean", () => {
     let getPossibleWriteCodesMockFunc;
 
     beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
       possibleReadCodes = [1, 2, 3, 4];
       possibleWriteCodes = [16];
 
@@ -119,7 +181,7 @@ describe("MBBoolean", () => {
     });
 
     let exec = async () => {
-      variable = new MBBoolean();
+      variable = new MBBoolean(project, device);
 
       return variable.init(payload);
     };

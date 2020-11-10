@@ -1,16 +1,56 @@
 const MBByteArray = require("../../../../../../classes/Element/Variable/ConnectableVariable/MBVariable/MBByteArray");
 
 describe("MBByteArray", () => {
+  describe("constructor", () => {
+    let project;
+    let device;
+
+    beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
+    });
+
+    let exec = () => {
+      return new MBByteArray(project, device);
+    };
+
+    it("should create new ConnectableVariable and set all its properties to null", () => {
+      let result = exec();
+
+      expect(result.ID).toEqual(null);
+      expect(result.Name).toEqual(null);
+      expect(result.Type).toEqual(null);
+
+      //Value should not be checked - method _convertDataToValue is not set
+      //expect(result.Value).toEqual(null);
+      expect(result.DefaultValue).toEqual(null);
+      expect(result.LastValueTick).toEqual(null);
+      expect(result.Unit).toEqual(null);
+      expect(result.SampleTime).toEqual(null);
+    });
+
+    it("should assign project and device", () => {
+      let result = exec();
+
+      expect(result._project).toEqual(project);
+      expect(result._device).toEqual(device);
+    });
+  });
+
   describe("_convertDataToValue", () => {
+    let project;
+    let device;
     let mbVariable;
     let dataToConvert;
 
     beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
       dataToConvert = [513, 2052, 8208, 32832];
     });
 
     let exec = async () => {
-      mbVariable = new MBByteArray();
+      mbVariable = new MBByteArray(project, device);
 
       return mbVariable._convertDataToValue(dataToConvert);
     };
@@ -23,15 +63,19 @@ describe("MBByteArray", () => {
   });
 
   describe("_convertValueToData", () => {
+    let project;
+    let device;
     let mbVariable;
     let valueToConvert;
 
     beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
       valueToConvert = [1, 2, 4, 8, 16, 32, 64, 128];
     });
 
     let exec = async () => {
-      mbVariable = new MBByteArray();
+      mbVariable = new MBByteArray(project, device);
       return mbVariable._convertValueToData(valueToConvert);
     };
 
@@ -43,10 +87,17 @@ describe("MBByteArray", () => {
   });
 
   describe("_getReadPossibleFunctionCodes", () => {
+    let project;
+    let device;
     let mbVariable;
 
+    beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
+    });
+
     let exec = async () => {
-      mbVariable = new MBByteArray();
+      mbVariable = new MBByteArray(project, device);
       return mbVariable._getReadPossibleFunctionCodes();
     };
 
@@ -58,10 +109,17 @@ describe("MBByteArray", () => {
   });
 
   describe("_getWritePossibleFunctionCodes", () => {
+    let project;
+    let device;
     let mbVariable;
 
+    beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
+    });
+
     let exec = async () => {
-      mbVariable = new MBByteArray();
+      mbVariable = new MBByteArray(project, device);
       return mbVariable._getWritePossibleFunctionCodes();
     };
 
@@ -73,10 +131,14 @@ describe("MBByteArray", () => {
   });
 
   describe("init", () => {
+    let project;
+    let device;
     let payload;
     let variable;
 
     beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
       payload = {
         id: "testElementId",
         name: "testElementName",
@@ -96,7 +158,7 @@ describe("MBByteArray", () => {
     });
 
     let exec = async () => {
-      variable = new MBByteArray();
+      variable = new MBByteArray(project, device);
 
       return variable.init(payload);
     };

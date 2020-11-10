@@ -2,6 +2,42 @@ const MBDouble = require("../../../../../../classes/Element/Variable/Connectable
 
 describe("MBDouble", () => {
   describe("_convertDataToValue", () => {
+    describe("constructor", () => {
+      let project;
+      let device;
+
+      beforeEach(() => {
+        project = "fakeProject";
+        device = "fakeDevice";
+      });
+
+      let exec = () => {
+        return new MBDouble(project, device);
+      };
+
+      it("should create new ConnectableVariable and set all its properties to null", () => {
+        let result = exec();
+
+        expect(result.ID).toEqual(null);
+        expect(result.Name).toEqual(null);
+        expect(result.Type).toEqual(null);
+
+        //Value should not be checked - method _convertDataToValue is not set
+        //expect(result.Value).toEqual(null);
+        expect(result.DefaultValue).toEqual(null);
+        expect(result.LastValueTick).toEqual(null);
+        expect(result.Unit).toEqual(null);
+        expect(result.SampleTime).toEqual(null);
+      });
+
+      it("should assign project and device", () => {
+        let result = exec();
+
+        expect(result._project).toEqual(project);
+        expect(result._device).toEqual(device);
+      });
+    });
+
     let mbVariable;
     let dataToConvert;
 
@@ -23,15 +59,19 @@ describe("MBDouble", () => {
   });
 
   describe("_convertValueToData", () => {
+    let project;
+    let device;
     let mbVariable;
     let valueToConvert;
 
     beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
       valueToConvert = 12345678.7654321;
     });
 
     let exec = async () => {
-      mbVariable = new MBDouble();
+      mbVariable = new MBDouble(project, device);
       return mbVariable._convertValueToData(valueToConvert);
     };
 
@@ -44,9 +84,16 @@ describe("MBDouble", () => {
 
   describe("_getReadPossibleFunctionCodes", () => {
     let mbVariable;
+    let project;
+    let device;
+
+    beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
+    });
 
     let exec = async () => {
-      mbVariable = new MBDouble();
+      mbVariable = new MBDouble(project, device);
       return mbVariable._getReadPossibleFunctionCodes();
     };
 
@@ -58,10 +105,17 @@ describe("MBDouble", () => {
   });
 
   describe("_getWritePossibleFunctionCodes", () => {
+    let project;
+    let device;
     let mbVariable;
 
+    beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
+    });
+
     let exec = async () => {
-      mbVariable = new MBDouble();
+      mbVariable = new MBDouble(project, device);
       return mbVariable._getWritePossibleFunctionCodes();
     };
 
@@ -73,10 +127,14 @@ describe("MBDouble", () => {
   });
 
   describe("init", () => {
+    let project;
+    let device;
     let payload;
     let variable;
 
     beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
       payload = {
         id: "testElementId",
         name: "testElementName",
@@ -96,7 +154,7 @@ describe("MBDouble", () => {
     });
 
     let exec = async () => {
-      variable = new MBDouble();
+      variable = new MBDouble(project, device);
 
       return variable.init(payload);
     };

@@ -2,8 +2,16 @@ const MBVariable = require("../../../../../../classes/Element/Variable/Connectab
 
 describe("MBVariable", () => {
   describe("constructor", () => {
+    let project;
+    let device;
+
+    beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
+    });
+
     let exec = () => {
-      return new MBVariable();
+      return new MBVariable(project, device);
     };
 
     it("should create new MBVariable and set all its properties to null", () => {
@@ -21,6 +29,13 @@ describe("MBVariable", () => {
       expect(result.SampleTime).toEqual(null);
       expect(result.Offset).toEqual(null);
       expect(result.Length).toEqual(null);
+    });
+
+    it("should assign project and device", () => {
+      let result = exec();
+
+      expect(result._project).toEqual(project);
+      expect(result._device).toEqual(device);
     });
 
     it("should create new MBVariable and set data to null", () => {
@@ -48,6 +63,8 @@ describe("MBVariable", () => {
   });
 
   describe("init", () => {
+    let project;
+    let device;
     let payload;
     let variable;
     let convertValueToDataMockFunc;
@@ -58,6 +75,8 @@ describe("MBVariable", () => {
     let getPossibleWriteCodesMockFunc;
 
     beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
       possibleReadCodes = [1, 2, 3, 4];
       possibleWriteCodes = [16];
 
@@ -104,7 +123,7 @@ describe("MBVariable", () => {
     });
 
     let exec = async () => {
-      variable = new MBVariable();
+      variable = new MBVariable(project, device);
       variable._convertDataToValue = convertDataToValueMockFunc;
       variable._convertValueToData = convertValueToDataMockFunc;
       variable._getReadPossibleFunctionCodes = getPossibleReadCodesMockFunc;
@@ -309,6 +328,8 @@ describe("MBVariable", () => {
   });
 
   describe("generatePayload", () => {
+    let project;
+    let device;
     let payload;
     let getValueMockFunc;
     let element;
@@ -316,6 +337,8 @@ describe("MBVariable", () => {
     let getPossibleWriteCodesMockFunc;
 
     beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
       payload = {
         id: "testElementId",
         name: "testElementName",
@@ -341,7 +364,7 @@ describe("MBVariable", () => {
     });
 
     let exec = async () => {
-      element = new MBVariable();
+      element = new MBVariable(project, device);
       element._getValue = getValueMockFunc;
       element._getReadPossibleFunctionCodes = getPossibleReadCodesMockFunc;
       element._getWritePossibleFunctionCodes = getPossibleWriteCodesMockFunc;

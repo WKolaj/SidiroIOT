@@ -4,7 +4,7 @@ class InternalDevice extends Device {
   //#region ========= CONSTRUCTOR =========
 
   constructor(project) {
-    this._project = project;
+    super(project);
   }
 
   //#endregion ========= CONSTRUCTOR =========
