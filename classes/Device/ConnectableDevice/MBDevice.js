@@ -16,6 +16,7 @@ const MBUInt16 = require("../../Element/Variable/ConnectableVariable/MBVariable/
 const MBUInt32 = require("../../Element/Variable/ConnectableVariable/MBVariable/MBUInt32");
 const AssociatedVariable = require("../../Element/Variable/AssociatedVariable");
 const InternalVariable = require("../../Element/Variable/InternalVariable");
+const FactorCalculator = require("../../Element/CalcElement/FactorCalculator");
 const Joi = require("joi");
 
 //#region ========= PAYLOAD VALIDATION =========
@@ -103,10 +104,15 @@ const validateCalcElementsPayload = (calcElementsPayload, helpers) => {
 
     //TODO - add calcElement types
     switch (calcElementType) {
+      case "FactorCalculator":
+        calcElementMessage = FactorCalculator.validatePayload(
+          calcElementPayload
+        );
+        break;
       default:
         calcElementMessage = "calcElement type not recognized";
     }
-
+    console.log(calcElementMessage);
     if (calcElementMessage) return message(calcElementMessage);
 
     let calcElementIDFromPayload = calcElementPayload.id;

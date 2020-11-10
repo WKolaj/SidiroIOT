@@ -224,8 +224,8 @@ class Project {
     await this.RefreshGroupManager.refresh(tickNumber);
 
     //Only to test - TODO - remove after
-    for (let device of Object.values(this.ConnectableDevices)) {
-      for (let variable of Object.values(device.Variables)) {
+    for (let device of Object.values(this.Devices)) {
+      for (let variable of Object.values(device.Elements)) {
         console.log(
           `${device.ID}:${variable.ID}:${variable.LastValueTick}:${variable.Value}`
         );

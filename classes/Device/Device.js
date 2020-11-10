@@ -270,28 +270,7 @@ class Device {
   async _initCalcElement(calcElementPayload) {
     let type = calcElementPayload.type;
 
-    let calcElement = null;
-
-    switch (type) {
-      case "AverageCalculator":
-        calcElement = new AverageCalculator();
-        break;
-      case "FactorCalculator":
-        calcElement = new FactorCalculator();
-        break;
-      case "IncreaseCalculator":
-        calcElement = new IncreaseCalculator();
-        break;
-      case "SumCalculator":
-        calcElement = new SumCalculator();
-        break;
-      case "ValueFromByteArrayCalculator":
-        calcElement = new ValueFromByteArrayCalculator();
-        break;
-
-      default:
-        throw new Error(`Unrecognized CalcElement type: ${type}`);
-    }
+    let calcElement = this._createCalcElementBasedOnPayload(type);
 
     //Initializing calcElement
     await calcElement.init(calcElementPayload);
@@ -345,7 +324,7 @@ class Device {
    * @description Method for creating variables based on type - throws if type is not a valid type. CAN BE OVERRIDEN IN CHILD CLASSES
    * @param {String} type type of variable
    */
-  async _createVariableBasedOnPayload(type) {
+  _createVariableBasedOnPayload(type) {
     switch (type) {
       case "AssociatedVariable":
         return new AssociatedVariable(this._project, this);
@@ -353,6 +332,19 @@ class Device {
         return new InternalVariable(this._project, this);
       default:
         throw new Error(`Unrecognized Variable type: ${type}`);
+    }
+  }
+
+  /**
+   * @description Method for creating calcElement based on type - throws if type is not a valid type. CAN BE OVERRIDEN IN CHILD CLASSES
+   * @param {String} type type of variable
+   */
+  _createCalcElementBasedOnPayload(type) {
+    switch (type) {
+      case "FactorCalculator":
+        return new FactorCalculator(this._project, this);
+      default:
+        throw new Error(`Unrecognized CalcElement type: ${type}`);
     }
   }
 
