@@ -220,6 +220,7 @@ class Project {
    * @description Main method for handling tick of sampler
    */
   async _handleSamplerTick(tickNumber) {
+    let start = Date.now();
     //Refreshing group manager on every tick
     await this.RefreshGroupManager.refresh(tickNumber);
 
@@ -231,6 +232,9 @@ class Project {
         );
       }
     }
+    let stop = Date.now();
+
+    console.log(`Refreshed of ${tickNumber} in ${(stop - start) / 1000} [s]`);
   }
 
   /**

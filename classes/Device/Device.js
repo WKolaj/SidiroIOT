@@ -343,6 +343,8 @@ class Device {
     switch (type) {
       case "FactorCalculator":
         return new FactorCalculator(this._project, this);
+      case "SumCalculator":
+        return new SumCalculator(this._project, this);
       default:
         throw new Error(`Unrecognized CalcElement type: ${type}`);
     }

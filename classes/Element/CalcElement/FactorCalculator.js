@@ -1,4 +1,5 @@
 const Joi = require("joi");
+const { isNumber } = require("lodash");
 const { exists } = require("../../../utilities/utilities");
 const CalcElement = require("./CalcElement");
 
@@ -91,7 +92,14 @@ class FactorCalculator extends CalcElement {
     let variable = this._device.Variables[this.VariableID];
 
     //Setting new value if variable exists
-    if (exists(variable)) this.setValue(variable.Value * this.Factor, tickId);
+    if (exists(variable)) {
+      let newValue = variable.Value * this.Factor;
+
+      //Avoding setting NaN - eg. when variable value is not a valid float
+      if (isNaN(newValue)) return;
+
+      this.setValue(newValue, tickId);
+    }
   }
 
   /**
