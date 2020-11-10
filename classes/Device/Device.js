@@ -345,6 +345,8 @@ class Device {
         return new FactorCalculator(this._project, this);
       case "SumCalculator":
         return new SumCalculator(this._project, this);
+      case "ValueFromByteArrayCalculator":
+        return new ValueFromByteArrayCalculator(this._project, this);
       default:
         throw new Error(`Unrecognized CalcElement type: ${type}`);
     }

@@ -19,6 +19,7 @@ const InternalVariable = require("../../Element/Variable/InternalVariable");
 const FactorCalculator = require("../../Element/CalcElement/FactorCalculator");
 const SumCalculator = require("../../Element/CalcElement/SumCalculator");
 const Joi = require("joi");
+const ValueFromByteArrayCalculator = require("../../Element/CalcElement/ValueFromByteArrayCalculator");
 
 //#region ========= PAYLOAD VALIDATION =========
 
@@ -112,6 +113,11 @@ const validateCalcElementsPayload = (calcElementsPayload, helpers) => {
         break;
       case "SumCalculator":
         calcElementMessage = SumCalculator.validatePayload(calcElementPayload);
+        break;
+      case "ValueFromByteArrayCalculator":
+        calcElementMessage = ValueFromByteArrayCalculator.validatePayload(
+          calcElementPayload
+        );
         break;
       default:
         calcElementMessage = "calcElement type not recognized";
