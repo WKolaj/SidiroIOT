@@ -258,6 +258,8 @@ describe("MBRequestManager", () => {
 
     let exec = () => {
       variable1 = createFakeMBVariable(
+        null,
+        null,
         "variabl1Id",
         "variable1Name",
         "FakeMBVariable",
@@ -278,6 +280,8 @@ describe("MBRequestManager", () => {
         variable1WriteSingle
       );
       variable2 = createFakeMBVariable(
+        null,
+        null,
         "variabl2Id",
         "variable2Name",
         "FakeMBVariable",
@@ -298,6 +302,8 @@ describe("MBRequestManager", () => {
         variable2WriteSingle
       );
       variable3 = createFakeMBVariable(
+        null,
+        null,
         "variabl3Id",
         "variable3Name",
         "FakeMBVariable",
@@ -318,6 +324,8 @@ describe("MBRequestManager", () => {
         variable3WriteSingle
       );
       variable4 = createFakeMBVariable(
+        null,
+        null,
         "variabl4Id",
         "variable4Name",
         "FakeMBVariable",
@@ -338,6 +346,8 @@ describe("MBRequestManager", () => {
         variable4WriteSingle
       );
       variable5 = createFakeMBVariable(
+        null,
+        null,
         "variabl5Id",
         "variable5Name",
         "FakeMBVariable",
@@ -358,6 +368,8 @@ describe("MBRequestManager", () => {
         variable5WriteSingle
       );
       variable6 = createFakeMBVariable(
+        null,
+        null,
         "variabl6Id",
         "variable6Name",
         "FakeMBVariable",
@@ -378,6 +390,8 @@ describe("MBRequestManager", () => {
         variable6WriteSingle
       );
       variable7 = createFakeMBVariable(
+        null,
+        null,
         "variabl7Id",
         "variable7Name",
         "FakeMBVariable",
@@ -398,6 +412,8 @@ describe("MBRequestManager", () => {
         variable7WriteSingle
       );
       variable8 = createFakeMBVariable(
+        null,
+        null,
         "variabl8Id",
         "variable8Name",
         "FakeMBVariable",
@@ -418,6 +434,8 @@ describe("MBRequestManager", () => {
         variable8WriteSingle
       );
       variable9 = createFakeMBVariable(
+        null,
+        null,
         "variabl9Id",
         "variable9Name",
         "FakeMBVariable",
@@ -438,6 +456,8 @@ describe("MBRequestManager", () => {
         variable9WriteSingle
       );
       variable10 = createFakeMBVariable(
+        null,
+        null,
         "variabl10Id",
         "variable10Name",
         "FakeMBVariable",
@@ -4233,6 +4253,8 @@ describe("MBRequestManager", () => {
 
     let exec = () => {
       variable1 = createFakeMBVariable(
+        null,
+        null,
         "variabl1Id",
         "variable1Name",
         "FakeMBVariable",
@@ -4253,6 +4275,8 @@ describe("MBRequestManager", () => {
         variable1WriteSingle
       );
       variable2 = createFakeMBVariable(
+        null,
+        null,
         "variabl2Id",
         "variable2Name",
         "FakeMBVariable",
@@ -4273,6 +4297,8 @@ describe("MBRequestManager", () => {
         variable2WriteSingle
       );
       variable3 = createFakeMBVariable(
+        null,
+        null,
         "variabl3Id",
         "variable3Name",
         "FakeMBVariable",
@@ -4293,6 +4319,8 @@ describe("MBRequestManager", () => {
         variable3WriteSingle
       );
       variable4 = createFakeMBVariable(
+        null,
+        null,
         "variabl4Id",
         "variable4Name",
         "FakeMBVariable",
@@ -4313,6 +4341,8 @@ describe("MBRequestManager", () => {
         variable4WriteSingle
       );
       variable5 = createFakeMBVariable(
+        null,
+        null,
         "variabl5Id",
         "variable5Name",
         "FakeMBVariable",
@@ -4333,6 +4363,8 @@ describe("MBRequestManager", () => {
         variable5WriteSingle
       );
       variable6 = createFakeMBVariable(
+        null,
+        null,
         "variabl6Id",
         "variable6Name",
         "FakeMBVariable",
@@ -4353,6 +4385,8 @@ describe("MBRequestManager", () => {
         variable6WriteSingle
       );
       variable7 = createFakeMBVariable(
+        null,
+        null,
         "variabl7Id",
         "variable7Name",
         "FakeMBVariable",
@@ -4373,6 +4407,8 @@ describe("MBRequestManager", () => {
         variable7WriteSingle
       );
       variable8 = createFakeMBVariable(
+        null,
+        null,
         "variabl8Id",
         "variable8Name",
         "FakeMBVariable",
@@ -4393,6 +4429,8 @@ describe("MBRequestManager", () => {
         variable8WriteSingle
       );
       variable9 = createFakeMBVariable(
+        null,
+        null,
         "variabl9Id",
         "variable9Name",
         "FakeMBVariable",
@@ -4413,6 +4451,8 @@ describe("MBRequestManager", () => {
         variable9WriteSingle
       );
       variable10 = createFakeMBVariable(
+        null,
+        null,
         "variabl10Id",
         "variable10Name",
         "FakeMBVariable",

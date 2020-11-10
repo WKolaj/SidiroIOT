@@ -23,11 +23,17 @@ const { snooze } = require("../../../../utilities/utilities");
 
 describe("MBDevice", () => {
   describe("constructor", () => {
+    let project;
+
+    beforeEach(() => {
+      project = "fakeProject";
+    });
+
     let exec = () => {
-      return new MBDevice();
+      return new MBDevice(project);
     };
 
-    it("should create new MBDevice and set its RequestManager to MBRequestManager and Driver to MBDriver", async () => {
+    it("should create new MBDevice and set its RequestManager to MBRequestManager and Driver to MBDriver", () => {
       let result = exec();
 
       expect(result).toBeDefined();
@@ -38,13 +44,21 @@ describe("MBDevice", () => {
       expect(result.Driver).toBeDefined();
       expect(result.Driver instanceof MBDriver).toEqual(true);
     });
+
+    it("should assign project to MBDevice", () => {
+      let result = exec();
+
+      expect(result._project).toEqual(project);
+    });
   });
 
   describe("init", () => {
+    let project;
     let device;
     let payload;
 
     beforeEach(() => {
+      project = "testProject";
       payload = {
         id: "testDeviceID",
         name: "testDeviceName",
@@ -118,7 +132,7 @@ describe("MBDevice", () => {
     //TODO - add tests with internal variables and associated variables
 
     let exec = async () => {
-      device = new MBDevice();
+      device = new MBDevice(project);
       return device.init(payload);
     };
 
@@ -153,6 +167,8 @@ describe("MBDevice", () => {
       let variable3Payload = payload.variables["testVariable3ID"];
 
       testMBVariable(
+        project,
+        device,
         allVariablesValues[0],
         variable1Payload,
         variable1Payload.defaultValue,
@@ -160,6 +176,8 @@ describe("MBDevice", () => {
         MBFloat
       );
       testMBVariable(
+        project,
+        device,
         allVariablesValues[1],
         variable2Payload,
         variable2Payload.defaultValue,
@@ -167,6 +185,8 @@ describe("MBDevice", () => {
         MBFloat
       );
       testMBVariable(
+        project,
+        device,
         allVariablesValues[2],
         variable3Payload,
         variable3Payload.defaultValue,
@@ -232,6 +252,8 @@ describe("MBDevice", () => {
       let variable3Payload = payload.variables["testVariable3ID"];
 
       testMBVariable(
+        project,
+        device,
         allVariablesValues[0],
         variable1Payload,
         variable1Payload.defaultValue,
@@ -239,6 +261,8 @@ describe("MBDevice", () => {
         MBUInt32
       );
       testMBVariable(
+        project,
+        device,
         allVariablesValues[1],
         variable2Payload,
         variable2Payload.defaultValue,
@@ -246,6 +270,8 @@ describe("MBDevice", () => {
         MBInt32
       );
       testMBVariable(
+        project,
+        device,
         allVariablesValues[2],
         variable3Payload,
         variable3Payload.defaultValue,
@@ -313,6 +339,8 @@ describe("MBDevice", () => {
       let variable3Payload = payload.variables["testVariable3ID"];
 
       testMBVariable(
+        project,
+        device,
         allVariablesValues[0],
         variable1Payload,
         variable1Payload.defaultValue,
@@ -320,6 +348,8 @@ describe("MBDevice", () => {
         MBSwappedUInt32
       );
       testMBVariable(
+        project,
+        device,
         allVariablesValues[1],
         variable2Payload,
         variable2Payload.defaultValue,
@@ -327,6 +357,8 @@ describe("MBDevice", () => {
         MBSwappedInt32
       );
       testMBVariable(
+        project,
+        device,
         allVariablesValues[2],
         variable3Payload,
         variable3Payload.defaultValue,
@@ -400,6 +432,8 @@ describe("MBDevice", () => {
       let variable3Payload = payload.variables["testVariable3ID"];
 
       testMBVariable(
+        project,
+        device,
         allVariablesValues[0],
         variable1Payload,
         variable1Payload.defaultValue,
@@ -407,6 +441,8 @@ describe("MBDevice", () => {
         MBDouble
       );
       testMBVariable(
+        project,
+        device,
         allVariablesValues[1],
         variable2Payload,
         variable2Payload.defaultValue,
@@ -414,6 +450,8 @@ describe("MBDevice", () => {
         MBSwappedDouble
       );
       testMBVariable(
+        project,
+        device,
         allVariablesValues[2],
         variable3Payload,
         variable3Payload.defaultValue,
@@ -489,6 +527,8 @@ describe("MBDevice", () => {
       let variable3Payload = payload.variables["testVariable3ID"];
 
       testMBVariable(
+        project,
+        device,
         allVariablesValues[0],
         variable1Payload,
         variable1Payload.defaultValue,
@@ -496,6 +536,8 @@ describe("MBDevice", () => {
         MBInt16
       );
       testMBVariable(
+        project,
+        device,
         allVariablesValues[1],
         variable2Payload,
         variable2Payload.defaultValue,
@@ -503,6 +545,8 @@ describe("MBDevice", () => {
         MBUInt16
       );
       testMBVariable(
+        project,
+        device,
         allVariablesValues[2],
         variable3Payload,
         variable3Payload.defaultValue,
@@ -651,6 +695,8 @@ describe("MBDevice", () => {
       let variable3Payload = payload.variables["testVariable3ID"];
 
       testMBVariable(
+        project,
+        device,
         allVariablesValues[0],
         variable1Payload,
         variable1Payload.defaultValue,
@@ -659,6 +705,8 @@ describe("MBDevice", () => {
         true
       );
       testMBVariable(
+        project,
+        device,
         allVariablesValues[1],
         variable2Payload,
         variable2Payload.defaultValue,
@@ -667,6 +715,8 @@ describe("MBDevice", () => {
         true
       );
       testMBVariable(
+        project,
+        device,
         allVariablesValues[2],
         variable3Payload,
         variable3Payload.defaultValue,
@@ -741,6 +791,8 @@ describe("MBDevice", () => {
       let variable3Payload = payload.variables["testVariable3ID"];
 
       testMBVariable(
+        project,
+        device,
         allVariablesValues[0],
         variable1Payload,
         variable1Payload.defaultValue,
@@ -749,6 +801,8 @@ describe("MBDevice", () => {
         true
       );
       testMBVariable(
+        project,
+        device,
         allVariablesValues[1],
         variable2Payload,
         variable2Payload.defaultValue,
@@ -757,6 +811,8 @@ describe("MBDevice", () => {
         true
       );
       testMBVariable(
+        project,
+        device,
         allVariablesValues[2],
         variable3Payload,
         variable3Payload.defaultValue,
@@ -848,6 +904,8 @@ describe("MBDevice", () => {
       let variable3Payload = payload.variables["testVariable3ID"];
 
       testMBVariable(
+        project,
+        device,
         allVariablesValues[0],
         variable1Payload,
         variable1Payload.defaultValue,
@@ -856,6 +914,8 @@ describe("MBDevice", () => {
         true
       );
       testMBVariable(
+        project,
+        device,
         allVariablesValues[1],
         variable2Payload,
         variable2Payload.defaultValue,
@@ -864,6 +924,8 @@ describe("MBDevice", () => {
         true
       );
       testMBVariable(
+        project,
+        device,
         allVariablesValues[2],
         variable3Payload,
         variable3Payload.defaultValue,
@@ -955,6 +1017,8 @@ describe("MBDevice", () => {
       let variable3Payload = payload.variables["testVariable3ID"];
 
       testMBVariable(
+        project,
+        device,
         allVariablesValues[0],
         variable1Payload,
         variable1Payload.defaultValue,
@@ -963,6 +1027,8 @@ describe("MBDevice", () => {
         true
       );
       testMBVariable(
+        project,
+        device,
         allVariablesValues[1],
         variable2Payload,
         variable2Payload.defaultValue,
@@ -971,6 +1037,8 @@ describe("MBDevice", () => {
         true
       );
       testMBVariable(
+        project,
+        device,
         allVariablesValues[2],
         variable3Payload,
         variable3Payload.defaultValue,
@@ -1076,6 +1144,8 @@ describe("MBDevice", () => {
       let variable3Payload = payload.variables["testVariable3ID"];
 
       testMBVariable(
+        project,
+        device,
         allVariablesValues[0],
         variable1Payload,
         variable1Payload.defaultValue,
@@ -1083,6 +1153,8 @@ describe("MBDevice", () => {
         MBInt32
       );
       testMBVariable(
+        project,
+        device,
         allVariablesValues[1],
         variable2Payload,
         variable2Payload.defaultValue,
@@ -1090,6 +1162,8 @@ describe("MBDevice", () => {
         MBInt32
       );
       testMBVariable(
+        project,
+        device,
         allVariablesValues[2],
         variable3Payload,
         variable3Payload.defaultValue,
@@ -1181,6 +1255,8 @@ describe("MBDevice", () => {
       let variable3Payload = payload.variables["testVariable3ID"];
 
       testMBVariable(
+        project,
+        device,
         allVariablesValues[0],
         variable1Payload,
         variable1Payload.defaultValue,
@@ -1188,6 +1264,8 @@ describe("MBDevice", () => {
         MBInt32
       );
       testMBVariable(
+        project,
+        device,
         allVariablesValues[1],
         variable2Payload,
         variable2Payload.defaultValue,
@@ -1195,6 +1273,8 @@ describe("MBDevice", () => {
         MBInt32
       );
       testMBVariable(
+        project,
+        device,
         allVariablesValues[2],
         variable3Payload,
         variable3Payload.defaultValue,
@@ -1280,6 +1360,8 @@ describe("MBDevice", () => {
       let variable3Payload = payload.variables["testVariable3ID"];
 
       testMBVariable(
+        project,
+        device,
         allVariablesValues[0],
         variable1Payload,
         variable1Payload.defaultValue,
@@ -1288,6 +1370,8 @@ describe("MBDevice", () => {
         true
       );
       testMBVariable(
+        project,
+        device,
         allVariablesValues[1],
         variable2Payload,
         variable2Payload.defaultValue,
@@ -1296,6 +1380,8 @@ describe("MBDevice", () => {
         true
       );
       testMBVariable(
+        project,
+        device,
         allVariablesValues[2],
         variable3Payload,
         variable3Payload.defaultValue,
@@ -1382,6 +1468,8 @@ describe("MBDevice", () => {
       let variable3Payload = payload.variables["testVariable3ID"];
 
       testMBVariable(
+        project,
+        device,
         allVariablesValues[0],
         variable1Payload,
         variable1Payload.defaultValue,
@@ -1390,6 +1478,8 @@ describe("MBDevice", () => {
         true
       );
       testMBVariable(
+        project,
+        device,
         allVariablesValues[1],
         variable2Payload,
         variable2Payload.defaultValue,
@@ -1398,6 +1488,8 @@ describe("MBDevice", () => {
         true
       );
       testMBVariable(
+        project,
+        device,
         allVariablesValues[2],
         variable3Payload,
         variable3Payload.defaultValue,
@@ -1485,6 +1577,8 @@ describe("MBDevice", () => {
       let variable3Payload = payload.variables["testVariable3ID"];
 
       testMBVariable(
+        project,
+        device,
         allVariablesValues[0],
         variable1Payload,
         variable1Payload.defaultValue,
@@ -1493,6 +1587,8 @@ describe("MBDevice", () => {
         true
       );
       testMBVariable(
+        project,
+        device,
         allVariablesValues[1],
         variable2Payload,
         variable2Payload.defaultValue,
@@ -1501,6 +1597,8 @@ describe("MBDevice", () => {
         true
       );
       testMBVariable(
+        project,
+        device,
         allVariablesValues[2],
         variable3Payload,
         variable3Payload.defaultValue,
@@ -1545,6 +1643,7 @@ describe("MBDevice", () => {
   });
 
   describe("generatePayload", () => {
+    let project;
     let payload;
     let device;
     let connectDevice;
@@ -1576,6 +1675,7 @@ describe("MBDevice", () => {
     let addAlert3;
 
     beforeEach(() => {
+      project = "testProject";
       connectDevice = false;
       payload = {
         id: "testDeviceID",
@@ -1671,7 +1771,7 @@ describe("MBDevice", () => {
     });
 
     let exec = async () => {
-      device = new MBDevice();
+      device = new MBDevice(project);
       await device.init(payload);
 
       //#region create calcElements
@@ -1679,6 +1779,8 @@ describe("MBDevice", () => {
       calcElements = [];
 
       calcElement1 = createFakeCalcElement(
+        project,
+        device,
         "calcElement1ID",
         "calcElement1Name",
         "FakeCalcElement",
@@ -1689,6 +1791,8 @@ describe("MBDevice", () => {
       );
 
       calcElement2 = createFakeCalcElement(
+        project,
+        device,
         "calcElement2ID",
         "calcElement2Name",
         "FakeCalcElement",
@@ -1699,6 +1803,8 @@ describe("MBDevice", () => {
       );
 
       calcElement3 = createFakeCalcElement(
+        project,
+        device,
         "calcElement3ID",
         "calcElement3Name",
         "FakeCalcElement",
@@ -1719,6 +1825,8 @@ describe("MBDevice", () => {
       alerts = [];
 
       alert1 = createFakeAlert(
+        project,
+        device,
         "alert1ID",
         "alert1Name",
         "FakeAlert",
@@ -1729,6 +1837,8 @@ describe("MBDevice", () => {
       );
 
       alert2 = createFakeAlert(
+        project,
+        device,
         "alert2ID",
         "alert2Name",
         "FakeAlert",
@@ -1739,6 +1849,8 @@ describe("MBDevice", () => {
       );
 
       alert3 = createFakeAlert(
+        project,
+        device,
         "alert3ID",
         "alert3Name",
         "FakeAlert",
@@ -2812,10 +2924,12 @@ describe("MBDevice", () => {
   });
 
   describe("getRefreshGroupID", () => {
+    let project;
     let device;
     let payload;
 
     beforeEach(() => {
+      project = "testProject";
       payload = {
         id: "testDeviceID",
         name: "testDeviceName",
@@ -2886,7 +3000,7 @@ describe("MBDevice", () => {
     });
 
     let exec = async () => {
-      device = new MBDevice();
+      device = new MBDevice(project);
       await device.init(payload);
       return device.getRefreshGroupID();
     };

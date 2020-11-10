@@ -15,8 +15,14 @@ const Driver = require("../../../../classes/Driver/Driver");
 
 describe("ConnectableDevice", () => {
   describe("constructor", () => {
+    let project;
+
+    beforeEach(() => {
+      project = "testProject";
+    });
+
     let exec = () => {
-      return new ConnectableDevice();
+      return new ConnectableDevice(project);
     };
 
     it("should create new ConnectableDevice and set RequestManager and Driver to null", () => {
@@ -27,15 +33,23 @@ describe("ConnectableDevice", () => {
       expect(driver.RequestManager).toEqual(null);
       expect(driver.Driver).toEqual(null);
     });
+
+    it("should assign project to ConnectableDevice", () => {
+      let result = exec();
+
+      expect(result._project).toEqual(project);
+    });
   });
 
   describe("init", () => {
+    let project;
     let device;
     let payload;
     let requestManagerMock;
     let driverMock;
 
     beforeEach(() => {
+      project = "testProject";
       payload = {
         id: "testDeviceID",
         name: "testDeviceName",
@@ -54,7 +68,7 @@ describe("ConnectableDevice", () => {
     });
 
     let exec = async () => {
-      device = new ConnectableDevice();
+      device = new ConnectableDevice(project);
       device._requestManager = requestManagerMock;
       device._driver = driverMock;
       return device.init(payload);
@@ -92,6 +106,7 @@ describe("ConnectableDevice", () => {
   });
 
   describe("generatePayload", () => {
+    let project;
     let device;
     let deviceId;
     let deviceName;
@@ -172,6 +187,7 @@ describe("ConnectableDevice", () => {
     let addAlert3;
 
     beforeEach(() => {
+      project = "testProject";
       deviceId = "device1ID";
       deviceName = "device1Name";
       deviceType = "FakeDevice";
@@ -286,6 +302,8 @@ describe("ConnectableDevice", () => {
       variables = [];
 
       variable1 = createFakeConnectableVariable(
+        project,
+        null,
         "variable1ID",
         "variable1Name",
         "FakeVariable",
@@ -298,6 +316,8 @@ describe("ConnectableDevice", () => {
       );
 
       variable2 = createFakeConnectableVariable(
+        project,
+        null,
         "variable2ID",
         "variable2Name",
         "FakeVariable",
@@ -310,6 +330,8 @@ describe("ConnectableDevice", () => {
       );
 
       variable3 = createFakeConnectableVariable(
+        project,
+        null,
         "variable3ID",
         "variable3Name",
         "FakeVariable",
@@ -322,6 +344,8 @@ describe("ConnectableDevice", () => {
       );
 
       variable4 = createFakeConnectableVariable(
+        project,
+        null,
         "variable4ID",
         "variable4Name",
         "FakeVariable",
@@ -334,6 +358,8 @@ describe("ConnectableDevice", () => {
       );
 
       variable5 = createFakeConnectableVariable(
+        project,
+        null,
         "variable5ID",
         "variable5Name",
         "FakeVariable",
@@ -358,6 +384,8 @@ describe("ConnectableDevice", () => {
       calcElements = [];
 
       calcElement1 = createFakeCalcElement(
+        project,
+        null,
         "calcElement1ID",
         "calcElement1Name",
         "FakeCalcElement",
@@ -368,6 +396,8 @@ describe("ConnectableDevice", () => {
       );
 
       calcElement2 = createFakeCalcElement(
+        project,
+        null,
         "calcElement2ID",
         "calcElement2Name",
         "FakeCalcElement",
@@ -378,6 +408,8 @@ describe("ConnectableDevice", () => {
       );
 
       calcElement3 = createFakeCalcElement(
+        project,
+        null,
         "calcElement3ID",
         "calcElement3Name",
         "FakeCalcElement",
@@ -398,6 +430,8 @@ describe("ConnectableDevice", () => {
       alerts = [];
 
       alert1 = createFakeAlert(
+        project,
+        null,
         "alert1ID",
         "alert1Name",
         "FakeAlert",
@@ -408,6 +442,8 @@ describe("ConnectableDevice", () => {
       );
 
       alert2 = createFakeAlert(
+        project,
+        null,
         "alert2ID",
         "alert2Name",
         "FakeAlert",
@@ -418,6 +454,8 @@ describe("ConnectableDevice", () => {
       );
 
       alert3 = createFakeAlert(
+        project,
+        null,
         "alert3ID",
         "alert3Name",
         "FakeAlert",
@@ -461,6 +499,7 @@ describe("ConnectableDevice", () => {
       //#endregion create requests
 
       device = createFakeConnectableDevice(
+        project,
         deviceId,
         deviceType,
         deviceName,
@@ -593,6 +632,7 @@ describe("ConnectableDevice", () => {
   });
 
   describe("IsActive", () => {
+    let project;
     let device;
     let isDriverActive;
     let isDriverConnected;
@@ -601,6 +641,7 @@ describe("ConnectableDevice", () => {
     let driverDisconnectMock;
 
     beforeEach(() => {
+      project = "testProject";
       isDriverActive = false;
       isDriverConnected = false;
       isDriverBusy = false;
@@ -610,6 +651,7 @@ describe("ConnectableDevice", () => {
 
     let exec = async () => {
       device = createFakeConnectableDevice(
+        project,
         "device1Id",
         "FakeDevice",
         "device1Name",
@@ -646,6 +688,7 @@ describe("ConnectableDevice", () => {
   });
 
   describe("IsConnected", () => {
+    let project;
     let device;
     let isDriverActive;
     let isDriverConnected;
@@ -654,6 +697,7 @@ describe("ConnectableDevice", () => {
     let driverDisconnectMock;
 
     beforeEach(() => {
+      project = "testProject";
       isDriverActive = false;
       isDriverConnected = false;
       isDriverBusy = false;
@@ -663,6 +707,7 @@ describe("ConnectableDevice", () => {
 
     let exec = async () => {
       device = createFakeConnectableDevice(
+        project,
         "device1Id",
         "FakeDevice",
         "device1Name",
@@ -699,6 +744,7 @@ describe("ConnectableDevice", () => {
   });
 
   describe("Timeout", () => {
+    let project;
     let device;
     let isDriverActive;
     let isDriverConnected;
@@ -708,6 +754,7 @@ describe("ConnectableDevice", () => {
     let driverDisconnectMock;
 
     beforeEach(() => {
+      project = "testProject";
       isDriverActive = false;
       isDriverConnected = false;
       isDriverBusy = false;
@@ -718,6 +765,7 @@ describe("ConnectableDevice", () => {
 
     let exec = async () => {
       device = createFakeConnectableDevice(
+        project,
         "device1Id",
         "FakeDevice",
         "device1Name",
@@ -744,6 +792,7 @@ describe("ConnectableDevice", () => {
   });
 
   describe("activate", () => {
+    let project;
     let device;
     let isDriverActive;
     let isDriverConnected;
@@ -752,6 +801,7 @@ describe("ConnectableDevice", () => {
     let driverDisconnectMock;
 
     beforeEach(() => {
+      project = "testProject";
       isDriverActive = false;
       isDriverConnected = false;
       isDriverBusy = false;
@@ -761,6 +811,7 @@ describe("ConnectableDevice", () => {
 
     let exec = async () => {
       device = createFakeConnectableDevice(
+        project,
         "device1Id",
         "FakeDevice",
         "device1Name",
@@ -807,6 +858,7 @@ describe("ConnectableDevice", () => {
   });
 
   describe("deactivate", () => {
+    let project;
     let device;
     let isDriverActive;
     let isDriverConnected;
@@ -815,6 +867,7 @@ describe("ConnectableDevice", () => {
     let driverDisconnectMock;
 
     beforeEach(() => {
+      project = "testProject";
       isDriverActive = true;
       isDriverConnected = false;
       isDriverBusy = false;
@@ -824,6 +877,7 @@ describe("ConnectableDevice", () => {
 
     let exec = async () => {
       device = createFakeConnectableDevice(
+        project,
         "device1Id",
         "FakeDevice",
         "device1Name",
@@ -870,6 +924,7 @@ describe("ConnectableDevice", () => {
   });
 
   describe("refresh", () => {
+    let project;
     let device;
     let isDriverActive;
     let isDriverConnected;
@@ -939,6 +994,7 @@ describe("ConnectableDevice", () => {
     let loggerWarnOriginal;
 
     beforeEach(() => {
+      project = "testProject";
       loggerWarnMock = jest.fn();
       loggerWarnOriginal = logger.warn;
       logger.warn = loggerWarnMock;
@@ -1046,6 +1102,8 @@ describe("ConnectableDevice", () => {
       //#region create variables
 
       variable1 = createFakeConnectableVariable(
+        project,
+        null,
         "variable1ID",
         "variable1Name",
         "FakeVariable",
@@ -1058,6 +1116,8 @@ describe("ConnectableDevice", () => {
       );
 
       variable2 = createFakeConnectableVariable(
+        project,
+        null,
         "variable2ID",
         "variable2Name",
         "FakeVariable",
@@ -1070,6 +1130,8 @@ describe("ConnectableDevice", () => {
       );
 
       variable3 = createFakeConnectableVariable(
+        project,
+        null,
         "variable3ID",
         "variable3Name",
         "FakeVariable",
@@ -1082,6 +1144,8 @@ describe("ConnectableDevice", () => {
       );
 
       variable4 = createFakeConnectableVariable(
+        project,
+        null,
         "variable4ID",
         "variable4Name",
         "FakeVariable",
@@ -1094,6 +1158,8 @@ describe("ConnectableDevice", () => {
       );
 
       variable5 = createFakeConnectableVariable(
+        project,
+        null,
         "variable5ID",
         "variable5Name",
         "FakeVariable",
@@ -1112,6 +1178,8 @@ describe("ConnectableDevice", () => {
       //#region create calcElements
 
       calcElement1 = createFakeCalcElement(
+        project,
+        null,
         "calcElement1ID",
         "calcElement1Name",
         "FakeCalcElement",
@@ -1122,6 +1190,8 @@ describe("ConnectableDevice", () => {
       );
 
       calcElement2 = createFakeCalcElement(
+        project,
+        null,
         "calcElement2ID",
         "calcElement2Name",
         "FakeCalcElement",
@@ -1132,6 +1202,8 @@ describe("ConnectableDevice", () => {
       );
 
       calcElement3 = createFakeCalcElement(
+        project,
+        null,
         "calcElement3ID",
         "calcElement3Name",
         "FakeCalcElement",
@@ -1148,6 +1220,8 @@ describe("ConnectableDevice", () => {
       //#region create alerts
 
       alert1 = createFakeAlert(
+        project,
+        null,
         "alert1ID",
         "alert1Name",
         "FakeAlert",
@@ -1158,6 +1232,8 @@ describe("ConnectableDevice", () => {
       );
 
       alert2 = createFakeAlert(
+        project,
+        null,
         "alert2ID",
         "alert2Name",
         "FakeAlert",
@@ -1168,6 +1244,8 @@ describe("ConnectableDevice", () => {
       );
 
       alert3 = createFakeAlert(
+        project,
+        null,
         "alert3ID",
         "alert3Name",
         "FakeAlert",
@@ -1209,6 +1287,7 @@ describe("ConnectableDevice", () => {
       //#endregion create requests
 
       device = createFakeConnectableDevice(
+        project,
         "device1ID",
         "FakeDevice",
         "device1Name",

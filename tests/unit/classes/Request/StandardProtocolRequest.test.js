@@ -25,6 +25,8 @@ describe("StandardProtocolRequest", () => {
 
     beforeEach(() => {
       variable1 = createFakeStandardProtocolVariable(
+        null,
+        null,
         "var1Id",
         "var1Name",
         "FakeVar",
@@ -42,6 +44,8 @@ describe("StandardProtocolRequest", () => {
         false
       );
       variable2 = createFakeStandardProtocolVariable(
+        null,
+        null,
         "var2Id",
         "var2Name",
         "FakeVar",
@@ -59,6 +63,8 @@ describe("StandardProtocolRequest", () => {
         false
       );
       variable3 = createFakeStandardProtocolVariable(
+        null,
+        null,
         "var3Id",
         "var3Name",
         "FakeVar",
@@ -292,6 +298,8 @@ describe("StandardProtocolRequest", () => {
       tickId = 1234;
 
       variable1 = createFakeStandardProtocolVariable(
+        null,
+        null,
         "var1Id",
         "var1Name",
         "FakeVariable",
@@ -306,6 +314,8 @@ describe("StandardProtocolRequest", () => {
       );
 
       variable2 = createFakeStandardProtocolVariable(
+        null,
+        null,
         "var2Id",
         "var2Name",
         "FakeVariable",
@@ -320,6 +330,8 @@ describe("StandardProtocolRequest", () => {
       );
 
       variable3 = createFakeStandardProtocolVariable(
+        null,
+        null,
         "var3Id",
         "var3Name",
         "FakeVariable",
@@ -469,6 +481,8 @@ describe("StandardProtocolRequest", () => {
 
     beforeEach(() => {
       variable1 = createFakeStandardProtocolVariable(
+        null,
+        null,
         "var1Id",
         "var1Name",
         "FakeVariable",
@@ -487,6 +501,8 @@ describe("StandardProtocolRequest", () => {
       );
 
       variable2 = createFakeStandardProtocolVariable(
+        null,
+        null,
         "var2Id",
         "var2Name",
         "FakeVariable",
@@ -505,6 +521,8 @@ describe("StandardProtocolRequest", () => {
       );
 
       variable3 = createFakeStandardProtocolVariable(
+        null,
+        null,
         "var3Id",
         "var3Name",
         "FakeVariable",

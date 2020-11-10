@@ -245,14 +245,27 @@ module.exports.createFakeConnectableDevice = (
   device._name = name;
 
   device._variables = {};
-  for (let variable of variables) device._variables[variable.ID] = variable;
+  for (let variable of variables) {
+    variable._project = project;
+    variable._device = device;
+    device._variables[variable.ID] = variable;
+  }
 
   device._calcElements = {};
-  for (let calcElement of calcElements)
+  for (let calcElement of calcElements) {
     device._calcElements[calcElement.ID] = calcElement;
 
+    calcElement._project = project;
+    calcElement._device = device;
+  }
+
   device._alerts = {};
-  for (let alert of alerts) device._alerts[alert.ID] = alert;
+  for (let alert of alerts) {
+    device._alerts[alert.ID] = alert;
+
+    alert._project = project;
+    alert._device = device;
+  }
 
   //Creating and initializing requets manager
   device._requestManager = new RequestManager();
@@ -434,6 +447,8 @@ module.exports.createFakeMBVariable = (
 };
 
 module.exports.testMBVariable = (
+  project,
+  device,
   variable,
   payload,
   value,
@@ -441,6 +456,8 @@ module.exports.testMBVariable = (
   variableClass,
   exactValue = false
 ) => {
+  expect(variable._project).toEqual(project);
+  expect(variable._device).toEqual(device);
   expect(variable instanceof variableClass).toEqual(true);
   expect(variable.ID).toEqual(payload.id);
   expect(variable.Name).toEqual(payload.name);
@@ -580,14 +597,27 @@ module.exports.createFakeDevice = (
   device._name = name;
 
   device._variables = {};
-  for (let variable of variables) device._variables[variable.ID] = variable;
+  for (let variable of variables) {
+    variable._project = project;
+    variable._device = device;
+    device._variables[variable.ID] = variable;
+  }
 
   device._calcElements = {};
-  for (let calcElement of calcElements)
+  for (let calcElement of calcElements) {
     device._calcElements[calcElement.ID] = calcElement;
 
+    calcElement._project = project;
+    calcElement._device = device;
+  }
+
   device._alerts = {};
-  for (let alert of alerts) device._alerts[alert.ID] = alert;
+  for (let alert of alerts) {
+    device._alerts[alert.ID] = alert;
+
+    alert._project = project;
+    alert._device = device;
+  }
 
   device._isActive = isActive;
 

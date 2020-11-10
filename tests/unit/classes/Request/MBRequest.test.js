@@ -94,6 +94,8 @@ describe("MBRequest", () => {
 
     let exec = () => {
       variable1 = createFakeMBVariable(
+        null,
+        null,
         "var1Id",
         "var1Name",
         "FakeVar",
@@ -117,6 +119,8 @@ describe("MBRequest", () => {
       );
 
       variable2 = createFakeMBVariable(
+        null,
+        null,
         "var2Id",
         "var2Name",
         "FakeVar",
@@ -140,6 +144,8 @@ describe("MBRequest", () => {
       );
 
       variable3 = createFakeMBVariable(
+        null,
+        null,
         "var3Id",
         "var3Name",
         "FakeVar",

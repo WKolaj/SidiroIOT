@@ -250,6 +250,8 @@ describe("MBDriver", () => {
 
     let exec = async () => {
       variable1 = createFakeMBVariable(
+        null,
+        null,
         "var1Id",
         "var1Name",
         "FakeVar",
@@ -273,6 +275,8 @@ describe("MBDriver", () => {
       );
 
       variable2 = createFakeMBVariable(
+        null,
+        null,
         "var2Id",
         "var2Name",
         "FakeVar",
@@ -296,6 +300,8 @@ describe("MBDriver", () => {
       );
 
       variable3 = createFakeMBVariable(
+        null,
+        null,
         "var3Id",
         "var3Name",
         "FakeVar",
@@ -724,6 +730,8 @@ describe("MBDriver", () => {
 
     let exec = async () => {
       variable1 = createFakeMBVariable(
+        null,
+        null,
         "var1Id",
         "var1Name",
         "FakeVar",
@@ -747,6 +755,8 @@ describe("MBDriver", () => {
       );
 
       variable2 = createFakeMBVariable(
+        null,
+        null,
         "var2Id",
         "var2Name",
         "FakeVar",
@@ -770,6 +780,8 @@ describe("MBDriver", () => {
       );
 
       variable3 = createFakeMBVariable(
+        null,
+        null,
         "var3Id",
         "var3Name",
         "FakeVar",

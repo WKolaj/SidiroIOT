@@ -12,7 +12,27 @@ const Device = require("../../../../classes/Device/Device");
 describe("Device", () => {
   //TODO - add init tests - after creating internal and associated variables
 
+  describe("constructor", () => {
+    let project;
+
+    beforeEach(() => {
+      project = "testProject";
+    });
+
+    let exec = () => {
+      return new Device(project);
+    };
+
+    it("should create new ConnectableDevice and assign project to Device", () => {
+      let result = exec();
+
+      expect(result instanceof Device).toEqual(true);
+      expect(result._project).toEqual(project);
+    });
+  });
+
   describe("IsActive", () => {
+    let project;
     let device;
     let isDeviceActive;
     let getActiveMockFunc;
@@ -20,6 +40,7 @@ describe("Device", () => {
     let overrideIsActive;
 
     beforeEach(() => {
+      project = "testProject";
       getActiveMockFunc = jest.fn(() => {
         return isDeviceActive;
       });
@@ -29,7 +50,7 @@ describe("Device", () => {
 
     let exec = () => {
       isDeviceActive = false;
-      device = new Device();
+      device = new Device(project);
       if (overrideGetActiveFunc) device._getIsActiveState = getActiveMockFunc;
       if (overrideIsActive) device._isActive = isDeviceActive;
       return device.IsActive;
@@ -65,20 +86,22 @@ describe("Device", () => {
   });
 
   describe("activate", () => {
+    let project;
     let device;
     let isDeviceActive;
 
     beforeEach(() => {
+      project = "testProject";
       isDeviceActive = false;
     });
 
     let exec = async () => {
       device = createFakeDevice(
+        project,
         "device1Id",
         "FakeDevice",
         "device1Name",
-        100,
-        jest.fn(),
+        [],
         [],
         [],
         isDeviceActive
@@ -112,20 +135,22 @@ describe("Device", () => {
   });
 
   describe("deactivate", () => {
+    let project;
     let device;
     let isDeviceActive;
 
     beforeEach(() => {
+      project = "testProject";
       isDeviceActive = true;
     });
 
     let exec = async () => {
       device = createFakeDevice(
+        project,
         "device1Id",
         "FakeDevice",
         "device1Name",
-        100,
-        jest.fn(),
+        [],
         [],
         [],
         isDeviceActive
@@ -159,6 +184,7 @@ describe("Device", () => {
   });
 
   describe("generatePayload", () => {
+    let project;
     let device;
     let deviceId;
     let deviceName;
@@ -213,6 +239,7 @@ describe("Device", () => {
     let addAlert3;
 
     beforeEach(() => {
+      project = "testProject";
       deviceId = "device1ID";
       deviceName = "device1Name";
       deviceType = "FakeDevice";
@@ -290,6 +317,8 @@ describe("Device", () => {
       variables = [];
 
       variable1 = createFakeVariable(
+        project,
+        null,
         "variable1ID",
         "variable1Name",
         "FakeVariable",
@@ -299,6 +328,8 @@ describe("Device", () => {
       );
 
       variable2 = createFakeVariable(
+        project,
+        null,
         "variable2ID",
         "variable2Name",
         "FakeVariable",
@@ -308,6 +339,8 @@ describe("Device", () => {
       );
 
       variable3 = createFakeVariable(
+        project,
+        null,
         "variable3ID",
         "variable3Name",
         "FakeVariable",
@@ -317,6 +350,8 @@ describe("Device", () => {
       );
 
       variable4 = createFakeVariable(
+        project,
+        null,
         "variable4ID",
         "variable4Name",
         "FakeVariable",
@@ -326,6 +361,8 @@ describe("Device", () => {
       );
 
       variable5 = createFakeVariable(
+        project,
+        null,
         "variable5ID",
         "variable5Name",
         "FakeVariable",
@@ -347,6 +384,8 @@ describe("Device", () => {
       calcElements = [];
 
       calcElement1 = createFakeCalcElement(
+        project,
+        null,
         "calcElement1ID",
         "calcElement1Name",
         "FakeCalcElement",
@@ -357,6 +396,8 @@ describe("Device", () => {
       );
 
       calcElement2 = createFakeCalcElement(
+        project,
+        null,
         "calcElement2ID",
         "calcElement2Name",
         "FakeCalcElement",
@@ -367,6 +408,8 @@ describe("Device", () => {
       );
 
       calcElement3 = createFakeCalcElement(
+        project,
+        null,
         "calcElement3ID",
         "calcElement3Name",
         "FakeCalcElement",
@@ -387,6 +430,8 @@ describe("Device", () => {
       alerts = [];
 
       alert1 = createFakeAlert(
+        project,
+        null,
         "alert1ID",
         "alert1Name",
         "FakeAlert",
@@ -397,6 +442,8 @@ describe("Device", () => {
       );
 
       alert2 = createFakeAlert(
+        project,
+        null,
         "alert2ID",
         "alert2Name",
         "FakeAlert",
@@ -407,6 +454,8 @@ describe("Device", () => {
       );
 
       alert3 = createFakeAlert(
+        project,
+        null,
         "alert3ID",
         "alert3Name",
         "FakeAlert",
@@ -422,7 +471,7 @@ describe("Device", () => {
 
       //#endregion create alerts
 
-      device = new Device();
+      device = new Device(project);
 
       await device.init({
         id: deviceId,
@@ -655,6 +704,7 @@ describe("Device", () => {
     let exec = async () => {
       variable1 = createFakeVariable(
         project,
+        null,
         "variable1ID",
         "variable1Name",
         "FakeVariable",
@@ -666,6 +716,7 @@ describe("Device", () => {
 
       variable2 = createFakeVariable(
         project,
+        null,
         "variable2ID",
         "variable2Name",
         "FakeVariable",
@@ -677,6 +728,7 @@ describe("Device", () => {
 
       variable3 = createFakeVariable(
         project,
+        null,
         "variable3ID",
         "variable3Name",
         "FakeVariable",
@@ -691,6 +743,7 @@ describe("Device", () => {
 
       calcElement1 = createFakeCalcElement(
         project,
+        null,
         "calcElement1ID",
         "calcElement1Name",
         "FakeCalcElement",
@@ -702,6 +755,7 @@ describe("Device", () => {
 
       calcElement2 = createFakeCalcElement(
         project,
+        null,
         "calcElement2ID",
         "calcElement2Name",
         "FakeCalcElement",
@@ -713,6 +767,7 @@ describe("Device", () => {
 
       calcElement3 = createFakeCalcElement(
         project,
+        null,
         "calcElement3ID",
         "calcElement3Name",
         "FakeCalcElement",
@@ -728,6 +783,7 @@ describe("Device", () => {
 
       alert1 = createFakeAlert(
         project,
+        null,
         "alert1ID",
         "alert1Name",
         "FakeAlert",
@@ -739,6 +795,7 @@ describe("Device", () => {
 
       alert2 = createFakeAlert(
         project,
+        null,
         "alert2ID",
         "alert2Name",
         "FakeAlert",
@@ -750,6 +807,7 @@ describe("Device", () => {
 
       alert3 = createFakeAlert(
         project,
+        null,
         "alert3ID",
         "alert3Name",
         "FakeAlert",
@@ -827,9 +885,9 @@ describe("Device", () => {
 
       await exec();
 
-      expect(calcVariable1RefreshMock).not.toHaveBeenCalled();
-      expect(calcVariable2RefreshMock).not.toHaveBeenCalled();
-      expect(calcVariable3RefreshMock).not.toHaveBeenCalled();
+      expect(variable1RefreshMock).not.toHaveBeenCalled();
+      expect(variable2RefreshMock).not.toHaveBeenCalled();
+      expect(variable3RefreshMock).not.toHaveBeenCalled();
       expect(calcElement1RefreshMock).not.toHaveBeenCalled();
       expect(calcElement2RefreshMock).not.toHaveBeenCalled();
       expect(calcElement3RefreshMock).not.toHaveBeenCalled();
@@ -840,8 +898,8 @@ describe("Device", () => {
 
     it("should refresh all variables one by one that suits tickId, than refresh calcElements that suits tickId one by one and than refresh alerts that suits tickId one by one", async () => {
       variable1SampleTime = 1;
-      variable1SampleTime = 2;
-      variable1SampleTime = 3;
+      variable2SampleTime = 2;
+      variable3SampleTime = 3;
 
       calcElement1SampleTime = 1;
       calcElement2SampleTime = 2;
@@ -885,40 +943,90 @@ describe("Device", () => {
       expect(alert1RefreshMock).toHaveBeenCalledBefore(alert3RefreshMock);
     });
 
-    it("should invoke refreshVariable first, than refresh all calcElement one by one and than refresh all alerts one by one - if there are no calcElements", async () => {
-      createCalcElements = false;
+    it("should refresh all variables one by one, than refresh all calcElement one by one and than refresh all alerts one by one - if there are no variables", async () => {
+      createVariables = false;
 
       await exec();
 
-      expect(refreshVariableMockFunc).toHaveBeenCalledTimes(1);
-      expect(alert1RefreshMock).toHaveBeenCalledTimes(1);
-      expect(alert2RefreshMock).toHaveBeenCalledTimes(1);
-      expect(alert3RefreshMock).toHaveBeenCalledTimes(1);
-
-      expect(alert1RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
-      expect(alert2RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
-      expect(alert3RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
-
-      expect(refreshVariableMockFunc).toHaveBeenCalledBefore(alert1RefreshMock);
-      expect(alert1RefreshMock).toHaveBeenCalledBefore(alert2RefreshMock);
-      expect(alert2RefreshMock).toHaveBeenCalledBefore(alert3RefreshMock);
-    });
-
-    it("should invoke refreshVariable first, than refresh all calcElement one by one and than refresh all alerts one by one - if there are no alerts", async () => {
-      createAlerts = false;
-
-      await exec();
-
-      expect(refreshVariableMockFunc).toHaveBeenCalledTimes(1);
       expect(calcElement1RefreshMock).toHaveBeenCalledTimes(1);
       expect(calcElement2RefreshMock).toHaveBeenCalledTimes(1);
       expect(calcElement3RefreshMock).toHaveBeenCalledTimes(1);
+
+      expect(alert1RefreshMock).toHaveBeenCalledTimes(1);
+      expect(alert2RefreshMock).toHaveBeenCalledTimes(1);
+      expect(alert3RefreshMock).toHaveBeenCalledTimes(1);
 
       expect(calcElement1RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
       expect(calcElement2RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
       expect(calcElement3RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
 
-      expect(refreshVariableMockFunc).toHaveBeenCalledBefore(
+      expect(alert1RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(alert2RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(alert3RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+
+      expect(calcElement1RefreshMock).toHaveBeenCalledBefore(
+        calcElement2RefreshMock
+      );
+      expect(calcElement2RefreshMock).toHaveBeenCalledBefore(
+        calcElement3RefreshMock
+      );
+      expect(calcElement3RefreshMock).toHaveBeenCalledBefore(alert1RefreshMock);
+      expect(alert1RefreshMock).toHaveBeenCalledBefore(alert2RefreshMock);
+      expect(alert2RefreshMock).toHaveBeenCalledBefore(alert3RefreshMock);
+    });
+
+    it("should refresh all variables one by one, than refresh all calcElement one by one and than refresh all alerts one by one - if there are no calcElements", async () => {
+      createCalcElements = false;
+
+      await exec();
+
+      expect(variable1RefreshMock).toHaveBeenCalledTimes(1);
+      expect(variable2RefreshMock).toHaveBeenCalledTimes(1);
+      expect(variable3RefreshMock).toHaveBeenCalledTimes(1);
+
+      expect(alert1RefreshMock).toHaveBeenCalledTimes(1);
+      expect(alert2RefreshMock).toHaveBeenCalledTimes(1);
+      expect(alert3RefreshMock).toHaveBeenCalledTimes(1);
+
+      expect(variable1RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(variable1RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(variable1RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+
+      expect(alert1RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(alert2RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(alert3RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+
+      expect(variable1RefreshMock).toHaveBeenCalledBefore(variable2RefreshMock);
+      expect(variable2RefreshMock).toHaveBeenCalledBefore(variable3RefreshMock);
+      expect(variable3RefreshMock).toHaveBeenCalledBefore(alert1RefreshMock);
+      expect(alert1RefreshMock).toHaveBeenCalledBefore(alert2RefreshMock);
+      expect(alert2RefreshMock).toHaveBeenCalledBefore(alert3RefreshMock);
+    });
+
+    it("should refresh all variables one by one, than refresh all calcElement one by one and than refresh all alerts one by one - if there are no alerts", async () => {
+      createAlerts = false;
+
+      await exec();
+
+      expect(variable1RefreshMock).toHaveBeenCalledTimes(1);
+      expect(variable2RefreshMock).toHaveBeenCalledTimes(1);
+      expect(variable3RefreshMock).toHaveBeenCalledTimes(1);
+
+      expect(calcElement1RefreshMock).toHaveBeenCalledTimes(1);
+      expect(calcElement2RefreshMock).toHaveBeenCalledTimes(1);
+      expect(calcElement3RefreshMock).toHaveBeenCalledTimes(1);
+
+      expect(variable1RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(variable1RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(variable1RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+
+      expect(calcElement1RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(calcElement2RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(calcElement3RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+
+      expect(variable1RefreshMock).toHaveBeenCalledBefore(variable2RefreshMock);
+      expect(variable2RefreshMock).toHaveBeenCalledBefore(variable3RefreshMock);
+      expect(variable3RefreshMock).toHaveBeenCalledBefore(
         calcElement1RefreshMock
       );
       expect(calcElement1RefreshMock).toHaveBeenCalledBefore(
@@ -929,26 +1037,39 @@ describe("Device", () => {
       );
     });
 
-    it("should refresh all calcElement one by one and than refresh all alerts one by one - event if refreshVariables throws", async () => {
-      refreshVariableMockFunc = async () => {
+    it("should refresh all variables one by one, then all calcElement one by one and than refresh all alerts one by one - even if one of variables throws while refreshing", async () => {
+      variable2RefreshMock = async () => {
         throw new Error("testError");
       };
+
       await exec();
+
+      expect(variable1RefreshMock).toHaveBeenCalledTimes(1);
+      expect(variable3RefreshMock).toHaveBeenCalledTimes(1);
 
       expect(calcElement1RefreshMock).toHaveBeenCalledTimes(1);
       expect(calcElement2RefreshMock).toHaveBeenCalledTimes(1);
       expect(calcElement3RefreshMock).toHaveBeenCalledTimes(1);
+
       expect(alert1RefreshMock).toHaveBeenCalledTimes(1);
       expect(alert2RefreshMock).toHaveBeenCalledTimes(1);
       expect(alert3RefreshMock).toHaveBeenCalledTimes(1);
 
+      expect(variable1RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(variable3RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+
       expect(calcElement1RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
       expect(calcElement2RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
       expect(calcElement3RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+
       expect(alert1RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
       expect(alert2RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
       expect(alert3RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
 
+      expect(variable1RefreshMock).toHaveBeenCalledBefore(variable3RefreshMock);
+      expect(variable3RefreshMock).toHaveBeenCalledBefore(
+        calcElement1RefreshMock
+      );
       expect(calcElement1RefreshMock).toHaveBeenCalledBefore(
         calcElement2RefreshMock
       );
@@ -964,13 +1085,16 @@ describe("Device", () => {
       expect(loggerWarnMock.mock.calls[0][0]).toEqual("testError");
     });
 
-    it("should invoke refreshVariable first, than refresh all calcElement one by one and than refresh all alerts one by one - even if one of calcElement throws while refreshing", async () => {
+    it("should refresh all variables one by one, than refresh all calcElement one by one and than refresh all alerts one by one - even if one of calcElement throws while refreshing", async () => {
       calcElement2RefreshMock = async () => {
         throw new Error("testError");
       };
       await exec();
 
-      expect(refreshVariableMockFunc).toHaveBeenCalledTimes(1);
+      expect(variable1RefreshMock).toHaveBeenCalledTimes(1);
+      expect(variable2RefreshMock).toHaveBeenCalledTimes(1);
+      expect(variable3RefreshMock).toHaveBeenCalledTimes(1);
+
       expect(calcElement1RefreshMock).toHaveBeenCalledTimes(1);
       expect(calcElement3RefreshMock).toHaveBeenCalledTimes(1);
       expect(alert1RefreshMock).toHaveBeenCalledTimes(1);
@@ -983,7 +1107,9 @@ describe("Device", () => {
       expect(alert2RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
       expect(alert3RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
 
-      expect(refreshVariableMockFunc).toHaveBeenCalledBefore(
+      expect(variable1RefreshMock).toHaveBeenCalledBefore(variable2RefreshMock);
+      expect(variable2RefreshMock).toHaveBeenCalledBefore(variable3RefreshMock);
+      expect(variable3RefreshMock).toHaveBeenCalledBefore(
         calcElement1RefreshMock
       );
       expect(calcElement1RefreshMock).toHaveBeenCalledBefore(
@@ -998,14 +1124,17 @@ describe("Device", () => {
       expect(loggerWarnMock.mock.calls[0][0]).toEqual("testError");
     });
 
-    it("should invoke refreshVariable first, than refresh all calcElement one by one and than refresh all alerts one by one - event if one of alerts throws while refreshing", async () => {
+    it("should refresh all variables one by one,, than refresh all calcElement one by one and than refresh all alerts one by one - event if one of alerts throws while refreshing", async () => {
       alert2RefreshMock = async () => {
         throw new Error("testError");
       };
 
       await exec();
 
-      expect(refreshVariableMockFunc).toHaveBeenCalledTimes(1);
+      expect(variable1RefreshMock).toHaveBeenCalledTimes(1);
+      expect(variable2RefreshMock).toHaveBeenCalledTimes(1);
+      expect(variable3RefreshMock).toHaveBeenCalledTimes(1);
+
       expect(calcElement1RefreshMock).toHaveBeenCalledTimes(1);
       expect(calcElement2RefreshMock).toHaveBeenCalledTimes(1);
       expect(calcElement3RefreshMock).toHaveBeenCalledTimes(1);
@@ -1018,7 +1147,9 @@ describe("Device", () => {
       expect(alert1RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
       expect(alert3RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
 
-      expect(refreshVariableMockFunc).toHaveBeenCalledBefore(
+      expect(variable1RefreshMock).toHaveBeenCalledBefore(variable2RefreshMock);
+      expect(variable2RefreshMock).toHaveBeenCalledBefore(variable3RefreshMock);
+      expect(variable3RefreshMock).toHaveBeenCalledBefore(
         calcElement1RefreshMock
       );
       expect(calcElement1RefreshMock).toHaveBeenCalledBefore(
