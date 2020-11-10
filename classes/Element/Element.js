@@ -163,6 +163,16 @@ class Element {
   }
 
   //#endregion ========= PRIVATE VIRTUAL METHODS =========
+
+  //#region ========= PUBLIC ABSTRACT METHODS =========
+
+  /**
+   * @description Method for checking if value can be set to element. Used for checking formatting and also blocking assigning value to read only elements. Returns null if value can be set, or string with message why value cannot be set. MUST BE OVERRIDEN IN CHILD CLASSES
+   * @param {Object} value value to be set
+   */
+  checkIfValueCanBeSet(value) {}
+
+  //#endregion ========= PUBLIC ABSTRACT METHODS =========
 }
 
 module.exports = Element;

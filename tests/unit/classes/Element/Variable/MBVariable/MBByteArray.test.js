@@ -1057,4 +1057,104 @@ describe("MBByteArray", () => {
       expect(result).toEqual(`"writeAsSingle" must be a boolean`);
     });
   });
+
+  describe("checkIfValueCanBeSet", () => {
+    let project;
+    let device;
+    let variable;
+    let value;
+    let length;
+
+    beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
+      value = [1, 2, 3, 4, 6, 7, 8, 9];
+      length = 4;
+    });
+
+    let exec = () => {
+      variable = new MBByteArray(project, device);
+      variable._length = length;
+      return variable.checkIfValueCanBeSet(value, length);
+    };
+
+    it("should return null if value and length is valid", () => {
+      let result = exec();
+
+      expect(result).toEqual(null);
+    });
+
+    it("should return null message if value and length is valid - empty value, length 0", () => {
+      length = 0;
+      value = [];
+
+      let result = exec();
+
+      expect(result).toEqual(`"value" does not contain 1 required value(s)`);
+    });
+
+    it("should return message if value and length is invalid", () => {
+      value = [1, 2, 3, 4, 6, 7, 8, 9];
+      length = 5;
+      let result = exec();
+
+      expect(result).toEqual(`"value" must contain 10 items`);
+    });
+
+    it("should return message if value is undefined", () => {
+      value = undefined;
+
+      let result = exec();
+
+      expect(result).toEqual(`"value" is required`);
+    });
+
+    it("should return message if value is null", () => {
+      value = null;
+
+      let result = exec();
+
+      expect(result).toEqual(`"value" must be an array`);
+    });
+
+    it("should return message if value is not a valid array", () => {
+      value = 1234.4231;
+
+      let result = exec();
+
+      expect(result).toEqual(`"value" must be an array`);
+    });
+
+    it("should return message if value in array is null", () => {
+      value = [1, null, 3, 4, 6, 7, 8, 9];
+
+      let result = exec();
+
+      expect(result).toEqual(`"[1]" must be a number`);
+    });
+
+    it("should return message if value in array is not a number", () => {
+      value = [1, "test", 3, 4, 6, 7, 8, 9];
+
+      let result = exec();
+
+      expect(result).toEqual(`"[1]" must be a number`);
+    });
+
+    it("should return message if value in array is samller than 0", () => {
+      value = [1, -1, 3, 4, 6, 7, 8, 9];
+
+      let result = exec();
+
+      expect(result).toEqual(`"[1]" must be greater than or equal to 0`);
+    });
+
+    it("should return message if value in array is greater than 255", () => {
+      value = [1, 256, 3, 4, 6, 7, 8, 9];
+
+      let result = exec();
+
+      expect(result).toEqual(`"[1]" must be less than or equal to 255`);
+    });
+  });
 });

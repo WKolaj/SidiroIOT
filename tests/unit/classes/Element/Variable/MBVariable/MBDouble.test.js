@@ -976,4 +976,62 @@ describe("MBDouble", () => {
       expect(result).toEqual(`"writeAsSingle" must be a boolean`);
     });
   });
+
+  describe("checkIfValueCanBeSet", () => {
+    let project;
+    let device;
+    let variable;
+    let value;
+
+    beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
+      value = true;
+    });
+
+    let exec = () => {
+      variable = new MBDouble(project, device);
+      return variable.checkIfValueCanBeSet(value);
+    };
+
+    it("should return null if value is a valid double", () => {
+      value = 123.321;
+
+      let result = exec();
+
+      expect(result).toEqual(null);
+    });
+
+    it("should return null if value is a valid integer", () => {
+      value = 123;
+
+      let result = exec();
+
+      expect(result).toEqual(null);
+    });
+
+    it("should return message if value is undefined", () => {
+      value = undefined;
+
+      let result = exec();
+
+      expect(result).toEqual(`"value" is required`);
+    });
+
+    it("should return message if value is null", () => {
+      value = null;
+
+      let result = exec();
+
+      expect(result).toEqual(`"value" must be a number`);
+    });
+
+    it("should return message if value is not a valid number", () => {
+      value = "fakeValue";
+
+      let result = exec();
+
+      expect(result).toEqual(`"value" must be a number`);
+    });
+  });
 });

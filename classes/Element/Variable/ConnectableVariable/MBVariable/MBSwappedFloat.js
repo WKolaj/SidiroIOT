@@ -1,5 +1,6 @@
 const MBVariable = require("./MBVariable");
 const Joi = require("joi");
+const { checkFloat } = require("../../../ElementsValueModels");
 
 //#region ========= PAYLOAD VALIDATION =========
 
@@ -149,6 +150,14 @@ class MBSwappedFloat extends MBVariable {
       throw new Error("Invalid length in payload of MBSwappedFloat");
 
     await super.init(payload);
+  }
+
+  /**
+   * @description Method for checking if value can be set to element. Used for checking formatting and also blocking assigning value to read only elements. Returns null if value can be set, or string with message why value cannot be set
+   * @param {Object} value value to be set
+   */
+  checkIfValueCanBeSet(value) {
+    return checkFloat(value);
   }
 
   //#endregion ========= OVERRIDE PUBLIC METHODS =========

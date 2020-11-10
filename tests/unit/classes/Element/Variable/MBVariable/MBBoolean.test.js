@@ -905,4 +905,62 @@ describe("MBBoolean", () => {
       expect(result).toEqual(`"writeAsSingle" must be a boolean`);
     });
   });
+
+  describe("checkIfValueCanBeSet", () => {
+    let project;
+    let device;
+    let variable;
+    let value;
+
+    beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
+      value = true;
+    });
+
+    let exec = () => {
+      variable = new MBBoolean(project, device);
+      return variable.checkIfValueCanBeSet(value);
+    };
+
+    it("should return null if value is a valid boolean (true)", () => {
+      value = false;
+
+      let result = exec();
+
+      expect(result).toEqual(null);
+    });
+
+    it("should return null if value is a valid boolean (false)", () => {
+      value = true;
+
+      let result = exec();
+
+      expect(result).toEqual(null);
+    });
+
+    it("should return message if value is undefined", () => {
+      value = undefined;
+
+      let result = exec();
+
+      expect(result).toEqual(`"value" is required`);
+    });
+
+    it("should return message if value is null", () => {
+      value = null;
+
+      let result = exec();
+
+      expect(result).toEqual(`"value" must be a boolean`);
+    });
+
+    it("should return message if value is not a valid boolean", () => {
+      value = 1234.4231;
+
+      let result = exec();
+
+      expect(result).toEqual(`"value" must be a boolean`);
+    });
+  });
 });

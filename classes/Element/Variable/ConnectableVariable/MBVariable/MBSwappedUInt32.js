@@ -1,5 +1,6 @@
 const MBVariable = require("./MBVariable");
 const Joi = require("joi");
+const { checkUInt32 } = require("../../../ElementsValueModels");
 
 //#region ========= PAYLOAD VALIDATION =========
 
@@ -132,6 +133,14 @@ class MBSwappedUInt32 extends MBVariable {
     let int2 = view2.getUint16(0);
 
     return [int1, int2];
+  }
+
+  /**
+   * @description Method for checking if value can be set to element. Used for checking formatting and also blocking assigning value to read only elements. Returns null if value can be set, or string with message why value cannot be set
+   * @param {Object} value value to be set
+   */
+  checkIfValueCanBeSet(value) {
+    return checkUInt32(value);
   }
 
   //#endregion ========= OVERRIDE PUBLIC METHODS =========]

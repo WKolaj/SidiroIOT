@@ -1,5 +1,6 @@
 const MBVariable = require("./MBVariable");
 const Joi = require("joi");
+const { checkByteArray } = require("../../../ElementsValueModels");
 
 //#region ========= PAYLOAD VALIDATION =========
 
@@ -132,6 +133,15 @@ class MBByteArray extends MBVariable {
 
     await super.init(payload);
   }
+
+  /**
+   * @description Method for checking if value can be set to element. Used for checking formatting and also blocking assigning value to read only elements. Returns null if value can be set, or string with message why value cannot be set
+   * @param {Object} value value to be set
+   */
+  checkIfValueCanBeSet(value) {
+    return checkByteArray(value, this.Length * 2);
+  }
+
   //#endregion ========= OVERRIDE PUBLIC METHODS =========
 
   //#region ========= OVERRIDE PRIVATE METHODS =========

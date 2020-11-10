@@ -1029,4 +1029,74 @@ describe("MBInt32", () => {
       expect(result).toEqual(`"writeAsSingle" must be a boolean`);
     });
   });
+
+  describe("checkIfValueCanBeSet", () => {
+    let project;
+    let device;
+    let variable;
+    let value;
+
+    beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
+      value = 123;
+    });
+
+    let exec = () => {
+      variable = new MBInt32(project, device);
+      return variable.checkIfValueCanBeSet(value);
+    };
+
+    it("should return null if value is a valid integer", () => {
+      value = 123;
+
+      let result = exec();
+
+      expect(result).toEqual(null);
+    });
+
+    it("should return message if value is greater than 2147483647", () => {
+      value = 2147483648;
+
+      let result = exec();
+
+      expect(result).toEqual(
+        `"value" must be less than or equal to 2147483647`
+      );
+    });
+
+    it("should return message if value is sammler than -2147483648", () => {
+      value = -2147483649;
+
+      let result = exec();
+
+      expect(result).toEqual(
+        `"value" must be greater than or equal to -2147483648`
+      );
+    });
+
+    it("should return message if value is undefined", () => {
+      value = undefined;
+
+      let result = exec();
+
+      expect(result).toEqual(`"value" is required`);
+    });
+
+    it("should return message if value is null", () => {
+      value = null;
+
+      let result = exec();
+
+      expect(result).toEqual(`"value" must be a number`);
+    });
+
+    it("should return message if value is not a valid number", () => {
+      value = "fakeValue";
+
+      let result = exec();
+
+      expect(result).toEqual(`"value" must be a number`);
+    });
+  });
 });
