@@ -21,6 +21,7 @@ const SumCalculator = require("../../Element/CalcElement/SumCalculator");
 const Joi = require("joi");
 const ValueFromByteArrayCalculator = require("../../Element/CalcElement/ValueFromByteArrayCalculator");
 const IncreaseCalculator = require("../../Element/CalcElement/IncreaseCalculator");
+const AverageCalculator = require("../../Element/CalcElement/AverageCalculator");
 
 //#region ========= PAYLOAD VALIDATION =========
 
@@ -122,6 +123,11 @@ const validateCalcElementsPayload = (calcElementsPayload, helpers) => {
         break;
       case "IncreaseCalculator":
         calcElementMessage = IncreaseCalculator.validatePayload(
+          calcElementPayload
+        );
+        break;
+      case "AverageCalculator":
+        calcElementMessage = AverageCalculator.validatePayload(
           calcElementPayload
         );
         break;

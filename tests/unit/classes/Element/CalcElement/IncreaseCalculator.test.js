@@ -912,6 +912,33 @@ describe("IncreaseCalculator", () => {
       expect(calcElement.LastValueTick).toEqual(0);
     });
 
+    it("should leave calculationStarted as true, beginIntervalTick, endIntervalTick, not set new begin Value not calculate and set not new increase -  if tickId is from earlier interval", async () => {
+      //tickId = 1213 -> 1245 to 1260
+      //actual interval 1215 to 1230
+
+      tickId = 1213;
+      beginIntervalTick = 1215;
+      endIntervalTick = 1230;
+      beginValue = 100;
+      payload.factor = 3;
+      variable2Value = 300;
+      calculationStarted = true;
+      refreshedFirstTime = true;
+
+      await exec();
+
+      expect(calcElement._refreshedFirstTime).toEqual(true);
+      expect(calcElement._calculationStarted).toEqual(true);
+
+      expect(calcElement._beginIntervalTick).toEqual(1215);
+      expect(calcElement._endIntervalTick).toEqual(1230);
+
+      //Begin value should be set but value and LastValueTick should stay as they are
+      expect(calcElement._beginValue).toEqual(100);
+      expect(calcElement.Value).toEqual(payload.defaultValue);
+      expect(calcElement.LastValueTick).toEqual(0);
+    });
+
     it("should leave calculationStarted as true, set new beginIntervalTick and new endIntervalTick, set new begin Value but not calculate and set new increase -  if tickId is exactly the begin of two intervals ahead", async () => {
       //tickId = 1245 -> 1245 to 1260
       //actual interval 1215 to 1230

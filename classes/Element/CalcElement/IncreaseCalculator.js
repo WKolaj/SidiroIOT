@@ -101,8 +101,8 @@ class IncreaseCalculator extends CalcElement {
    * @param {Number} tickId
    */
   _shouldStartNewInterval(tickId) {
-    //Returning true if tick id is outside actual interval - EVEN IF INTERVAL IS YOUNGER THAN ACTUAL - EG. TIMESHIFT OR CHANGE CLOCK
-    return tickId >= this._endIntervalTick || tickId < this._beginIntervalTick;
+    //Returning true if tick id is outside actual interval
+    return tickId >= this._endIntervalTick;
   }
 
   /**
@@ -120,7 +120,7 @@ class IncreaseCalculator extends CalcElement {
       this._shouldIncreaseBeSet(newBeginInterval)
     ) {
       let increase = this._calculateIncrease(tickId, value);
-      this.setValue(increase, newBeginInterval);
+      this.setValue(increase, this._endIntervalTick);
     }
 
     this._beginIntervalTick = newBeginInterval;
@@ -252,5 +252,3 @@ class IncreaseCalculator extends CalcElement {
 }
 
 module.exports = IncreaseCalculator;
-
-//TODO - add tests to this class
