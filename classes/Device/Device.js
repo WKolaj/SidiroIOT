@@ -347,6 +347,8 @@ class Device {
         return new SumCalculator(this._project, this);
       case "ValueFromByteArrayCalculator":
         return new ValueFromByteArrayCalculator(this._project, this);
+      case "IncreaseCalculator":
+        return new IncreaseCalculator(this._project, this);
       default:
         throw new Error(`Unrecognized CalcElement type: ${type}`);
     }

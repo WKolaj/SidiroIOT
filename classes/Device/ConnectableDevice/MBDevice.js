@@ -20,6 +20,7 @@ const FactorCalculator = require("../../Element/CalcElement/FactorCalculator");
 const SumCalculator = require("../../Element/CalcElement/SumCalculator");
 const Joi = require("joi");
 const ValueFromByteArrayCalculator = require("../../Element/CalcElement/ValueFromByteArrayCalculator");
+const IncreaseCalculator = require("../../Element/CalcElement/IncreaseCalculator");
 
 //#region ========= PAYLOAD VALIDATION =========
 
@@ -116,6 +117,11 @@ const validateCalcElementsPayload = (calcElementsPayload, helpers) => {
         break;
       case "ValueFromByteArrayCalculator":
         calcElementMessage = ValueFromByteArrayCalculator.validatePayload(
+          calcElementPayload
+        );
+        break;
+      case "IncreaseCalculator":
+        calcElementMessage = IncreaseCalculator.validatePayload(
           calcElementPayload
         );
         break;
