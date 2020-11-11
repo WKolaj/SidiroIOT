@@ -25,6 +25,9 @@ class AverageCalculator extends CalcElement {
     this._variableId = null;
     this._calculationInterval = null;
     this._valuesAndTicks = null;
+    this._refreshedFirstTime = null;
+    this._beginIntervalTick = null;
+    this._endIntervalTick = null;
   }
 
   //#endregion ========= CONSTRUCTOR =========
@@ -121,7 +124,7 @@ class AverageCalculator extends CalcElement {
     //Getting all ticks sorted from the smallest to the largest
     let allTicks = Object.keys(this._valuesAndTicks).sort((a, b) => a - b);
     if (allTicks.length === 0) {
-      return 0;
+      return actualValue;
     }
 
     let valueSum = 0;
@@ -193,6 +196,7 @@ class AverageCalculator extends CalcElement {
     this._factor = payload.factor;
     this._variableId = payload.variableID;
     this._calculationInterval = payload.calculationInterval;
+    this._valuesAndTicks = {};
   }
 
   /**
