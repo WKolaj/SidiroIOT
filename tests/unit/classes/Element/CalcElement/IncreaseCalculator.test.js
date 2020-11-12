@@ -1106,5 +1106,238 @@ describe("IncreaseCalculator", () => {
       //Last tick should be set to begin of new interval
       expect(calcElement.LastValueTick).toEqual(1230);
     });
+
+    it("should properly calculate whole procedure - from the begining, value difference is positive", async () => {
+      //tickId = 1234 -> 1230 to 1245
+      //previous interval 1215 to 1230
+
+      tickId = 1234;
+      beginIntervalTick = null;
+      endIntervalTick = null;
+      beginValue = null;
+      calculationStarted = false;
+      refreshedFirstTime = false;
+      variable2Value = 100;
+
+      await exec();
+      //INTIALIZED but value not test
+
+      expect(calcElement._refreshedFirstTime).toEqual(true);
+      expect(calcElement._calculationStarted).toEqual(false);
+
+      //tickId = 1234 -> 1230 to 1245
+      expect(calcElement._beginIntervalTick).toEqual(1230);
+      expect(calcElement._endIntervalTick).toEqual(1245);
+
+      //Begin value, value and LastValueTick should stay as they are
+      expect(calcElement._beginValue).toEqual(null);
+      expect(calcElement.Value).toEqual(payload.defaultValue);
+      expect(calcElement.LastValueTick).toEqual(0);
+
+      variable2._value = 105;
+      await calcElement.refresh(1236);
+      variable2._value = 107;
+      await calcElement.refresh(1238);
+      variable2._value = 109;
+      await calcElement.refresh(1240);
+      variable2._value = 115;
+      await calcElement.refresh(1242);
+      variable2._value = 118;
+      await calcElement.refresh(1244);
+      variable2._value = 122;
+      await calcElement.refresh(1246);
+
+      //NEW INTERVAL - calculation started but value not set
+
+      expect(calcElement._refreshedFirstTime).toEqual(true);
+      expect(calcElement._calculationStarted).toEqual(true);
+
+      //tickId = 1234 -> 1230 to 1245
+      expect(calcElement._beginIntervalTick).toEqual(1245);
+      expect(calcElement._endIntervalTick).toEqual(1260);
+
+      //Begin value, value and LastValueTick should stay as they are
+      expect(calcElement._beginValue).toEqual(122);
+      expect(calcElement.Value).toEqual(payload.defaultValue);
+      expect(calcElement.LastValueTick).toEqual(0);
+
+      variable2._value = 120;
+      await calcElement.refresh(1248);
+      variable2._value = 122;
+      await calcElement.refresh(1252);
+      variable2._value = 124;
+      await calcElement.refresh(1256);
+      variable2._value = 126;
+      await calcElement.refresh(1258);
+      variable2._value = 128;
+      await calcElement.refresh(1262);
+
+      //(128-122)*5 = 30
+
+      //tickId = 1234 -> 1230 to 1245
+      expect(calcElement._beginIntervalTick).toEqual(1260);
+      expect(calcElement._endIntervalTick).toEqual(1275);
+
+      //Begin value, value and LastValueTick should stay as they are
+      expect(calcElement._beginValue).toEqual(128);
+      expect(calcElement.Value).toEqual(30);
+      expect(calcElement.LastValueTick).toEqual(1260);
+    });
+
+    it("should properly calculate whole procedure - from the begining, value difference is negative, overflow is enabled", async () => {
+      //tickId = 1234 -> 1230 to 1245
+      //previous interval 1215 to 1230
+
+      payload.overflow = 200;
+      tickId = 1234;
+      beginIntervalTick = null;
+      endIntervalTick = null;
+      beginValue = null;
+      calculationStarted = false;
+      refreshedFirstTime = false;
+      variable2Value = 100;
+
+      await exec();
+      //INTIALIZED but value not test
+
+      expect(calcElement._refreshedFirstTime).toEqual(true);
+      expect(calcElement._calculationStarted).toEqual(false);
+
+      //tickId = 1234 -> 1230 to 1245
+      expect(calcElement._beginIntervalTick).toEqual(1230);
+      expect(calcElement._endIntervalTick).toEqual(1245);
+
+      //Begin value, value and LastValueTick should stay as they are
+      expect(calcElement._beginValue).toEqual(null);
+      expect(calcElement.Value).toEqual(payload.defaultValue);
+      expect(calcElement.LastValueTick).toEqual(0);
+
+      variable2._value = 105;
+      await calcElement.refresh(1236);
+      variable2._value = 107;
+      await calcElement.refresh(1238);
+      variable2._value = 109;
+      await calcElement.refresh(1240);
+      variable2._value = 115;
+      await calcElement.refresh(1242);
+      variable2._value = 118;
+      await calcElement.refresh(1244);
+      variable2._value = 122;
+      await calcElement.refresh(1246);
+
+      //NEW INTERVAL - calculation started but value not set
+
+      expect(calcElement._refreshedFirstTime).toEqual(true);
+      expect(calcElement._calculationStarted).toEqual(true);
+
+      //tickId = 1234 -> 1230 to 1245
+      expect(calcElement._beginIntervalTick).toEqual(1245);
+      expect(calcElement._endIntervalTick).toEqual(1260);
+
+      //Begin value, value and LastValueTick should stay as they are
+      expect(calcElement._beginValue).toEqual(122);
+      expect(calcElement.Value).toEqual(payload.defaultValue);
+      expect(calcElement.LastValueTick).toEqual(0);
+
+      variable2._value = 120;
+      await calcElement.refresh(1248);
+      variable2._value = 122;
+      await calcElement.refresh(1252);
+      variable2._value = 10;
+      await calcElement.refresh(1256);
+      variable2._value = 12;
+      await calcElement.refresh(1258);
+      variable2._value = 14;
+      await calcElement.refresh(1262);
+
+      //(128-122)*5 = 30
+
+      //tickId = 1234 -> 1230 to 1245
+      expect(calcElement._beginIntervalTick).toEqual(1260);
+      expect(calcElement._endIntervalTick).toEqual(1275);
+
+      //Begin value, value and LastValueTick should stay as they are
+      expect(calcElement._beginValue).toEqual(14);
+      expect(calcElement.Value).toEqual(5 * (200 - 122 + 14));
+      expect(calcElement.LastValueTick).toEqual(1260);
+    });
+
+    it("should properly calculate whole procedure - from the begining, value difference is negative, overflow is disabled", async () => {
+      //tickId = 1234 -> 1230 to 1245
+      //previous interval 1215 to 1230
+
+      payload.overflow = null;
+      tickId = 1234;
+      beginIntervalTick = null;
+      endIntervalTick = null;
+      beginValue = null;
+      calculationStarted = false;
+      refreshedFirstTime = false;
+      variable2Value = 100;
+
+      await exec();
+      //INTIALIZED but value not test
+
+      expect(calcElement._refreshedFirstTime).toEqual(true);
+      expect(calcElement._calculationStarted).toEqual(false);
+
+      //tickId = 1234 -> 1230 to 1245
+      expect(calcElement._beginIntervalTick).toEqual(1230);
+      expect(calcElement._endIntervalTick).toEqual(1245);
+
+      //Begin value, value and LastValueTick should stay as they are
+      expect(calcElement._beginValue).toEqual(null);
+      expect(calcElement.Value).toEqual(payload.defaultValue);
+      expect(calcElement.LastValueTick).toEqual(0);
+
+      variable2._value = 105;
+      await calcElement.refresh(1236);
+      variable2._value = 107;
+      await calcElement.refresh(1238);
+      variable2._value = 109;
+      await calcElement.refresh(1240);
+      variable2._value = 115;
+      await calcElement.refresh(1242);
+      variable2._value = 118;
+      await calcElement.refresh(1244);
+      variable2._value = 122;
+      await calcElement.refresh(1246);
+
+      //NEW INTERVAL - calculation started but value not set
+
+      expect(calcElement._refreshedFirstTime).toEqual(true);
+      expect(calcElement._calculationStarted).toEqual(true);
+
+      //tickId = 1234 -> 1230 to 1245
+      expect(calcElement._beginIntervalTick).toEqual(1245);
+      expect(calcElement._endIntervalTick).toEqual(1260);
+
+      //Begin value, value and LastValueTick should stay as they are
+      expect(calcElement._beginValue).toEqual(122);
+      expect(calcElement.Value).toEqual(payload.defaultValue);
+      expect(calcElement.LastValueTick).toEqual(0);
+
+      variable2._value = 120;
+      await calcElement.refresh(1248);
+      variable2._value = 122;
+      await calcElement.refresh(1252);
+      variable2._value = 10;
+      await calcElement.refresh(1256);
+      variable2._value = 12;
+      await calcElement.refresh(1258);
+      variable2._value = 14;
+      await calcElement.refresh(1262);
+
+      //(128-122)*5 = 30
+
+      //tickId = 1234 -> 1230 to 1245
+      expect(calcElement._beginIntervalTick).toEqual(1260);
+      expect(calcElement._endIntervalTick).toEqual(1275);
+
+      //Begin value, value and LastValueTick should stay as they are
+      expect(calcElement._beginValue).toEqual(14);
+      expect(calcElement.Value).toEqual(0);
+      expect(calcElement.LastValueTick).toEqual(1260);
+    });
   });
 });
