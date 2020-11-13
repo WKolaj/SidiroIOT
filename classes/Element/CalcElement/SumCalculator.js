@@ -82,6 +82,7 @@ class SumCalculator extends CalcElement {
    */
   async refresh(tickId) {
     let value = 0;
+    let lastValueTick = 0;
 
     for (let variableSumObject of this.VariableIDs) {
       let variableID = variableSumObject.variableID;
@@ -96,13 +97,18 @@ class SumCalculator extends CalcElement {
       let multipliedValue = variable.Value * factor;
 
       //Avoding setting NaN - eg. when variable value is not a valid float
-      if (isNaN(multipliedValue)) return;
+      if (!isFinite(multipliedValue)) return;
 
       value += multipliedValue;
+      if (variable.LastValueTick && variable.LastValueTick > lastValueTick)
+        lastValueTick = variable.LastValueTick;
     }
 
+    //Avoiding setting value if there is not value tick
+    if (!lastValueTick) return;
+
     //Setting new value
-    this.setValue(value, tickId);
+    this.setValue(value, lastValueTick);
   }
 
   /**

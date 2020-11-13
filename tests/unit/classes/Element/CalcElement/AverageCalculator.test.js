@@ -829,7 +829,7 @@ describe("AverageCalculator", () => {
       valuesAndTicks = { 115: 10, 140: 15, 160: 20 };
       factor = 5;
       variable2Value = 25;
-      tickId = 210;
+      variable2LastValueTick = 210;
 
       await exec();
 
@@ -848,7 +848,9 @@ describe("AverageCalculator", () => {
       expect(calcElement.LastValueTick).toEqual(200);
 
       //new value should be set into valuesAndTicks
-      expect(calcElement._valuesAndTicks).toEqual({ [tickId]: variable2Value });
+      expect(calcElement._valuesAndTicks).toEqual({
+        [variable2LastValueTick]: variable2Value,
+      });
     });
 
     it("should leave refreshedFirstTime as true and set beginIntervalTick and endIntervalTick of a new interval and then calculate average and assing it to value together with LastValueTick - if refreshedFirstTime is true and tick is future period two intervals forward", async () => {
@@ -857,7 +859,7 @@ describe("AverageCalculator", () => {
       valuesAndTicks = { 115: 10, 140: 15, 160: 20 };
       factor = 5;
       variable2Value = 25;
-      tickId = 310;
+      variable2LastValueTick = 310;
 
       await exec();
 
@@ -876,7 +878,30 @@ describe("AverageCalculator", () => {
       expect(calcElement.LastValueTick).toEqual(200);
 
       //new value should be set into valuesAndTicks
-      expect(calcElement._valuesAndTicks).toEqual({ [tickId]: variable2Value });
+      expect(calcElement._valuesAndTicks).toEqual({
+        [variable2LastValueTick]: variable2Value,
+      });
+    });
+
+    it("should do nothing - if lastVariableTick is 0", async () => {
+      beginTickInterval = 100;
+      endTickInterval = 200;
+      valuesAndTicks = { 115: 10, 140: 15, 160: 20 };
+      factor = 5;
+      variable2Value = 25;
+      variable2LastValueTick = 0;
+
+      await exec();
+
+      expect(calcElement._refreshedFirstTime).toEqual(true);
+      expect(calcElement._beginIntervalTick).toEqual(100);
+      expect(calcElement._endIntervalTick).toEqual(200);
+
+      expect(calcElement.Value).toEqual(payload.defaultValue);
+      expect(calcElement.LastValueTick).toEqual(0);
+
+      //new value should be set into valuesAndTicks
+      expect(calcElement._valuesAndTicks).toEqual(valuesAndTicks);
     });
 
     it("should do nothing - if refreshedFirstTime is true and tick is from past interval", async () => {
@@ -885,7 +910,7 @@ describe("AverageCalculator", () => {
       valuesAndTicks = { 115: 10, 140: 15, 160: 20 };
       factor = 5;
       variable2Value = 25;
-      tickId = 80;
+      variable2LastValueTick = 80;
 
       await exec();
 
@@ -907,7 +932,7 @@ describe("AverageCalculator", () => {
       valuesAndTicks = { 115: 10, 140: 15, 160: 20 };
       factor = 5;
       variable2Value = 25;
-      tickId = 210;
+      variable2LastValueTick = 210;
 
       await exec();
 
@@ -928,7 +953,7 @@ describe("AverageCalculator", () => {
       valuesAndTicks = { 115: 10, 140: 15, 160: 20 };
       factor = 5;
       variable2Value = [1, 2, 3, 4, 5, 6];
-      tickId = 210;
+      variable2LastValueTick = 210;
 
       await exec();
 
@@ -949,7 +974,7 @@ describe("AverageCalculator", () => {
       valuesAndTicks = { 115: 10, 140: 15, 160: 20 };
       factor = 5;
       variable2Value = 25;
-      tickId = 200;
+      variable2LastValueTick = 200;
 
       await exec();
 
@@ -968,7 +993,9 @@ describe("AverageCalculator", () => {
       expect(calcElement.LastValueTick).toEqual(200);
 
       //new value should be set into valuesAndTicks
-      expect(calcElement._valuesAndTicks).toEqual({ [tickId]: variable2Value });
+      expect(calcElement._valuesAndTicks).toEqual({
+        [variable2LastValueTick]: variable2Value,
+      });
     });
 
     it("should leave refreshedFirstTime as true, leave beginIntervalTick and endIntervalTick, not calculate average and not assing it to value together with LastValueTick but add value and tickId to ValuesAndTicks - if refreshedFirstTime is true and tick is exactly the start of the actual period", async () => {
@@ -977,8 +1004,8 @@ describe("AverageCalculator", () => {
       valuesAndTicks = { 115: 10, 140: 15, 160: 20 };
       factor = 5;
       variable2Value = 25;
-      tickId = 180;
       let initialValuesAndTicks = { ...valuesAndTicks };
+      variable2LastValueTick = 180;
 
       await exec();
 
@@ -992,7 +1019,7 @@ describe("AverageCalculator", () => {
       //new value should be set into valuesAndTicks
       expect(calcElement._valuesAndTicks).toEqual({
         ...initialValuesAndTicks,
-        [tickId]: variable2Value,
+        [variable2LastValueTick]: variable2Value,
       });
     });
 
@@ -1002,8 +1029,8 @@ describe("AverageCalculator", () => {
       valuesAndTicks = { 115: 10, 140: 15, 160: 20 };
       factor = 5;
       variable2Value = 25;
-      tickId = 160;
       let initialValuesAndTicks = { ...valuesAndTicks };
+      variable2LastValueTick = 160;
 
       await exec();
 
@@ -1017,7 +1044,7 @@ describe("AverageCalculator", () => {
       //new value should be set into valuesAndTicks
       expect(calcElement._valuesAndTicks).toEqual({
         ...initialValuesAndTicks,
-        [tickId]: variable2Value,
+        [variable2LastValueTick]: variable2Value,
       });
     });
 
@@ -1028,7 +1055,7 @@ describe("AverageCalculator", () => {
       valuesAndTicks = "fakeValuesAndTicks";
       factor = 5;
       variable2Value = 25;
-      tickId = 210;
+      variable2LastValueTick = 210;
 
       await exec();
 
@@ -1041,7 +1068,7 @@ describe("AverageCalculator", () => {
 
       //new value should be set into valuesAndTicks
       expect(calcElement._valuesAndTicks).toEqual({
-        [tickId]: variable2Value,
+        [variable2LastValueTick]: variable2Value,
       });
     });
 
@@ -1053,7 +1080,7 @@ describe("AverageCalculator", () => {
       valuesAndTicks = { 115: 10, 140: 15, 160: 20 };
       factor = 5;
       variable2Value = 25;
-      tickId = 210;
+      variable2LastValueTick = 210;
 
       await exec();
 
@@ -1075,7 +1102,7 @@ describe("AverageCalculator", () => {
       valuesAndTicks = { 115: 10, 140: 15, 160: 20 };
       factor = 5;
       variable2Value = [1, 2, 3, 4, 5, 6];
-      tickId = 210;
+      variable2LastValueTick = 210;
 
       await exec();
 
@@ -1097,7 +1124,7 @@ describe("AverageCalculator", () => {
       valuesAndTicks = null;
       factor = 5;
       variable2Value = 0;
-      tickId = 100;
+      variable2LastValueTick = 100;
 
       //begin 100
       //      115:10
@@ -1107,13 +1134,17 @@ describe("AverageCalculator", () => {
 
       await exec();
       variable2._value = 10;
-      await calcElement.refresh(115);
+      variable2._lastValueTick = 115;
+      await calcElement.refresh(tickId);
       variable2._value = 15;
-      await calcElement.refresh(140);
+      variable2._lastValueTick = 140;
+      await calcElement.refresh(tickId);
       variable2._value = 20;
-      await calcElement.refresh(160);
+      variable2._lastValueTick = 160;
+      await calcElement.refresh(tickId);
       variable2._value = 25;
-      await calcElement.refresh(200);
+      variable2._lastValueTick = 200;
+      await calcElement.refresh(tickId);
 
       //average - 5*(15*10 + 25*15 + 20*20 + 40*25)/100 = 96.25
       expect(calcElement.Value).toEqual(96.25);
@@ -1130,7 +1161,7 @@ describe("AverageCalculator", () => {
       valuesAndTicks = null;
       factor = 5;
       variable2Value = 0;
-      tickId = 100;
+      variable2LastValueTick = 100;
 
       //begin 100
       //      115:10
@@ -1140,13 +1171,17 @@ describe("AverageCalculator", () => {
 
       await exec();
       variable2._value = 10;
-      await calcElement.refresh(115);
+      variable2._lastValueTick = 115;
+      await calcElement.refresh(tickId);
       variable2._value = 15;
-      await calcElement.refresh(140);
+      variable2._lastValueTick = 140;
+      await calcElement.refresh(tickId);
       variable2._value = 20;
-      await calcElement.refresh(160);
+      variable2._lastValueTick = 160;
+      await calcElement.refresh(tickId);
       variable2._value = 25;
-      await calcElement.refresh(205);
+      variable2._lastValueTick = 205;
+      await calcElement.refresh(tickId);
 
       //average - 5*(15*10 + 25*15 + 20*20 + 40*25)/100 = 96.25
       expect(calcElement.Value).toEqual(96.25);
@@ -1163,7 +1198,7 @@ describe("AverageCalculator", () => {
       valuesAndTicks = null;
       factor = 5;
       variable2Value = 0;
-      tickId = 100;
+      variable2LastValueTick = 100;
 
       //begin 200
       //      215:10
@@ -1174,22 +1209,30 @@ describe("AverageCalculator", () => {
       //proper work
       await exec();
       variable2._value = 1;
-      await calcElement.refresh(115);
+      variable2._lastValueTick = 115;
+      await calcElement.refresh(tickId);
       variable2._value = 2;
-      await calcElement.refresh(140);
+      variable2._lastValueTick = 140;
+      await calcElement.refresh(tickId);
       variable2._value = 3;
-      await calcElement.refresh(160);
+      variable2._lastValueTick = 160;
+      await calcElement.refresh(tickId);
       //new period
       variable2._value = 4;
-      await calcElement.refresh(200);
+      variable2._lastValueTick = 200;
+      await calcElement.refresh(tickId);
       variable2._value = 10;
-      await calcElement.refresh(215);
+      variable2._lastValueTick = 215;
+      await calcElement.refresh(tickId);
       variable2._value = 15;
-      await calcElement.refresh(240);
+      variable2._lastValueTick = 240;
+      await calcElement.refresh(tickId);
       variable2._value = 20;
-      await calcElement.refresh(260);
+      variable2._lastValueTick = 260;
+      await calcElement.refresh(tickId);
       variable2._value = 25;
-      await calcElement.refresh(305);
+      variable2._lastValueTick = 305;
+      await calcElement.refresh(tickId);
 
       //average - 5*(15*10 + 25*15 + 20*20 + 40*25)/100 = 96.25
       expect(calcElement.Value).toEqual(96.25);
@@ -1206,7 +1249,7 @@ describe("AverageCalculator", () => {
       valuesAndTicks = null;
       factor = 5;
       variable2Value = 0;
-      tickId = 100;
+      variable2LastValueTick = 100;
 
       //begin 200
       //      215:10
@@ -1217,20 +1260,27 @@ describe("AverageCalculator", () => {
       //proper work
       await exec();
       variable2._value = 1;
-      await calcElement.refresh(115);
+      variable2._lastValueTick = 115;
+      await calcElement.refresh(tickId);
       variable2._value = 2;
-      await calcElement.refresh(140);
+      variable2._lastValueTick = 140;
+      await calcElement.refresh(tickId);
       variable2._value = 3;
-      await calcElement.refresh(160);
+      variable2._lastValueTick = 160;
+      await calcElement.refresh(tickId);
       //new period
       variable2._value = 10;
-      await calcElement.refresh(215);
+      variable2._lastValueTick = 215;
+      await calcElement.refresh(tickId);
       variable2._value = 15;
-      await calcElement.refresh(240);
+      variable2._lastValueTick = 240;
+      await calcElement.refresh(tickId);
       variable2._value = 20;
-      await calcElement.refresh(260);
+      variable2._lastValueTick = 260;
+      await calcElement.refresh(tickId);
       variable2._value = 25;
-      await calcElement.refresh(305);
+      variable2._lastValueTick = 305;
+      await calcElement.refresh(tickId);
 
       //average - 5*(15*10 + 25*15 + 20*20 + 40*25)/100 = 96.25
       expect(calcElement.Value).toEqual(96.25);

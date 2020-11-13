@@ -132,6 +132,10 @@ class ValueFromByteArrayCalculator extends CalcElement {
     //if byte of variable does no exist - return immediately
     if (!exists(variableByte)) return;
 
+    //Checking lastTickId - LAST TICK ID IS THE BASE FOR ANY CALCULATION
+    let lastTickId = variable.LastValueTick;
+    if (!lastTickId) return;
+
     //Getting values for byte array
     let newValue = 0;
     for (let i = 0; i < this.Length; i++) {
@@ -140,9 +144,9 @@ class ValueFromByteArrayCalculator extends CalcElement {
     }
 
     //Avoding setting NaN
-    if (isNaN(newValue)) return;
+    if (!isFinite(newValue)) return;
 
-    this.setValue(newValue, tickId);
+    this.setValue(newValue, lastTickId);
   }
 
   /**

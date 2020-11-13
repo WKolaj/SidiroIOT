@@ -627,7 +627,7 @@ describe("FactorCalculator", () => {
       await exec();
 
       expect(calcElement.Value).toEqual(variable2Value * payload.factor);
-      expect(calcElement.LastValueTick).toEqual(tickId);
+      expect(calcElement.LastValueTick).toEqual(variable2LastValueTick);
     });
 
     it("should not set value and lastValueTick but also not throw - if there is no variable of given id", async () => {
@@ -650,6 +650,24 @@ describe("FactorCalculator", () => {
 
     it("should not set value and lastValueTick but also not throw - if value of variable is not a number", async () => {
       variable2Value = [1, 2, 3, 4, 5];
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
+
+      expect(calcElement.Value).toEqual(payload.defaultValue);
+      expect(calcElement.LastValueTick).toEqual(0);
+    });
+
+    it("should not set value and lastValueTick but also not throw - if last value tick of variable is 0", async () => {
+      variable2LastValueTick = 0;
 
       await expect(
         new Promise(async (resolve, reject) => {

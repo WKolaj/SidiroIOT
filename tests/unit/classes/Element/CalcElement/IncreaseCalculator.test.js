@@ -740,7 +740,7 @@ describe("IncreaseCalculator", () => {
     };
 
     it("should not set calculationStarted but set refreshedFirstTime and set set beginIntervalTick and endIntervalTick - if calculationStarted and refreshedFirstTime are false", async () => {
-      tickId = 1234;
+      variable2LastValueTick = 1234;
       beginIntervalTick = null;
       endIntervalTick = null;
       beginValue = null;
@@ -762,8 +762,31 @@ describe("IncreaseCalculator", () => {
       expect(calcElement.LastValueTick).toEqual(0);
     });
 
+    it("should do nothing if lastValueTickId is 0", async () => {
+      variable2LastValueTick = 0;
+      beginIntervalTick = null;
+      endIntervalTick = null;
+      beginValue = null;
+      calculationStarted = false;
+      refreshedFirstTime = false;
+
+      await exec();
+
+      expect(calcElement._refreshedFirstTime).toEqual(false);
+      expect(calcElement._calculationStarted).toEqual(false);
+
+      //tickId = 1234 -> 1230 to 1245
+      expect(calcElement._beginIntervalTick).toEqual(null);
+      expect(calcElement._endIntervalTick).toEqual(null);
+
+      //Begin value, value and LastValueTick should stay as they are
+      expect(calcElement._beginValue).toEqual(null);
+      expect(calcElement.Value).toEqual(payload.defaultValue);
+      expect(calcElement.LastValueTick).toEqual(0);
+    });
+
     it("should do nothing if variable does not exist", async () => {
-      tickId = 1234;
+      variable2LastValueTick = 1234;
       beginIntervalTick = null;
       endIntervalTick = null;
       beginValue = null;
@@ -788,7 +811,7 @@ describe("IncreaseCalculator", () => {
     });
 
     it("should do nothing if variable's value is not value", async () => {
-      tickId = 1234;
+      variable2LastValueTick = 1234;
       beginIntervalTick = null;
       endIntervalTick = null;
       beginValue = null;
@@ -816,7 +839,7 @@ describe("IncreaseCalculator", () => {
       //tickId = 1234 -> 1230 to 1245
       //previous interval 1215 to 1230
 
-      tickId = 1234;
+      variable2LastValueTick = 1234;
       beginIntervalTick = 1215;
       endIntervalTick = 1230;
       beginValue = null;
@@ -841,7 +864,7 @@ describe("IncreaseCalculator", () => {
       //tickId = 1230 -> 1230 to 1245
       //previous interval 1215 to 1230
 
-      tickId = 1230;
+      variable2LastValueTick = 1230;
       beginIntervalTick = 1215;
       endIntervalTick = 1230;
       beginValue = null;
@@ -866,7 +889,7 @@ describe("IncreaseCalculator", () => {
       //tickId = 1246 -> 1245 to 1260
       //actual interval 1215 to 1230
 
-      tickId = 1246;
+      variable2LastValueTick = 1246;
       beginIntervalTick = 1215;
       endIntervalTick = 1230;
       beginValue = null;
@@ -891,7 +914,7 @@ describe("IncreaseCalculator", () => {
       //tickId = 1245 -> 1245 to 1260
       //actual interval 1215 to 1230
 
-      tickId = 1245;
+      variable2LastValueTick = 1245;
       beginIntervalTick = 1215;
       endIntervalTick = 1230;
       beginValue = null;
@@ -916,7 +939,7 @@ describe("IncreaseCalculator", () => {
       //tickId = 1213 -> 1245 to 1260
       //actual interval 1215 to 1230
 
-      tickId = 1213;
+      variable2LastValueTick = 1213;
       beginIntervalTick = 1215;
       endIntervalTick = 1230;
       beginValue = 100;
@@ -943,7 +966,7 @@ describe("IncreaseCalculator", () => {
       //tickId = 1245 -> 1245 to 1260
       //actual interval 1215 to 1230
 
-      tickId = 1245;
+      variable2LastValueTick = 1245;
       beginIntervalTick = 1215;
       endIntervalTick = 1230;
       beginValue = 100;
@@ -970,7 +993,7 @@ describe("IncreaseCalculator", () => {
       //tickId = 1247 -> 1245 to 1260
       //actual interval 1215 to 1230
 
-      tickId = 1247;
+      variable2LastValueTick = 1247;
       beginIntervalTick = 1215;
       endIntervalTick = 1230;
       beginValue = 100;
@@ -997,7 +1020,7 @@ describe("IncreaseCalculator", () => {
       //tickId = 1230 -> 1230 to 1245
       //previous interval 1215 to 1230
 
-      tickId = 1230;
+      variable2LastValueTick = 1230;
       beginIntervalTick = 1215;
       endIntervalTick = 1230;
       beginValue = 100;
@@ -1025,7 +1048,7 @@ describe("IncreaseCalculator", () => {
       //tickId = 1234 -> 1230 to 1245
       //previous interval 1215 to 1230
 
-      tickId = 1234;
+      variable2LastValueTick = 1234;
       beginIntervalTick = 1215;
       endIntervalTick = 1230;
       beginValue = 100;
@@ -1053,7 +1076,7 @@ describe("IncreaseCalculator", () => {
       //tickId = 1234 -> 1230 to 1245
       //previous interval 1215 to 1230
 
-      tickId = 1234;
+      variable2LastValueTick = 1234;
       beginIntervalTick = 1215;
       endIntervalTick = 1230;
       beginValue = 300;
@@ -1082,7 +1105,7 @@ describe("IncreaseCalculator", () => {
       //tickId = 1234 -> 1230 to 1245
       //previous interval 1215 to 1230
 
-      tickId = 1234;
+      variable2LastValueTick = 1234;
       beginIntervalTick = 1215;
       endIntervalTick = 1230;
       beginValue = 300;
@@ -1111,7 +1134,7 @@ describe("IncreaseCalculator", () => {
       //tickId = 1234 -> 1230 to 1245
       //previous interval 1215 to 1230
 
-      tickId = 1234;
+      variable2LastValueTick = 1234;
       beginIntervalTick = null;
       endIntervalTick = null;
       beginValue = null;
@@ -1135,17 +1158,23 @@ describe("IncreaseCalculator", () => {
       expect(calcElement.LastValueTick).toEqual(0);
 
       variable2._value = 105;
-      await calcElement.refresh(1236);
+      variable2._lastValueTick = 1236;
+      await calcElement.refresh(tickId);
       variable2._value = 107;
-      await calcElement.refresh(1238);
+      variable2._lastValueTick = 1238;
+      await calcElement.refresh(tickId);
       variable2._value = 109;
-      await calcElement.refresh(1240);
+      variable2._lastValueTick = 1240;
+      await calcElement.refresh(tickId);
       variable2._value = 115;
-      await calcElement.refresh(1242);
+      variable2._lastValueTick = 1242;
+      await calcElement.refresh(tickId);
       variable2._value = 118;
-      await calcElement.refresh(1244);
+      variable2._lastValueTick = 1244;
+      await calcElement.refresh(tickId);
       variable2._value = 122;
-      await calcElement.refresh(1246);
+      variable2._lastValueTick = 1246;
+      await calcElement.refresh(tickId);
 
       //NEW INTERVAL - calculation started but value not set
 
@@ -1162,15 +1191,20 @@ describe("IncreaseCalculator", () => {
       expect(calcElement.LastValueTick).toEqual(0);
 
       variable2._value = 120;
-      await calcElement.refresh(1248);
+      variable2._lastValueTick = 1248;
+      await calcElement.refresh(tickId);
       variable2._value = 122;
-      await calcElement.refresh(1252);
+      variable2._lastValueTick = 1252;
+      await calcElement.refresh(tickId);
       variable2._value = 124;
-      await calcElement.refresh(1256);
+      variable2._lastValueTick = 1256;
+      await calcElement.refresh(tickId);
       variable2._value = 126;
-      await calcElement.refresh(1258);
+      variable2._lastValueTick = 1258;
+      await calcElement.refresh(tickId);
       variable2._value = 128;
-      await calcElement.refresh(1262);
+      variable2._lastValueTick = 1262;
+      await calcElement.refresh(tickId);
 
       //(128-122)*5 = 30
 
@@ -1188,6 +1222,7 @@ describe("IncreaseCalculator", () => {
       //tickId = 1234 -> 1230 to 1245
       //previous interval 1215 to 1230
 
+      variable2LastValueTick = 1234;
       payload.overflow = 200;
       tickId = 1234;
       beginIntervalTick = null;
@@ -1213,17 +1248,23 @@ describe("IncreaseCalculator", () => {
       expect(calcElement.LastValueTick).toEqual(0);
 
       variable2._value = 105;
-      await calcElement.refresh(1236);
+      variable2._lastValueTick = 1236;
+      await calcElement.refresh(tickId);
       variable2._value = 107;
-      await calcElement.refresh(1238);
+      variable2._lastValueTick = 1238;
+      await calcElement.refresh(tickId);
       variable2._value = 109;
-      await calcElement.refresh(1240);
+      variable2._lastValueTick = 1240;
+      await calcElement.refresh(tickId);
       variable2._value = 115;
-      await calcElement.refresh(1242);
+      variable2._lastValueTick = 1242;
+      await calcElement.refresh(tickId);
       variable2._value = 118;
-      await calcElement.refresh(1244);
+      variable2._lastValueTick = 1244;
+      await calcElement.refresh(tickId);
       variable2._value = 122;
-      await calcElement.refresh(1246);
+      variable2._lastValueTick = 1246;
+      await calcElement.refresh(tickId);
 
       //NEW INTERVAL - calculation started but value not set
 
@@ -1240,15 +1281,20 @@ describe("IncreaseCalculator", () => {
       expect(calcElement.LastValueTick).toEqual(0);
 
       variable2._value = 120;
-      await calcElement.refresh(1248);
+      variable2._lastValueTick = 1248;
+      await calcElement.refresh(tickId);
       variable2._value = 122;
-      await calcElement.refresh(1252);
+      variable2._lastValueTick = 1252;
+      await calcElement.refresh(tickId);
       variable2._value = 10;
-      await calcElement.refresh(1256);
+      variable2._lastValueTick = 1256;
+      await calcElement.refresh(tickId);
       variable2._value = 12;
-      await calcElement.refresh(1258);
+      variable2._lastValueTick = 1258;
+      await calcElement.refresh(tickId);
       variable2._value = 14;
-      await calcElement.refresh(1262);
+      variable2._lastValueTick = 1262;
+      await calcElement.refresh(tickId);
 
       //(128-122)*5 = 30
 
@@ -1266,6 +1312,7 @@ describe("IncreaseCalculator", () => {
       //tickId = 1234 -> 1230 to 1245
       //previous interval 1215 to 1230
 
+      variable2LastValueTick = 1234;
       payload.overflow = null;
       tickId = 1234;
       beginIntervalTick = null;
@@ -1291,17 +1338,23 @@ describe("IncreaseCalculator", () => {
       expect(calcElement.LastValueTick).toEqual(0);
 
       variable2._value = 105;
-      await calcElement.refresh(1236);
+      variable2._lastValueTick = 1236;
+      await calcElement.refresh(tickId);
       variable2._value = 107;
-      await calcElement.refresh(1238);
+      variable2._lastValueTick = 1238;
+      await calcElement.refresh(tickId);
       variable2._value = 109;
-      await calcElement.refresh(1240);
+      variable2._lastValueTick = 1240;
+      await calcElement.refresh(tickId);
       variable2._value = 115;
-      await calcElement.refresh(1242);
+      variable2._lastValueTick = 1242;
+      await calcElement.refresh(tickId);
       variable2._value = 118;
-      await calcElement.refresh(1244);
+      variable2._lastValueTick = 1244;
+      await calcElement.refresh(tickId);
       variable2._value = 122;
-      await calcElement.refresh(1246);
+      variable2._lastValueTick = 1246;
+      await calcElement.refresh(tickId);
 
       //NEW INTERVAL - calculation started but value not set
 
@@ -1318,15 +1371,20 @@ describe("IncreaseCalculator", () => {
       expect(calcElement.LastValueTick).toEqual(0);
 
       variable2._value = 120;
-      await calcElement.refresh(1248);
+      variable2._lastValueTick = 1248;
+      await calcElement.refresh(tickId);
       variable2._value = 122;
-      await calcElement.refresh(1252);
+      variable2._lastValueTick = 1252;
+      await calcElement.refresh(tickId);
       variable2._value = 10;
-      await calcElement.refresh(1256);
+      variable2._lastValueTick = 1256;
+      await calcElement.refresh(tickId);
       variable2._value = 12;
-      await calcElement.refresh(1258);
+      variable2._lastValueTick = 1258;
+      await calcElement.refresh(tickId);
       variable2._value = 14;
-      await calcElement.refresh(1262);
+      variable2._lastValueTick = 1262;
+      await calcElement.refresh(tickId);
 
       //(128-122)*5 = 30
 

@@ -776,7 +776,7 @@ describe("ValueFromByteArrayCalculator", () => {
       //value - 011 -> 3
 
       expect(calcElement.Value).toEqual(3);
-      expect(calcElement.LastValueTick).toEqual(tickId);
+      expect(calcElement.LastValueTick).toEqual(variable2LastValueTick);
     });
 
     it("should set value and lastValueTick to ValueFromByteArrayCalculator element - if value is all 1", async () => {
@@ -788,7 +788,7 @@ describe("ValueFromByteArrayCalculator", () => {
       //value - 111 -> 7
 
       expect(calcElement.Value).toEqual(7);
-      expect(calcElement.LastValueTick).toEqual(tickId);
+      expect(calcElement.LastValueTick).toEqual(variable2LastValueTick);
     });
 
     it("should set value and lastValueTick to ValueFromByteArrayCalculator element - if value is all 0", async () => {
@@ -800,7 +800,7 @@ describe("ValueFromByteArrayCalculator", () => {
       //value - 000 -> 0
 
       expect(calcElement.Value).toEqual(0);
-      expect(calcElement.LastValueTick).toEqual(tickId);
+      expect(calcElement.LastValueTick).toEqual(variable2LastValueTick);
     });
 
     it("should set value and lastValueTick to ValueFromByteArrayCalculator element - even if variable2 lastValueTick differst from actualTick", async () => {
@@ -813,7 +813,25 @@ describe("ValueFromByteArrayCalculator", () => {
       //value - 011 -> 3
 
       expect(calcElement.Value).toEqual(3);
-      expect(calcElement.LastValueTick).toEqual(tickId);
+      expect(calcElement.LastValueTick).toEqual(variable2LastValueTick);
+    });
+
+    it("should not set value and lastValueTick but also not throw - if variable LastValueTick is 0", async () => {
+      variable2LastValueTick = 0;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
+
+      expect(calcElement.Value).toEqual(payload.defaultValue);
+      expect(calcElement.LastValueTick).toEqual(0);
     });
 
     it("should not set value and lastValueTick but also not throw - if there is no variable of given id", async () => {

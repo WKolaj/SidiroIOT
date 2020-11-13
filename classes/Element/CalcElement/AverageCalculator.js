@@ -229,16 +229,20 @@ class AverageCalculator extends CalcElement {
     //returning if value is not a number
     if (!isNumber(value)) return;
 
-    //checking if increase calculator has been invoked first time
+    //Checking lastTickId - LAST TICK ID IS THE BASE FOR ANY CALCULATION
+    let lastTickId = variable.LastValueTick;
+    if (!lastTickId) return;
+
     if (!this._refreshedFirstTime) {
-      this._refreshFirstTime(tickId);
+      //checking if increase calculator has been invoked first time
+      this._refreshFirstTime(lastTickId);
       this._refreshedFirstTime = true;
-    } else if (this._shouldStartNewInterval(tickId)) {
-      this._startNewCalculationInterval(tickId, value);
+    } else if (this._shouldStartNewInterval(lastTickId)) {
+      this._startNewCalculationInterval(lastTickId, value);
     }
 
     //Assigning new value to valuesAndTicks
-    this._registerNewValue(tickId, value);
+    this._registerNewValue(lastTickId, value);
   }
 
   /**

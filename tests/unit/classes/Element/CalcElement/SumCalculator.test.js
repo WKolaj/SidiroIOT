@@ -715,7 +715,24 @@ describe("SumCalculator", () => {
         variable3Value * payload.variableIDs[2].factor;
 
       expect(calcElement.Value).toEqual(expectedValue);
-      expect(calcElement.LastValueTick).toEqual(tickId);
+      expect(calcElement.LastValueTick).toEqual(300);
+    });
+
+    it("should set value and lastValueTick as  maximum lastValueTick to FactorCalculator element - if all variables lastValueTick differst from actualTick", async () => {
+      tickId = 123;
+      variable1LastValueTick = 101;
+      variable2LastValueTick = 102;
+      variable3LastValueTick = 103;
+
+      await exec();
+
+      let expectedValue =
+        variable1Value * payload.variableIDs[0].factor +
+        variable2Value * payload.variableIDs[1].factor +
+        variable3Value * payload.variableIDs[2].factor;
+
+      expect(calcElement.Value).toEqual(expectedValue);
+      expect(calcElement.LastValueTick).toEqual(103);
     });
 
     it("should not set value and lastValueTick but also not throw - if there is no variable of given id", async () => {
@@ -724,6 +741,26 @@ describe("SumCalculator", () => {
         { variableID: "fakeVariableID", factor: 2 },
         { variableID: "variable3ID", factor: 3 },
       ];
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
+
+      expect(calcElement.Value).toEqual(payload.defaultValue);
+      expect(calcElement.LastValueTick).toEqual(0);
+    });
+
+    it("should not set value and lastValueTick but also not throw - if all variables ticks are 0", async () => {
+      variable1LastValueTick = 0;
+      variable2LastValueTick = 0;
+      variable3LastValueTick = 0;
 
       await expect(
         new Promise(async (resolve, reject) => {

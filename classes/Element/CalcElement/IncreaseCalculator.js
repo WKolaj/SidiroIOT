@@ -227,16 +227,20 @@ class IncreaseCalculator extends CalcElement {
     //returning if value is not a number
     if (!isNumber(value)) return;
 
+    //Checking lastTickId - LAST TICK ID IS THE BASE FOR ANY CALCULATION
+    let lastTickId = variable.LastValueTick;
+    if (!lastTickId) return;
+
     //checking if increase calculator has been invoked first time
     if (!this._refreshedFirstTime) {
-      this._refreshFirstTime(tickId);
+      this._refreshFirstTime(lastTickId);
       this._refreshedFirstTime = true;
     }
 
     //Acting (calculating new increase) only when starting new interval and ending last one
-    if (this._shouldStartNewInterval(tickId)) {
+    if (this._shouldStartNewInterval(lastTickId)) {
       //Starting calculation interval
-      this._startNewCalculationInterval(tickId, value);
+      this._startNewCalculationInterval(lastTickId, value);
     }
   }
 
