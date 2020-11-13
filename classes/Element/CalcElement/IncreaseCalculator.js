@@ -2,19 +2,9 @@ const CalcElement = require("./CalcElement");
 const Joi = require("joi");
 const { isNumber } = require("lodash");
 const { exists } = require("../../../utilities/utilities");
-
-const joiSchema = Joi.object({
-  id: Joi.string().min(1).required(),
-  name: Joi.string().min(1).required(),
-  type: Joi.string().valid("IncreaseCalculator").required(),
-  unit: Joi.string().min(1).required(),
-  sampleTime: Joi.number().integer().min(1).required(),
-  defaultValue: Joi.number().required(),
-  variableID: Joi.string().min(1).required(),
-  factor: Joi.number().required(),
-  calculationInterval: Joi.number().integer().min(1).required(),
-  overflow: Joi.number().min(0).allow(null).required(),
-});
+const {
+  joiSchema,
+} = require("../../../models/Elements/CalcElements/IncreaseCalculator");
 
 class IncreaseCalculator extends CalcElement {
   //#region ========= CONSTRUCTOR =========

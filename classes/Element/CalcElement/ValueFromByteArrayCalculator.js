@@ -1,27 +1,9 @@
 const Joi = require("joi");
 const { exists, getBit } = require("../../../utilities/utilities");
 const CalcElement = require("./CalcElement");
-
-const joiSchema = Joi.object({
-  id: Joi.string().min(1).required(),
-  name: Joi.string().min(1).required(),
-  type: Joi.string().valid("ValueFromByteArrayCalculator").required(),
-  unit: Joi.string().min(1).required(),
-  sampleTime: Joi.number().integer().min(1).required(),
-  defaultValue: Joi.number().integer().required(),
-  bitNumber: Joi.number().integer().min(0).max(7).required(),
-  byteNumber: Joi.number().integer().min(0).required(),
-  length: Joi.number()
-    .integer()
-    .min(1)
-    .max(
-      Joi.ref("bitNumber", {
-        adjust: (value) => 8 - value,
-      })
-    )
-    .required(),
-  variableID: Joi.string().min(0).required(),
-});
+const {
+  joiSchema,
+} = require("../../../models/Elements/CalcElements/ValueFromByteArrayCalculator");
 
 class ValueFromByteArrayCalculator extends CalcElement {
   //#region ========= CONSTRUCTOR =========

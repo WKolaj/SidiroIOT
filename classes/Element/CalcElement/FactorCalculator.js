@@ -1,17 +1,9 @@
 const Joi = require("joi");
 const { exists } = require("../../../utilities/utilities");
 const CalcElement = require("./CalcElement");
-
-const joiSchema = Joi.object({
-  id: Joi.string().min(1).required(),
-  name: Joi.string().min(1).required(),
-  type: Joi.string().valid("FactorCalculator").required(),
-  unit: Joi.string().min(1).required(),
-  sampleTime: Joi.number().integer().min(1).required(),
-  defaultValue: Joi.number().required(),
-  variableID: Joi.string().min(1).required(),
-  factor: Joi.number().required(),
-});
+const {
+  joiSchema,
+} = require("../../../models/Elements/CalcElements/FactorCalculator");
 
 class FactorCalculator extends CalcElement {
   //#region ========= CONSTRUCTOR =========

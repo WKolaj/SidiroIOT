@@ -6,7 +6,7 @@ const schemaContent = {
   type: Joi.string().required(),
   unit: Joi.string().min(1).required(),
   sampleTime: Joi.number().integer().min(1).required(),
-  defaultValue: Joi.object().required(),
+  defaultValue: Joi.any().required(),
 };
 
 const joiSchema = Joi.object(schemaContent);
