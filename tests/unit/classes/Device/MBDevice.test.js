@@ -50,6 +50,12 @@ describe("MBDevice", () => {
 
       expect(result._project).toEqual(project);
     });
+
+    it("should set _continueIfRequestThrows to false", () => {
+      let result = exec();
+
+      expect(result._continueIfRequestThrows).toEqual(false);
+    });
   });
 
   describe("init", () => {
@@ -623,26 +629,6 @@ describe("MBDevice", () => {
       ).rejects.toBeDefined();
 
       expect(error.message).toEqual("Unrecognized Variable type: FakeType");
-    });
-
-    it("should not initialize MBDevice and throw - if type is different than MBDevice", async () => {
-      payload.type = "FakeType";
-
-      let error = null;
-
-      await expect(
-        new Promise(async (resolve, reject) => {
-          try {
-            await exec();
-            return resolve(1);
-          } catch (err) {
-            error = err;
-            return reject(err);
-          }
-        })
-      ).rejects.toBeDefined();
-
-      expect(error.message).toEqual("Trying to set type FakeType to MBDevice!");
     });
 
     it("should initialize MBDevice based on given payload - if variables are to write", async () => {

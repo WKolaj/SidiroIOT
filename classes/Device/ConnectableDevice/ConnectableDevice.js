@@ -10,6 +10,8 @@ class ConnectableDevice extends Device {
     super(project);
     this._requestManager = null;
     this._driver = null;
+    //Flag for determining whether refreshing other request should continue after one of request throws (true for gateways false for standard devices)
+    this._continueIfRequestThrows = false;
 
     //IMPORTANT! driver and request manager should be created in constructor in child classes
   }
@@ -84,6 +86,8 @@ class ConnectableDevice extends Device {
             await request.writeDataToVariableValues(data, tickId);
         } catch (err) {
           logger.warn(err.message, err);
+          //If invoking other requests should be stopped after throwing one (Standard TCP device) - returning immediately
+          if (!this._continueIfRequestThrows) return;
         }
     }
 

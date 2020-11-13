@@ -39,6 +39,12 @@ describe("ConnectableDevice", () => {
 
       expect(result._project).toEqual(project);
     });
+
+    it("should set _continueIfRequestThrows to false", () => {
+      let result = exec();
+
+      expect(result._continueIfRequestThrows).toEqual(false);
+    });
   });
 
   describe("init", () => {
@@ -937,6 +943,7 @@ describe("ConnectableDevice", () => {
     let driverDisconnectDelay;
     let driverProcessRequestDelay;
     let driverProcessRequestResult;
+    let deviceContinueOnRequestThrow;
     let variable1;
     let variable2;
     let variable3;
@@ -1005,6 +1012,7 @@ describe("ConnectableDevice", () => {
 
       //#region init device
 
+      deviceContinueOnRequestThrow = true;
       isDriverActive = true;
       isDriverConnected = true;
       isDriverBusy = false;
@@ -1304,7 +1312,8 @@ describe("ConnectableDevice", () => {
           driverProcessRequestMock,
           driverProcessRequestDelay
         ),
-        driverTimeout
+        driverTimeout,
+        deviceContinueOnRequestThrow
       );
 
       return device.refresh(tickNumber);
@@ -1601,7 +1610,7 @@ describe("ConnectableDevice", () => {
       );
     });
 
-    it("should not throw and proceed with next actions - if refreshing one of requests throws", async () => {
+    it("should not throw and proceed with next actions - if refreshing one of requests throws - continueOnRequestThrow set to true", async () => {
       //making all elements to be called
       tickNumber = 6;
       //making second request (the one that throws) to be for read - writeData should not be called after throw
@@ -1680,7 +1689,7 @@ describe("ConnectableDevice", () => {
       expect(loggerWarnMock.mock.calls[0][0]).toEqual("test error");
     });
 
-    it("should not throw and proceed with next actions - if refreshing one of requests takes too much time", async () => {
+    it("should not throw and proceed with next actions - if refreshing one of requests takes too much time - continueOnRequestThrow set to true", async () => {
       //making all elements to be called
       tickNumber = 6;
 
@@ -1763,7 +1772,7 @@ describe("ConnectableDevice", () => {
       );
     });
 
-    it("should not throw and proceed with next actions - if refreshing one of requests throws and than disconnect throws", async () => {
+    it("should not throw and proceed with next actions - if refreshing one of requests throws and than disconnect throws - continueOnRequestThrow set to true", async () => {
       //making all elements to be called
       tickNumber = 6;
       //making second request (the one that throws) to be for read - writeData should not be called after throw
@@ -1846,7 +1855,7 @@ describe("ConnectableDevice", () => {
       expect(loggerWarnMock.mock.calls[0][0]).toEqual("test error");
     });
 
-    it("should not throw and proceed with next actions - if refreshing one of requests takes too much time and than disconnect throws", async () => {
+    it("should not throw and proceed with next actions - if refreshing one of requests takes too much time and than disconnect throws - continueOnRequestThrow set to true", async () => {
       //making all elements to be called
       tickNumber = 6;
       //making second request (the one that throws) to be for read - writeData should not be called after throw
@@ -1921,6 +1930,314 @@ describe("ConnectableDevice", () => {
       expect(request3WriteDataToVariablesMockFunc.mock.calls[0][1]).toEqual(
         tickNumber
       );
+      //Busy should be set to false
+      expect(device.Driver.Busy).toEqual(false);
+
+      //Logger method should be called
+      expect(loggerWarnMock).toHaveBeenCalledTimes(1);
+      expect(loggerWarnMock.mock.calls[0][0]).toEqual(
+        "Processing data timeout error"
+      );
+    });
+
+    it("should not throw but not proceed with next requests - if refreshing one of requests throws - continueOnRequestThrow set to false", async () => {
+      deviceContinueOnRequestThrow = false;
+
+      //making all elements to be called
+      tickNumber = 6;
+      //making second request (the one that throws) to be for read - writeData should not be called after throw
+      request2Write = false;
+
+      let numberOfCalls = 0;
+
+      //Throwing only during second refresh
+      driverProcessRequestMock = jest.fn(() => {
+        numberOfCalls++;
+        if (numberOfCalls === 2) throw new Error("test error");
+        return driverProcessRequestResult;
+      });
+
+      //refreshing should not throw
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
+
+      //all elements should be refreshed
+      expect(calcElement1RefreshMock).toHaveBeenCalledTimes(1);
+      expect(calcElement1RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(calcElement2RefreshMock).toHaveBeenCalledTimes(1);
+      expect(calcElement2RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(calcElement3RefreshMock).toHaveBeenCalledTimes(1);
+      expect(calcElement3RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+
+      expect(alert1RefreshMock).toHaveBeenCalledTimes(1);
+      expect(alert1RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(alert2RefreshMock).toHaveBeenCalledTimes(1);
+      expect(alert2RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(alert3RefreshMock).toHaveBeenCalledTimes(1);
+      expect(alert3RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+
+      //all request before second should be processed
+      expect(driverProcessRequestMock).toHaveBeenCalledTimes(2);
+      expect(driverProcessRequestMock.mock.calls[0][0]).toEqual(request1);
+      expect(driverProcessRequestMock.mock.calls[0][1]).toEqual(tickNumber);
+      expect(driverProcessRequestMock.mock.calls[1][0]).toEqual(request2);
+      expect(driverProcessRequestMock.mock.calls[1][1]).toEqual(tickNumber);
+
+      expect(driverConnectMock).not.toHaveBeenCalled();
+      //Driver should call disconnect once - when processing throws, disconnect is mocked so connect will not be called again
+      expect(driverDisconnectMock).toHaveBeenCalledTimes(1);
+
+      //For each request that is ment to read data - writeDataToVariables should be invoked
+      expect(request1WriteDataToVariablesMockFunc).toHaveBeenCalledTimes(1);
+      expect(request1WriteDataToVariablesMockFunc.mock.calls[0][0]).toEqual(
+        driverProcessRequestResult
+      );
+      expect(request1WriteDataToVariablesMockFunc.mock.calls[0][1]).toEqual(
+        tickNumber
+      );
+      expect(request2WriteDataToVariablesMockFunc).not.toHaveBeenCalled();
+      expect(request3WriteDataToVariablesMockFunc).not.toHaveBeenCalled();
+
+      //Busy should be set to false
+      expect(device.Driver.Busy).toEqual(false);
+
+      //Logger method should be called
+      expect(loggerWarnMock).toHaveBeenCalledTimes(1);
+      expect(loggerWarnMock.mock.calls[0][0]).toEqual("test error");
+    });
+
+    it("should not throw but not proceed with next requests - if refreshing one of requests takes too much time - continueOnRequestThrow set to false", async () => {
+      deviceContinueOnRequestThrow = false;
+
+      //making all elements to be called
+      tickNumber = 6;
+
+      //making second request (the one that throws) to be for read - writeData should not be called after timeout
+      request2Write = false;
+
+      let numberOfCalls = 0;
+
+      //Throwing only during second refresh
+      driverProcessRequestMock = jest.fn(async () => {
+        numberOfCalls++;
+        if (numberOfCalls === 2) await snooze(1000);
+        return driverProcessRequestResult;
+      });
+
+      //refreshing should not throw
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
+
+      //all elements should be refreshed
+      expect(calcElement1RefreshMock).toHaveBeenCalledTimes(1);
+      expect(calcElement1RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(calcElement2RefreshMock).toHaveBeenCalledTimes(1);
+      expect(calcElement2RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(calcElement3RefreshMock).toHaveBeenCalledTimes(1);
+      expect(calcElement3RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+
+      expect(alert1RefreshMock).toHaveBeenCalledTimes(1);
+      expect(alert1RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(alert2RefreshMock).toHaveBeenCalledTimes(1);
+      expect(alert2RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(alert3RefreshMock).toHaveBeenCalledTimes(1);
+      expect(alert3RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+
+      //all request before second should be processed
+      expect(driverProcessRequestMock).toHaveBeenCalledTimes(2);
+      expect(driverProcessRequestMock.mock.calls[0][0]).toEqual(request1);
+      expect(driverProcessRequestMock.mock.calls[0][1]).toEqual(tickNumber);
+      expect(driverProcessRequestMock.mock.calls[1][0]).toEqual(request2);
+      expect(driverProcessRequestMock.mock.calls[1][1]).toEqual(tickNumber);
+
+      expect(driverConnectMock).not.toHaveBeenCalled();
+      //Driver should call disconnect once - when processing throws due to timeout, disconnect is mocked so connect will not be called again
+      expect(driverDisconnectMock).toHaveBeenCalledTimes(1);
+
+      //For each request that is ment to read data - writeDataToVariables should be invoked
+      expect(request1WriteDataToVariablesMockFunc).toHaveBeenCalledTimes(1);
+      expect(request1WriteDataToVariablesMockFunc.mock.calls[0][0]).toEqual(
+        driverProcessRequestResult
+      );
+      expect(request1WriteDataToVariablesMockFunc.mock.calls[0][1]).toEqual(
+        tickNumber
+      );
+      expect(request2WriteDataToVariablesMockFunc).not.toHaveBeenCalled();
+      expect(request3WriteDataToVariablesMockFunc).not.toHaveBeenCalled();
+
+      //Busy should be set to false
+      expect(device.Driver.Busy).toEqual(false);
+
+      //Logger method should be called
+      expect(loggerWarnMock).toHaveBeenCalledTimes(1);
+      expect(loggerWarnMock.mock.calls[0][0]).toEqual(
+        "Processing data timeout error"
+      );
+    });
+
+    it("should not throw but not proceed with next requests - if refreshing one of requests throws and than disconnect throws - continueOnRequestThrow set to false", async () => {
+      deviceContinueOnRequestThrow = false;
+
+      //making all elements to be called
+      tickNumber = 6;
+      //making second request (the one that throws) to be for read - writeData should not be called after throw
+      request2Write = false;
+
+      let numberOfCalls = 0;
+
+      //Throwing only during second refresh
+      driverProcessRequestMock = jest.fn(() => {
+        numberOfCalls++;
+        if (numberOfCalls === 2) throw new Error("test error");
+        return driverProcessRequestResult;
+      });
+
+      driverDisconnectMock = jest.fn(() => {
+        throw new Error("testError2");
+      });
+
+      //refreshing should not throw
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
+
+      //all elements should be refreshed
+      expect(calcElement1RefreshMock).toHaveBeenCalledTimes(1);
+      expect(calcElement1RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(calcElement2RefreshMock).toHaveBeenCalledTimes(1);
+      expect(calcElement2RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(calcElement3RefreshMock).toHaveBeenCalledTimes(1);
+      expect(calcElement3RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+
+      expect(alert1RefreshMock).toHaveBeenCalledTimes(1);
+      expect(alert1RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(alert2RefreshMock).toHaveBeenCalledTimes(1);
+      expect(alert2RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(alert3RefreshMock).toHaveBeenCalledTimes(1);
+      expect(alert3RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+
+      //all request before 2nd should be called
+      expect(driverProcessRequestMock).toHaveBeenCalledTimes(2);
+      expect(driverProcessRequestMock.mock.calls[0][0]).toEqual(request1);
+      expect(driverProcessRequestMock.mock.calls[0][1]).toEqual(tickNumber);
+      expect(driverProcessRequestMock.mock.calls[1][0]).toEqual(request2);
+      expect(driverProcessRequestMock.mock.calls[1][1]).toEqual(tickNumber);
+
+      expect(driverConnectMock).not.toHaveBeenCalled();
+      //Driver should call disconnect once - when processing throws, disconnect is mocked so connect will not be called again
+      expect(driverDisconnectMock).toHaveBeenCalledTimes(1);
+
+      //For each request that is ment to read data - writeDataToVariables should be invoked
+      expect(request1WriteDataToVariablesMockFunc).toHaveBeenCalledTimes(1);
+      expect(request1WriteDataToVariablesMockFunc.mock.calls[0][0]).toEqual(
+        driverProcessRequestResult
+      );
+      expect(request1WriteDataToVariablesMockFunc.mock.calls[0][1]).toEqual(
+        tickNumber
+      );
+      expect(request2WriteDataToVariablesMockFunc).not.toHaveBeenCalled();
+      expect(request3WriteDataToVariablesMockFunc).not.toHaveBeenCalled();
+      //Busy should be set to false
+      expect(device.Driver.Busy).toEqual(false);
+
+      //Logger method should be called
+      expect(loggerWarnMock).toHaveBeenCalledTimes(1);
+      expect(loggerWarnMock.mock.calls[0][0]).toEqual("test error");
+    });
+
+    it("should not throw but not proceed with next requests - if refreshing one of requests takes too much time and than disconnect throws - continueOnRequestThrow set to false", async () => {
+      deviceContinueOnRequestThrow = false;
+
+      //making all elements to be called
+      tickNumber = 6;
+      //making second request (the one that throws) to be for read - writeData should not be called after throw
+      request2Write = false;
+
+      let numberOfCalls = 0;
+
+      //Throwing only during second refresh
+      driverProcessRequestMock = jest.fn(async () => {
+        numberOfCalls++;
+        if (numberOfCalls === 2) await snooze(1000);
+        return driverProcessRequestResult;
+      });
+
+      driverDisconnectMock = jest.fn(() => {
+        throw new Error("testError2");
+      });
+
+      //refreshing should not throw
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
+
+      //all elements should be refreshed
+      expect(calcElement1RefreshMock).toHaveBeenCalledTimes(1);
+      expect(calcElement1RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(calcElement2RefreshMock).toHaveBeenCalledTimes(1);
+      expect(calcElement2RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(calcElement3RefreshMock).toHaveBeenCalledTimes(1);
+      expect(calcElement3RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+
+      expect(alert1RefreshMock).toHaveBeenCalledTimes(1);
+      expect(alert1RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(alert2RefreshMock).toHaveBeenCalledTimes(1);
+      expect(alert2RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(alert3RefreshMock).toHaveBeenCalledTimes(1);
+      expect(alert3RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+
+      //all requests before 2nd should be called
+      expect(driverProcessRequestMock).toHaveBeenCalledTimes(2);
+      expect(driverProcessRequestMock.mock.calls[0][0]).toEqual(request1);
+      expect(driverProcessRequestMock.mock.calls[0][1]).toEqual(tickNumber);
+      expect(driverProcessRequestMock.mock.calls[1][0]).toEqual(request2);
+      expect(driverProcessRequestMock.mock.calls[1][1]).toEqual(tickNumber);
+
+      expect(driverConnectMock).not.toHaveBeenCalled();
+      //Driver should call disconnect once - when processing throws, disconnect is mocked so connect will not be called again
+      expect(driverDisconnectMock).toHaveBeenCalledTimes(1);
+
+      //For each request that is ment to read data - writeDataToVariables should be invoked
+      expect(request1WriteDataToVariablesMockFunc).toHaveBeenCalledTimes(1);
+      expect(request1WriteDataToVariablesMockFunc.mock.calls[0][0]).toEqual(
+        driverProcessRequestResult
+      );
+      expect(request1WriteDataToVariablesMockFunc.mock.calls[0][1]).toEqual(
+        tickNumber
+      );
+      expect(request2WriteDataToVariablesMockFunc).not.toHaveBeenCalled();
+      expect(request3WriteDataToVariablesMockFunc).not.toHaveBeenCalled();
+
       //Busy should be set to false
       expect(device.Driver.Busy).toEqual(false);
 

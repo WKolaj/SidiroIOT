@@ -8,6 +8,7 @@ const MBDevice = require("../Device/ConnectableDevice/MBDevice");
 const S7Device = require("../Device/ConnectableDevice/S7Device");
 const Joi = require("joi");
 const { exists } = require("../../utilities/utilities");
+const MBGatewayDevice = require("../Device/ConnectableDevice/MBGatewayDevice");
 
 //TODO - TEST ALL ELEMENT AGAIN WITH ASSIGNING PROJECT TO THEIR CONSTRUCTOR!
 
@@ -28,6 +29,9 @@ const validateConnectableDevicesPayload = (devicesPayload, helpers) => {
     switch (deviceType) {
       case "MBDevice":
         validationMessage = MBDevice.validatePayload(devicePayload);
+        break;
+      case "MBGatewayDevice":
+        validationMessage = MBGatewayDevice.validatePayload(devicePayload);
         break;
       case "S7Device":
         validationMessage = S7Device.validatePayload(devicePayload);
@@ -328,6 +332,9 @@ class Project {
     switch (type) {
       case "MBDevice": {
         return new MBDevice(this);
+      }
+      case "MBGatewayDevice": {
+        return new MBGatewayDevice(this);
       }
       case "S7Device": {
         return new S7Device(this);

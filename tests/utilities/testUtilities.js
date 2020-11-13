@@ -237,7 +237,8 @@ module.exports.createFakeConnectableDevice = (
   driverConnectMock,
   driverDisconnectMock,
   driverProcessRequestMock,
-  driverTimeout
+  driverTimeout,
+  continueOnRequestThrow = false
 ) => {
   let device = new ConnectableDevice(project);
   device._id = id;
@@ -283,6 +284,8 @@ module.exports.createFakeConnectableDevice = (
   device.Driver._processRequest = driverProcessRequestMock;
   device.Driver._connect = driverConnectMock;
   device.Driver._disconnect = driverDisconnectMock;
+
+  device._continueIfRequestThrows = continueOnRequestThrow;
 
   return device;
 };
