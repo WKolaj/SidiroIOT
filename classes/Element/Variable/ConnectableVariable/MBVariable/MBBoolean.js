@@ -1,35 +1,11 @@
 const MBVariable = require("./MBVariable");
 const Joi = require("joi");
-const { checkBoolean } = require("../../../ElementsValueModels");
-
-//#region ========= PAYLOAD VALIDATION =========
-
-const joiSchema = Joi.object({
-  id: Joi.string().min(1).required(),
-  name: Joi.string().min(1).required(),
-  type: Joi.string().valid("MBBoolean").required(),
-  unit: Joi.string().min(1).required(),
-  sampleTime: Joi.number().integer().min(1).required(),
-  defaultValue: Joi.boolean().required(),
-  offset: Joi.number().integer().min(0).required(),
-  length: Joi.number().integer().valid(1).required(),
-  unitID: Joi.number().integer().min(1).max(255).required(),
-  read: Joi.boolean().required(),
-  write: Joi.when("read", {
-    is: true,
-    then: Joi.valid(false).required(),
-    otherwise: Joi.valid(true).required(),
-  }),
-  readFCode: Joi.when("read", {
-    is: true,
-    then: Joi.number().valid(1, 2).required(),
-    otherwise: Joi.number().valid(1, 2).optional(),
-  }),
-  readAsSingle: Joi.boolean().required(),
-  writeAsSingle: Joi.boolean().required(),
-});
-
-//#endregion ========= PAYLOAD VALIDATION =========
+const {
+  checkBoolean,
+} = require("../../../../../models/Elements/ElementsValues/Boolean");
+const {
+  joiSchema,
+} = require("../../../../../models/Elements/Variable/MBVariable/MBBoolean");
 
 class MBBoolean extends MBVariable {
   //#region ========= CONSTRUCTOR =========

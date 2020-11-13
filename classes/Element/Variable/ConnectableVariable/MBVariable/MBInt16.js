@@ -1,40 +1,11 @@
 const MBVariable = require("./MBVariable");
 const Joi = require("joi");
-const { checkInt16 } = require("../../../ElementsValueModels");
-
-//#region ========= PAYLOAD VALIDATION =========
-
-const joiSchema = Joi.object({
-  id: Joi.string().min(1).required(),
-  name: Joi.string().min(1).required(),
-  type: Joi.string().valid("MBInt16").required(),
-  unit: Joi.string().min(1).required(),
-  sampleTime: Joi.number().integer().min(1).required(),
-  offset: Joi.number().integer().min(0).required(),
-  length: Joi.valid(1).required(),
-  defaultValue: Joi.number().integer().min(-32768).max(32767).required(),
-  unitID: Joi.number().integer().min(1).max(255).required(),
-  read: Joi.boolean().required(),
-  write: Joi.when("read", {
-    is: true,
-    then: Joi.valid(false).required(),
-    otherwise: Joi.valid(true).required(),
-  }),
-  readFCode: Joi.when("read", {
-    is: true,
-    then: Joi.number().valid(3, 4).required(),
-    otherwise: Joi.number().valid(3, 4).optional(),
-  }),
-  writeFCode: Joi.when("write", {
-    is: true,
-    then: Joi.number().valid(16).required(),
-    otherwise: Joi.number().valid(16).optional(),
-  }),
-  readAsSingle: Joi.boolean().required(),
-  writeAsSingle: Joi.boolean().required(),
-});
-
-//#endregion ========= PAYLOAD VALIDATION =========
+const {
+  checkInt16,
+} = require("../../../../../models/Elements/ElementsValues/Int16");
+const {
+  joiSchema,
+} = require("../../../../../models/Elements/Variable/MBVariable/MBInt16");
 
 class MBInt16 extends MBVariable {
   //#region ========= CONSTRUCTOR =========

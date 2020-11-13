@@ -1,40 +1,11 @@
 const MBVariable = require("./MBVariable");
 const Joi = require("joi");
-const { checkDouble } = require("../../../ElementsValueModels");
-
-//#region ========= PAYLOAD VALIDATION =========
-
-const joiSchema = Joi.object({
-  id: Joi.string().min(1).required(),
-  name: Joi.string().min(1).required(),
-  type: Joi.string().valid("MBSwappedDouble").required(),
-  unit: Joi.string().min(1).required(),
-  sampleTime: Joi.number().integer().min(1).required(),
-  offset: Joi.number().integer().min(0).required(),
-  length: Joi.valid(4).required(),
-  defaultValue: Joi.number().required(),
-  unitID: Joi.number().integer().min(1).max(255).required(),
-  read: Joi.boolean().required(),
-  write: Joi.when("read", {
-    is: true,
-    then: Joi.valid(false).required(),
-    otherwise: Joi.valid(true).required(),
-  }),
-  readFCode: Joi.when("read", {
-    is: true,
-    then: Joi.number().valid(3, 4).required(),
-    otherwise: Joi.number().valid(3, 4).optional(),
-  }),
-  writeFCode: Joi.when("write", {
-    is: true,
-    then: Joi.number().valid(16).required(),
-    otherwise: Joi.number().valid(16).optional(),
-  }),
-  readAsSingle: Joi.boolean().required(),
-  writeAsSingle: Joi.boolean().required(),
-});
-
-//#endregion ========= PAYLOAD VALIDATION =========
+const {
+  checkDouble,
+} = require("../../../../../models/Elements/ElementsValues/Double");
+const {
+  joiSchema,
+} = require("../../../../../models/Elements/Variable/MBVariable/MBSwappedDouble");
 
 class MBSwappedDouble extends MBVariable {
   //#region ========= CONSTRUCTOR =========

@@ -649,8 +649,6 @@ describe("MBSwappedFloat", () => {
 
     it("should return message if length is 0", () => {
       payload.length = 0;
-      //together with length, a default value should be calculated
-      payload.defaultValue = [];
 
       let result = exec();
 

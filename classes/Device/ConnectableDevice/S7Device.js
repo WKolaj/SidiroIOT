@@ -16,6 +16,9 @@ class S7Device extends ConnectableDevice {
   constructor(project) {
     super(project);
     //TODO - add creation of S7RequestManager and S7Driver
+
+    //Standard device - invoking other requests is unneccessary after throwing of one
+    this._continueIfRequestThrows = false;
   }
 
   //#endregion ========= CONSTRUCTOR =========
@@ -31,9 +34,6 @@ class S7Device extends ConnectableDevice {
    * @param {JSON} payload Payload to initialize
    */
   async init(payload) {
-    if (payload.type !== "S7Device")
-      throw new Error(`Trying to set type ${payload.type} to S7Device!`);
-
     //initialize properties of S7Device and S7Driver
 
     await super.init(payload);
