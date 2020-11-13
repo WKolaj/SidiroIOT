@@ -1,128 +1,13 @@
 const RefreshGroupManager = require("../RefreshGroup/RefreshGroupsManager");
 const Sampler = require("../Sampler/Sampler");
-const ConnectableDevice = require("../Device/ConnectableDevice/ConnectableDevice");
 const InternalDevice = require("../Device/InternalDevice/InternalDevice");
 const AgentDevice = require("../Device/AgentDevice/AgentDevice");
 const logger = require("../../logger/logger");
 const MBDevice = require("../Device/ConnectableDevice/MBDevice");
 const S7Device = require("../Device/ConnectableDevice/S7Device");
-const Joi = require("joi");
-const { exists } = require("../../utilities/utilities");
 const MBGatewayDevice = require("../Device/ConnectableDevice/MBGatewayDevice");
-
-//TODO - TEST ALL ELEMENT AGAIN WITH ASSIGNING PROJECT TO THEIR CONSTRUCTOR!
-
-//#region ========= PAYLOAD VALIDATION =========
-
-const validateConnectableDevicesPayload = (devicesPayload, helpers) => {
-  const { message } = helpers;
-
-  if (devicesPayload === null)
-    return message(`"connectableDevices" cannot be null`);
-
-  for (let deviceID of Object.keys(devicesPayload)) {
-    let devicePayload = devicesPayload[deviceID];
-
-    let deviceType = devicePayload.type;
-    let validationMessage = null;
-
-    switch (deviceType) {
-      case "MBDevice":
-        validationMessage = MBDevice.validatePayload(devicePayload);
-        break;
-      case "MBGatewayDevice":
-        validationMessage = MBGatewayDevice.validatePayload(devicePayload);
-        break;
-      case "S7Device":
-        validationMessage = S7Device.validatePayload(devicePayload);
-        break;
-      default:
-        validationMessage = "connectable device type not recognized";
-    }
-
-    if (validationMessage !== null) return message(validationMessage);
-
-    let deviceIDFromPayload = devicePayload.id;
-
-    if (deviceID !== deviceIDFromPayload)
-      return message("connectable device's id as key and in payload differ!");
-  }
-
-  return devicesPayload;
-};
-
-const validateInternalDevicesPayload = (devicesPayload, helpers) => {
-  const { message } = helpers;
-
-  if (devicesPayload === null)
-    return message(`"internalDevices" cannot be null`);
-
-  for (let deviceID of Object.keys(devicesPayload)) {
-    let devicePayload = devicesPayload[deviceID];
-
-    let deviceType = devicePayload.type;
-    let validationMessage = null;
-
-    //TODO - add checking device payload based on type
-    switch (deviceType) {
-      default:
-        validationMessage = "internal device type not recognized";
-    }
-
-    if (validationMessage !== null) return message(validationMessage);
-
-    let deviceIDFromPayload = devicePayload.id;
-
-    if (deviceID !== deviceIDFromPayload)
-      return message("internal device's id as key and in payload differ!");
-  }
-
-  return devicesPayload;
-};
-
-const validateAgentDevicesPayload = (devicesPayload, helpers) => {
-  const { message } = helpers;
-
-  if (devicesPayload === null) return message(`"agentDevices" cannot be null`);
-
-  for (let deviceID of Object.keys(devicesPayload)) {
-    let devicePayload = devicesPayload[deviceID];
-
-    let deviceType = devicePayload.type;
-    let validationMessage = null;
-
-    //TODO - add checking device payload based on type
-    switch (deviceType) {
-      default:
-        validationMessage = "agent device type not recognized";
-    }
-
-    if (validationMessage !== null) return message(validationMessage);
-
-    let deviceIDFromPayload = devicePayload.id;
-
-    if (deviceID !== deviceIDFromPayload)
-      return message("agent device's id as key and in payload differ!");
-  }
-
-  return devicesPayload;
-};
-
-const joiSchema = Joi.object({
-  connectableDevices: Joi.any()
-    .custom(validateConnectableDevicesPayload, "custom validation")
-    .required(),
-  internalDevices: Joi.any()
-    .custom(validateInternalDevicesPayload, "custom validation")
-    .required(),
-  agentDevices: Joi.any()
-    .custom(validateAgentDevicesPayload, "custom validation")
-    .required(),
-});
-
-//#endregion ========= PAYLOAD VALIDATION =========
-
-//TODO - test this class
+const { exists } = require("../../utilities/utilities");
+const { joiSchema } = require("../../models/Project/Project");
 
 class Project {
   //#region ========= CONSTRUCTOR =========
@@ -228,17 +113,17 @@ class Project {
     //Refreshing group manager on every tick
     await this.RefreshGroupManager.refresh(tickNumber);
 
-    //Only to test - TODO - remove after
-    for (let device of Object.values(this.Devices)) {
-      for (let variable of Object.values(device.Elements)) {
-        console.log(
-          `${device.ID}:${variable.ID}:${variable.LastValueTick}:${variable.Value}`
-        );
-      }
-    }
-    let stop = Date.now();
+    // //Only to test - TODO - remove after
+    // for (let device of Object.values(this.Devices)) {
+    //   for (let variable of Object.values(device.Elements)) {
+    //     console.log(
+    //       `${device.ID}:${variable.ID}:${variable.LastValueTick}:${variable.Value}`
+    //     );
+    //   }
+    // }
+    // let stop = Date.now();
 
-    console.log(`Refreshed of ${tickNumber} in ${(stop - start) / 1000} [s]`);
+    // console.log(`Refreshed of ${tickNumber} in ${(stop - start) / 1000} [s]`);
   }
 
   /**

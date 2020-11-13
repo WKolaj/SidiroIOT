@@ -1,0 +1,118 @@
+const Joi = require("joi");
+const MBDevice = require("../../classes/Device/ConnectableDevice/MBDevice");
+const MBGatewayDevice = require("../../classes/Device/ConnectableDevice/MBGatewayDevice");
+const S7Device = require("../../classes/Device/ConnectableDevice/S7Device");
+
+const validateConnectableDevicesPayload = (devicesPayload, helpers) => {
+  const { message } = helpers;
+
+  if (devicesPayload === null)
+    return message(`"connectableDevices" cannot be null`);
+
+  for (let deviceID of Object.keys(devicesPayload)) {
+    let devicePayload = devicesPayload[deviceID];
+
+    let deviceType = devicePayload.type;
+    let validationMessage = null;
+
+    switch (deviceType) {
+      case "MBDevice":
+        validationMessage = MBDevice.validatePayload(devicePayload);
+        break;
+      case "MBGatewayDevice":
+        validationMessage = MBGatewayDevice.validatePayload(devicePayload);
+        break;
+      case "S7Device":
+        validationMessage = S7Device.validatePayload(devicePayload);
+        break;
+      default:
+        validationMessage = "connectable device type not recognized";
+    }
+
+    if (validationMessage !== null) return message(validationMessage);
+
+    let deviceIDFromPayload = devicePayload.id;
+
+    if (deviceID !== deviceIDFromPayload)
+      return message("connectable device's id as key and in payload differ!");
+  }
+
+  return devicesPayload;
+};
+
+const validateInternalDevicesPayload = (devicesPayload, helpers) => {
+  const { message } = helpers;
+
+  if (devicesPayload === null)
+    return message(`"internalDevices" cannot be null`);
+
+  for (let deviceID of Object.keys(devicesPayload)) {
+    let devicePayload = devicesPayload[deviceID];
+
+    let deviceType = devicePayload.type;
+    let validationMessage = null;
+
+    //TODO - add checking device payload based on type
+    switch (deviceType) {
+      default:
+        validationMessage = "internal device type not recognized";
+    }
+
+    if (validationMessage !== null) return message(validationMessage);
+
+    let deviceIDFromPayload = devicePayload.id;
+
+    if (deviceID !== deviceIDFromPayload)
+      return message("internal device's id as key and in payload differ!");
+  }
+
+  return devicesPayload;
+};
+
+const validateAgentDevicesPayload = (devicesPayload, helpers) => {
+  const { message } = helpers;
+
+  if (devicesPayload === null) return message(`"agentDevices" cannot be null`);
+
+  for (let deviceID of Object.keys(devicesPayload)) {
+    let devicePayload = devicesPayload[deviceID];
+
+    let deviceType = devicePayload.type;
+    let validationMessage = null;
+
+    //TODO - add checking device payload based on type
+    switch (deviceType) {
+      default:
+        validationMessage = "agent device type not recognized";
+    }
+
+    if (validationMessage !== null) return message(validationMessage);
+
+    let deviceIDFromPayload = devicePayload.id;
+
+    if (deviceID !== deviceIDFromPayload)
+      return message("agent device's id as key and in payload differ!");
+  }
+
+  return devicesPayload;
+};
+
+const schemaContent = {
+  connectableDevices: Joi.any()
+    .custom(validateConnectableDevicesPayload, "custom validation")
+    .required(),
+  internalDevices: Joi.any()
+    .custom(validateInternalDevicesPayload, "custom validation")
+    .required(),
+  agentDevices: Joi.any()
+    .custom(validateAgentDevicesPayload, "custom validation")
+    .required(),
+};
+
+const joiSchema = Joi.object(schemaContent);
+
+module.exports.validateConnectableDevicesPayload = validateConnectableDevicesPayload;
+module.exports.validateInternalDevicesPayload = validateInternalDevicesPayload;
+module.exports.validateAgentDevicesPayload = validateAgentDevicesPayload;
+module.exports.schemaContent = schemaContent;
+module.exports.joiSchema = joiSchema;

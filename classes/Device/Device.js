@@ -326,10 +326,6 @@ class Device {
    */
   _createVariableBasedOnPayload(type) {
     switch (type) {
-      case "AssociatedVariable":
-        return new AssociatedVariable(this._project, this);
-      case "InternalVariable":
-        return new InternalVariable(this._project, this);
       default:
         throw new Error(`Unrecognized Variable type: ${type}`);
     }

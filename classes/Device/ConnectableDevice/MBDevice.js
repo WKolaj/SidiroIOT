@@ -108,10 +108,6 @@ class MBDevice extends ConnectableDevice {
    */
   _createVariableBasedOnPayload(type) {
     switch (type) {
-      case "AssociatedVariable":
-        return new AssociatedVariable(this._project, this);
-      case "InternalVariable":
-        return new InternalVariable(this._project, this);
       case "MBBoolean":
         return new MBBoolean(this._project, this);
       case "MBByteArray":
