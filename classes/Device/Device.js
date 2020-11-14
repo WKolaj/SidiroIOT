@@ -290,16 +290,16 @@ class Device {
 
     switch (type) {
       case "HighLimitAlert":
-        alert = new HighLimitAlert();
+        alert = new HighLimitAlert(this._project, this);
         break;
       case "LowLimitAlert":
-        alert = new LowLimitAlert();
+        alert = new LowLimitAlert(this._project, this);
         break;
       case "BandwidthLimitAlert":
-        alert = new BandwidthLimitAlert();
+        alert = new BandwidthLimitAlert(this._project, this);
         break;
       case "ExactValuesAlert":
-        alert = new ExactValuesAlert();
+        alert = new ExactValuesAlert(this._project, this);
         break;
 
       default:

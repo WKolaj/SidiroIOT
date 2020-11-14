@@ -113,17 +113,17 @@ class Project {
     //Refreshing group manager on every tick
     await this.RefreshGroupManager.refresh(tickNumber);
 
-    // //Only to test - TODO - remove after
-    // for (let device of Object.values(this.Devices)) {
-    //   for (let variable of Object.values(device.Elements)) {
-    //     console.log(
-    //       `${device.ID}:${variable.ID}:${variable.LastValueTick}:${variable.Value}`
-    //     );
-    //   }
-    // }
-    // let stop = Date.now();
+    //Only to test - TODO - remove after
+    for (let device of Object.values(this.Devices)) {
+      for (let variable of Object.values(device.Elements)) {
+        console.log(
+          `${device.ID}:${variable.ID}:${variable.LastValueTick}:${variable.Value}`
+        );
+      }
+    }
+    let stop = Date.now();
 
-    // console.log(`Refreshed of ${tickNumber} in ${(stop - start) / 1000} [s]`);
+    console.log(`Refreshed of ${tickNumber} in ${(stop - start) / 1000} [s]`);
   }
 
   /**

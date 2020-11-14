@@ -227,6 +227,8 @@ module.exports.checkIfProjFileExistsAndIsValid = async () => {
   //Validating project content
   let validationResult = module.exports.validateProjectPayload(jsonContent);
   if (validationResult !== null) {
+    //TODO - remove earlier
+    console.log(validationResult);
     return false;
   }
 
