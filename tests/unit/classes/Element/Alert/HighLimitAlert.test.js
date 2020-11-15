@@ -1,7 +1,9 @@
+const { last } = require("lodash");
 const HighLimitAlert = require("../../../../../classes/Element/Alerts/HighLimitAlert");
 const {
   createFakeDevice,
   createFakeVariable,
+  createFakeCalcElement,
 } = require("../../../../utilities/testUtilities");
 
 describe("HighLimitAlert", () => {
@@ -775,6 +777,1005 @@ describe("HighLimitAlert", () => {
       let result = await exec();
 
       expect(result).toEqual("HighLimitAlert value is readonly");
+    });
+  });
+
+  describe("refresh", () => {
+    let project;
+    let variable1ID;
+    let variable1Value;
+    let variable1LastValueTick;
+    let variable1Add;
+    let variable1;
+    let variable2ID;
+    let variable2Value;
+    let variable2LastValueTick;
+    let variable2Add;
+    let variable2;
+    let variable3ID;
+    let variable3Value;
+    let variable3LastValueTick;
+    let variable3Add;
+    let variable3;
+    let variables;
+    let calcElement1ID;
+    let calcElement1Value;
+    let calcElement1LastValueTick;
+    let calcElement1Add;
+    let calcElement1;
+    let calcElements;
+    let device;
+    let payload;
+    let alert;
+    let tickId;
+    let value;
+    let lastValueTick;
+
+    let alertActive;
+
+    beforeEach(() => {
+      variable1ID = "variable1ID";
+      variable1Value = 123.321;
+      variable1LastValueTick = 100;
+      variable1Add = true;
+
+      variable2ID = "variable2ID";
+      variable2Value = 223.321;
+      variable2LastValueTick = 200;
+      variable2Add = true;
+
+      variable3ID = "variable3ID";
+      variable3Value = 323.321;
+      variable3LastValueTick = 300;
+      variable3Add = true;
+
+      calcElement1ID = "calcElement1ID";
+      calcElement1Value = 423.321;
+      calcElement1LastValueTick = 400;
+      calcElement1Add = true;
+
+      project = "fakeProject";
+
+      payload = {
+        id: "fakeElement1ID",
+        name: "fakeElement1Name",
+        type: "HighLimitAlert",
+        unit: "FakeUnit",
+        sampleTime: 15,
+        defaultValue: null,
+        variableID: "variable2ID",
+        highLimit: 500,
+        severity: 1,
+        hysteresis: 10,
+        timeOnDelay: 5,
+        timeOffDelay: 10,
+        texts: {
+          pl: "fakeTextPL, value: $VALUE, time: $TIME",
+          en: "fakeTextEN, value: $VALUE, time: $TIME",
+        },
+      };
+
+      alertActive = false;
+      tickIdOfStartingOnTimeDelay = null;
+      tickIdOfStartingOffTimeDelay = null;
+      onDelayTimeStarted = false;
+      offDelayTimeStarted = false;
+      value = null;
+      lastValueTick = 0;
+    });
+
+    let exec = async () => {
+      variable1 = createFakeVariable(
+        project,
+        null,
+        variable1ID,
+        "variable1Name",
+        "FakeVariable",
+        variable1Value,
+        "FakeUnit",
+        1,
+        () => {}
+      );
+      variable1.setValue(variable1Value, variable1LastValueTick);
+
+      variable2 = createFakeVariable(
+        project,
+        null,
+        variable2ID,
+        "variable2Name",
+        "FakeVariable",
+        variable2Value,
+        "FakeUnit",
+        1,
+        () => {}
+      );
+      variable2.setValue(variable2Value, variable2LastValueTick);
+
+      variable3 = createFakeVariable(
+        project,
+        null,
+        variable3ID,
+        "variable3Name",
+        "FakeVariable",
+        variable3Value,
+        "FakeUnit",
+        1,
+        () => {}
+      );
+      variable3.setValue(variable3Value, variable3LastValueTick);
+
+      variables = [];
+      if (variable1Add) variables.push(variable1);
+      if (variable2Add) variables.push(variable2);
+      if (variable3Add) variables.push(variable3);
+
+      calcElement1 = createFakeCalcElement(
+        project,
+        null,
+        calcElement1ID,
+        "calcElement1Name",
+        "FakeCalcElement",
+        calcElement1Value,
+        "FakeUnit",
+        1,
+        () => {}
+      );
+      calcElement1.setValue(calcElement1Value, calcElement1LastValueTick);
+
+      calcElements = [];
+      if (calcElement1Add) calcElements.push(calcElement1);
+
+      device = createFakeDevice(
+        project,
+        "fakeDevice1ID",
+        "FakeDevice",
+        "fakeDevice1Name",
+        calcElements,
+        [],
+        variables,
+        true
+      );
+
+      alert = new HighLimitAlert(project, device);
+
+      await alert.init(payload);
+
+      alert._alertActive = alertActive;
+      alert._onDelayTimeStarted = onDelayTimeStarted;
+      alert._offDelayTimeStarted = offDelayTimeStarted;
+      alert._tickIdOfStartingOnTimeDelay = tickIdOfStartingOnTimeDelay;
+      alert._tickIdOfStartingOffTimeDelay = tickIdOfStartingOffTimeDelay;
+      alert.setValue(value, lastValueTick);
+      return alert.refresh(tickId);
+    };
+
+    it("should do nothing - if alert is not active, value is below highAlert (inc. hyst.), off delay time is not started, on delay time is not started", async () => {
+      alertActive = false;
+      tickIdOfStartingOnTimeDelay = null;
+      tickIdOfStartingOffTimeDelay = null;
+      onDelayTimeStarted = false;
+      offDelayTimeStarted = false;
+      variable2Value = 400;
+      variable2LastValueTick = 100;
+      value = null;
+      lastValueTick = 0;
+
+      await exec();
+
+      expect(alert.Value).toEqual(null);
+      expect(alert.LastValueTick).toEqual(0);
+
+      expect(alert.AlertActive).toEqual(false);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+    });
+
+    it("should do nothing - if alert is not active, value is below highAlert (inc. hyst.) but not highAlert, off delay time is not started, on delay time is not started", async () => {
+      alertActive = false;
+      tickIdOfStartingOnTimeDelay = null;
+      tickIdOfStartingOffTimeDelay = null;
+      onDelayTimeStarted = false;
+      offDelayTimeStarted = false;
+      variable2Value = 475;
+      variable2LastValueTick = 100;
+      value = null;
+      lastValueTick = 0;
+
+      await exec();
+
+      expect(alert.Value).toEqual(null);
+      expect(alert.LastValueTick).toEqual(0);
+
+      expect(alert.AlertActive).toEqual(false);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+    });
+
+    it("should start on delay - if alert is not active, value is above highAlertLimit, off delay time is not started, on delay time is not started", async () => {
+      alertActive = false;
+      tickIdOfStartingOnTimeDelay = null;
+      tickIdOfStartingOffTimeDelay = null;
+      onDelayTimeStarted = false;
+      offDelayTimeStarted = false;
+      variable2Value = 501;
+      variable2LastValueTick = 100;
+      value = null;
+      lastValueTick = 0;
+
+      await exec();
+
+      expect(alert.Value).toEqual(null);
+      expect(alert.LastValueTick).toEqual(0);
+
+      expect(alert.AlertActive).toEqual(false);
+      expect(alert._onDelayTimeStarted).toEqual(true);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(100);
+    });
+
+    it("should stop on delay - if alert is not active, value is below highAlertLimit, off delay time is not started, on delay time is started", async () => {
+      alertActive = false;
+      tickIdOfStartingOnTimeDelay = 100;
+      tickIdOfStartingOffTimeDelay = null;
+      onDelayTimeStarted = true;
+      offDelayTimeStarted = false;
+      variable2Value = 475;
+      variable2LastValueTick = 101;
+      value = null;
+      lastValueTick = 0;
+
+      await exec();
+
+      expect(alert.Value).toEqual(null);
+      expect(alert.LastValueTick).toEqual(0);
+
+      expect(alert.AlertActive).toEqual(false);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+    });
+
+    it("should do nothing and wait for on delay time - if alert is not active, value is above highAlertLimit, off delay time is not started, on delay time is started but not elapsed", async () => {
+      alertActive = false;
+      tickIdOfStartingOnTimeDelay = 100;
+      tickIdOfStartingOffTimeDelay = null;
+      onDelayTimeStarted = true;
+      offDelayTimeStarted = false;
+      variable2Value = 501;
+      variable2LastValueTick = 111;
+      payload.timeOnDelay = 15;
+      value = null;
+      lastValueTick = 0;
+
+      await exec();
+
+      expect(alert.Value).toEqual(null);
+      expect(alert.LastValueTick).toEqual(0);
+
+      expect(alert.AlertActive).toEqual(false);
+      expect(alert._onDelayTimeStarted).toEqual(true);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(100);
+    });
+
+    it("should stop on delay and activate alert - if alert is not active, value is above highAlertLimit, off delay time is not started, on delay time is started, on delay time elapsed", async () => {
+      alertActive = false;
+      tickIdOfStartingOnTimeDelay = 100;
+      tickIdOfStartingOffTimeDelay = null;
+      onDelayTimeStarted = true;
+      offDelayTimeStarted = false;
+      variable2Value = 501;
+      variable2LastValueTick = 111;
+      payload.timeOnDelay = 10;
+
+      await exec();
+
+      const expectedTexts = {
+        en: payload.texts.en
+          .replace("$VALUE", 501)
+          .replace("$TIME", new Date(111000).toISOString()),
+        pl: payload.texts.pl
+          .replace("$VALUE", 501)
+          .replace("$TIME", new Date(111000).toISOString()),
+      };
+
+      expect(alert.Value).toEqual(expectedTexts);
+      expect(alert.LastValueTick).toEqual(variable2LastValueTick);
+
+      expect(alert.AlertActive).toEqual(true);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+    });
+
+    it("should do nothing - if alert is active, value is above highAlertLimit, off delay time is not started, on delay time is not started", async () => {
+      alertActive = true;
+      tickIdOfStartingOnTimeDelay = null;
+      tickIdOfStartingOffTimeDelay = null;
+      onDelayTimeStarted = false;
+      offDelayTimeStarted = false;
+      variable2Value = 501;
+      variable2LastValueTick = 111;
+      payload.timeOnDelay = 10;
+      value = {
+        pl: "someTextPL",
+        en: "someTextEN",
+      };
+      lastValueTick = 100;
+
+      await exec();
+
+      expect(alert.Value).toEqual(value);
+      expect(alert.LastValueTick).toEqual(lastValueTick);
+
+      expect(alert.AlertActive).toEqual(true);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+    });
+
+    it("should do nothing - if alert is active, value is below highAlertLimit but above highAlertLimit (inc. hys.), off delay time is not started, on delay time is not started", async () => {
+      alertActive = true;
+      tickIdOfStartingOnTimeDelay = null;
+      tickIdOfStartingOffTimeDelay = null;
+      onDelayTimeStarted = false;
+      offDelayTimeStarted = false;
+      variable2Value = 475;
+      variable2LastValueTick = 111;
+      payload.timeOnDelay = 10;
+      value = {
+        pl: "someTextPL",
+        en: "someTextEN",
+      };
+      lastValueTick = 100;
+
+      await exec();
+
+      expect(alert.Value).toEqual(value);
+      expect(alert.LastValueTick).toEqual(lastValueTick);
+
+      expect(alert.AlertActive).toEqual(true);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+    });
+
+    it("should start onTimeDelay - if alert is active, value is below highAlertLimit (inc. hys.), off delay time is not started, on delay time is not started", async () => {
+      alertActive = true;
+      tickIdOfStartingOnTimeDelay = null;
+      tickIdOfStartingOffTimeDelay = null;
+      onDelayTimeStarted = false;
+      offDelayTimeStarted = false;
+      variable2Value = 440;
+      variable2LastValueTick = 111;
+      payload.timeOnDelay = 10;
+      value = {
+        pl: "someTextPL",
+        en: "someTextEN",
+      };
+      lastValueTick = 100;
+
+      await exec();
+
+      expect(alert.Value).toEqual(value);
+      expect(alert.LastValueTick).toEqual(lastValueTick);
+
+      expect(alert.AlertActive).toEqual(true);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(true);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(111);
+    });
+
+    it("should stop onTimeDelay - if alert is active, value is above highAlertLimit (inc. hys.), off delay time is started, on delay time is not started", async () => {
+      alertActive = true;
+      tickIdOfStartingOnTimeDelay = null;
+      tickIdOfStartingOffTimeDelay = 111;
+      onDelayTimeStarted = false;
+      offDelayTimeStarted = true;
+      variable2Value = 451;
+      variable2LastValueTick = 112;
+      payload.timeOnDelay = 10;
+      value = {
+        pl: "someTextPL",
+        en: "someTextEN",
+      };
+      lastValueTick = 100;
+
+      await exec();
+
+      expect(alert.Value).toEqual(value);
+      expect(alert.LastValueTick).toEqual(lastValueTick);
+
+      expect(alert.AlertActive).toEqual(true);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+    });
+
+    it("should do nothing - if alert is active, value is below highAlertLimit (inc. hys.), off delay time is started but not elapsed, on delay time is not started", async () => {
+      alertActive = true;
+      tickIdOfStartingOnTimeDelay = null;
+      tickIdOfStartingOffTimeDelay = 111;
+      onDelayTimeStarted = false;
+      offDelayTimeStarted = true;
+      variable2Value = 440;
+      variable2LastValueTick = 120;
+      payload.timeOnDelay = 10;
+      value = {
+        pl: "someTextPL",
+        en: "someTextEN",
+      };
+      lastValueTick = 100;
+
+      await exec();
+
+      expect(alert.Value).toEqual(value);
+      expect(alert.LastValueTick).toEqual(lastValueTick);
+
+      expect(alert.AlertActive).toEqual(true);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(true);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(111);
+    });
+
+    it("should deactive alert and stop offTimeDelay - if alert is active, value is below highAlertLimit (inc. hys.), off delay time is not started, on delay time elapsed", async () => {
+      alertActive = true;
+      tickIdOfStartingOnTimeDelay = null;
+      tickIdOfStartingOffTimeDelay = 111;
+      onDelayTimeStarted = false;
+      offDelayTimeStarted = true;
+      variable2Value = 440;
+      variable2LastValueTick = 122;
+      payload.timeOnDelay = 10;
+      value = {
+        pl: "someTextPL",
+        en: "someTextEN",
+      };
+      lastValueTick = 100;
+
+      await exec();
+
+      expect(alert.Value).toEqual(null);
+      expect(alert.LastValueTick).toEqual(122);
+
+      expect(alert.AlertActive).toEqual(false);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+    });
+
+    it("should do nothing - if there is no variable and calcElement of given id", async () => {
+      alertActive = false;
+      tickIdOfStartingOnTimeDelay = null;
+      tickIdOfStartingOffTimeDelay = null;
+      onDelayTimeStarted = false;
+      offDelayTimeStarted = false;
+      variable2Value = 501;
+      variable2LastValueTick = 100;
+      value = null;
+      lastValueTick = 0;
+
+      payload.variableID = "fakeVariableID";
+
+      await exec();
+
+      expect(alert.Value).toEqual(null);
+      expect(alert.LastValueTick).toEqual(0);
+
+      expect(alert.AlertActive).toEqual(false);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+    });
+
+    it("should do nothing - if variables value of given id is not a number", async () => {
+      alertActive = false;
+      tickIdOfStartingOnTimeDelay = null;
+      tickIdOfStartingOffTimeDelay = null;
+      onDelayTimeStarted = false;
+      offDelayTimeStarted = false;
+      variable2Value = [1, 2, 3, 4, 5];
+      variable2LastValueTick = 100;
+      value = null;
+      lastValueTick = 0;
+
+      await exec();
+
+      expect(alert.Value).toEqual(null);
+      expect(alert.LastValueTick).toEqual(0);
+
+      expect(alert.AlertActive).toEqual(false);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+    });
+
+    it("should do nothing - if variable lastValueTick is 0", async () => {
+      alertActive = false;
+      tickIdOfStartingOnTimeDelay = null;
+      tickIdOfStartingOffTimeDelay = null;
+      onDelayTimeStarted = false;
+      offDelayTimeStarted = false;
+      variable2Value = 501;
+      variable2LastValueTick = 0;
+      value = null;
+      lastValueTick = 0;
+
+      await exec();
+
+      expect(alert.Value).toEqual(null);
+      expect(alert.LastValueTick).toEqual(0);
+
+      expect(alert.AlertActive).toEqual(false);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+    });
+
+    it("should start on delay - if alert is not active, value is above highAlertLimit, off delay time is not started, on delay time is not started - BUT INSTEAD OF VALUE THERE IS CALC ELEMENT", async () => {
+      alertActive = false;
+      tickIdOfStartingOnTimeDelay = null;
+      tickIdOfStartingOffTimeDelay = null;
+      onDelayTimeStarted = false;
+      offDelayTimeStarted = false;
+      calcElement1Value = 501;
+      calcElement1LastValueTick = 100;
+      payload.variableID = calcElement1ID;
+      value = null;
+      lastValueTick = 0;
+
+      await exec();
+
+      expect(alert.Value).toEqual(null);
+      expect(alert.LastValueTick).toEqual(0);
+
+      expect(alert.AlertActive).toEqual(false);
+      expect(alert._onDelayTimeStarted).toEqual(true);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(100);
+    });
+
+    it("should do nothing - if calcElements value of given id is not a number", async () => {
+      alertActive = false;
+      tickIdOfStartingOnTimeDelay = null;
+      tickIdOfStartingOffTimeDelay = null;
+      onDelayTimeStarted = false;
+      offDelayTimeStarted = false;
+      calcElement1Value = [1, 2, 3, 4, 5];
+      calcElement1LastValueTick = 100;
+      payload.variableID = calcElement1ID;
+      value = null;
+      lastValueTick = 0;
+
+      await exec();
+
+      expect(alert.Value).toEqual(null);
+      expect(alert.LastValueTick).toEqual(0);
+
+      expect(alert.AlertActive).toEqual(false);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+    });
+
+    it("should do nothing - if calcElements lastValueTick is 0", async () => {
+      alertActive = false;
+      tickIdOfStartingOnTimeDelay = null;
+      tickIdOfStartingOffTimeDelay = null;
+      onDelayTimeStarted = false;
+      offDelayTimeStarted = false;
+      calcElement1Value = 501;
+      calcElement1LastValueTick = 0;
+      payload.variableID = calcElement1ID;
+      value = null;
+      lastValueTick = 0;
+
+      await exec();
+
+      expect(alert.Value).toEqual(null);
+      expect(alert.LastValueTick).toEqual(0);
+
+      expect(alert.AlertActive).toEqual(false);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+    });
+
+    it("should invoke proper cycle with variable", async () => {
+      alertActive = false;
+      tickIdOfStartingOnTimeDelay = null;
+      tickIdOfStartingOffTimeDelay = null;
+      onDelayTimeStarted = false;
+      offDelayTimeStarted = false;
+      variable2Value = 400;
+      variable2LastValueTick = 100;
+      value = null;
+      lastValueTick = 0;
+
+      //Value below high limit - no change
+      await exec();
+
+      expect(alert.Value).toEqual(null);
+      expect(alert.LastValueTick).toEqual(0);
+      expect(alert.AlertActive).toEqual(false);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+
+      //Value above limit with hysteresis but not limit  - no change
+      variable2.setValue(475, 101);
+      await alert.refresh(100);
+
+      expect(alert.Value).toEqual(null);
+      expect(alert.LastValueTick).toEqual(0);
+      expect(alert.AlertActive).toEqual(false);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+
+      //Value above limit  - starting on time delay
+      variable2.setValue(501, 102);
+      await alert.refresh(100);
+
+      expect(alert.Value).toEqual(null);
+      expect(alert.LastValueTick).toEqual(0);
+      expect(alert.AlertActive).toEqual(false);
+      expect(alert._onDelayTimeStarted).toEqual(true);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(102);
+
+      //Value below limit  - stopping on time delay
+      variable2.setValue(499, 103);
+      await alert.refresh(100);
+
+      expect(alert.Value).toEqual(null);
+      expect(alert.LastValueTick).toEqual(0);
+      expect(alert.AlertActive).toEqual(false);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+
+      //Value above limit  - starting on time delay
+      variable2.setValue(501, 104);
+      await alert.refresh(100);
+
+      expect(alert.Value).toEqual(null);
+      expect(alert.LastValueTick).toEqual(0);
+      expect(alert.AlertActive).toEqual(false);
+      expect(alert._onDelayTimeStarted).toEqual(true);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(104);
+
+      //On time delay does not elapsed
+      variable2.setValue(501, 105);
+      await alert.refresh(100);
+
+      expect(alert.Value).toEqual(null);
+      expect(alert.LastValueTick).toEqual(0);
+      expect(alert.AlertActive).toEqual(false);
+      expect(alert._onDelayTimeStarted).toEqual(true);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(104);
+
+      //On time delay does elapsed
+      variable2.setValue(501, 115);
+      await alert.refresh(100);
+
+      let expectedTexts = {
+        en: payload.texts.en
+          .replace("$VALUE", 501)
+          .replace("$TIME", new Date(115000).toISOString()),
+        pl: payload.texts.pl
+          .replace("$VALUE", 501)
+          .replace("$TIME", new Date(115000).toISOString()),
+      };
+
+      expect(alert.Value).toEqual(expectedTexts);
+      expect(alert.LastValueTick).toEqual(115);
+      expect(alert.AlertActive).toEqual(true);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+
+      //Value still above alert - do nothing
+      variable2.setValue(501, 116);
+      await alert.refresh(100);
+
+      expect(alert.Value).toEqual(expectedTexts);
+      expect(alert.LastValueTick).toEqual(115);
+      expect(alert.AlertActive).toEqual(true);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+
+      //Value below alert but not alert with hysteresis - do nothing
+      variable2.setValue(475, 117);
+      await alert.refresh(100);
+
+      expect(alert.Value).toEqual(expectedTexts);
+      expect(alert.LastValueTick).toEqual(115);
+      expect(alert.AlertActive).toEqual(true);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+
+      //Value below alert with hysteresis - start on delay
+      variable2.setValue(440, 118);
+      await alert.refresh(100);
+
+      expect(alert.Value).toEqual(expectedTexts);
+      expect(alert.LastValueTick).toEqual(115);
+      expect(alert.AlertActive).toEqual(true);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(true);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(118);
+
+      //Value above alert with hysteresis - stop on delay
+      variable2.setValue(451, 119);
+      await alert.refresh(100);
+
+      expect(alert.Value).toEqual(expectedTexts);
+      expect(alert.LastValueTick).toEqual(115);
+      expect(alert.AlertActive).toEqual(true);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+
+      //Value below alert with hysteresis again - start on delay
+      variable2.setValue(449, 120);
+      await alert.refresh(100);
+
+      expect(alert.Value).toEqual(expectedTexts);
+      expect(alert.LastValueTick).toEqual(115);
+      expect(alert.AlertActive).toEqual(true);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(true);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(120);
+
+      //Value below alert with hysteresis again, off time delay not elapsed - do nothing
+      variable2.setValue(445, 121);
+      await alert.refresh(100);
+
+      expect(alert.Value).toEqual(expectedTexts);
+      expect(alert.LastValueTick).toEqual(115);
+      expect(alert.AlertActive).toEqual(true);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(true);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(120);
+
+      //Value below alert with hysteresis again, off time delay elapsed - deactivate alert
+      variable2.setValue(443, 132);
+      await alert.refresh(100);
+
+      expect(alert.Value).toEqual(null);
+      expect(alert.LastValueTick).toEqual(132);
+      expect(alert.AlertActive).toEqual(false);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+    });
+
+    it("should invoke proper cycle with calcElement", async () => {
+      alertActive = false;
+      tickIdOfStartingOnTimeDelay = null;
+      tickIdOfStartingOffTimeDelay = null;
+      onDelayTimeStarted = false;
+      offDelayTimeStarted = false;
+      payload.variableID = calcElement1ID;
+      calcElement1Value = 400;
+      calcElement1LastValueTick = 100;
+      value = null;
+      lastValueTick = 0;
+
+      //Value below high limit - no change
+      await exec();
+
+      expect(alert.Value).toEqual(null);
+      expect(alert.LastValueTick).toEqual(0);
+      expect(alert.AlertActive).toEqual(false);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+
+      //Value above limit with hysteresis but not limit  - no change
+      calcElement1.setValue(475, 101);
+      await alert.refresh(100);
+
+      expect(alert.Value).toEqual(null);
+      expect(alert.LastValueTick).toEqual(0);
+      expect(alert.AlertActive).toEqual(false);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+
+      //Value above limit  - starting on time delay
+      calcElement1.setValue(501, 102);
+      await alert.refresh(100);
+
+      expect(alert.Value).toEqual(null);
+      expect(alert.LastValueTick).toEqual(0);
+      expect(alert.AlertActive).toEqual(false);
+      expect(alert._onDelayTimeStarted).toEqual(true);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(102);
+
+      //Value below limit  - stopping on time delay
+      calcElement1.setValue(499, 103);
+      await alert.refresh(100);
+
+      expect(alert.Value).toEqual(null);
+      expect(alert.LastValueTick).toEqual(0);
+      expect(alert.AlertActive).toEqual(false);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+
+      //Value above limit  - starting on time delay
+      calcElement1.setValue(501, 104);
+      await alert.refresh(100);
+
+      expect(alert.Value).toEqual(null);
+      expect(alert.LastValueTick).toEqual(0);
+      expect(alert.AlertActive).toEqual(false);
+      expect(alert._onDelayTimeStarted).toEqual(true);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(104);
+
+      //On time delay does not elapsed
+      calcElement1.setValue(501, 105);
+      await alert.refresh(100);
+
+      expect(alert.Value).toEqual(null);
+      expect(alert.LastValueTick).toEqual(0);
+      expect(alert.AlertActive).toEqual(false);
+      expect(alert._onDelayTimeStarted).toEqual(true);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(104);
+
+      //On time delay does elapsed
+      calcElement1.setValue(501, 115);
+      await alert.refresh(100);
+
+      let expectedTexts = {
+        en: payload.texts.en
+          .replace("$VALUE", 501)
+          .replace("$TIME", new Date(115000).toISOString()),
+        pl: payload.texts.pl
+          .replace("$VALUE", 501)
+          .replace("$TIME", new Date(115000).toISOString()),
+      };
+
+      expect(alert.Value).toEqual(expectedTexts);
+      expect(alert.LastValueTick).toEqual(115);
+      expect(alert.AlertActive).toEqual(true);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+
+      //Value still above alert - do nothing
+      calcElement1.setValue(501, 116);
+      await alert.refresh(100);
+
+      expect(alert.Value).toEqual(expectedTexts);
+      expect(alert.LastValueTick).toEqual(115);
+      expect(alert.AlertActive).toEqual(true);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+
+      //Value below alert but not alert with hysteresis - do nothing
+      calcElement1.setValue(475, 117);
+      await alert.refresh(100);
+
+      expect(alert.Value).toEqual(expectedTexts);
+      expect(alert.LastValueTick).toEqual(115);
+      expect(alert.AlertActive).toEqual(true);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+
+      //Value below alert with hysteresis - start on delay
+      calcElement1.setValue(440, 118);
+      await alert.refresh(100);
+
+      expect(alert.Value).toEqual(expectedTexts);
+      expect(alert.LastValueTick).toEqual(115);
+      expect(alert.AlertActive).toEqual(true);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(true);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(118);
+
+      //Value above alert with hysteresis - stop on delay
+      calcElement1.setValue(451, 119);
+      await alert.refresh(100);
+
+      expect(alert.Value).toEqual(expectedTexts);
+      expect(alert.LastValueTick).toEqual(115);
+      expect(alert.AlertActive).toEqual(true);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+
+      //Value below alert with hysteresis again - start on delay
+      calcElement1.setValue(449, 120);
+      await alert.refresh(100);
+
+      expect(alert.Value).toEqual(expectedTexts);
+      expect(alert.LastValueTick).toEqual(115);
+      expect(alert.AlertActive).toEqual(true);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(true);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(120);
+
+      //Value below alert with hysteresis again, off time delay not elapsed - do nothing
+      calcElement1.setValue(445, 121);
+      await alert.refresh(100);
+
+      expect(alert.Value).toEqual(expectedTexts);
+      expect(alert.LastValueTick).toEqual(115);
+      expect(alert.AlertActive).toEqual(true);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(true);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(120);
+
+      //Value below alert with hysteresis again, off time delay elapsed - deactivate alert
+      calcElement1.setValue(443, 132);
+      await alert.refresh(100);
+
+      expect(alert.Value).toEqual(null);
+      expect(alert.LastValueTick).toEqual(132);
+      expect(alert.AlertActive).toEqual(false);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
     });
   });
 });
