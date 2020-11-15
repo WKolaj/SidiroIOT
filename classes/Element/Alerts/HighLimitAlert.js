@@ -26,7 +26,6 @@ class HighLimitAlert extends Alert {
     this._onDelayTimeStarted = null;
     this._offDelayTimeStarted = null;
     this._highLimit = null;
-    this._actualState = null;
   }
 
   //#endregion ========= CONSTRUCTOR =========
@@ -163,7 +162,8 @@ class HighLimitAlert extends Alert {
 
     //Initializing other flags
     this._value = null;
-    this._actualState = null;
+    this._tickIdOfStartingOnTimeDelay = null;
+    this._tickIdOfStartingOffTimeDelay = null;
     this._onDelayTimeStarted = false;
     this._offDelayTimeStarted = false;
   }
@@ -178,7 +178,7 @@ class HighLimitAlert extends Alert {
     superPayload.highLimit = this.HighLimit;
     superPayload.texts = this.Texts;
     superPayload.severity = this.Severity;
-    superPayload.hysteresys = this.Hysteresis;
+    superPayload.hysteresis = this.Hysteresis;
     superPayload.timeOnDelay = this.TimeOnDelay;
     superPayload.timeOffDelay = this.TimeOffDelay;
 
