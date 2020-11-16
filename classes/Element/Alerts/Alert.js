@@ -18,7 +18,7 @@ class Alert extends Element {
    * @description Is alert in active state
    */
   get AlertActive() {
-    return this._alertActive;
+    return this._getAlertActiveState();
   }
 
   //#endregion ========= PROPERTIES =========

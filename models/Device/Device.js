@@ -1,4 +1,5 @@
 const Joi = require("joi");
+const BandwidthLimitAlert = require("../../classes/Element/Alerts/BandwidthLimitAlert");
 const HighLimitAlert = require("../../classes/Element/Alerts/HighLimitAlert");
 const LowLimitAlert = require("../../classes/Element/Alerts/LowLimitAlert");
 const AverageCalculator = require("../../classes/Element/CalcElement/AverageCalculator");
@@ -102,6 +103,9 @@ const validateAlertsPayload = (alertsPayload, helpers) => {
         break;
       case "LowLimitAlert":
         alertMessage = LowLimitAlert.validatePayload(alertPayload);
+        break;
+      case "BandwidthLimitAlert":
+        alertMessage = BandwidthLimitAlert.validatePayload(alertPayload);
         break;
       default:
         alertMessage = "alert type not recognized";
