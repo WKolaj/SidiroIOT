@@ -25,7 +25,6 @@ class HighLimitAlert extends Alert {
     this._tickIdOfStartingOffTimeDelay = null;
     this._onDelayTimeStarted = null;
     this._offDelayTimeStarted = null;
-    this._highLimit = null;
   }
 
   //#endregion ========= CONSTRUCTOR =========
@@ -277,5 +276,3 @@ class HighLimitAlert extends Alert {
 }
 
 module.exports = HighLimitAlert;
-
-//TODO - test this class

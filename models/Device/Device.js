@@ -1,5 +1,6 @@
 const Joi = require("joi");
 const HighLimitAlert = require("../../classes/Element/Alerts/HighLimitAlert");
+const LowLimitAlert = require("../../classes/Element/Alerts/LowLimitAlert");
 const AverageCalculator = require("../../classes/Element/CalcElement/AverageCalculator");
 const FactorCalculator = require("../../classes/Element/CalcElement/FactorCalculator");
 const IncreaseCalculator = require("../../classes/Element/CalcElement/IncreaseCalculator");
@@ -98,6 +99,9 @@ const validateAlertsPayload = (alertsPayload, helpers) => {
     switch (alertType) {
       case "HighLimitAlert":
         alertMessage = HighLimitAlert.validatePayload(alertPayload);
+        break;
+      case "LowLimitAlert":
+        alertMessage = LowLimitAlert.validatePayload(alertPayload);
         break;
       default:
         alertMessage = "alert type not recognized";
