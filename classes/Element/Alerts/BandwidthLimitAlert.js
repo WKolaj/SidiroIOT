@@ -129,23 +129,6 @@ class BandwidthLimitAlert extends Alert {
 
   //#endregion  ========= PUBLIC STATIC METHODS =========
 
-  //#region ========= PUBLIC METHODS =========
-
-  /**
-   * @description Method for activating alert state. CAN BE OVERRIDEN IN CHILD CLASSES
-   */
-  _activateAlert() {
-    this._alertActive = true;
-  }
-
-  /**
-   * @description Method for deactivating alert state. CAN BE OVERRIDEN IN CHILD CLASSES
-   */
-  _deactivateAlert() {
-    this._alertActive = false;
-  }
-  //#endregion ========= PUBLIC METHODS =========
-
   //#region ========= PRIVATE METHODS =========
 
   /**
@@ -183,13 +166,6 @@ class BandwidthLimitAlert extends Alert {
     this._tickIdOfStartingOffTimeDelay = null;
     this._offDelayTimeStarted = false;
   }
-
-  /**
-   * @description Method called every tick that suits sampleTime. If logic is normal
-   * @param {Number} lastTickId actual tick id of variable
-   * @param {Object} value value for variable
-   */
-  async _refreshWithNormalLogic(lastTickId, value) {}
 
   /**
    * @description Method for deactivating high alert
@@ -419,6 +395,16 @@ class BandwidthLimitAlert extends Alert {
   _getAlertActiveState() {
     return this.HighAlertActive || this.LowAlertActive;
   }
+
+  /**
+   * @description Method for activating alert state. CAN BE OVERRIDEN IN CHILD CLASSES
+   */
+  _activateAlert() {}
+
+  /**
+   * @description Method for deactivating alert state. CAN BE OVERRIDEN IN CHILD CLASSES
+   */
+  _deactivateAlert() {}
 
   //#endregion ========= OVERRIDE PRIVATE METHODS =========
 }
