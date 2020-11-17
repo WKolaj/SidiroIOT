@@ -2,6 +2,7 @@ const Joi = require("joi");
 const MBDevice = require("../../classes/Device/ConnectableDevice/MBDevice");
 const MBGatewayDevice = require("../../classes/Device/ConnectableDevice/MBGatewayDevice");
 const S7Device = require("../../classes/Device/ConnectableDevice/S7Device");
+const InternalDevice = require("../../classes/Device/InternalDevice/InternalDevice");
 
 const validateConnectableDevicesPayload = (devicesPayload, helpers) => {
   const { message } = helpers;
@@ -52,8 +53,10 @@ const validateInternalDevicesPayload = (devicesPayload, helpers) => {
     let deviceType = devicePayload.type;
     let validationMessage = null;
 
-    //TODO - add checking device payload based on type
     switch (deviceType) {
+      case "InternalDevice":
+        validationMessage = InternalDevice.validatePayload(devicePayload);
+        break;
       default:
         validationMessage = "internal device type not recognized";
     }

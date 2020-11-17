@@ -326,6 +326,8 @@ class Device {
    */
   _createVariableBasedOnPayload(type) {
     switch (type) {
+      case "AssociatedVariable":
+        return new AssociatedVariable(this._project, this);
       default:
         throw new Error(`Unrecognized Variable type: ${type}`);
     }
@@ -353,10 +355,6 @@ class Device {
   }
 
   //#endregion ========= PRIVATE VIRTUAL METHODS =========
-
-  //#region ========= PRIVATE ABSTRACT METHODS =========
-
-  //#endregion ========= PRIVATE ABSTRACT METHODS =========
 
   //#region ========= PUBLIC ABSTRACT METHODS =========
 

@@ -7,7 +7,6 @@ const textsObjectSchema = Joi.object({
   lowLimit: joiTextSchema.required(),
 });
 
-//TODO - add expression validation for low limit
 const schemaContent = {
   ...elementProtocolVariableSchema.schemaContent,
   type: Joi.string().valid("BandwidthLimitAlert").required(),

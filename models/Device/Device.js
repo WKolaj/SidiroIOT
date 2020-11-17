@@ -8,6 +8,7 @@ const FactorCalculator = require("../../classes/Element/CalcElement/FactorCalcul
 const IncreaseCalculator = require("../../classes/Element/CalcElement/IncreaseCalculator");
 const SumCalculator = require("../../classes/Element/CalcElement/SumCalculator");
 const ValueFromByteArrayCalculator = require("../../classes/Element/CalcElement/ValueFromByteArrayCalculator");
+const AssociatedVariable = require("../../classes/Element/Variable/AssociatedVariable");
 
 const validateVariablesPayload = (variablesPayload, helpers) => {
   const { message } = helpers;
@@ -21,6 +22,9 @@ const validateVariablesPayload = (variablesPayload, helpers) => {
     let validationMessage = null;
 
     switch (variableType) {
+      case "AssociatedVariable":
+        validationMessage = AssociatedVariable.validatePayload(variablePayload);
+        break;
       default:
         validationMessage = "variable type not recognized";
     }

@@ -276,5 +276,3 @@ class LowLimitAlert extends Alert {
 }
 
 module.exports = LowLimitAlert;
-
-//TODO - test this class

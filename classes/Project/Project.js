@@ -276,16 +276,21 @@ class Project {
    * @param {String} deviceID device id of element
    * @param {String} elementID element id
    */
-  getElementValue(deviceID, elementID) {
-    let device = this.Devices[deviceID];
-    if (!exists(device))
-      throw new Error(`Device of id: ${deviceID} does not exist`);
+  getElement(deviceID, elementID) {
+    let connectableDevice = this.ConnectableDevices[deviceID];
+    let internalDevice = this.InternalDevices[deviceID];
+    let agentDevice = this.AgentDevices[deviceID];
 
-    let element = device.Elements[elementID];
-    if (!exists(element))
-      throw new Error(
-        `Element of id: ${elementID} does not exist in device: ${deviceID}`
-      );
+    let device = connectableDevice || internalDevice || agentDevice;
+    if (!exists(device)) return null;
+
+    //Getting variable, calcElement or alert without creating new collection - performance
+    let variable = device.Variables[elementID];
+    let calcElement = device.CalcElements[elementID];
+    let alert = device.Alerts[elementID];
+    let element = variable || calcElement || alert;
+
+    if (!exists(element)) return null;
 
     return element;
   }
