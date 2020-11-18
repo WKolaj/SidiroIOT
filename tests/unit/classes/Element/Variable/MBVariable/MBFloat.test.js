@@ -135,7 +135,7 @@ describe("MBFloat", () => {
 
     beforeEach(() => {
       project = "fakeProject";
-      device = "fakeDevice";
+      device = { ID: "fakeDeviceId" };
       payload = {
         id: "testElementId",
         name: "testElementName",

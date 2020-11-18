@@ -1,5 +1,6 @@
 const Sampler = require("../Sampler/Sampler");
 const Joi = require("joi");
+const { exists } = require("../../utilities/utilities");
 
 class Element {
   //#region ========= CONSTRUCTOR =========
@@ -150,6 +151,8 @@ class Element {
    * @description Method for generating payload of element. CAN BE OVERRIDEN IN CHILD CLASSES
    */
   generatePayload() {
+    let deviceId = exists(this._device) ? this._device.ID : null;
+
     return {
       id: this.ID,
       name: this.Name,
@@ -159,6 +162,7 @@ class Element {
       unit: this.Unit,
       sampleTime: this.SampleTime,
       lastValueTick: this.LastValueTick,
+      deviceId: deviceId,
     };
   }
 

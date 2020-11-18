@@ -158,7 +158,7 @@ describe("MBBoolean", () => {
 
     beforeEach(() => {
       project = "fakeProject";
-      device = "fakeDevice";
+      device = { ID: "fakeDeviceId" };
       possibleReadCodes = [1, 2, 3, 4];
       possibleWriteCodes = [16];
 

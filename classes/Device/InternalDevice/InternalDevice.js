@@ -38,3 +38,5 @@ class InternalDevice extends Device {
 }
 
 module.exports = InternalDevice;
+
+//TODO - test this class

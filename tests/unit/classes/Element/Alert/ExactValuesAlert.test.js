@@ -195,6 +195,7 @@ describe("ExactValuesAlert", () => {
         ...payload,
         lastValueTick: 0,
         value: payload.defaultValue,
+        deviceId: "fakeDevice1ID",
       };
 
       expect(calcElementPayload).toEqual(expectedPayload);
@@ -210,6 +211,7 @@ describe("ExactValuesAlert", () => {
         ...payload,
         lastValueTick: 0,
         value: payload.defaultValue,
+        deviceId: "fakeDevice1ID",
       };
 
       expect(calcElementPayload).toEqual(expectedPayload);
@@ -250,6 +252,7 @@ describe("ExactValuesAlert", () => {
         lastValueTick: 0,
         value: payload.defaultValue,
         texts: defaultTexts,
+        deviceId: "fakeDevice1ID",
       };
 
       expect(calcElementPayload).toEqual(expectedPayload);
@@ -275,7 +278,7 @@ describe("ExactValuesAlert", () => {
 
     beforeEach(() => {
       project = "fakeProject";
-      device = "fakeDevice";
+      device = { ID: "fakeDeviceId" };
 
       payload = {
         id: "pac3200-1-current-alert",
@@ -327,6 +330,7 @@ describe("ExactValuesAlert", () => {
         ...payload,
         lastValueTick: 0,
         value: payload.defaultValue,
+        deviceId: "fakeDeviceId",
       };
 
       expect(result).toEqual(expectedPayload);

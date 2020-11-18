@@ -62,7 +62,7 @@ describe("ConnectableVariable", () => {
 
     beforeEach(() => {
       project = "fakeProject";
-      device = "fakeDevice";
+      device = { ID: "fakeDeviceId" };
       payload = {
         id: "testElementId",
         name: "testElementName",
@@ -335,7 +335,7 @@ describe("ConnectableVariable", () => {
 
     beforeEach(() => {
       project = "fakeProject";
-      device = "fakeDevice";
+      device = { ID: "fakeDeviceId" };
       payload = {
         id: "testElementId",
         name: "testElementName",
@@ -375,6 +375,7 @@ describe("ConnectableVariable", () => {
         defaultValue: 10,
         value: 123,
         lastValueTick: 0,
+        deviceId: "fakeDeviceId",
       };
 
       expect(result).toEqual(expectedResult);

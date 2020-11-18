@@ -48,7 +48,7 @@ describe("AssociatedVariable", () => {
 
     beforeEach(() => {
       project = {};
-      device = "fakeDevice";
+      device = { ID: "fakeDeviceId" };
       payload = {
         id: "testElementId",
         name: "testElementName",
@@ -83,6 +83,7 @@ describe("AssociatedVariable", () => {
         ...payload,
         value: getElementReturnValue.DefaultValue,
         lastValueTick: 0,
+        deviceId: "fakeDeviceId",
       };
 
       expect(payload).toEqual(expectedPayload);
@@ -100,6 +101,7 @@ describe("AssociatedVariable", () => {
         ...payload,
         value: 0,
         lastValueTick: 0,
+        deviceId: "fakeDeviceId",
       };
 
       expect(payload).toEqual(expectedPayload);

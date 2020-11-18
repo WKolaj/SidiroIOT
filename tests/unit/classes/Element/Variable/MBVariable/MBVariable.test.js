@@ -76,7 +76,7 @@ describe("MBVariable", () => {
 
     beforeEach(() => {
       project = "fakeProject";
-      device = "fakeDevice";
+      device = { ID: "fakeDeviceId" };
       possibleReadCodes = [1, 2, 3, 4];
       possibleWriteCodes = [16];
 
@@ -338,7 +338,7 @@ describe("MBVariable", () => {
 
     beforeEach(() => {
       project = "fakeProject";
-      device = "fakeDevice";
+      device = { ID: "fakeDeviceId" };
       payload = {
         id: "testElementId",
         name: "testElementName",
@@ -393,6 +393,7 @@ describe("MBVariable", () => {
         unitID: 12,
         readFCode: 4,
         writeFCode: 16,
+        deviceId: "fakeDeviceId",
       };
 
       expect(result).toEqual(expectedResult);
@@ -419,6 +420,7 @@ describe("MBVariable", () => {
         length: 456,
         unitID: 12,
         readFCode: 4,
+        deviceId: "fakeDeviceId",
       };
 
       expect(result).toEqual(expectedResult);
@@ -447,6 +449,7 @@ describe("MBVariable", () => {
         length: 456,
         unitID: 12,
         writeFCode: 16,
+        deviceId: "fakeDeviceId",
       };
 
       expect(result).toEqual(expectedResult);

@@ -95,7 +95,6 @@ class Device {
 
     for (let element of allElements) {
       let elementPayload = element.generatePayload();
-      elementPayload.deviceId = this.ID;
       objectToReturn[element.ID] = elementPayload;
     }
 

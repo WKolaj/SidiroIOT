@@ -184,6 +184,7 @@ describe("HighLimitAlert", () => {
         ...payload,
         lastValueTick: 0,
         value: payload.defaultValue,
+        deviceId: "fakeDevice1ID",
       };
 
       expect(calcElementPayload).toEqual(expectedPayload);
@@ -199,6 +200,7 @@ describe("HighLimitAlert", () => {
         ...payload,
         lastValueTick: 0,
         value: payload.defaultValue,
+        deviceId: "fakeDevice1ID",
       };
 
       expect(calcElementPayload).toEqual(expectedPayload);
@@ -221,6 +223,7 @@ describe("HighLimitAlert", () => {
         lastValueTick: 0,
         value: payload.defaultValue,
         texts: defaultTexts,
+        deviceId: "fakeDevice1ID",
       };
 
       expect(calcElementPayload).toEqual(expectedPayload);
@@ -277,7 +280,7 @@ describe("HighLimitAlert", () => {
 
     beforeEach(() => {
       project = "fakeProject";
-      device = "fakeDevice";
+      device = { ID: "fakeDeviceId" };
 
       payload = {
         id: "fakeElement1ID",
@@ -292,6 +295,7 @@ describe("HighLimitAlert", () => {
         hysteresis: 15,
         timeOnDelay: 5,
         timeOffDelay: 10,
+        deviceId: "fakeDeviceId",
         texts: {
           pl: "fakeTextPL",
           en: "fakeTextEN",

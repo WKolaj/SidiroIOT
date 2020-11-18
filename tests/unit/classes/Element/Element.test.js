@@ -153,7 +153,7 @@ describe("Element", () => {
 
     beforeEach(() => {
       project = "fakeProject";
-      device = "fakeDevice";
+      device = { ID: "fakeDeviceId" };
       payload = {
         id: "testElementId",
         name: "testElementName",
@@ -182,6 +182,7 @@ describe("Element", () => {
         lastValueTick: 0,
         sampleTime: 15,
         unit: "testUnit",
+        deviceId: "fakeDeviceId",
       };
 
       expect(result).toEqual(expectedResult);

@@ -195,6 +195,7 @@ describe("BandwidthLimitAlert", () => {
         ...payload,
         lastValueTick: 0,
         value: payload.defaultValue,
+        deviceId: "fakeDevice1ID",
       };
 
       expect(calcElementPayload).toEqual(expectedPayload);
@@ -210,6 +211,7 @@ describe("BandwidthLimitAlert", () => {
         ...payload,
         lastValueTick: 0,
         value: payload.defaultValue,
+        deviceId: "fakeDevice1ID",
       };
 
       expect(calcElementPayload).toEqual(expectedPayload);
@@ -238,6 +240,7 @@ describe("BandwidthLimitAlert", () => {
         lastValueTick: 0,
         value: payload.defaultValue,
         texts: defaultTexts,
+        deviceId: "fakeDevice1ID",
       };
 
       expect(calcElementPayload).toEqual(expectedPayload);
@@ -328,7 +331,7 @@ describe("BandwidthLimitAlert", () => {
 
     beforeEach(() => {
       project = "fakeProject";
-      device = "fakeDevice";
+      device = { ID: "fakeDeviceId" };
 
       payload = {
         id: "fakeElement1ID",
@@ -370,6 +373,7 @@ describe("BandwidthLimitAlert", () => {
         ...payload,
         lastValueTick: 0,
         value: payload.defaultValue,
+        deviceId: "fakeDeviceId",
       };
 
       expect(result).toEqual(expectedPayload);

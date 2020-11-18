@@ -150,7 +150,7 @@ describe("StandardProtocolVariable", () => {
 
     beforeEach(() => {
       project = "fakeProject";
-      device = "fakeDevice";
+      device = { ID: "fakeDeviceId" };
       payload = {
         id: "testElementId",
         name: "testElementName",
@@ -194,6 +194,7 @@ describe("StandardProtocolVariable", () => {
         lastValueTick: 0,
         offset: 123,
         length: 456,
+        deviceId: "fakeDeviceId",
       };
 
       expect(result).toEqual(expectedResult);
