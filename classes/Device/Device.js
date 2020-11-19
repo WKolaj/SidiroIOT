@@ -285,25 +285,7 @@ class Device {
   async _initAlert(alertPayload) {
     let type = alertPayload.type;
 
-    let alert = null;
-
-    switch (type) {
-      case "HighLimitAlert":
-        alert = new HighLimitAlert(this._project, this);
-        break;
-      case "LowLimitAlert":
-        alert = new LowLimitAlert(this._project, this);
-        break;
-      case "BandwidthLimitAlert":
-        alert = new BandwidthLimitAlert(this._project, this);
-        break;
-      case "ExactValuesAlert":
-        alert = new ExactValuesAlert(this._project, this);
-        break;
-
-      default:
-        throw new Error(`Unrecognized Alert type: ${type}`);
-    }
+    let alert = this._createAlertBasedOnPayload(type);
 
     //Initializing alert
     await alert.init(alertPayload);
@@ -353,6 +335,26 @@ class Device {
     }
   }
 
+  /**
+   * @description Method for creating alert based on type - throws if type is not a valid type. CAN BE OVERRIDEN IN CHILD CLASSES
+   * @param {String} type type of variable
+   */
+  _createAlertBasedOnPayload(type) {
+    switch (type) {
+      case "HighLimitAlert":
+        return new HighLimitAlert(this._project, this);
+      case "LowLimitAlert":
+        return new LowLimitAlert(this._project, this);
+      case "BandwidthLimitAlert":
+        return new BandwidthLimitAlert(this._project, this);
+      case "ExactValuesAlert":
+        return new ExactValuesAlert(this._project, this);
+
+      default:
+        throw new Error(`Unrecognized Alert type: ${type}`);
+    }
+  }
+
   //#endregion ========= PRIVATE VIRTUAL METHODS =========
 
   //#region ========= PUBLIC ABSTRACT METHODS =========
@@ -366,5 +368,3 @@ class Device {
 }
 
 module.exports = Device;
-
-//TODO - add device init tests

@@ -4,8 +4,6 @@ const {
   joiSchema,
 } = require("../../../models/Elements/Variable/AssociatedVariable");
 
-//TODO - test this class
-
 class AssociatedVariable extends Variable {
   //#region ========= CONSTRUCTOR =========
 
