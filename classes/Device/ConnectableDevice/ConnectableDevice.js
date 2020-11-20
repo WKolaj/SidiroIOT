@@ -75,6 +75,9 @@ class ConnectableDevice extends Device {
    * @param {Number} tickId tick id of actual refreshing date
    */
   async _refreshVariables(tickId) {
+    //refreshing all other variables
+    await super._refreshVariables(tickId);
+
     //Inoking every request of request manager that suits actual tickId
     //After invoking the request, adjust variables values if they exits after invoking request
     for (let request of this.RequestManager.Requests) {
@@ -90,9 +93,6 @@ class ConnectableDevice extends Device {
           if (!this._continueIfRequestThrows) return;
         }
     }
-
-    //After refreshing requests - refreshing all other variables
-    await super._refreshVariables();
   }
 
   /**
@@ -154,3 +154,5 @@ class ConnectableDevice extends Device {
 }
 
 module.exports = ConnectableDevice;
+
+//TODO - test option with includeLastProcssingFailInConnection

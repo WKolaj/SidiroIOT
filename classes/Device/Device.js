@@ -206,8 +206,9 @@ class Device {
     //Refreshing all variables one by one
     for (let variable of Object.values(this.Variables)) {
       try {
-        if (variable.checkIfShouldBeRefreshed(tickNumber))
+        if (variable.checkIfShouldBeRefreshed(tickNumber)) {
           await variable.refresh(tickNumber);
+        }
       } catch (err) {
         logger.warn(err.message, err);
       }

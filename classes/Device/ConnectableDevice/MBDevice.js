@@ -2,6 +2,7 @@ const ConnectableDevice = require("./ConnectableDevice");
 const MBRequestManager = require("../../Request/MBRequest/MBRequestManager");
 const MBDriver = require("../../Driver/MBDriver");
 
+const DeviceConnectionVariable = require("../../Element/Variable/InternalVariable/DeviceConnectionVariable");
 const MBBoolean = require("../../Element/Variable/ConnectableVariable/MBVariable/MBBoolean");
 const MBByteArray = require("../../Element/Variable/ConnectableVariable/MBVariable/MBByteArray");
 const MBDouble = require("../../Element/Variable/ConnectableVariable/MBVariable/MBDouble");
@@ -14,8 +15,6 @@ const MBSwappedInt32 = require("../../Element/Variable/ConnectableVariable/MBVar
 const MBSwappedUInt32 = require("../../Element/Variable/ConnectableVariable/MBVariable/MBSwappedUInt32");
 const MBUInt16 = require("../../Element/Variable/ConnectableVariable/MBVariable/MBUInt16");
 const MBUInt32 = require("../../Element/Variable/ConnectableVariable/MBVariable/MBUInt32");
-const AssociatedVariable = require("../../Element/Variable/AssociatedVariable");
-const InternalVariable = require("../../Element/Variable/InternalVariable/InternalVariable");
 
 const { joiSchema } = require("../../../models/Device/MBDevice");
 
@@ -108,6 +107,8 @@ class MBDevice extends ConnectableDevice {
    */
   _createVariableBasedOnPayload(type) {
     switch (type) {
+      case "DeviceConnectionVariable":
+        return new DeviceConnectionVariable(this._project, this);
       case "MBBoolean":
         return new MBBoolean(this._project, this);
       case "MBByteArray":
@@ -141,3 +142,5 @@ class MBDevice extends ConnectableDevice {
 }
 
 module.exports = MBDevice;
+
+//TODO - test option with includeLastProcssingFailInConnection

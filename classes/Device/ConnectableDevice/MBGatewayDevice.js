@@ -1,6 +1,7 @@
 const MBDevice = require("./MBDevice");
 
 const { joiSchema } = require("../../../models/Device/MBGatewayDevice");
+const MBGatewayDriver = require("../../Driver/MBGatewayDriver");
 
 class MBGatewayDevice extends MBDevice {
   //#region ========= CONSTRUCTOR =========
@@ -11,6 +12,7 @@ class MBGatewayDevice extends MBDevice {
     //Gateway has the same functionality as MBDevice but with _continueIfRequestThrows set to true
 
     this._continueIfRequestThrows = true;
+    this._driver = new MBGatewayDriver();
   }
 
   //#endregion ========= CONSTRUCTOR =========

@@ -15,6 +15,8 @@ class Driver {
     this._disconnectOnProcessError = true;
     this._enableProcessTimeout = true;
     this._connectWhenDisconnectedOnProcess = true;
+    this._lastProcessingFails = false;
+    this._includeLastProcessingFailInConnection = false;
   }
 
   //#endregion ========= CONSTRUCTOR =========
@@ -32,7 +34,9 @@ class Driver {
    * @description Checking whether connection to device is established
    */
   get IsConnected() {
-    return this._getIsConnectedState();
+    if (this._includeLastProcessingFailInConnection)
+      return this._getIsConnectedState() && !this._lastProcessingFails;
+    else return this._getIsConnectedState();
   }
 
   /**
@@ -170,6 +174,7 @@ class Driver {
           processRequestTimeoutHandler = setTimeout(async () => {
             if (self._disconnectOnProcessTimeout) await self._tryDisconnect();
             self._busy = false;
+            this._lastProcessingFails = true;
             return reject(new Error("Processing data timeout error"));
           }, self.Timeout);
 
@@ -181,9 +186,15 @@ class Driver {
         //Clearing busy state
         self._busy = false;
 
+        //setting lastProcessing fail to false
+        this._lastProcessingFails = false;
+
         //Resolving process
         return resolve(data);
       } catch (err) {
+        //setting lastProcessing fail to true
+        this._lastProcessingFails = true;
+
         //Clearing timeout handler in case of error
         self._clearTimeoutIfExists(processRequestTimeoutHandler);
 

@@ -20,6 +20,7 @@ class MBDriver extends Driver {
     this._disconnectOnProcessError = false;
     this._enableProcessTimeout = false;
     this._connectWhenDisconnectedOnProcess = true;
+    this._includeLastProcessingFailInConnection = true;
   }
 
   //#endregion ========= CONSTRUCTOR =========
@@ -52,7 +53,7 @@ class MBDriver extends Driver {
   //#region ========= OVERRIDE PUBLIC METHODS =========
 
   /**
-   * @description method for setting timeout. CAN BE OVERRIDEN IN CHILD CLASSES
+   * @description method for setting timeout.
    */
   setTimeout(value) {
     this.Client.setTimeout(value);
@@ -63,14 +64,14 @@ class MBDriver extends Driver {
   //#region ========= OVERRIDE PRIVATE METHODS =========
 
   /**
-   * @description Method for getting connection state of driver. MUST BE OVERRIDEN IN CHILD CLASSES
+   * @description Method for getting connection state of driver.
    */
   _getIsConnectedState() {
-    return this.Client.isOpen;
+    return this.Client.isOpen && !this._lastProcessingFails;
   }
 
   /**
-   * @description Method for establishing TCP connection to device. MUST BE OVERRIDEN IN CHILD CLASSES
+   * @description Method for establishing TCP connection to device.
    */
   async _connect() {
     return this.Client.connectTCP(this.IPAddress, {

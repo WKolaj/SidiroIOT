@@ -1,4 +1,3 @@
-const { time } = require("systeminformation");
 const Driver = require("../../../../classes/Driver/Driver");
 const { snooze } = require("../../../../utilities/utilities");
 const { wrapMethodToInvokeAfter } = require("../../../utilities/testUtilities");
@@ -29,6 +28,8 @@ describe("Driver", () => {
       expect(result._disconnectOnProcessError).toEqual(true);
       expect(result._enableProcessTimeout).toEqual(true);
       expect(result._connectWhenDisconnectedOnProcess).toEqual(true);
+      expect(result._lastProcessingFails).toEqual(false);
+      expect(result._includeLastProcessingFailInConnection).toEqual(false);
     });
   });
 
@@ -135,6 +136,103 @@ describe("Driver", () => {
     });
   });
 
+  describe("isConnected", () => {
+    let driver;
+    let getConnectedMockFunc;
+    let getConnectedMockFuncResult;
+    let lastProcessingFails;
+    let includeLastProcessingFailInConnection;
+
+    beforeEach(() => {
+      getConnectedMockFuncResult = false;
+      lastProcessingFails = false;
+      includeLastProcessingFailInConnection = false;
+      getConnectedMockFunc = jest.fn(() => {
+        return getConnectedMockFuncResult;
+      });
+    });
+
+    let exec = async () => {
+      driver = new Driver();
+      driver._lastProcessingFails = lastProcessingFails;
+      driver._includeLastProcessingFailInConnection = includeLastProcessingFailInConnection;
+      driver._getIsConnectedState = getConnectedMockFunc;
+      return driver.IsConnected;
+    };
+
+    it("should return false if isConnected return false, lastProcessingFails is false and includeLastProcessingFailIncConnection is false", async () => {
+      getConnectedMockFuncResult = false;
+      lastProcessingFails = false;
+      includeLastProcessingFailInConnection = false;
+
+      await exec();
+      expect(driver.IsConnected).toEqual(false);
+    });
+
+    it("should return true if isConnected return false, lastProcessingFails is false and includeLastProcessingFailIncConnection is true", async () => {
+      getConnectedMockFuncResult = false;
+      lastProcessingFails = false;
+      includeLastProcessingFailInConnection = true;
+
+      await exec();
+      expect(driver.IsConnected).toEqual(false);
+    });
+
+    it("should return false if isConnected return false, lastProcessingFails is true and includeLastProcessingFailIncConnection is false", async () => {
+      getConnectedMockFuncResult = false;
+      lastProcessingFails = true;
+      includeLastProcessingFailInConnection = false;
+
+      await exec();
+      expect(driver.IsConnected).toEqual(false);
+    });
+
+    it("should return true if isConnected return false, lastProcessingFails is true and includeLastProcessingFailIncConnection is true", async () => {
+      getConnectedMockFuncResult = false;
+      lastProcessingFails = true;
+      includeLastProcessingFailInConnection = true;
+
+      await exec();
+      expect(driver.IsConnected).toEqual(false);
+    });
+
+    it("should return true if isConnected return true, lastProcessingFails is false and includeLastProcessingFailIncConnection is false", async () => {
+      getConnectedMockFuncResult = true;
+      lastProcessingFails = false;
+      includeLastProcessingFailInConnection = false;
+
+      await exec();
+      expect(driver.IsConnected).toEqual(true);
+    });
+
+    it("should return true if isConnected return true, lastProcessingFails is false and includeLastProcessingFailIncConnection is true", async () => {
+      getConnectedMockFuncResult = true;
+      lastProcessingFails = false;
+      includeLastProcessingFailInConnection = true;
+
+      await exec();
+      expect(driver.IsConnected).toEqual(true);
+    });
+
+    it("should return true if isConnected return true, lastProcessingFails is true and includeLastProcessingFailIncConnection is false", async () => {
+      getConnectedMockFuncResult = true;
+      lastProcessingFails = true;
+      includeLastProcessingFailInConnection = false;
+
+      await exec();
+      expect(driver.IsConnected).toEqual(true);
+    });
+
+    it("should return false if isConnected return true, lastProcessingFails is true and includeLastProcessingFailIncConnection is true", async () => {
+      getConnectedMockFuncResult = true;
+      lastProcessingFails = true;
+      includeLastProcessingFailInConnection = true;
+
+      await exec();
+      expect(driver.IsConnected).toEqual(false);
+    });
+  });
+
   describe("invokeRequest", () => {
     let driver;
     let driverTimeout;
@@ -155,6 +253,8 @@ describe("Driver", () => {
     let disconnectOnProcessError;
     let enableProcessTimeout;
     let connectWhenDisconnectedOnProcess;
+    let lastProcessingFails;
+    let includeLastProcessingFailInConnection;
     let request;
     let tickNumber;
 
@@ -182,6 +282,8 @@ describe("Driver", () => {
       disconnectOnProcessError = true;
       enableProcessTimeout = true;
       connectWhenDisconnectedOnProcess = true;
+      lastProcessingFails = false;
+      includeLastProcessingFailInConnection = false;
     });
 
     let exec = async () => {
@@ -211,6 +313,8 @@ describe("Driver", () => {
       driver._disconnectOnProcessError = disconnectOnProcessError;
       driver._enableProcessTimeout = enableProcessTimeout;
       driver._connectWhenDisconnectedOnProcess = connectWhenDisconnectedOnProcess;
+      driver._lastProcessingFails = lastProcessingFails;
+      driver._includeLastProcessingFailInConnection = includeLastProcessingFailInConnection;
 
       return driver.invokeRequest(request, tickNumber);
     };
@@ -222,6 +326,58 @@ describe("Driver", () => {
       expect(processMockFunc.mock.calls[0][0]).toEqual(request);
       expect(processMockFunc.mock.calls[0][1]).toEqual(tickNumber);
       expect(result).toEqual(processMockFuncResult);
+    });
+
+    it("should set lastProcessingFail to false - if it was properly invoked", async () => {
+      lastProcessingFails = true;
+
+      let result = await exec();
+
+      expect(driver._lastProcessingFails).toEqual(false);
+    });
+
+    it("should set lastProcessingFail to false - if it invoke throwed", async () => {
+      lastProcessingFails = false;
+
+      processMockFunc = () => {
+        throw new Error("testError");
+      };
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(driver._lastProcessingFails).toEqual(true);
+    });
+
+    it("should set lastProcessingFail to false - if it there was a timeout during invoking request", async () => {
+      processMockFuncDelay = 1000;
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(driver._lastProcessingFails).toEqual(true);
     });
 
     it("should set busy to false after successfully invoking request", async () => {
@@ -246,6 +402,63 @@ describe("Driver", () => {
 
       expect(connectMockFunc).toHaveBeenCalledTimes(1);
       expect(connectMockFunc).toHaveBeenCalledBefore(processMockFunc);
+
+      //Disconnect should not have been called
+
+      expect(disconnectMockFunc).not.toHaveBeenCalled();
+    });
+
+    it("should not invoke connect before processing request - if device is connected, lastProcessFails is true but includeLastProcessFailInConnecting is false", async () => {
+      includeLastProcessingFailInConnection = false;
+      lastProcessingFails = true;
+      isConnected = true;
+
+      await exec();
+
+      expect(connectMockFunc).not.toHaveBeenCalled();
+
+      //Disconnect should not have been called
+
+      expect(disconnectMockFunc).not.toHaveBeenCalled();
+    });
+
+    it("should not invoke connect before processing request - if device is connected, lastProcessFails is false and includeLastProcessFailInConnecting is false", async () => {
+      includeLastProcessingFailInConnection = false;
+      lastProcessingFails = true;
+      isConnected = true;
+
+      await exec();
+
+      expect(connectMockFunc).not.toHaveBeenCalled();
+
+      //Disconnect should not have been called
+
+      expect(disconnectMockFunc).not.toHaveBeenCalled();
+    });
+
+    it("should invoke connect before processing request - if device is connected but lastProcessFails is true and includeLastProcessFailInConnecting is true", async () => {
+      includeLastProcessingFailInConnection = true;
+      lastProcessingFails = true;
+      isConnected = true;
+
+      await exec();
+
+      expect(connectMockFunc).toHaveBeenCalledTimes(1);
+      expect(connectMockFunc).toHaveBeenCalledBefore(processMockFunc);
+
+      //Disconnect should not have been called
+
+      expect(disconnectMockFunc).not.toHaveBeenCalled();
+    });
+
+    it("should not invoke connect before processing request - if device is connected, lastProcessFails is false and includeLastProcessFailInConnecting is true", async () => {
+      includeLastProcessingFailInConnection = false;
+      lastProcessingFails = true;
+      isConnected = true;
+
+      await exec();
+
+      expect(connectMockFunc).not.toHaveBeenCalled();
 
       //Disconnect should not have been called
 
@@ -899,3 +1112,5 @@ describe("Driver", () => {
     });
   });
 });
+
+//TODO - test mechanism for including last processing fail in connection state

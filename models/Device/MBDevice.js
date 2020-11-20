@@ -11,6 +11,7 @@ const MBSwappedInt32 = require("../../classes/Element/Variable/ConnectableVariab
 const MBSwappedUInt32 = require("../../classes/Element/Variable/ConnectableVariable/MBVariable/MBSwappedUInt32");
 const MBUInt16 = require("../../classes/Element/Variable/ConnectableVariable/MBVariable/MBUInt16");
 const MBUInt32 = require("../../classes/Element/Variable/ConnectableVariable/MBVariable/MBUInt32");
+const DeviceConnectionVariable = require("../../classes/Element/Variable/InternalVariable/DeviceConnectionVariable");
 const connectableDeviceSchema = require("./ConnectableDevice");
 const ipV4Schema = require("./PropertiesValues/IPAddress").ipV4Schema;
 
@@ -26,6 +27,11 @@ const validateMBVariablesPayload = (variablesPayload, helpers) => {
     let validationMessage = null;
 
     switch (variableType) {
+      case "DeviceConnectionVariable":
+        validationMessage = DeviceConnectionVariable.validatePayload(
+          variablePayload
+        );
+        break;
       case "MBBoolean":
         validationMessage = MBBoolean.validatePayload(variablePayload);
         break;
