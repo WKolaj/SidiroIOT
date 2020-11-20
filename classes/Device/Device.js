@@ -1,6 +1,6 @@
 const logger = require("../../logger/logger");
 
-const InternalVariable = require("../Element/Variable/InternalVariable");
+const InternalVariable = require("../Element/Variable/InternalVariable/InternalVariable");
 const AssociatedVariable = require("../Element/Variable/AssociatedVariable");
 
 const AverageCalculator = require("../Element/CalcElement/AverageCalculator");

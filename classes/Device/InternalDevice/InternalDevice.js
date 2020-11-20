@@ -1,5 +1,10 @@
 const Device = require("../Device");
 const { joiSchema } = require("../../../models/Device/InternalDevice");
+const AssociatedVariable = require("../../Element/Variable/AssociatedVariable");
+const CPULoadVariable = require("../../Element/Variable/InternalVariable/CPULoadVariable");
+const CPUTemperatureVariable = require("../../Element/Variable/InternalVariable/CPUTemperatureVariable");
+const DiskUsageVariable = require("../../Element/Variable/InternalVariable/DiskUsageVariable");
+const RAMUsageVariable = require("../../Element/Variable/InternalVariable/RAMUsageVariable");
 
 class InternalDevice extends Device {
   //#region ========= CONSTRUCTOR =========
@@ -35,6 +40,31 @@ class InternalDevice extends Device {
   }
 
   //#endregion ========= OVERRIDE METHODS =========
+
+  //#region ========= OVERRIDE PRIVATE METHODS =========
+
+  /**
+   * @description Method for creating variables based on type - throws if type is not a valid type.
+   * @param {String} type type of variable
+   */
+  _createVariableBasedOnPayload(type) {
+    switch (type) {
+      case "AssociatedVariable":
+        return new AssociatedVariable(this._project, this);
+      case "CPULoadVariable":
+        return new CPULoadVariable(this._project, this);
+      case "CPUTemperatureVariable":
+        return new CPUTemperatureVariable(this._project, this);
+      case "DiskUsageVariable":
+        return new DiskUsageVariable(this._project, this);
+      case "RAMUsageVariable":
+        return new RAMUsageVariable(this._project, this);
+      default:
+        throw new Error(`Unrecognized Variable type: ${type}`);
+    }
+  }
+
+  //#endregion ========= OVERRIDE PRIVATE METHODS =========
 }
 
 module.exports = InternalDevice;

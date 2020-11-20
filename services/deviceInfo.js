@@ -71,3 +71,8 @@ module.exports.getDeviceInfo = async () => {
     diskUsage,
   };
 };
+
+module.exports.calcDiskUsage = calcDiskUsage;
+module.exports.calcAvailableMemory = calcAvailableMemory;
+module.exports.calcCPUTemperature = calcCPUTemperature;
+module.exports.calcCPULoad = calcCPULoad;

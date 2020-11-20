@@ -1,4 +1,4 @@
-const Variable = require("./Variable");
+const Variable = require("../Variable");
 
 class InternalVariable extends Variable {
   //#region ========= CONSTRUCTOR =========

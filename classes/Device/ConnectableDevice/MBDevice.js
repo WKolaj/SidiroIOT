@@ -15,7 +15,7 @@ const MBSwappedUInt32 = require("../../Element/Variable/ConnectableVariable/MBVa
 const MBUInt16 = require("../../Element/Variable/ConnectableVariable/MBVariable/MBUInt16");
 const MBUInt32 = require("../../Element/Variable/ConnectableVariable/MBVariable/MBUInt32");
 const AssociatedVariable = require("../../Element/Variable/AssociatedVariable");
-const InternalVariable = require("../../Element/Variable/InternalVariable");
+const InternalVariable = require("../../Element/Variable/InternalVariable/InternalVariable");
 
 const { joiSchema } = require("../../../models/Device/MBDevice");
 

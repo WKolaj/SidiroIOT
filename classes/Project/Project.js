@@ -274,16 +274,28 @@ class Project {
   }
 
   /**
-   * @description Method for getting object of element. Throws if element does not exists
-   * @param {String} deviceID device id of element
-   * @param {String} elementID element id
+   * @description Method for getting device. Returns null if device does not exists
+   * @param {String} deviceID device id
    */
-  getElement(deviceID, elementID) {
+  getDevice(deviceID) {
+    //Checking seperately in every collection instead of creating new with all devices - performance
     let connectableDevice = this.ConnectableDevices[deviceID];
     let internalDevice = this.InternalDevices[deviceID];
     let agentDevice = this.AgentDevices[deviceID];
 
     let device = connectableDevice || internalDevice || agentDevice;
+    if (!exists(device)) return null;
+
+    return device;
+  }
+
+  /**
+   * @description Method for getting object of element. Returns null if element does not exists
+   * @param {String} deviceID device id of element
+   * @param {String} elementID element id
+   */
+  getElement(deviceID, elementID) {
+    let device = this.getDevice(deviceID);
     if (!exists(device)) return null;
 
     //Getting variable, calcElement or alert without creating new collection - performance
