@@ -10,8 +10,6 @@ const {
 const Device = require("../../../../classes/Device/Device");
 
 describe("Device", () => {
-  //TODO - add init tests - after creating internal and associated variables
-
   describe("init", () => {
     let project;
     let payload;

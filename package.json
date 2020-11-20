@@ -4,7 +4,7 @@
   "description": "Back-end for NodeJS server",
   "main": "server.js",
   "scripts": {
-    "test": "jest --watch --runInBand --detectOpenHandles --forceExit --coverage",
+    "test": "jest --watchAll --runInBand --detectOpenHandles --forceExit --coverage",
     "start": "node server.js"
   },
   "repository": {

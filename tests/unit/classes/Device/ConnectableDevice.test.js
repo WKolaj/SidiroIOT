@@ -53,27 +53,201 @@ describe("ConnectableDevice", () => {
     let payload;
     let requestManagerMock;
     let driverMock;
+    let getElementMockFunc;
+    let getElementReturnValue;
+    let getConnectedMockFunc;
+    let getConnectedReturnValue;
 
     beforeEach(() => {
-      project = "testProject";
+      project = {};
+      getElementReturnValue = {
+        LastValueTick: 123,
+        Value: 456.789,
+        DefaultValue: 987.321,
+      };
+      getConnectedReturnValue = true;
+
       payload = {
         id: "testDeviceID",
         name: "testDeviceName",
         type: "ConncectableDevice",
+
         variables: {},
-        calcElements: {},
-        alerts: {},
+        calcElements: {
+          averageCalculatorID: {
+            id: "averageCalculatorID",
+            name: "averageCalculatorName",
+            type: "AverageCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            calculationInterval: 15,
+          },
+          factorCalculatorID: {
+            id: "factorCalculatorID",
+            name: "factorCalculatorName",
+            type: "FactorCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+          },
+          increaseCalculatorID: {
+            id: "increaseCalculatorID",
+            name: "increaseCalculatorName",
+            type: "IncreaseCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            calculationInterval: 15,
+            overflow: 1234,
+          },
+          sumCalculatorID: {
+            id: "sumCalculatorID",
+            name: "sumCalculatorName",
+            type: "SumCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableIDs: [
+              { variableID: "fakeVariableID1", factor: 1 },
+              { variableID: "fakeVariableID2", factor: 2 },
+              { variableID: "fakeVariableID3", factor: 3 },
+            ],
+          },
+          valueFromByteArrayCalculatorID: {
+            id: "valueFromByteArrayCalculatorID",
+            name: "valueFromByteArrayCalculatorName",
+            type: "ValueFromByteArrayCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 15,
+            variableID: "fakeVariableID",
+            bitNumber: 4,
+            byteNumber: 3,
+            length: 2,
+          },
+        },
+        alerts: {
+          bandwidthLimitAlertID: {
+            id: "bandwidthLimitAlertID",
+            name: "bandwidthLimitAlertName",
+            type: "BandwidthLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            highLimit: 100,
+            lowLimit: -50,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              highLimit: {
+                pl: "fakeHighLimitTextPL",
+                en: "fakeHighLimitTextEN",
+              },
+              lowLimit: {
+                pl: "fakeLowLimitTextPL",
+                en: "fakeLowLimitTextEN",
+              },
+            },
+          },
+          exactValuesAlertID: {
+            id: "exactValuesAlertID",
+            name: "exactValuesAlertName",
+            type: "ExactValuesAlert",
+            unit: "A",
+            sampleTime: 1,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            alertValues: [10, 20, 30, 40, 50],
+            severity: 10,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              10: {
+                en: "step 1: $VALUE",
+                pl: "próg 1: $VALUE",
+              },
+              20: {
+                en: "step 2: $VALUE",
+                pl: "próg 2: $VALUE",
+              },
+              30: {
+                en: "step 3: $VALUE",
+                pl: "próg 3: $VALUE",
+              },
+              40: {
+                en: "step 4: $VALUE",
+                pl: "próg 4: $VALUE",
+              },
+              50: {
+                en: "step 5: $VALUE",
+                pl: "próg 5: $VALUE",
+              },
+            },
+          },
+          highLimitAlertID: {
+            id: "highLimitAlertID",
+            name: "highLimitAlertName",
+            type: "HighLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            highLimit: 100,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              pl: "fakeTextPL",
+              en: "fakeTextEN",
+            },
+          },
+          lowLimitAlertID: {
+            id: "lowLimitAlertID",
+            name: "lowLimitAlertName",
+            type: "LowLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            lowLimit: 100,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              pl: "fakeTextPL",
+              en: "fakeTextEN",
+            },
+          },
+        },
         isActive: true,
         timeout: 2500,
       };
       requestManagerMock = new RequestManager();
       requestManagerMock.createRequests = jest.fn();
       driverMock = new Driver();
-      driverMock.activate = jest.fn();
-      driverMock.deactivate = jest.fn();
+      driverMock.activate = jest.fn(driverMock.activate);
+      driverMock.deactivate = jest.fn(driverMock.deactivate);
     });
 
     let exec = async () => {
+      getElementMockFunc = jest.fn(() => getElementReturnValue);
+      project.getElement = getElementMockFunc;
+      getConnectedMockFunc = jest.fn(() => getConnectedReturnValue);
+
+      driverMock._getIsConnectedState = getConnectedMockFunc;
+
       device = new ConnectableDevice(project);
       device._requestManager = requestManagerMock;
       device._driver = driverMock;
@@ -83,13 +257,457 @@ describe("ConnectableDevice", () => {
     it("should initialize connectableDevice based on payload", async () => {
       await exec();
 
-      expect(device.ID).toEqual(payload.id);
-      expect(device.Name).toEqual(payload.name);
-      expect(device.Type).toEqual(payload.type);
-      expect(device.Variables).toEqual(payload.variables);
-      expect(device.CalcElements).toEqual(payload.calcElements);
-      expect(device.Alerts).toEqual(payload.alerts);
-      expect(device.Timeout).toEqual(payload.timeout);
+      let expectedPayload = {
+        id: "testDeviceID",
+        name: "testDeviceName",
+        type: "ConncectableDevice",
+        variables: {},
+        calcElements: {
+          averageCalculatorID: {
+            id: "averageCalculatorID",
+            name: "averageCalculatorName",
+            type: "AverageCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            calculationInterval: 15,
+            value: 123456.654321,
+            lastValueTick: 0,
+            deviceId: "testDeviceID",
+          },
+          factorCalculatorID: {
+            id: "factorCalculatorID",
+            name: "factorCalculatorName",
+            type: "FactorCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            value: 123456.654321,
+            lastValueTick: 0,
+            deviceId: "testDeviceID",
+          },
+          increaseCalculatorID: {
+            id: "increaseCalculatorID",
+            name: "increaseCalculatorName",
+            type: "IncreaseCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            calculationInterval: 15,
+            overflow: 1234,
+            value: 123456.654321,
+            lastValueTick: 0,
+            deviceId: "testDeviceID",
+          },
+          sumCalculatorID: {
+            id: "sumCalculatorID",
+            name: "sumCalculatorName",
+            type: "SumCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableIDs: [
+              { variableID: "fakeVariableID1", factor: 1 },
+              { variableID: "fakeVariableID2", factor: 2 },
+              { variableID: "fakeVariableID3", factor: 3 },
+            ],
+            value: 123456.654321,
+            lastValueTick: 0,
+            deviceId: "testDeviceID",
+          },
+          valueFromByteArrayCalculatorID: {
+            id: "valueFromByteArrayCalculatorID",
+            name: "valueFromByteArrayCalculatorName",
+            type: "ValueFromByteArrayCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 15,
+            variableID: "fakeVariableID",
+            bitNumber: 4,
+            byteNumber: 3,
+            length: 2,
+            value: 15,
+            lastValueTick: 0,
+            deviceId: "testDeviceID",
+          },
+        },
+        alerts: {
+          bandwidthLimitAlertID: {
+            id: "bandwidthLimitAlertID",
+            name: "bandwidthLimitAlertName",
+            type: "BandwidthLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            highLimit: 100,
+            lowLimit: -50,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              highLimit: {
+                pl: "fakeHighLimitTextPL",
+                en: "fakeHighLimitTextEN",
+              },
+              lowLimit: {
+                pl: "fakeLowLimitTextPL",
+                en: "fakeLowLimitTextEN",
+              },
+            },
+            value: null,
+            lastValueTick: 0,
+            deviceId: "testDeviceID",
+          },
+          exactValuesAlertID: {
+            id: "exactValuesAlertID",
+            name: "exactValuesAlertName",
+            type: "ExactValuesAlert",
+            unit: "A",
+            sampleTime: 1,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            alertValues: [10, 20, 30, 40, 50],
+            severity: 10,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              10: {
+                en: "step 1: $VALUE",
+                pl: "próg 1: $VALUE",
+              },
+              20: {
+                en: "step 2: $VALUE",
+                pl: "próg 2: $VALUE",
+              },
+              30: {
+                en: "step 3: $VALUE",
+                pl: "próg 3: $VALUE",
+              },
+              40: {
+                en: "step 4: $VALUE",
+                pl: "próg 4: $VALUE",
+              },
+              50: {
+                en: "step 5: $VALUE",
+                pl: "próg 5: $VALUE",
+              },
+            },
+            value: null,
+            lastValueTick: 0,
+            deviceId: "testDeviceID",
+          },
+          highLimitAlertID: {
+            id: "highLimitAlertID",
+            name: "highLimitAlertName",
+            type: "HighLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            highLimit: 100,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              pl: "fakeTextPL",
+              en: "fakeTextEN",
+            },
+            value: null,
+            lastValueTick: 0,
+            deviceId: "testDeviceID",
+          },
+          lowLimitAlertID: {
+            id: "lowLimitAlertID",
+            name: "lowLimitAlertName",
+            type: "LowLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            lowLimit: 100,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              pl: "fakeTextPL",
+              en: "fakeTextEN",
+            },
+            value: null,
+            lastValueTick: 0,
+            deviceId: "testDeviceID",
+          },
+        },
+        isActive: true,
+        timeout: 2500,
+        isConnected: true,
+      };
+
+      expect(device.generatePayload()).toEqual(expectedPayload);
+    });
+
+    it("should initialize connectableDevice based on payload - if there are no calcElements", async () => {
+      payload.calcElements = {};
+
+      await exec();
+
+      let expectedPayload = {
+        id: "testDeviceID",
+        name: "testDeviceName",
+        type: "ConncectableDevice",
+        variables: {},
+        calcElements: {},
+        alerts: {
+          bandwidthLimitAlertID: {
+            id: "bandwidthLimitAlertID",
+            name: "bandwidthLimitAlertName",
+            type: "BandwidthLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            highLimit: 100,
+            lowLimit: -50,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              highLimit: {
+                pl: "fakeHighLimitTextPL",
+                en: "fakeHighLimitTextEN",
+              },
+              lowLimit: {
+                pl: "fakeLowLimitTextPL",
+                en: "fakeLowLimitTextEN",
+              },
+            },
+            value: null,
+            lastValueTick: 0,
+            deviceId: "testDeviceID",
+          },
+          exactValuesAlertID: {
+            id: "exactValuesAlertID",
+            name: "exactValuesAlertName",
+            type: "ExactValuesAlert",
+            unit: "A",
+            sampleTime: 1,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            alertValues: [10, 20, 30, 40, 50],
+            severity: 10,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              10: {
+                en: "step 1: $VALUE",
+                pl: "próg 1: $VALUE",
+              },
+              20: {
+                en: "step 2: $VALUE",
+                pl: "próg 2: $VALUE",
+              },
+              30: {
+                en: "step 3: $VALUE",
+                pl: "próg 3: $VALUE",
+              },
+              40: {
+                en: "step 4: $VALUE",
+                pl: "próg 4: $VALUE",
+              },
+              50: {
+                en: "step 5: $VALUE",
+                pl: "próg 5: $VALUE",
+              },
+            },
+            value: null,
+            lastValueTick: 0,
+            deviceId: "testDeviceID",
+          },
+          highLimitAlertID: {
+            id: "highLimitAlertID",
+            name: "highLimitAlertName",
+            type: "HighLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            highLimit: 100,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              pl: "fakeTextPL",
+              en: "fakeTextEN",
+            },
+            value: null,
+            lastValueTick: 0,
+            deviceId: "testDeviceID",
+          },
+          lowLimitAlertID: {
+            id: "lowLimitAlertID",
+            name: "lowLimitAlertName",
+            type: "LowLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            lowLimit: 100,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              pl: "fakeTextPL",
+              en: "fakeTextEN",
+            },
+            value: null,
+            lastValueTick: 0,
+            deviceId: "testDeviceID",
+          },
+        },
+        isActive: true,
+        timeout: 2500,
+        isConnected: true,
+      };
+
+      expect(device.generatePayload()).toEqual(expectedPayload);
+    });
+
+    it("should initialize connectableDevice based on payload - if there are no alerts", async () => {
+      payload.alerts = {};
+
+      await exec();
+
+      let expectedPayload = {
+        id: "testDeviceID",
+        name: "testDeviceName",
+        type: "ConncectableDevice",
+        variables: {},
+        calcElements: {
+          averageCalculatorID: {
+            id: "averageCalculatorID",
+            name: "averageCalculatorName",
+            type: "AverageCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            calculationInterval: 15,
+            value: 123456.654321,
+            lastValueTick: 0,
+            deviceId: "testDeviceID",
+          },
+          factorCalculatorID: {
+            id: "factorCalculatorID",
+            name: "factorCalculatorName",
+            type: "FactorCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            value: 123456.654321,
+            lastValueTick: 0,
+            deviceId: "testDeviceID",
+          },
+          increaseCalculatorID: {
+            id: "increaseCalculatorID",
+            name: "increaseCalculatorName",
+            type: "IncreaseCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            calculationInterval: 15,
+            overflow: 1234,
+            value: 123456.654321,
+            lastValueTick: 0,
+            deviceId: "testDeviceID",
+          },
+          sumCalculatorID: {
+            id: "sumCalculatorID",
+            name: "sumCalculatorName",
+            type: "SumCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableIDs: [
+              { variableID: "fakeVariableID1", factor: 1 },
+              { variableID: "fakeVariableID2", factor: 2 },
+              { variableID: "fakeVariableID3", factor: 3 },
+            ],
+            value: 123456.654321,
+            lastValueTick: 0,
+            deviceId: "testDeviceID",
+          },
+          valueFromByteArrayCalculatorID: {
+            id: "valueFromByteArrayCalculatorID",
+            name: "valueFromByteArrayCalculatorName",
+            type: "ValueFromByteArrayCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 15,
+            variableID: "fakeVariableID",
+            bitNumber: 4,
+            byteNumber: 3,
+            length: 2,
+            value: 15,
+            lastValueTick: 0,
+            deviceId: "testDeviceID",
+          },
+        },
+        alerts: {},
+        isActive: true,
+        timeout: 2500,
+        isConnected: true,
+      };
+
+      expect(device.generatePayload()).toEqual(expectedPayload);
+    });
+
+    it("should throw - if there is associatedVariable - associatedVariables is not permitted in connecableDevice", async () => {
+      payload.variables = {
+        associatedVariableID: {
+          id: "associatedVariableID",
+          name: "associatedVariableName",
+          type: "AssociatedVariable",
+          unit: "A",
+          sampleTime: 1,
+          associatedElementID: "fakeDeviceID",
+          associatedDeviceID: "fakeVariableID",
+        },
+      };
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(error.message).toEqual(
+        "Unrecognized Variable type: AssociatedVariable"
+      );
     });
 
     it("should call activate of driver if is active is set to true", async () => {

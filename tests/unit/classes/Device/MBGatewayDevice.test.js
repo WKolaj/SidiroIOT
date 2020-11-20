@@ -26,7 +26,7 @@ describe("MBGatewayDevice", () => {
       expect(result.Driver instanceof MBDriver).toEqual(true);
     });
 
-    it("should assign project to MBDevice", () => {
+    it("should assign project to MBGatewayDevice", () => {
       let result = exec();
 
       expect(result._project).toEqual(project);
@@ -202,8 +202,164 @@ describe("MBGatewayDevice", () => {
             writeAsSingle: false,
           },
         },
-        calcElements: {},
-        alerts: {},
+        calcElements: {
+          averageCalculatorID: {
+            id: "averageCalculatorID",
+            name: "averageCalculatorName",
+            type: "AverageCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            calculationInterval: 15,
+          },
+          factorCalculatorID: {
+            id: "factorCalculatorID",
+            name: "factorCalculatorName",
+            type: "FactorCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+          },
+          increaseCalculatorID: {
+            id: "increaseCalculatorID",
+            name: "increaseCalculatorName",
+            type: "IncreaseCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            calculationInterval: 15,
+            overflow: 1234,
+          },
+          sumCalculatorID: {
+            id: "sumCalculatorID",
+            name: "sumCalculatorName",
+            type: "SumCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableIDs: [
+              { variableID: "fakeVariableID1", factor: 1 },
+              { variableID: "fakeVariableID2", factor: 2 },
+              { variableID: "fakeVariableID3", factor: 3 },
+            ],
+          },
+          valueFromByteArrayCalculatorID: {
+            id: "valueFromByteArrayCalculatorID",
+            name: "valueFromByteArrayCalculatorName",
+            type: "ValueFromByteArrayCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 15,
+            variableID: "fakeVariableID",
+            bitNumber: 4,
+            byteNumber: 3,
+            length: 2,
+          },
+        },
+        alerts: {
+          bandwidthLimitAlertID: {
+            id: "bandwidthLimitAlertID",
+            name: "bandwidthLimitAlertName",
+            type: "BandwidthLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            highLimit: 100,
+            lowLimit: -50,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              highLimit: {
+                pl: "fakeHighLimitTextPL",
+                en: "fakeHighLimitTextEN",
+              },
+              lowLimit: {
+                pl: "fakeLowLimitTextPL",
+                en: "fakeLowLimitTextEN",
+              },
+            },
+          },
+          exactValuesAlertID: {
+            id: "exactValuesAlertID",
+            name: "exactValuesAlertName",
+            type: "ExactValuesAlert",
+            unit: "A",
+            sampleTime: 1,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            alertValues: [10, 20, 30, 40, 50],
+            severity: 10,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              10: {
+                en: "step 1: $VALUE",
+                pl: "próg 1: $VALUE",
+              },
+              20: {
+                en: "step 2: $VALUE",
+                pl: "próg 2: $VALUE",
+              },
+              30: {
+                en: "step 3: $VALUE",
+                pl: "próg 3: $VALUE",
+              },
+              40: {
+                en: "step 4: $VALUE",
+                pl: "próg 4: $VALUE",
+              },
+              50: {
+                en: "step 5: $VALUE",
+                pl: "próg 5: $VALUE",
+              },
+            },
+          },
+          highLimitAlertID: {
+            id: "highLimitAlertID",
+            name: "highLimitAlertName",
+            type: "HighLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            highLimit: 100,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              pl: "fakeTextPL",
+              en: "fakeTextEN",
+            },
+          },
+          lowLimitAlertID: {
+            id: "lowLimitAlertID",
+            name: "lowLimitAlertName",
+            type: "LowLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            lowLimit: 100,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              pl: "fakeTextPL",
+              en: "fakeTextEN",
+            },
+          },
+        },
         isActive: true,
         ipAddress: "192.168.10.100",
         portNumber: 502,
@@ -798,9 +954,69 @@ describe("MBGatewayDevice", () => {
       expect(result).toEqual(`"defaultValue" must be a number`);
     });
 
-    //TODO - add tests for associated variables and internal variables
+    it("should return message if there is associated variable present", () => {
+      //invalid default value
+      payload.variables.associatedVariableID = {
+        id: "associatedVariableID",
+        name: "associatedVariableName",
+        type: "AssociatedVariable",
+        unit: "A",
+        sampleTime: 1,
+        associatedElementID: "fakeDeviceID",
+        associatedDeviceID: "fakeVariableID",
+      };
 
-    it("should return message if one of variables types is not recognized", () => {
+      let result = exec();
+
+      expect(result).toEqual(`variable type not recognized`);
+    });
+
+    it("should return message if variables type is not recognized", () => {
+      //invalid default value
+      payload.variables.testVariable1ID.type = "FakeType";
+
+      let result = exec();
+
+      expect(result).toEqual(`variable type not recognized`);
+    });
+
+    it("should return message if one of calcElement payload is invalid - AverageCalculator", () => {
+      //Invalid variableID type
+      payload.calcElements.averageCalculatorID.variableID = 12345;
+
+      let result = exec();
+
+      expect(result).toEqual(`"variableID" must be a string`);
+    });
+
+    it("should return message if one of calcElement payload is invalid - FactorCalculator", () => {
+      //Invalid variableID type
+      payload.calcElements.factorCalculatorID.variableID = 12345;
+
+      let result = exec();
+
+      expect(result).toEqual(`"variableID" must be a string`);
+    });
+
+    it("should return message if one of calcElement payload is invalid - IncreaseCalculator", () => {
+      //Invalid variableID type
+      payload.calcElements.increaseCalculatorID.variableID = 12345;
+
+      let result = exec();
+
+      expect(result).toEqual(`"variableID" must be a string`);
+    });
+
+    it("should return message if one of calcElement payload is invalid - SumCalculator", () => {
+      //Invalid variableID type
+      payload.calcElements.sumCalculatorID.variableIDs = 12345;
+
+      let result = exec();
+
+      expect(result).toEqual(`"variableIDs" must be an array`);
+    });
+
+    it("should return message if one of calcElement types is not recognized", () => {
       //invalid default value
       payload.variables.testVariable1ID = {
         id: "testVariable1ID",
@@ -825,6 +1041,15 @@ describe("MBGatewayDevice", () => {
       expect(result).toEqual(`variable type not recognized`);
     });
 
+    it("should return message if calcElement type is not recognized", () => {
+      //invalid default value
+      payload.calcElements.averageCalculatorID.type = "FakeType";
+
+      let result = exec();
+
+      expect(result).toEqual(`calcElement type not recognized`);
+    });
+
     it("should return message if calcElements is not defined", () => {
       delete payload.calcElements;
 
@@ -841,7 +1066,14 @@ describe("MBGatewayDevice", () => {
       expect(result).toEqual(`"calcElements" cannot be null`);
     });
 
-    //TODO - add tests for types of calcElements
+    it("should return message if alerts type is not recognized", () => {
+      //invalid default value
+      payload.alerts.highLimitAlertID.type = "FakeType";
+
+      let result = exec();
+
+      expect(result).toEqual(`alert type not recognized`);
+    });
 
     it("should return message if alerts is not defined", () => {
       delete payload.alerts;
@@ -859,6 +1091,40 @@ describe("MBGatewayDevice", () => {
       expect(result).toEqual(`"alerts" cannot be null`);
     });
 
-    //TODO - add tests for types of alerts
+    it("should return message if one of alert payload is invalid - BandwidthLimitAlert", () => {
+      //Invalid variableID type
+      payload.alerts.bandwidthLimitAlertID.variableID = 12345;
+
+      let result = exec();
+
+      expect(result).toEqual(`"variableID" must be a string`);
+    });
+
+    it("should return message if one of alert payload is invalid - ExactValuesAlert", () => {
+      //Invalid variableID type
+      payload.alerts.exactValuesAlertID.variableID = 12345;
+
+      let result = exec();
+
+      expect(result).toEqual(`"variableID" must be a string`);
+    });
+
+    it("should return message if one of alert payload is invalid - HighLimitAlert", () => {
+      //Invalid variableID type
+      payload.alerts.highLimitAlertID.variableID = 12345;
+
+      let result = exec();
+
+      expect(result).toEqual(`"variableID" must be a string`);
+    });
+
+    it("should return message if one of alert payload is invalid - LowLimitAlert", () => {
+      //Invalid variableID type
+      payload.alerts.lowLimitAlertID.variableID = 12345;
+
+      let result = exec();
+
+      expect(result).toEqual(`"variableID" must be a string`);
+    });
   });
 });

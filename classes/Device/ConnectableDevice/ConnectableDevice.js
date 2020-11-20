@@ -95,6 +95,18 @@ class ConnectableDevice extends Device {
     await super._refreshVariables();
   }
 
+  /**
+   * @description Method for creating variables based on type - throws if type is not a valid type.
+   * @param {String} type type of variable
+   */
+  _createVariableBasedOnPayload(type) {
+    //AssociatedVariable should be disabled
+    switch (type) {
+      default:
+        throw new Error(`Unrecognized Variable type: ${type}`);
+    }
+  }
+
   //#endregion ========= OVERRIDE PRIVATE METHODS =========
 
   //#region ========= OVERRIDE PUBLIC METHODS =========
