@@ -2574,10 +2574,10 @@ describe("api/variable", () => {
                 connectableDeviceID3Variable1ID: {
                   id: "connectableDeviceID3Variable1ID",
                   name: "connectableDeviceID3Variable1Name",
-                  type: "MBDouble",
+                  type: "MBByteArray",
                   unit: "V",
                   sampleTime: 1,
-                  defaultValue: 0,
+                  defaultValue: [1, 2, 3, 4, 5, 6, 7, 8],
                   offset: 1,
                   length: 4,
                   read: true,
@@ -3102,6 +3102,33 @@ describe("api/variable", () => {
       expect(element.LastValueTick <= endDate).toEqual(true);
     });
 
+    it("should return 200 and values and tickIds of given element and set value and tick id - if device is connectableDevice, element is variable of MBByteArray type", async () => {
+      //connectableDeviceID3Variable1ID is a MBByteArray
+      elementId = "connectableDeviceID3Variable1ID";
+      valuePayload = { value: [10, 11, 12, 13, 14, 15, 16, 17] };
+
+      let beginDate = Math.floor(Date.now() / 1000);
+
+      let result = await exec();
+
+      let endDate = Math.ceil(Date.now() / 1000);
+
+      expect(result.status).toEqual(200);
+
+      let element = projectService.getVariable(
+        "connectableDeviceID3",
+        "connectableDeviceID3Variable1ID"
+      );
+
+      expect(result.body.value).toEqual(valuePayload.value);
+      expect(result.body.lastValueTick >= beginDate).toEqual(true);
+      expect(result.body.lastValueTick <= endDate).toEqual(true);
+
+      expect(element.Value).toEqual(valuePayload.value);
+      expect(element.LastValueTick >= beginDate).toEqual(true);
+      expect(element.LastValueTick <= endDate).toEqual(true);
+    });
+
     it("should return 400 and not change values and tickIds of given element - if element is read only", async () => {
       elementId = "internalDeviceID2Variable2ID";
 
@@ -3142,6 +3169,25 @@ describe("api/variable", () => {
         "connectableDeviceID2Variable2ID"
       );
       expect(element.Value).toEqual(0);
+      expect(element.LastValueTick).toEqual(0);
+    });
+
+    it("should return 400 and not set value and tick id - if device is connectableDevice, element is variable of MBByteArray type but value is invalid - length", async () => {
+      //connectableDeviceID3Variable1ID is a MBByteArray
+      elementId = "connectableDeviceID3Variable1ID";
+      valuePayload = { value: [10, 11, 12, 13, 14, 15, 16] };
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+      expect(result.text).toEqual(`"value" must contain 8 items`);
+
+      let element = projectService.getVariable(
+        "connectableDeviceID3",
+        "connectableDeviceID3Variable1ID"
+      );
+
+      expect(element.Value).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
       expect(element.LastValueTick).toEqual(0);
     });
 
