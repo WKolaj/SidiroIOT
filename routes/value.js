@@ -9,6 +9,9 @@ const {
 const { exists, applyJSONParsingToRoute } = require("../utilities/utilities");
 const hasUser = require("../middleware/auth/hasUser");
 const isUser = require("../middleware/auth/isUser");
+const { validateValue } = require("../models/value");
+const validate = require("../middleware/validation/joiValidate");
+const Sampler = require("../classes/Sampler/Sampler");
 
 applyJSONParsingToRoute(express, router);
 
@@ -74,5 +77,45 @@ router.get("/:id", [hasUser, isUser], async (req, res) => {
 });
 
 //#endregion ========== GET ==========
+
+//#region ========== POST ==========
+
+//Route for setting values
+//Only user can set values
+router.post(
+  "/:id",
+  [hasUser, isUser, validate(validateValue)],
+  async (req, res) => {
+    let value = req.body.value;
+    let tickId = Sampler.convertDateToTickNumber(Date.now());
+
+    let devicesId = [];
+
+    //Getting device ids to get element from
+    let devices = getDevices();
+    if (exists(devices)) {
+      devicesId = Object.keys(devices);
+    }
+
+    //Getting element from devices to set its value
+    for (let deviceId of devicesId) {
+      let element = getElement(deviceId, req.params.id);
+      if (exists(element)) {
+        //Checking if value is valid for given element
+        let elementValidateMessage = element.checkIfValueCanBeSet(value);
+        if (exists(elementValidateMessage))
+          res.status(400).send(elementValidateMessage);
+
+        element.setValue(value, tickId);
+        return res.status(200).send(generateValueTickPair(element));
+      }
+    }
+
+    //Variable not found - return 404
+    return res.status(404).send("Element not found");
+  }
+);
+
+//#endregion ========== POST ==========
 
 module.exports = router;
