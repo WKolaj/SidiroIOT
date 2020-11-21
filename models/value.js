@@ -4,7 +4,7 @@ const Joi = require("joi");
 
 //Schema for value
 exports.valueSchemaPayload = {
-  value: Joi.any().required(),
+  value: Joi.any().allow(null).required(),
 };
 
 //A joi schema generated from schema payload

@@ -104,7 +104,7 @@ router.post(
         //Checking if value is valid for given element
         let elementValidateMessage = element.checkIfValueCanBeSet(value);
         if (exists(elementValidateMessage))
-          res.status(400).send(elementValidateMessage);
+          return res.status(400).send(elementValidateMessage);
 
         element.setValue(value, tickId);
         return res.status(200).send(generateValueTickPair(element));
@@ -119,3 +119,5 @@ router.post(
 //#endregion ========== POST ==========
 
 module.exports = router;
+
+//TODO - test this route
