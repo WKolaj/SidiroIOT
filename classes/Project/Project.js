@@ -115,13 +115,13 @@ class Project {
 
     if (!process.env.NODE_ENV || process.env.NODE_ENV === "develop") {
       //Only to test - TODO - remove after
-      for (let device of Object.values(this.Devices)) {
-        for (let variable of Object.values(device.Elements)) {
-          console.log(
-            `${device.ID}:${variable.ID}:${variable.LastValueTick}:${variable.Value}`
-          );
-        }
-      }
+      // for (let device of Object.values(this.Devices)) {
+      //   for (let variable of Object.values(device.Elements)) {
+      //     console.log(
+      //       `${device.ID}:${variable.ID}:${variable.LastValueTick}:${variable.Value}`
+      //     );
+      //   }
+      // }
       let stop = Date.now();
 
       console.log(`Refreshed of ${tickNumber} in ${(stop - start) / 1000} [s]`);
@@ -274,10 +274,19 @@ class Project {
   }
 
   /**
+   * @description Method for getting all devices. Returns empty object if there are no devices
+   */
+  getDevices() {
+    //TODO - test this method
+    return this.Devices;
+  }
+
+  /**
    * @description Method for getting device. Returns null if device does not exists
    * @param {String} deviceID device id
    */
   getDevice(deviceID) {
+    //TODO - test this method
     //Checking seperately in every collection instead of creating new with all devices - performance
     let connectableDevice = this.ConnectableDevices[deviceID];
     let internalDevice = this.InternalDevices[deviceID];
@@ -290,11 +299,29 @@ class Project {
   }
 
   /**
+   * @description Method for getting all elements of device. Returns null if device does not exists or empty object if elements of device do not exist
+   * @param {String} deviceID device id
+   */
+  getElements(deviceID) {
+    //TODO - test this method
+    //Checking seperately in every collection instead of creating new with all devices - performance
+    let connectableDevice = this.ConnectableDevices[deviceID];
+    let internalDevice = this.InternalDevices[deviceID];
+    let agentDevice = this.AgentDevices[deviceID];
+
+    let device = connectableDevice || internalDevice || agentDevice;
+    if (!exists(device)) return null;
+
+    return device.Elements;
+  }
+
+  /**
    * @description Method for getting object of element. Returns null if element does not exists
    * @param {String} deviceID device id of element
    * @param {String} elementID element id
    */
   getElement(deviceID, elementID) {
+    //TODO - test this method
     let device = this.getDevice(deviceID);
     if (!exists(device)) return null;
 
@@ -307,6 +334,109 @@ class Project {
     if (!exists(element)) return null;
 
     return element;
+  }
+
+  /**
+   * @description Method for getting all variables of device. Returns null if device does not exists or empty object if variables of device do not exist
+   * @param {String} deviceID device id
+   */
+  getVariables(deviceID) {
+    //TODO - test this method
+    //Checking seperately in every collection instead of creating new with all devices - performance
+    let connectableDevice = this.ConnectableDevices[deviceID];
+    let internalDevice = this.InternalDevices[deviceID];
+    let agentDevice = this.AgentDevices[deviceID];
+
+    let device = connectableDevice || internalDevice || agentDevice;
+    if (!exists(device)) return null;
+
+    return device.Variables;
+  }
+
+  /**
+   * @description Method for getting object of variable. Returns null if variable does not exists
+   * @param {String} deviceID device id of variable
+   * @param {String} variableID variable id
+   */
+  getVariable(deviceID, variableID) {
+    //TODO - test this method
+    let device = this.getDevice(deviceID);
+    if (!exists(device)) return null;
+
+    //Getting variable, calcElement or alert without creating new collection - performance
+    let variable = device.Variables[variableID];
+
+    if (!exists(variable)) return null;
+
+    return variable;
+  }
+
+  /**
+   * @description Method for getting all calcElements of device. Returns null if device does not exists or empty object if calcElements of device do not exist
+   * @param {String} deviceID device id
+   */
+  getCalcElements(deviceID) {
+    //TODO - test this method
+    //Checking seperately in every collection instead of creating new with all devices - performance
+    let connectableDevice = this.ConnectableDevices[deviceID];
+    let internalDevice = this.InternalDevices[deviceID];
+    let agentDevice = this.AgentDevices[deviceID];
+
+    let device = connectableDevice || internalDevice || agentDevice;
+    if (!exists(device)) return null;
+
+    return device.CalcElements;
+  }
+
+  /**
+   * @description Method for getting object of calcElement. Returns null if calcElement does not exists
+   * @param {String} deviceID device id of calcElement
+   * @param {String} calcElementID calcElement id
+   */
+  getCalcElement(deviceID, calcElementID) {
+    //TODO - test this method
+    let device = this.getDevice(deviceID);
+    if (!exists(device)) return null;
+
+    let calcElement = device.CalcElements[calcElementID];
+
+    if (!exists(calcElement)) return null;
+
+    return calcElement;
+  }
+
+  /**
+   * @description Method for getting all alerts of device. Returns null if device does not exists or empty object if alerts of device do not exist
+   * @param {String} deviceID device id
+   */
+  getAlerts(deviceID) {
+    //TODO - test this method
+    //Checking seperately in every collection instead of creating new with all devices - performance
+    let connectableDevice = this.ConnectableDevices[deviceID];
+    let internalDevice = this.InternalDevices[deviceID];
+    let agentDevice = this.AgentDevices[deviceID];
+
+    let device = connectableDevice || internalDevice || agentDevice;
+    if (!exists(device)) return null;
+
+    return device.Alerts;
+  }
+
+  /**
+   * @description Method for getting object of alert. Returns null if alert does not exists
+   * @param {String} deviceID device id of alert
+   * @param {String} alertID alert id
+   */
+  getAlert(deviceID, alertID) {
+    //TODO - test this method
+    let device = this.getDevice(deviceID);
+    if (!exists(device)) return null;
+
+    let alert = device.Alerts[alertID];
+
+    if (!exists(alert)) return null;
+
+    return alert;
   }
 
   //#endregion ========= PUBLIC METHODS =========

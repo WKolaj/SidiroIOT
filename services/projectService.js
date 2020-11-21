@@ -322,13 +322,96 @@ module.exports.loadProjectFile = async () => {
 };
 
 /**
- * @description Method for getting element from project. Throws if there is no element of given ids
+ * @description Method for getting all devices from the project
+ */
+module.exports.getDevices = () => {
+  //TODO - test this method
+  return project.getDevices();
+};
+
+/**
+ * @description Method for getting device from project. Returns null if there is no device
+ * @param {String} deviceId  device ID
+ */
+module.exports.getDevice = (deviceId) => {
+  //TODO - test this method
+  return project.getDevice(deviceId);
+};
+
+/**
+ * @description Method for getting element from project of given device. Returns null if there is no device or empty object if there aro no elements
+ * @param {String} deviceId  deviceID
+ */
+module.exports.getElements = (deviceId) => {
+  //TODO - test this method
+  return project.getElements(deviceId);
+};
+
+/**
+ * @description Method for getting element from project. Returns null if there is no device or element
  * @param {String} deviceId  deviceID of element
  * @param {String} elementId elementID
  */
 module.exports.getElement = (deviceId, elementId) => {
   //TODO - test this method
   return project.getElement(deviceId, elementId);
+};
+
+/**
+ * @description Method for getting variables from project of given device. Returns null if there is no device or empty object if there aro no variables
+ * @param {String} deviceId  deviceID
+ */
+module.exports.getVariables = (deviceId) => {
+  //TODO - test this method
+  return project.getVariables(deviceId);
+};
+
+/**
+ * @description Method for getting element from project. Returns null if there is no device or variable
+ * @param {String} deviceId  deviceID of variable
+ * @param {String} variableID variableID
+ */
+module.exports.getVariable = (deviceId, variableID) => {
+  //TODO - test this method
+  return project.getVariable(deviceId, variableID);
+};
+
+/**
+ * @description Method for getting element from project of given device. Returns null if there is no device or empty object if there aro no calcElements
+ * @param {String} deviceId  deviceID
+ */
+module.exports.getCalcElements = (deviceId) => {
+  //TODO - test this method
+  return project.getCalcElements(deviceId);
+};
+
+/**
+ * @description Method for getting caclElement from project. Returns null if there is no device or element
+ * @param {String} deviceId  deviceID of calcElement
+ * @param {String} calcElementID calcElement ID
+ */
+module.exports.getCalcElement = (deviceId, calcElementID) => {
+  //TODO - test this method
+  return project.getCalcElement(deviceId, calcElementID);
+};
+
+/**
+ * @description Method for getting alerts from project of given device. Returns null if there is no device or empty object if there aro no alerts
+ * @param {String} deviceId  deviceID
+ */
+module.exports.getAlerts = (deviceId) => {
+  //TODO - test this method
+  return project.getAlerts(deviceId);
+};
+
+/**
+ * @description Method for getting alert from project. Returns null if there is no device or alert
+ * @param {String} deviceId  deviceID of alert
+ * @param {String} alertID calcElement ID
+ */
+module.exports.getAlert = (deviceId, alertID) => {
+  //TODO - test this method
+  return project.getAlert(deviceId, alertID);
 };
 
 //TODO - add tests with project validation

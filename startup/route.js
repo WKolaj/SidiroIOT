@@ -5,6 +5,12 @@ const authRouter = require("../routes/auth");
 const devInfoRouter = require("../routes/deviceInfo");
 const ipConfigRouter = require("../routes/ipConfig");
 const configFileRouter = require("../routes/configFile");
+const deviceRouter = require("../routes/device");
+const variableRouter = require("../routes/variable");
+const calcElementRouter = require("../routes/calcElement");
+const alertRouter = require("../routes/alert");
+const elementRouter = require("../routes/element");
+const valueRouter = require("../routes/value");
 
 //Method for initializing routes
 module.exports = async function (app) {
@@ -17,6 +23,24 @@ module.exports = async function (app) {
 
   app.use("/api/configFile", configFileRouter);
   logger.info("Config file route initialized");
+
+  app.use("/api/device", deviceRouter);
+  logger.info("Device route initialized");
+
+  app.use("/api/variable", variableRouter);
+  logger.info("Variable route initialized");
+
+  app.use("/api/calcElement", calcElementRouter);
+  logger.info("CalcElement route initialized");
+
+  app.use("/api/alert", alertRouter);
+  logger.info("Alert route initialized");
+
+  app.use("/api/element", elementRouter);
+  logger.info("Element route initialized");
+
+  app.use("/api/value", valueRouter);
+  logger.info("Value route initialized");
 
   //#endregion ========== CUSTOM ROUTES ==========
 
