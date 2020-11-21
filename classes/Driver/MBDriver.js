@@ -67,7 +67,7 @@ class MBDriver extends Driver {
    * @description Method for getting connection state of driver.
    */
   _getIsConnectedState() {
-    return this.Client.isOpen && !this._lastProcessingFails;
+    return this.Client.isOpen;
   }
 
   /**

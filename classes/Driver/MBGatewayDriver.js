@@ -13,5 +13,3 @@ class MBGatewayDriver extends MBDriver {
 }
 
 module.exports = MBGatewayDriver;
-
-//TODO - test this class

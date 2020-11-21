@@ -1,12 +1,12 @@
-const MBDriver = require("../../../../classes/Driver/MBDriver");
+const MBGatewayDriver = require("../../../../classes/Driver/MBGatewayDriver");
 const MBRequest = require("../../../../classes/Request/MBRequest/MBRequest");
 const { snooze } = require("../../../../utilities/utilities");
 const { createFakeMBVariable } = require("../../../utilities/testUtilities");
 
-describe("MBDriver", () => {
+describe("MBGatewayDriver", () => {
   describe("constructor", () => {
     let exec = () => {
-      return new MBDriver();
+      return new MBGatewayDriver();
     };
 
     it("should create new Driver and initialize its properties properly", () => {
@@ -34,7 +34,7 @@ describe("MBDriver", () => {
       expect(result._disconnectOnProcessError).toEqual(false);
       expect(result._enableProcessTimeout).toEqual(false);
       expect(result._connectWhenDisconnectedOnProcess).toEqual(true);
-      expect(result._includeLastProcessingFailInConnection).toEqual(true);
+      expect(result._includeLastProcessingFailInConnection).toEqual(false);
     });
   });
 
@@ -47,7 +47,7 @@ describe("MBDriver", () => {
     });
 
     let exec = () => {
-      driver = new MBDriver();
+      driver = new MBGatewayDriver();
       driver.Client.isOpen = isOpenMockState;
 
       return driver._getIsConnectedState();
@@ -73,7 +73,7 @@ describe("MBDriver", () => {
     let driver;
 
     let exec = async () => {
-      driver = new MBDriver();
+      driver = new MBGatewayDriver();
       return driver._connect();
     };
 
@@ -103,7 +103,7 @@ describe("MBDriver", () => {
     });
 
     let exec = async () => {
-      driver = new MBDriver();
+      driver = new MBGatewayDriver();
       driver.setTimeout(timeout);
       if (disconnectThrow)
         driver.Client.close = () => {
@@ -338,7 +338,7 @@ describe("MBDriver", () => {
         unitID
       );
 
-      driver = new MBDriver();
+      driver = new MBGatewayDriver();
       //Mocked RTU Client has to be connected to invoke any method - otherwise it throws error
       await driver._connect();
       return driver._processRequest(request, tickId);
@@ -818,7 +818,7 @@ describe("MBDriver", () => {
         unitID
       );
 
-      driver = new MBDriver();
+      driver = new MBGatewayDriver();
 
       driver.setTimeout(driverTimeout);
       driver._isActive = isActive;
@@ -997,8 +997,8 @@ describe("MBDriver", () => {
       //Busy should be false at the end
       expect(driver.Client.busy).toEqual(false);
 
-      //IsConnect should be set to false - due to including processing request fail in isConnected
-      expect(driver.IsConnected).toEqual(false);
+      //IsConnect should be  true - due to not including processing request fail in isConnected
+      expect(driver.IsConnected).toEqual(true);
     });
 
     it("should reject but not disconnect - if processing (reading data) throws", async () => {
@@ -1043,61 +1043,61 @@ describe("MBDriver", () => {
       //Busy should be false at the end
       expect(driver.Client.busy).toEqual(false);
 
-      //IsConnect should be set to false - due to including processing request fail in isConnected
-      expect(driver.IsConnected).toEqual(false);
+      //IsConnect should be  true - due to not including processing request fail in isConnected
+      expect(driver.IsConnected).toEqual(true);
     });
 
-    it("should connect first (if not connected) and then properly call _processRequest  - call setID to set proper unitID and than writeHoldingRegisters - if request is to write", async () => {
-      writeRequest = true;
-      fCode = 16;
+    // it("should connect first (if not connected) and then properly call _processRequest  - call setID to set proper unitID and than writeHoldingRegisters - if request is to write", async () => {
+    //   writeRequest = true;
+    //   fCode = 16;
 
-      variable1Write = true;
-      variable2Write = true;
-      variable3Write = true;
+    //   variable1Write = true;
+    //   variable2Write = true;
+    //   variable3Write = true;
 
-      variable1Read = false;
-      variable2Read = false;
-      variable3Read = false;
+    //   variable1Read = false;
+    //   variable2Read = false;
+    //   variable3Read = false;
 
-      let result = await exec();
+    //   let result = await exec();
 
-      //Checking id connect was called
-      expect(driver.Client.connectTCP).toHaveBeenCalledTimes(1);
-      expect(driver.Client.connectTCP.mock.calls[0][0]).toEqual(
-        driver.IPAddress
-      );
-      expect(driver.Client.connectTCP.mock.calls[0][1]).toEqual({
-        port: driver.PortNumber,
-      });
+    //   //Checking id connect was called
+    //   expect(driver.Client.connectTCP).toHaveBeenCalledTimes(1);
+    //   expect(driver.Client.connectTCP.mock.calls[0][0]).toEqual(
+    //     driver.IPAddress
+    //   );
+    //   expect(driver.Client.connectTCP.mock.calls[0][1]).toEqual({
+    //     port: driver.PortNumber,
+    //   });
 
-      //connect should be called before setID
-      expect(driver.Client.connectTCP).toHaveBeenCalledBefore(
-        driver.Client.setID
-      );
+    //   //connect should be called before setID
+    //   expect(driver.Client.connectTCP).toHaveBeenCalledBefore(
+    //     driver.Client.setID
+    //   );
 
-      expect(driver.Client.setID).toHaveBeenCalledTimes(1);
-      expect(driver.Client.setID.mock.calls[0][0]).toEqual(unitID);
+    //   expect(driver.Client.setID).toHaveBeenCalledTimes(1);
+    //   expect(driver.Client.setID.mock.calls[0][0]).toEqual(unitID);
 
-      //Setting unitID has to be called before
-      expect(driver.Client.setID).toHaveBeenCalledBefore(
-        driver.Client.writeRegisters
-      );
+    //   //Setting unitID has to be called before
+    //   expect(driver.Client.setID).toHaveBeenCalledBefore(
+    //     driver.Client.writeRegisters
+    //   );
 
-      expect(driver.Client.writeRegisters).toHaveBeenCalledTimes(1);
-      //total offset is 1 and data is [1,1,2,2,2,3,3]
-      expect(driver.Client.writeRegisters.mock.calls[0][0]).toEqual(1);
-      expect(driver.Client.writeRegisters.mock.calls[0][1]).toEqual([
-        1,
-        1,
-        2,
-        2,
-        2,
-        3,
-        3,
-      ]);
+    //   expect(driver.Client.writeRegisters).toHaveBeenCalledTimes(1);
+    //   //total offset is 1 and data is [1,1,2,2,2,3,3]
+    //   expect(driver.Client.writeRegisters.mock.calls[0][0]).toEqual(1);
+    //   expect(driver.Client.writeRegisters.mock.calls[0][1]).toEqual([
+    //     1,
+    //     1,
+    //     2,
+    //     2,
+    //     2,
+    //     3,
+    //     3,
+    //   ]);
 
-      //Busy should be false at the end
-      expect(driver.Client.busy).toEqual(false);
-    });
+    //   //Busy should be false at the end
+    //   expect(driver.Client.busy).toEqual(false);
+    // });
   });
 });

@@ -154,5 +154,3 @@ class ConnectableDevice extends Device {
 }
 
 module.exports = ConnectableDevice;
-
-//TODO - test option with includeLastProcssingFailInConnection

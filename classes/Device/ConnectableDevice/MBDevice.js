@@ -142,5 +142,3 @@ class MBDevice extends ConnectableDevice {
 }
 
 module.exports = MBDevice;
-
-//TODO - test option with includeLastProcssingFailInConnection

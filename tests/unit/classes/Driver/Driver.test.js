@@ -1112,5 +1112,3 @@ describe("Driver", () => {
     });
   });
 });
-
-//TODO - test mechanism for including last processing fail in connection state
