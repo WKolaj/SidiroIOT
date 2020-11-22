@@ -18,26 +18,16 @@ applyJSONParsingToRoute(express, router);
 //Only users can get a list of alerts
 router.get("/", [hasUser, isUser], async (req, res) => {
   let payloadToReturn = {};
-  let devicesId = [];
+  //null for getting all devices
+  let devicesId = null;
 
   //Getting device ids to get alerts from
-  if (exists(req.query.deviceId)) {
-    devicesId = [req.query.deviceId];
-  } else {
-    let devices = getDevices();
-    if (exists(devices)) {
-      devicesId = Object.keys(devices);
-    }
-  }
+  if (exists(req.query.deviceId)) devicesId = [req.query.deviceId];
 
   //Getting alerts from devices
-  for (let deviceId of devicesId) {
-    let alerts = getAlerts(deviceId);
-    if (exists(alerts)) {
-      for (let alert of Object.values(alerts)) {
-        payloadToReturn[alert.ID] = alert.generatePayload();
-      }
-    }
+  let alerts = getAlerts(devicesId);
+  for (let alert of Object.values(alerts)) {
+    payloadToReturn[alert.ID] = alert.generatePayload();
   }
 
   return res.status(200).send(payloadToReturn);
@@ -46,23 +36,14 @@ router.get("/", [hasUser, isUser], async (req, res) => {
 //Route for getting alert
 //Only users can get alert
 router.get("/:id", [hasUser, isUser], async (req, res) => {
-  let devicesId = [];
+  //null for getting all devices
+  let deviceId = null;
 
-  //Getting device ids to get alert from
-  if (exists(req.query.deviceId)) {
-    devicesId = [req.query.deviceId];
-  } else {
-    let devices = getDevices();
-    if (exists(devices)) {
-      devicesId = Object.keys(devices);
-    }
-  }
+  //Getting device ids to get elements from
+  if (exists(req.query.deviceId)) deviceId = req.query.deviceId;
 
-  //Getting alert from devices
-  for (let deviceId of devicesId) {
-    let alert = getAlert(deviceId, req.params.id);
-    if (exists(alert)) return res.status(200).send(alert.generatePayload());
-  }
+  let element = getAlert(deviceId, req.params.id);
+  if (exists(element)) return res.status(200).send(element.generatePayload());
 
   //CalcElement not found - return 404
   return res.status(404).send("Alert not found");
@@ -71,5 +52,3 @@ router.get("/:id", [hasUser, isUser], async (req, res) => {
 //#endregion ========== GET ==========
 
 module.exports = router;
-
-//TODO - test this route

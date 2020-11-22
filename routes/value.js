@@ -53,24 +53,15 @@ router.get("/", [hasUser, isUser], async (req, res) => {
 //Route for getting value of element
 //Only users can get values
 router.get("/:id", [hasUser, isUser], async (req, res) => {
-  let devicesId = [];
+  //null for getting all devices
+  let deviceId = null;
 
-  //Getting device ids to get element from
-  if (exists(req.query.deviceId)) {
-    devicesId = [req.query.deviceId];
-  } else {
-    let devices = getDevices();
-    if (exists(devices)) {
-      devicesId = Object.keys(devices);
-    }
-  }
+  //Getting device ids to get elements from
+  if (exists(req.query.deviceId)) deviceId = req.query.deviceId;
 
-  //Getting element from devices
-  for (let deviceId of devicesId) {
-    let element = getElement(deviceId, req.params.id);
-    if (exists(element))
-      return res.status(200).send(generateValueTickPair(element));
-  }
+  let element = getElement(deviceId, req.params.id);
+  if (exists(element))
+    return res.status(200).send(generateValueTickPair(element));
 
   //Variable not found - return 404
   return res.status(404).send("Element not found");
@@ -88,27 +79,21 @@ router.post(
   async (req, res) => {
     let value = req.body.value;
     let tickId = Sampler.convertDateToTickNumber(Date.now());
+    //null for getting all devices
+    let deviceId = null;
 
-    let devicesId = [];
+    //Getting device ids to get elements from
+    if (exists(req.query.deviceId)) deviceId = req.query.deviceId;
 
-    //Getting device ids to get element from
-    let devices = getDevices();
-    if (exists(devices)) {
-      devicesId = Object.keys(devices);
-    }
+    let element = getElement(deviceId, req.params.id);
+    if (exists(element)) {
+      //Checking if value is valid for given element
+      let elementValidateMessage = element.checkIfValueCanBeSet(value);
+      if (exists(elementValidateMessage))
+        return res.status(400).send(elementValidateMessage);
 
-    //Getting element from devices to set its value
-    for (let deviceId of devicesId) {
-      let element = getElement(deviceId, req.params.id);
-      if (exists(element)) {
-        //Checking if value is valid for given element
-        let elementValidateMessage = element.checkIfValueCanBeSet(value);
-        if (exists(elementValidateMessage))
-          return res.status(400).send(elementValidateMessage);
-
-        element.setValue(value, tickId);
-        return res.status(200).send(generateValueTickPair(element));
-      }
+      element.setValue(value, tickId);
+      return res.status(200).send(generateValueTickPair(element));
     }
 
     //Variable not found - return 404
@@ -119,5 +104,3 @@ router.post(
 //#endregion ========== POST ==========
 
 module.exports = router;
-
-//TODO - test this route

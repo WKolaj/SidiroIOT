@@ -227,8 +227,6 @@ module.exports.checkIfProjFileExistsAndIsValid = async () => {
   //Validating project content
   let validationResult = module.exports.validateProjectPayload(jsonContent);
   if (validationResult !== null) {
-    //TODO - remove earlier
-    console.log(validationResult);
     return false;
   }
 
@@ -311,6 +309,10 @@ module.exports.setIPConfigFromNetplanToProject = async () => {
  * @description Method for loading project file to memory - creating devices, variables, etc.
  */
 module.exports.loadProjectFile = async () => {
+  //Checking if project service is initialized
+  if (!exists(projectFilePath))
+    throw new Error("project service not initialized");
+
   //Setting new ip from project file
   await module.exports.setIPConfigFromProjectToNetplan();
 
@@ -318,13 +320,28 @@ module.exports.loadProjectFile = async () => {
   let projectContent = await module.exports.getProjectContentFromFile();
 
   //Initializing project based on file content
-  project.load(projectContent.data);
+  await project.load(projectContent.data);
+};
+
+/**
+ * @description Method for getting project object - only for tests
+ */
+module.exports._getProject = () => {
+  //Checking if project service is initialized
+  if (!exists(projectFilePath))
+    throw new Error("project service not initialized");
+
+  return project;
 };
 
 /**
  * @description Method for getting all devices from the project
  */
 module.exports.getDevices = () => {
+  //Checking if project service is initialized
+  if (!exists(projectFilePath))
+    throw new Error("project service not initialized");
+
   //TODO - test this method
   return project.getDevices();
 };
@@ -334,82 +351,118 @@ module.exports.getDevices = () => {
  * @param {String} deviceId  device ID
  */
 module.exports.getDevice = (deviceId) => {
+  //Checking if project service is initialized
+  if (!exists(projectFilePath))
+    throw new Error("project service not initialized");
+
   //TODO - test this method
   return project.getDevice(deviceId);
 };
 
 /**
- * @description Method for getting element from project of given device. Returns null if there is no device or empty object if there aro no elements
- * @param {String} deviceId  deviceID
+ * @description Method for getting element from project of given device. Returns empty object if devices or elements are not present
+ * @param {Array} deviceIds  list of all devices to get elements from. NULL if all elements from all devices should be returned
  */
-module.exports.getElements = (deviceId) => {
+module.exports.getElements = (deviceIds = null) => {
+  //Checking if project service is initialized
+  if (!exists(projectFilePath))
+    throw new Error("project service not initialized");
+
   //TODO - test this method
-  return project.getElements(deviceId);
+  return project.getElements(deviceIds);
 };
 
 /**
  * @description Method for getting element from project. Returns null if there is no device or element
- * @param {String} deviceId  deviceID of element
+ * @param {String} deviceId  deviceID of element. NULL if all devices should be taken into account
  * @param {String} elementId elementID
  */
 module.exports.getElement = (deviceId, elementId) => {
+  //Checking if project service is initialized
+  if (!exists(projectFilePath))
+    throw new Error("project service not initialized");
+
   //TODO - test this method
   return project.getElement(deviceId, elementId);
 };
 
 /**
- * @description Method for getting variables from project of given device. Returns null if there is no device or empty object if there aro no variables
- * @param {String} deviceId  deviceID
+ * @description Method for getting variables from project of given device. Returns empty object if devices or variables are not present
+ * @param {Array} deviceIds  list of all devices to get variables from. NULL if all vairables from all devices should be returned
  */
-module.exports.getVariables = (deviceId) => {
+module.exports.getVariables = (deviceIds = null) => {
+  //Checking if project service is initialized
+  if (!exists(projectFilePath))
+    throw new Error("project service not initialized");
+
   //TODO - test this method
-  return project.getVariables(deviceId);
+  return project.getVariables(deviceIds);
 };
 
 /**
  * @description Method for getting element from project. Returns null if there is no device or variable
- * @param {String} deviceId  deviceID of variable
+ * @param {String} deviceId  deviceID of variable. NULL if all devices should be taken into account
  * @param {String} variableID variableID
  */
 module.exports.getVariable = (deviceId, variableID) => {
+  //Checking if project service is initialized
+  if (!exists(projectFilePath))
+    throw new Error("project service not initialized");
+
   //TODO - test this method
   return project.getVariable(deviceId, variableID);
 };
 
 /**
- * @description Method for getting element from project of given device. Returns null if there is no device or empty object if there aro no calcElements
- * @param {String} deviceId  deviceID
+ * @description Method for getting calcElements from project of given device. Returns empty object if devices or calcElements are not present
+ * @param {Array} deviceIds  list of all devices to get calcElements from. NULL if all calcElements from all devices should be returned
  */
-module.exports.getCalcElements = (deviceId) => {
+module.exports.getCalcElements = (deviceIds = null) => {
+  //Checking if project service is initialized
+  if (!exists(projectFilePath))
+    throw new Error("project service not initialized");
+
   //TODO - test this method
-  return project.getCalcElements(deviceId);
+  return project.getCalcElements(deviceIds);
 };
 
 /**
  * @description Method for getting caclElement from project. Returns null if there is no device or element
- * @param {String} deviceId  deviceID of calcElement
+ * @param {String} deviceId  deviceID of calcElement. NULL if all devices should be taken into account
  * @param {String} calcElementID calcElement ID
  */
 module.exports.getCalcElement = (deviceId, calcElementID) => {
+  //Checking if project service is initialized
+  if (!exists(projectFilePath))
+    throw new Error("project service not initialized");
+
   //TODO - test this method
   return project.getCalcElement(deviceId, calcElementID);
 };
 
 /**
- * @description Method for getting alerts from project of given device. Returns null if there is no device or empty object if there aro no alerts
- * @param {String} deviceId  deviceID
+ * @description Method for getting alerts from project of given device. Returns empty object if devices or alerts are not present
+ * @param {Array} deviceIds  list of all devices to get alerts from. NULL if all alerts from all devices should be returned
  */
-module.exports.getAlerts = (deviceId) => {
+module.exports.getAlerts = (deviceIds = null) => {
+  //Checking if project service is initialized
+  if (!exists(projectFilePath))
+    throw new Error("project service not initialized");
+
   //TODO - test this method
-  return project.getAlerts(deviceId);
+  return project.getAlerts(deviceIds);
 };
 
 /**
  * @description Method for getting alert from project. Returns null if there is no device or alert
- * @param {String} deviceId  deviceID of alert
+ * @param {String} deviceId  deviceID of alert. NULL if all devices should be taken into account
  * @param {String} alertID calcElement ID
  */
 module.exports.getAlert = (deviceId, alertID) => {
+  //Checking if project service is initialized
+  if (!exists(projectFilePath))
+    throw new Error("project service not initialized");
+
   //TODO - test this method
   return project.getAlert(deviceId, alertID);
 };

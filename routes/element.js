@@ -18,26 +18,16 @@ applyJSONParsingToRoute(express, router);
 //Only users can get a list of elements
 router.get("/", [hasUser, isUser], async (req, res) => {
   let payloadToReturn = {};
-  let devicesId = [];
+  //null for getting all devices
+  let devicesId = null;
 
   //Getting device ids to get elements from
-  if (exists(req.query.deviceId)) {
-    devicesId = [req.query.deviceId];
-  } else {
-    let devices = getDevices();
-    if (exists(devices)) {
-      devicesId = Object.keys(devices);
-    }
-  }
+  if (exists(req.query.deviceId)) devicesId = [req.query.deviceId];
 
   //Getting elements from devices
-  for (let deviceId of devicesId) {
-    let elements = getElements(deviceId);
-    if (exists(elements)) {
-      for (let element of Object.values(elements)) {
-        payloadToReturn[element.ID] = element.generatePayload();
-      }
-    }
+  let elements = getElements(devicesId);
+  for (let element of Object.values(elements)) {
+    payloadToReturn[element.ID] = element.generatePayload();
   }
 
   return res.status(200).send(payloadToReturn);
@@ -46,23 +36,14 @@ router.get("/", [hasUser, isUser], async (req, res) => {
 //Route for getting element
 //Only users can get element
 router.get("/:id", [hasUser, isUser], async (req, res) => {
-  let devicesId = [];
+  //null for getting all devices
+  let deviceId = null;
 
-  //Getting device ids to get element from
-  if (exists(req.query.deviceId)) {
-    devicesId = [req.query.deviceId];
-  } else {
-    let devices = getDevices();
-    if (exists(devices)) {
-      devicesId = Object.keys(devices);
-    }
-  }
+  //Getting device ids to get elements from
+  if (exists(req.query.deviceId)) deviceId = req.query.deviceId;
 
-  //Getting element from devices
-  for (let deviceId of devicesId) {
-    let element = getElement(deviceId, req.params.id);
-    if (exists(element)) return res.status(200).send(element.generatePayload());
-  }
+  let element = getElement(deviceId, req.params.id);
+  if (exists(element)) return res.status(200).send(element.generatePayload());
 
   //Variable not found - return 404
   return res.status(404).send("Element not found");
@@ -71,5 +52,3 @@ router.get("/:id", [hasUser, isUser], async (req, res) => {
 //#endregion ========== GET ==========
 
 module.exports = router;
-
-//TODO - test this route

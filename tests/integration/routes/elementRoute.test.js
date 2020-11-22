@@ -27,7 +27,7 @@ const projectFilePath = path.join(settingsDirPath, projectFileName);
 
 const socketFilePath = config.get("netplanConfigSocketFilePath");
 
-describe("api/variable", () => {
+describe("api/element", () => {
   let uselessUser;
   let testAdmin;
   let testUser;
