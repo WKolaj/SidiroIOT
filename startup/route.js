@@ -11,6 +11,7 @@ const calcElementRouter = require("../routes/calcElement");
 const alertRouter = require("../routes/alert");
 const elementRouter = require("../routes/element");
 const valueRouter = require("../routes/value");
+const activateRouter = require("../routes/activate");
 
 //Method for initializing routes
 module.exports = async function (app) {
@@ -41,6 +42,9 @@ module.exports = async function (app) {
 
   app.use("/api/value", valueRouter);
   logger.info("Value route initialized");
+
+  app.use("/api/activate", activateRouter);
+  logger.info("Device activate route initialized");
 
   //#endregion ========== CUSTOM ROUTES ==========
 

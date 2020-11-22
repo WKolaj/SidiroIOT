@@ -8,7 +8,6 @@ const S7Device = require("../Device/ConnectableDevice/S7Device");
 const MBGatewayDevice = require("../Device/ConnectableDevice/MBGatewayDevice");
 const { exists } = require("../../utilities/utilities");
 const { joiSchema } = require("../../models/Project/Project");
-const e = require("express");
 
 class Project {
   //#region ========= CONSTRUCTOR =========
@@ -508,6 +507,28 @@ class Project {
 
     //Alert not found in any device - returns null
     return null;
+  }
+
+  /**
+   * @description Method for activating device
+   * @param {String} deviceID device id
+   */
+  async activateDevice(deviceID) {
+    //TODO - test this method
+
+    let device = this.Devices[deviceID];
+    if (exists(device)) await device.activate();
+  }
+
+  /**
+   * @description Method for deactivating device
+   * @param {String} deviceID device id
+   */
+  async deactivateDevice(deviceID) {
+    //TODO - test this method
+
+    let device = this.Devices[deviceID];
+    if (exists(device)) await device.deactivate();
   }
 
   //#endregion ========= PUBLIC METHODS =========

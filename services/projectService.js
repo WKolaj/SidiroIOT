@@ -467,4 +467,30 @@ module.exports.getAlert = (deviceId, alertID) => {
   return project.getAlert(deviceId, alertID);
 };
 
+/**
+ * @description Method for activating device.
+ * @param {String} deviceId  deviceID
+ */
+module.exports.activateDevice = async (deviceId) => {
+  //Checking if project service is initialized
+  if (!exists(projectFilePath))
+    throw new Error("project service not initialized");
+
+  //TODO - test this method
+  return project.activateDevice(deviceId);
+};
+
+/**
+ * @description Method for deactivating device.
+ * @param {String} deviceId  deviceID
+ */
+module.exports.deactivateDevice = async (deviceId) => {
+  //Checking if project service is initialized
+  if (!exists(projectFilePath))
+    throw new Error("project service not initialized");
+
+  //TODO - test this method
+  return project.deactivateDevice(deviceId);
+};
+
 //TODO - add tests with project validation
