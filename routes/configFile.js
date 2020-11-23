@@ -7,6 +7,7 @@ const {
   readFileAsync,
   removeFileIfExistsAsync,
   statAsync,
+  isStringAValidJSON,
 } = require("../utilities/utilities");
 const hasUser = require("../middleware/auth/hasUser");
 const isAdmin = require("../middleware/auth/isAdmin");
@@ -40,7 +41,15 @@ router.post("/", [hasUser, isAdmin], async (req, res) => {
       if (!exists(tmpFilePath))
         throw new Error("File path is empty after upload!");
 
-      let projectContent = JSON.parse(await readFileAsync(tmpFilePath, "utf8"));
+      let fileContent = await readFileAsync(tmpFilePath, "utf8");
+
+      if (!isStringAValidJSON(fileContent))
+        return res
+          .status(400)
+          .set("Content-Type", "text/plain")
+          .send("Content is not a valid JSON");
+
+      let projectContent = JSON.parse(fileContent);
 
       //removing tmp file
       await removeFileIfExistsAsync(tmpFilePath);

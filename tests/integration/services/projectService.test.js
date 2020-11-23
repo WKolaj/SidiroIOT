@@ -2592,8 +2592,6 @@ describe("projectService", () => {
     });
   });
 
-  //TODO - test load project method
-
   describe("getDevices", () => {
     let initialProjectFileContent;
     let initProjectService;
@@ -5245,6 +5243,16 @@ describe("projectService", () => {
     };
 
     it("should initialize project with new content - based on new project file", async () => {
+      await exec();
+
+      checkProjectWithPayload(newProjectFileContent);
+    });
+
+    it("should initialize project with new content - if content is empty project content", async () => {
+      newProjectFileContent = {
+        ipConfig: {},
+        data: { connectableDevices: {}, internalDevices: {}, agentDevices: {} },
+      };
       await exec();
 
       checkProjectWithPayload(newProjectFileContent);

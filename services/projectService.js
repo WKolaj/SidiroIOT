@@ -489,5 +489,3 @@ module.exports.getLastCycleDuration = () => {
 
   return project.LastCycleDuration;
 };
-
-//TODO - add tests with project validation
