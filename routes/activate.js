@@ -39,5 +39,3 @@ router.post(
 //#endregion ========== GET ==========
 
 module.exports = router;
-
-//TODO - test this route

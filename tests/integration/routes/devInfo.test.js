@@ -28,6 +28,7 @@ const projectFileName = config.get("projectFileName");
 const projectFilePath = path.join(settingsDirPath, projectFileName);
 
 const socketFilePath = config.get("netplanConfigSocketFilePath");
+const projectService = require("../../../services/projectService");
 
 let { exists, hashedStringMatch } = require("../../../utilities/utilities");
 let server;
@@ -104,6 +105,8 @@ describe("api/devInfo", () => {
     let rootPartitionDataPayload;
     let bootPartitionDataPayload;
     let partitionsDataPayload;
+    let projectGetLastCycleIntervalMockFunc;
+    let projectGetLastCycleIntervalMockFuncResult;
 
     beforeEach(async () => {
       jwt = await testUser.generateJWT();
@@ -132,6 +135,12 @@ describe("api/devInfo", () => {
         rootPartitionDataPayload,
         bootPartitionDataPayload,
       ];
+
+      projectGetLastCycleIntervalMockFuncResult = 123;
+
+      projectGetLastCycleIntervalMockFunc = jest.fn(() => {
+        return projectGetLastCycleIntervalMockFuncResult;
+      });
     });
 
     let exec = async () => {
@@ -143,6 +152,7 @@ describe("api/devInfo", () => {
       si._currentMemoryData.active = memoryUsageActive;
 
       si._currentFSData = partitionsDataPayload;
+      projectService.getLastCycleDuration = projectGetLastCycleIntervalMockFunc;
 
       if (exists(jwt))
         return request(server)
@@ -164,6 +174,7 @@ describe("api/devInfo", () => {
         cpuTemperature: 43.32,
         ramUsage: 33.33,
         diskUsage: 76.67,
+        lastCycleInterval: 123,
       };
       expect(response.body).toEqual(expectedBody);
     });
@@ -185,6 +196,7 @@ describe("api/devInfo", () => {
         cpuTemperature: 43.32,
         ramUsage: 33.33,
         diskUsage: 76.67,
+        lastCycleInterval: 123,
       };
       expect(response.body).toEqual(expectedBody);
 
@@ -205,6 +217,7 @@ describe("api/devInfo", () => {
         cpuTemperature: 43.32,
         ramUsage: 33.33,
         diskUsage: 76.67,
+        lastCycleInterval: 123,
       };
       expect(response.body).toEqual(expectedBody);
     });
@@ -223,6 +236,7 @@ describe("api/devInfo", () => {
         cpuTemperature: 43.32,
         ramUsage: 33.33,
         diskUsage: 76.67,
+        lastCycleInterval: 123,
       };
       expect(response.body).toEqual(expectedBody);
     });
@@ -241,6 +255,7 @@ describe("api/devInfo", () => {
         cpuTemperature: 43.32,
         ramUsage: 33.33,
         diskUsage: 76.67,
+        lastCycleInterval: 123,
       };
       expect(response.body).toEqual(expectedBody);
     });
@@ -262,6 +277,7 @@ describe("api/devInfo", () => {
         cpuTemperature: 43.32,
         ramUsage: null,
         diskUsage: 76.67,
+        lastCycleInterval: 123,
       };
       expect(response.body).toEqual(expectedBody);
 
@@ -282,6 +298,7 @@ describe("api/devInfo", () => {
         cpuTemperature: 43.32,
         ramUsage: null,
         diskUsage: 76.67,
+        lastCycleInterval: 123,
       };
       expect(response.body).toEqual(expectedBody);
     });
@@ -300,6 +317,7 @@ describe("api/devInfo", () => {
         cpuTemperature: 43.32,
         ramUsage: null,
         diskUsage: 76.67,
+        lastCycleInterval: 123,
       };
       expect(response.body).toEqual(expectedBody);
     });
@@ -318,6 +336,7 @@ describe("api/devInfo", () => {
         cpuTemperature: 43.32,
         ramUsage: null,
         diskUsage: 76.67,
+        lastCycleInterval: 123,
       };
       expect(response.body).toEqual(expectedBody);
     });
@@ -336,6 +355,7 @@ describe("api/devInfo", () => {
         cpuTemperature: 43.32,
         ramUsage: null,
         diskUsage: 76.67,
+        lastCycleInterval: 123,
       };
       expect(response.body).toEqual(expectedBody);
     });
@@ -354,6 +374,7 @@ describe("api/devInfo", () => {
         cpuTemperature: 43.32,
         ramUsage: null,
         diskUsage: 76.67,
+        lastCycleInterval: 123,
       };
       expect(response.body).toEqual(expectedBody);
     });
@@ -372,6 +393,7 @@ describe("api/devInfo", () => {
         cpuTemperature: 43.32,
         ramUsage: null,
         diskUsage: 76.67,
+        lastCycleInterval: 123,
       };
       expect(response.body).toEqual(expectedBody);
     });
@@ -390,6 +412,7 @@ describe("api/devInfo", () => {
         cpuTemperature: 43.32,
         ramUsage: 0,
         diskUsage: 76.67,
+        lastCycleInterval: 123,
       };
       expect(response.body).toEqual(expectedBody);
     });
@@ -411,6 +434,7 @@ describe("api/devInfo", () => {
         cpuTemperature: null,
         ramUsage: 33.33,
         diskUsage: 76.67,
+        lastCycleInterval: 123,
       };
       expect(response.body).toEqual(expectedBody);
 
@@ -431,6 +455,7 @@ describe("api/devInfo", () => {
         cpuTemperature: null,
         ramUsage: 33.33,
         diskUsage: 76.67,
+        lastCycleInterval: 123,
       };
       expect(response.body).toEqual(expectedBody);
     });
@@ -449,6 +474,7 @@ describe("api/devInfo", () => {
         cpuTemperature: null,
         ramUsage: 33.33,
         diskUsage: 76.67,
+        lastCycleInterval: 123,
       };
       expect(response.body).toEqual(expectedBody);
     });
@@ -467,6 +493,7 @@ describe("api/devInfo", () => {
         cpuTemperature: null,
         ramUsage: 33.33,
         diskUsage: 76.67,
+        lastCycleInterval: 123,
       };
       expect(response.body).toEqual(expectedBody);
     });
@@ -488,6 +515,7 @@ describe("api/devInfo", () => {
         cpuTemperature: 43.32,
         ramUsage: 33.33,
         diskUsage: null,
+        lastCycleInterval: 123,
       };
       expect(response.body).toEqual(expectedBody);
 
@@ -519,6 +547,7 @@ describe("api/devInfo", () => {
         cpuTemperature: 43.32,
         ramUsage: 33.33,
         diskUsage: 76.67,
+        lastCycleInterval: 123,
       };
       expect(response.body).toEqual(expectedBody);
     });
@@ -537,6 +566,7 @@ describe("api/devInfo", () => {
         cpuTemperature: 43.32,
         ramUsage: 33.33,
         diskUsage: 76.67,
+        lastCycleInterval: 123,
       };
       expect(response.body).toEqual(expectedBody);
     });
@@ -555,6 +585,7 @@ describe("api/devInfo", () => {
         cpuTemperature: 43.32,
         ramUsage: 33.33,
         diskUsage: null,
+        lastCycleInterval: 123,
       };
       expect(response.body).toEqual(expectedBody);
     });
@@ -573,6 +604,7 @@ describe("api/devInfo", () => {
         cpuTemperature: 43.32,
         ramUsage: 33.33,
         diskUsage: null,
+        lastCycleInterval: 123,
       };
       expect(response.body).toEqual(expectedBody);
     });
@@ -591,6 +623,7 @@ describe("api/devInfo", () => {
         cpuTemperature: 43.32,
         ramUsage: 33.33,
         diskUsage: null,
+        lastCycleInterval: 123,
       };
       expect(response.body).toEqual(expectedBody);
     });
@@ -609,6 +642,7 @@ describe("api/devInfo", () => {
         cpuTemperature: 43.32,
         ramUsage: 33.33,
         diskUsage: null,
+        lastCycleInterval: 123,
       };
       expect(response.body).toEqual(expectedBody);
     });
@@ -627,6 +661,7 @@ describe("api/devInfo", () => {
         cpuTemperature: 43.32,
         ramUsage: 33.33,
         diskUsage: null,
+        lastCycleInterval: 123,
       };
       expect(response.body).toEqual(expectedBody);
     });
@@ -645,6 +680,7 @@ describe("api/devInfo", () => {
         cpuTemperature: 43.32,
         ramUsage: 33.33,
         diskUsage: 66.67,
+        lastCycleInterval: 123,
       };
       expect(response.body).toEqual(expectedBody);
     });
@@ -663,6 +699,7 @@ describe("api/devInfo", () => {
         cpuTemperature: 43.32,
         ramUsage: 33.33,
         diskUsage: null,
+        lastCycleInterval: 123,
       };
       expect(response.body).toEqual(expectedBody);
     });
@@ -681,6 +718,7 @@ describe("api/devInfo", () => {
         cpuTemperature: 43.32,
         ramUsage: 33.33,
         diskUsage: null,
+        lastCycleInterval: 123,
       };
       expect(response.body).toEqual(expectedBody);
     });
@@ -699,6 +737,7 @@ describe("api/devInfo", () => {
         cpuTemperature: 43.32,
         ramUsage: 33.33,
         diskUsage: 10,
+        lastCycleInterval: 123,
       };
       expect(response.body).toEqual(expectedBody);
     });
@@ -717,6 +756,7 @@ describe("api/devInfo", () => {
         cpuTemperature: 43.32,
         ramUsage: 33.33,
         diskUsage: null,
+        lastCycleInterval: 123,
       };
       expect(response.body).toEqual(expectedBody);
     });
@@ -735,6 +775,66 @@ describe("api/devInfo", () => {
         cpuTemperature: 43.32,
         ramUsage: 33.33,
         diskUsage: null,
+        lastCycleInterval: 123,
+      };
+      expect(response.body).toEqual(expectedBody);
+    });
+
+    it("should not throw and return null as lastCycleInterval if lastCycleInterval returns undefined", async () => {
+      projectGetLastCycleIntervalMockFuncResult = undefined;
+
+      let response = await exec();
+
+      expect(response).toBeDefined();
+      expect(response.status).toEqual(200);
+
+      expect(response.body).toBeDefined();
+      let expectedBody = {
+        cpuUsage: 54.32,
+        cpuTemperature: 43.32,
+        ramUsage: 33.33,
+        diskUsage: 76.67,
+        lastCycleInterval: null,
+      };
+      expect(response.body).toEqual(expectedBody);
+    });
+
+    it("should not throw and return null as lastCycleInterval if lastCycleInterval returns null", async () => {
+      projectGetLastCycleIntervalMockFuncResult = null;
+
+      let response = await exec();
+
+      expect(response).toBeDefined();
+      expect(response.status).toEqual(200);
+
+      expect(response.body).toBeDefined();
+      let expectedBody = {
+        cpuUsage: 54.32,
+        cpuTemperature: 43.32,
+        ramUsage: 33.33,
+        diskUsage: 76.67,
+        lastCycleInterval: null,
+      };
+      expect(response.body).toEqual(expectedBody);
+    });
+
+    it("should not throw and return null as lastCycleInterval if getLastCycleInterval throws", async () => {
+      projectGetLastCycleIntervalMockFunc = jest.fn(() => {
+        throw new Error("testError");
+      });
+
+      let response = await exec();
+
+      expect(response).toBeDefined();
+      expect(response.status).toEqual(200);
+
+      expect(response.body).toBeDefined();
+      let expectedBody = {
+        cpuUsage: 54.32,
+        cpuTemperature: 43.32,
+        ramUsage: 33.33,
+        diskUsage: 76.67,
+        lastCycleInterval: null,
       };
       expect(response.body).toEqual(expectedBody);
     });

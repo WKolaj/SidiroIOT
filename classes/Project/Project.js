@@ -24,6 +24,9 @@ class Project {
 
     //Connecting _handlerSamplerTick to sampler main method
     this.Sampler.ExternalTickHandler = this._handleSamplerTick;
+
+    //Initializing other values
+    this._lastCycleDuration = 0;
   }
 
   //#endregion ========= CONSTRUCTOR =========
@@ -90,6 +93,12 @@ class Project {
     return this._sampler;
   }
 
+  /**
+   * @description Duration [in ms] of last refresh cycle
+   */
+  get LastCycleDuration() {
+    return this._lastCycleDuration;
+  }
   //#endregion ========= PROPERTIES =========
 
   //#region ========= PRIVATE METHODS =========
@@ -109,23 +118,14 @@ class Project {
    * @description Main method for handling tick of sampler
    */
   async _handleSamplerTick(tickNumber) {
+    //TODO - test LastCycleDuration calculation - mock refresh
     let start = Date.now();
     //Refreshing group manager on every tick
     await this.RefreshGroupManager.refresh(tickNumber);
+    let stop = Date.now();
 
-    if (!process.env.NODE_ENV || process.env.NODE_ENV === "develop") {
-      //Only to test - TODO - remove after
-      // for (let device of Object.values(this.Devices)) {
-      //   for (let variable of Object.values(device.Elements)) {
-      //     console.log(
-      //       `${device.ID}:${variable.ID}:${variable.LastValueTick}:${variable.Value}`
-      //     );
-      //   }
-      // }
-      let stop = Date.now();
-
-      console.log(`Refreshed of ${tickNumber} in ${(stop - start) / 1000} [s]`);
-    }
+    //Setting duration
+    this._lastCycleDuration = stop - start;
   }
 
   /**
@@ -249,7 +249,9 @@ class Project {
     //Checking payload
     let validatePayloadMessage = Project.validatePayload(payload);
     if (validatePayloadMessage !== null)
-      throw new Error(`Invalid payload for initialization: ${validatePayload}`);
+      throw new Error(
+        `Invalid payload for initialization: ${validatePayloadMessage}`
+      );
 
     //stopping sampler temporarly
     this.Sampler.stop();

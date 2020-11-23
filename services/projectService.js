@@ -227,6 +227,7 @@ module.exports.checkIfProjFileExistsAndIsValid = async () => {
   //Validating project content
   let validationResult = module.exports.validateProjectPayload(jsonContent);
   if (validationResult !== null) {
+    //console.log(validationResult);
     return false;
   }
 
@@ -279,8 +280,6 @@ module.exports.setIPConfigFromProjectToNetplan = async () => {
   //Setting new netplan settings if there is a difference
   if (!_.isEqual(ipConfigFromFile, ipConfigFromNetplan)) {
     await netplanService.setInterfaces(ipConfigFromFile);
-
-    let ipConfigFile = await netplanService.getInterfaces();
   }
 };
 
@@ -342,7 +341,6 @@ module.exports.getDevices = () => {
   if (!exists(projectFilePath))
     throw new Error("project service not initialized");
 
-  //TODO - test this method
   return project.getDevices();
 };
 
@@ -355,7 +353,6 @@ module.exports.getDevice = (deviceId) => {
   if (!exists(projectFilePath))
     throw new Error("project service not initialized");
 
-  //TODO - test this method
   return project.getDevice(deviceId);
 };
 
@@ -368,7 +365,6 @@ module.exports.getElements = (deviceIds = null) => {
   if (!exists(projectFilePath))
     throw new Error("project service not initialized");
 
-  //TODO - test this method
   return project.getElements(deviceIds);
 };
 
@@ -382,7 +378,6 @@ module.exports.getElement = (deviceId, elementId) => {
   if (!exists(projectFilePath))
     throw new Error("project service not initialized");
 
-  //TODO - test this method
   return project.getElement(deviceId, elementId);
 };
 
@@ -395,7 +390,6 @@ module.exports.getVariables = (deviceIds = null) => {
   if (!exists(projectFilePath))
     throw new Error("project service not initialized");
 
-  //TODO - test this method
   return project.getVariables(deviceIds);
 };
 
@@ -409,7 +403,6 @@ module.exports.getVariable = (deviceId, variableID) => {
   if (!exists(projectFilePath))
     throw new Error("project service not initialized");
 
-  //TODO - test this method
   return project.getVariable(deviceId, variableID);
 };
 
@@ -422,7 +415,6 @@ module.exports.getCalcElements = (deviceIds = null) => {
   if (!exists(projectFilePath))
     throw new Error("project service not initialized");
 
-  //TODO - test this method
   return project.getCalcElements(deviceIds);
 };
 
@@ -436,7 +428,6 @@ module.exports.getCalcElement = (deviceId, calcElementID) => {
   if (!exists(projectFilePath))
     throw new Error("project service not initialized");
 
-  //TODO - test this method
   return project.getCalcElement(deviceId, calcElementID);
 };
 
@@ -449,7 +440,6 @@ module.exports.getAlerts = (deviceIds = null) => {
   if (!exists(projectFilePath))
     throw new Error("project service not initialized");
 
-  //TODO - test this method
   return project.getAlerts(deviceIds);
 };
 
@@ -463,7 +453,6 @@ module.exports.getAlert = (deviceId, alertID) => {
   if (!exists(projectFilePath))
     throw new Error("project service not initialized");
 
-  //TODO - test this method
   return project.getAlert(deviceId, alertID);
 };
 
@@ -476,7 +465,6 @@ module.exports.activateDevice = async (deviceId) => {
   if (!exists(projectFilePath))
     throw new Error("project service not initialized");
 
-  //TODO - test this method
   return project.activateDevice(deviceId);
 };
 
@@ -489,8 +477,17 @@ module.exports.deactivateDevice = async (deviceId) => {
   if (!exists(projectFilePath))
     throw new Error("project service not initialized");
 
-  //TODO - test this method
   return project.deactivateDevice(deviceId);
+};
+
+/**
+ * @description Method for getting last cycle duration of project. Returns null if project has not been initialized.
+ */
+module.exports.getLastCycleDuration = () => {
+  //Checking if project service is initialized
+  if (!exists(projectFilePath) || !exists(project)) return null;
+
+  return project.LastCycleDuration;
 };
 
 //TODO - add tests with project validation

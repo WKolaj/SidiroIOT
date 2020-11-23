@@ -5,6 +5,7 @@ const CPULoadVariable = require("../../classes/Element/Variable/InternalVariable
 const CPUTemperatureVariable = require("../../classes/Element/Variable/InternalVariable/CPUTemperatureVariable");
 const DiskUsageVariable = require("../../classes/Element/Variable/InternalVariable/DiskUsageVariable");
 const RAMUsageVariable = require("../../classes/Element/Variable/InternalVariable/RAMUsageVariable");
+const LastCycleDurationVariable = require("../../classes/Element/Variable/InternalVariable/LastCycleDurationVariable");
 
 const validateVariablesPayload = (variablesPayload, helpers) => {
   const { message } = helpers;
@@ -34,6 +35,11 @@ const validateVariablesPayload = (variablesPayload, helpers) => {
         break;
       case "DiskUsageVariable":
         validationMessage = DiskUsageVariable.validatePayload(variablePayload);
+        break;
+      case "LastCycleDurationVariable":
+        validationMessage = LastCycleDurationVariable.validatePayload(
+          variablePayload
+        );
         break;
       default:
         validationMessage = "variable type not recognized";
