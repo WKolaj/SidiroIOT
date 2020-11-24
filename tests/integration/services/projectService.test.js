@@ -183,6 +183,14 @@ describe("projectService", () => {
                   readAsSingle: false,
                   writeAsSingle: false,
                 },
+                connectableDeviceID1Variable4ID: {
+                  id: "connectableDeviceID1Variable4ID",
+                  name: "connectableDeviceID1Variable4Name",
+                  type: "DeviceConnectionVariable",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: false,
+                },
               },
               calcElements: {
                 connectableDeviceID1CalcElement1ID: {
@@ -322,6 +330,14 @@ describe("projectService", () => {
                   readAsSingle: false,
                   writeAsSingle: false,
                 },
+                connectableDeviceID2Variable4ID: {
+                  id: "connectableDeviceID2Variable4ID",
+                  name: "connectableDeviceID2Variable4Name",
+                  type: "DeviceConnectionVariable",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: false,
+                },
               },
               calcElements: {
                 connectableDeviceID2CalcElement1ID: {
@@ -460,6 +476,14 @@ describe("projectService", () => {
                   unitID: 1,
                   readAsSingle: false,
                   writeAsSingle: false,
+                },
+                connectableDeviceID3Variable4ID: {
+                  id: "connectableDeviceID3Variable4ID",
+                  name: "connectableDeviceID3Variable4Name",
+                  type: "DeviceConnectionVariable",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: false,
                 },
               },
               calcElements: {

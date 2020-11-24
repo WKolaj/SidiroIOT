@@ -221,6 +221,14 @@ describe("api/user", () => {
                   readAsSingle: false,
                   writeAsSingle: false,
                 },
+                connectableDeviceID1Variable4ID: {
+                  id: "connectableDeviceID1Variable4ID",
+                  name: "connectableDeviceID1Variable4Name",
+                  type: "DeviceConnectionVariable",
+                  sampleTime: 1,
+                  defaultValue: false,
+                  unit: "Fake",
+                },
               },
               calcElements: {
                 connectableDeviceID1CalcElement1ID: {
@@ -366,6 +374,14 @@ describe("api/user", () => {
                   readAsSingle: false,
                   writeAsSingle: false,
                 },
+                connectableDeviceID2Variable4ID: {
+                  id: "connectableDeviceID2Variable4ID",
+                  name: "connectableDeviceID2Variable4Name",
+                  type: "DeviceConnectionVariable",
+                  sampleTime: 1,
+                  defaultValue: false,
+                  unit: "Fake",
+                },
               },
               calcElements: {
                 connectableDeviceID2CalcElement1ID: {
@@ -510,6 +526,14 @@ describe("api/user", () => {
                   unitID: 1,
                   readAsSingle: false,
                   writeAsSingle: false,
+                },
+                connectableDeviceID3Variable4ID: {
+                  id: "connectableDeviceID3Variable4ID",
+                  name: "connectableDeviceID3Variable4Name",
+                  type: "DeviceConnectionVariable",
+                  sampleTime: 1,
+                  defaultValue: false,
+                  unit: "Fake",
                 },
               },
               calcElements: {
@@ -1247,6 +1271,14 @@ describe("api/user", () => {
                   readAsSingle: false,
                   writeAsSingle: false,
                 },
+                connectableDeviceID4Variable4ID: {
+                  id: "connectableDeviceID4Variable4ID",
+                  name: "connectableDeviceID4Variable4Name",
+                  type: "DeviceConnectionVariable",
+                  sampleTime: 1,
+                  unit: "Test",
+                  defaultValue: false,
+                },
               },
               calcElements: {
                 connectableDeviceID4CalcElement1ID: {
@@ -1392,6 +1424,14 @@ describe("api/user", () => {
                   readAsSingle: false,
                   writeAsSingle: false,
                 },
+                connectableDeviceID5Variable4ID: {
+                  id: "connectableDeviceID5Variable4ID",
+                  name: "connectableDeviceID5Variable4Name",
+                  type: "DeviceConnectionVariable",
+                  sampleTime: 1,
+                  unit: "Test",
+                  defaultValue: false,
+                },
               },
               calcElements: {
                 connectableDeviceID5CalcElement1ID: {
@@ -1536,6 +1576,14 @@ describe("api/user", () => {
                   unitID: 1,
                   readAsSingle: false,
                   writeAsSingle: false,
+                },
+                connectableDeviceID6Variable4ID: {
+                  id: "connectableDeviceID6Variable4ID",
+                  name: "connectableDeviceID6Variable4Name",
+                  type: "DeviceConnectionVariable",
+                  sampleTime: 1,
+                  unit: "Test",
+                  defaultValue: false,
                 },
               },
               calcElements: {
