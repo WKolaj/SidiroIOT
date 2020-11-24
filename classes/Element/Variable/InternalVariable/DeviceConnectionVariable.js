@@ -55,5 +55,3 @@ class DeviceConnectionVariable extends InternalVariable {
 }
 
 module.exports = DeviceConnectionVariable;
-
-//TODO - test this variable

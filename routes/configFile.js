@@ -54,8 +54,6 @@ router.post("/", [hasUser, isAdmin], async (req, res) => {
       //removing tmp file
       await removeFileIfExistsAsync(tmpFilePath);
 
-      //TODO - add test for project validation!
-
       //Validating project content
       let validationResult = projectService.validateProjectPayload(
         projectContent
