@@ -474,3 +474,11 @@ module.exports.arraysEqual = function (a, b) {
   }
   return true;
 };
+
+/**
+ * @description Method to check whether array contains duplicates
+ * @param {Array} array array to check whether there are duplicates
+ */
+module.exports.hasDuplicates = function (array) {
+  return new Set(array).size !== array.length;
+};

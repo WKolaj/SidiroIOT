@@ -1810,6 +1810,36 @@ describe("projectService", () => {
       expect(result).toEqual(false);
     });
 
+    it("should return false if project file contains the same ids in devices", async () => {
+      let internalDevice2 =
+        initialProjectFileContent.data.internalDevices.internalDeviceID2;
+      delete initialProjectFileContent.data.internalDevices.internalDeviceID2;
+
+      internalDevice2.id = "connectableDeviceID2";
+      initialProjectFileContent.data.internalDevices.connectableDeviceID2 = internalDevice2;
+
+      let result = await exec();
+
+      expect(result).toEqual(false);
+    });
+
+    it("should return false if project file contains the same ids in devices and elements", async () => {
+      //Overriding type of one of variable
+      let internalDevice2Variable2 =
+        initialProjectFileContent.data.internalDevices.internalDeviceID2
+          .variables.internalDeviceID2Variable2ID;
+
+      delete initialProjectFileContent.data.internalDevices.internalDeviceID2
+        .variables.internalDeviceID2Variable2ID;
+
+      internalDevice2Variable2.id = "connectableDeviceID2";
+      initialProjectFileContent.data.internalDevices.internalDeviceID2.variables.connectableDeviceID2 = internalDevice2Variable2;
+
+      let result = await exec();
+
+      expect(result).toEqual(false);
+    });
+
     it("should return false if project file is not a valid JSON", async () => {
       createInitialProjectFile = false;
       //lack of ""

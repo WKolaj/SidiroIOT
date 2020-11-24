@@ -7,7 +7,10 @@ const MBDevice = require("../Device/ConnectableDevice/MBDevice");
 const S7Device = require("../Device/ConnectableDevice/S7Device");
 const MBGatewayDevice = require("../Device/ConnectableDevice/MBGatewayDevice");
 const { exists } = require("../../utilities/utilities");
-const { joiSchema } = require("../../models/Project/Project");
+const {
+  joiSchema,
+  checkIfProjectIdsAreUniq,
+} = require("../../models/Project/Project");
 
 class Project {
   //#region ========= CONSTRUCTOR =========
@@ -40,7 +43,13 @@ class Project {
   static validatePayload(payload) {
     let result = joiSchema.validate(payload);
     if (result.error) return result.error.details[0].message;
-    else return null;
+
+    //Checking wether project payload contains duplicated ids
+    let allIdsUniq = checkIfProjectIdsAreUniq(payload);
+    if (!allIdsUniq) return "All ids inside project payload should be unique!";
+
+    //Return null - payload is valid
+    return null;
   }
 
   //#endregion  ========= PUBLIC STATIC METHODS =========

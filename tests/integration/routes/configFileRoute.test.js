@@ -2352,6 +2352,99 @@ describe("api/user", () => {
       //#endregion CHECKING_PROJECT_CONTENT
     });
 
+    it("should return 400 and leave project as it is - if project content is invalid - same ids for multiple devices", async () => {
+      let internalDevice4 =
+        postProjectFileContent.data.internalDevices.internalDeviceID4;
+      delete postProjectFileContent.data.internalDevices.internalDeviceID4;
+
+      internalDevice4.id = "connectableDeviceID4";
+      postProjectFileContent.data.internalDevices.connectableDeviceID4 = internalDevice4;
+
+      let response = await exec();
+
+      //#region CHECKING_RESPONSE
+
+      expect(response).toBeDefined();
+      expect(response.status).toEqual(400);
+      expect(response.text).toEqual(
+        `Invalid project data: All ids inside project payload should be unique!`
+      );
+
+      //#endregion CHECKING_RESPONSE
+
+      //#region CHECKING_PROJECT_FILE_CONTENT
+
+      let fileContent = JSON.parse(await readFileAsync(projectFilePath));
+
+      expect(fileContent).toEqual(projectFileContent);
+
+      //#endregion CHECKING_PROJECT_FILE_CONTENT
+
+      //#region CHECKING_NETPLAN_INTERFACES
+
+      //Invoking only first time
+      expect(ipConfigMockServer.OnPostMockFn).toHaveBeenCalledTimes(1);
+
+      //#endregion CHECKING_NETPLAN_INTERFACES
+
+      //#region CHECKING_PROJECT_CONTENT
+
+      checkProjectWithPayload(projectFileContent);
+
+      //Disconnect should not have been invoked
+      expect(deactiveMockFunc).not.toHaveBeenCalled();
+
+      //#endregion CHECKING_PROJECT_CONTENT
+    });
+
+    it("should return 400 and leave project as it is - if project content is invalid - same ids for devices and variables", async () => {
+      let internalDevice4Variable2 =
+        postProjectFileContent.data.internalDevices.internalDeviceID4.variables
+          .internalDeviceID4Variable2ID;
+
+      delete postProjectFileContent.data.internalDevices.internalDeviceID4
+        .variables.internalDeviceID4Variable2ID;
+
+      internalDevice4Variable2.id = "connectableDeviceID4";
+      postProjectFileContent.data.internalDevices.internalDeviceID4.variables.connectableDeviceID4 = internalDevice4Variable2;
+
+      let response = await exec();
+
+      //#region CHECKING_RESPONSE
+
+      expect(response).toBeDefined();
+      expect(response.status).toEqual(400);
+      expect(response.text).toEqual(
+        `Invalid project data: All ids inside project payload should be unique!`
+      );
+
+      //#endregion CHECKING_RESPONSE
+
+      //#region CHECKING_PROJECT_FILE_CONTENT
+
+      let fileContent = JSON.parse(await readFileAsync(projectFilePath));
+
+      expect(fileContent).toEqual(projectFileContent);
+
+      //#endregion CHECKING_PROJECT_FILE_CONTENT
+
+      //#region CHECKING_NETPLAN_INTERFACES
+
+      //Invoking only first time
+      expect(ipConfigMockServer.OnPostMockFn).toHaveBeenCalledTimes(1);
+
+      //#endregion CHECKING_NETPLAN_INTERFACES
+
+      //#region CHECKING_PROJECT_CONTENT
+
+      checkProjectWithPayload(projectFileContent);
+
+      //Disconnect should not have been invoked
+      expect(deactiveMockFunc).not.toHaveBeenCalled();
+
+      //#endregion CHECKING_PROJECT_CONTENT
+    });
+
     it("should return 400 and leave project as it is - if project content is invalid - ipConfig is null", async () => {
       postProjectFileContent.ipConfig = null;
 

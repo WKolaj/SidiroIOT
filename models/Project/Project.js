@@ -3,6 +3,7 @@ const MBDevice = require("../../classes/Device/ConnectableDevice/MBDevice");
 const MBGatewayDevice = require("../../classes/Device/ConnectableDevice/MBGatewayDevice");
 const S7Device = require("../../classes/Device/ConnectableDevice/S7Device");
 const InternalDevice = require("../../classes/Device/InternalDevice/InternalDevice");
+const { hasDuplicates } = require("../../utilities/utilities");
 
 const validateConnectableDevicesPayload = (devicesPayload, helpers) => {
   const { message } = helpers;
@@ -100,6 +101,59 @@ const validateAgentDevicesPayload = (devicesPayload, helpers) => {
   return devicesPayload;
 };
 
+/**
+ * @description Method for checking whether there all project ids (Devices and elements) are uniq. Returns true if ids are uniq and false if uniq is true
+ * @param {JSON} devicesPayload Project payload
+ */
+const checkIfProjectIdsAreUniq = (devicesPayload) => {
+  //Creating an array with all ids
+
+  let allIds = [];
+
+  for (let connectableDevice of Object.values(
+    devicesPayload.connectableDevices
+  )) {
+    allIds.push(connectableDevice.id);
+
+    for (let variable of Object.values(connectableDevice.variables))
+      allIds.push(variable.id);
+
+    for (let calcElement of Object.values(connectableDevice.calcElements))
+      allIds.push(calcElement.id);
+
+    for (let agent of Object.values(connectableDevice.alerts))
+      allIds.push(agent.id);
+  }
+
+  for (let internalDevice of Object.values(devicesPayload.internalDevices)) {
+    allIds.push(internalDevice.id);
+
+    for (let variable of Object.values(internalDevice.variables))
+      allIds.push(variable.id);
+
+    for (let calcElement of Object.values(internalDevice.calcElements))
+      allIds.push(calcElement.id);
+
+    for (let agent of Object.values(internalDevice.alerts))
+      allIds.push(agent.id);
+  }
+
+  for (let agentDevice of Object.values(devicesPayload.agentDevices)) {
+    allIds.push(agentDevice.id);
+
+    for (let variable of Object.values(agentDevice.variables))
+      allIds.push(variable.id);
+
+    for (let calcElement of Object.values(agentDevice.calcElements))
+      allIds.push(calcElement.id);
+
+    for (let agent of Object.values(agentDevice.alerts)) allIds.push(agent.id);
+  }
+
+  //Returning wether array contains duplicates
+  return !hasDuplicates(allIds);
+};
+
 const schemaContent = {
   connectableDevices: Joi.any()
     .custom(validateConnectableDevicesPayload, "custom validation")
@@ -117,5 +171,6 @@ const joiSchema = Joi.object(schemaContent);
 module.exports.validateConnectableDevicesPayload = validateConnectableDevicesPayload;
 module.exports.validateInternalDevicesPayload = validateInternalDevicesPayload;
 module.exports.validateAgentDevicesPayload = validateAgentDevicesPayload;
+module.exports.checkIfProjectIdsAreUniq = checkIfProjectIdsAreUniq;
 module.exports.schemaContent = schemaContent;
 module.exports.joiSchema = joiSchema;
