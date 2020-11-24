@@ -824,7 +824,7 @@ describe("Device", () => {
       return new Device(project);
     };
 
-    it("should create new ConnectableDevice and assign project to Device", () => {
+    it("should create new Device and assign project to Device", () => {
       let result = exec();
 
       expect(result instanceof Device).toEqual(true);

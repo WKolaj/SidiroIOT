@@ -19,6 +19,7 @@ const Variable = require("../../classes/Element/Variable/Variable");
 const Alert = require("../../classes/Element/Alerts/Alert");
 const MBVariable = require("../../classes/Element/Variable/ConnectableVariable/MBVariable/MBVariable");
 const MBRequest = require("../../classes/Request/MBRequest/MBRequest");
+const InternalDevice = require("../../classes/Device/InternalDevice/InternalDevice");
 
 const testUselessUserID = "uselessUserID";
 const testAdminID = "adminID";
@@ -595,6 +596,49 @@ module.exports.createFakeDevice = (
   isActive
 ) => {
   let device = new Device(project);
+  device._id = id;
+  device._type = type;
+  device._name = name;
+
+  device._variables = {};
+  for (let variable of variables) {
+    variable._project = project;
+    variable._device = device;
+    device._variables[variable.ID] = variable;
+  }
+
+  device._calcElements = {};
+  for (let calcElement of calcElements) {
+    device._calcElements[calcElement.ID] = calcElement;
+
+    calcElement._project = project;
+    calcElement._device = device;
+  }
+
+  device._alerts = {};
+  for (let alert of alerts) {
+    device._alerts[alert.ID] = alert;
+
+    alert._project = project;
+    alert._device = device;
+  }
+
+  device._isActive = isActive;
+
+  return device;
+};
+
+module.exports.createFakeInternalDevice = (
+  project,
+  id,
+  type,
+  name,
+  calcElements,
+  alerts,
+  variables,
+  isActive
+) => {
+  let device = new InternalDevice(project);
   device._id = id;
   device._type = type;
   device._name = name;

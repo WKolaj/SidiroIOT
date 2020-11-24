@@ -62,6 +62,7 @@ const schemaContent = {
   variables: Joi.any()
     .custom(validateVariablesPayload, "custom validation")
     .required(),
+  type: Joi.string().valid("InternalDevice").required(),
 };
 
 const joiSchema = Joi.object(schemaContent);
