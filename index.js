@@ -1,28 +1,28 @@
-const { result } = require("lodash");
+const FileStorage = require("./classes/Storage/FileStorage");
+const { snooze } = require("./utilities/utilities");
 
-const joiSchema = require("./models/Device/InternalDevice").joiSchema;
+let storage = new FileStorage();
 
-let payload = {
-  id: "internalDevice",
-  name: "internalDevice",
-  type: "InternalDevice",
-  variables: {
-    "internal-current-L1": {
-      id: "internal-current-L1",
-      name: "PAC3200-CURRENT-L1",
-      type: "AssociatedVariable",
-      unit: "A",
-      sampleTime: 1,
-      defaultValue: 0,
-      associatedElementID: "pac3200-1-current-L1",
-      associatedDeviceID: "pac3200-1",
-    },
-  },
-  calcElements: {},
-  alerts: {},
-  isActive: true,
+let exec = async () => {
+  try {
+    await storage.init({
+      bufferLength: 10,
+      dirPath: `/home/wk/Documents/Projects/SidiroIOT/__testDir/fileStorage`,
+    });
+
+    // for (let i = 0; i < 20; i++) {
+    //   let payload = { data: i };
+    //   await storage.createData(payload);
+    // }
+
+    for (let id of await storage.getAllIDs()) {
+      console.log(await storage.getData(id));
+    }
+
+    console.log("done");
+  } catch (err) {
+    console.log(err);
+  }
 };
 
-let { error } = joiSchema.validate(payload);
-
-if (error) console.log(error.details[0].message);
+exec();

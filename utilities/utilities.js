@@ -482,3 +482,13 @@ module.exports.arraysEqual = function (a, b) {
 module.exports.hasDuplicates = function (array) {
   return new Set(array).size !== array.length;
 };
+
+/**
+ * @description Method for removing extension form file name
+ * @param {String} filename file name
+ */
+module.exports.removeExtensionFromFileName = function (filename) {
+  var lastDotPosition = filename.lastIndexOf(".");
+  if (lastDotPosition === -1) return filename;
+  else return filename.substr(0, lastDotPosition);
+};
