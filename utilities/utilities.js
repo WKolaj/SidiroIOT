@@ -492,3 +492,11 @@ module.exports.removeExtensionFromFileName = function (filename) {
   if (lastDotPosition === -1) return filename;
   else return filename.substr(0, lastDotPosition);
 };
+
+/**
+ * @description Method for cloning JSON objects
+ * @param {JSON} objectToClone object to clone
+ */
+module.exports.cloneObject = function (objectToClone) {
+  return JSON.parse(JSON.stringify(objectToClone));
+};

@@ -1,25 +1,26 @@
-const FileStorage = require("./classes/Storage/FileStorage");
-const { snooze } = require("./utilities/utilities");
+const DataClipboard = require("./classes/Clipboard/DataClipboard");
 
-let storage = new FileStorage();
+let clipboard = new DataClipboard();
 
 let exec = async () => {
   try {
-    await storage.init({
-      bufferLength: 10,
-      dirPath: `/home/wk/Documents/Projects/SidiroIOT/__testDir/fileStorage`,
-    });
+    clipboard.init();
 
-    // for (let i = 0; i < 20; i++) {
-    //   let payload = { data: i };
-    //   await storage.createData(payload);
-    // }
+    for (let i = 100; i < 110; i++) {
+      for (let j = 0; j < 10; j++) {
+        let elementId = "testElement" + j;
+        let elementValue = j * i + 123;
+        let tickId = i;
 
-    for (let id of await storage.getAllIDs()) {
-      console.log(await storage.getData(id));
+        clipboard.addData(tickId, elementId, elementValue);
+      }
     }
 
     console.log("done");
+
+    console.log(clipboard.getAllData());
+    clipboard.clearAllData();
+    console.log(clipboard.getAllData());
   } catch (err) {
     console.log(err);
   }
