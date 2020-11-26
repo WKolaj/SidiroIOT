@@ -1,7 +1,7 @@
 const Clipboard = require("./Clipboard");
 const { exists } = require("../../utilities/utilities");
 
-class DataClipboard extends Clipboard {
+class EventClipboard extends Clipboard {
   //#region ========= CONSTRUCTOR =========
 
   constructor() {
@@ -19,11 +19,11 @@ class DataClipboard extends Clipboard {
    * @param {Object} value value to set
    */
   addData(tickId, elementId, value) {
-    if (exists(this._data[tickId])) {
-      this._data[tickId] = { ...this._data[tickId], [elementId]: value };
-    } else {
-      this._data[tickId] = { [elementId]: value };
-    }
+    this._data.push({
+      tickId: tickId,
+      elementId: elementId,
+      value: value,
+    });
   }
 
   //#endregion ========= OVERRIDE PUBLIC METHODS =========
@@ -34,10 +34,10 @@ class DataClipboard extends Clipboard {
    * @description Method for getting default data of clipboard - set while clearing data.
    */
   _getDefaultData() {
-    return {};
+    return [];
   }
 
   //#endregion ========= POVERRIDE RIVATE METHODS =========
 }
 
-module.exports = DataClipboard;
+module.exports = EventClipboard;
