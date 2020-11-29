@@ -292,7 +292,7 @@ class AgentDevice extends Device {
     try {
       newBoardedState = await this._checkIfBoarded();
     } catch (err) {
-      logger.err(err, err.message);
+      logger.error(err.message, err);
     }
 
     this._boarded = newBoardedState;
@@ -358,7 +358,7 @@ class AgentDevice extends Device {
       this._dataClipboard.clearAllData();
       return true;
     } catch (err) {
-      logger.error(err, err.message);
+      logger.error(err.message, err);
       return false;
     }
   }
@@ -380,7 +380,7 @@ class AgentDevice extends Device {
       this._dataClipboard.clearAllData();
       return true;
     } catch (err) {
-      logger.warn(err, err.message);
+      logger.error(err.message, err);
       //If data not send successfully - write it to clipboard storage and do not proceed
       await this._tryMovingDataFromClipboardToStorage();
       return false;
@@ -442,7 +442,7 @@ class AgentDevice extends Device {
       await this._eventStorage.createData(eventToSave);
       return true;
     } catch (err2) {
-      logger.error(err2, err2.message);
+      logger.error(err2.message, err2);
       return false;
     }
   }
@@ -468,7 +468,7 @@ class AgentDevice extends Device {
         //Sending event
         await this._sendEvent(tickId, elementId, elementValue);
       } catch (err) {
-        logger.error(err, err.message);
+        logger.error(err.message, err);
 
         //Saving event into storage
         await this._trySavingEventToStorage(eventToSend);
@@ -515,7 +515,7 @@ class AgentDevice extends Device {
           await this._eventStorage.deleteData(fileId);
         }
       } catch (err) {
-        logger.error(err, err.message);
+        logger.error(err.message, err);
         sendingAtLeastOneFileFails = true;
       }
     }

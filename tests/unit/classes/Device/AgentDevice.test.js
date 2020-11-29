@@ -3732,4 +3732,532 @@ describe("AgentDevice", () => {
       });
     });
   });
+
+  describe("_refreshBoardedState", () => {
+    let project;
+    let payload;
+    let device;
+    let boardedInitialState;
+    let checkIfBoardedMockFunc;
+    let checkIfBoardedMockFuncResult;
+    let logActionMock;
+
+    beforeEach(async () => {
+      await createDirIfNotExists(AgentDirPath);
+      await clearDirectoryAsync(AgentDirPath);
+
+      project = {
+        AgentDirPath: AgentDirPath,
+        getElement: () => null,
+      };
+
+      payload = {
+        id: "deviceID",
+        name: "deviceName",
+        type: "AgentDevice",
+        variables: {},
+        calcElements: {},
+        alerts: {},
+        isActive: true,
+        sendDataFileInterval: 10,
+        sendEventFileInterval: 5,
+        dataStorageSize: 20,
+        eventStorageSize: 30,
+        numberOfDataFilesToSend: 3,
+        numberOfEventFilesToSend: 6,
+        dataToSendConfig: {},
+        eventsToSendConfig: {},
+      };
+
+      checkIfBoardedMockFuncResult = true;
+      checkIfBoardedMockFunc = jest.fn(async () => {
+        await snooze(10);
+        return checkIfBoardedMockFuncResult;
+      });
+      boardedInitialState = false;
+
+      //Overwriting logger action method
+      logActionMock = jest.fn();
+      logger.error = logActionMock;
+    });
+
+    afterEach(async () => {
+      await createDirIfNotExists(AgentDirPath);
+      await clearDirectoryAsync(AgentDirPath);
+    });
+
+    let exec = async () => {
+      device = new AgentDevice(project);
+
+      await device.init(payload);
+
+      device._checkIfBoarded = checkIfBoardedMockFunc;
+      device._boarded = boardedInitialState;
+
+      return device._refreshBoardedState();
+    };
+
+    it("should refresh Boarded state based on result of checkIfBoardedMockFunc result - if checkIfBoardedMockFunc returns true", async () => {
+      checkIfBoardedMockFuncResult = true;
+
+      await exec();
+
+      expect(device.Boarded).toEqual(true);
+    });
+
+    it("should refresh Boarded state based on result of checkIfBoardedMockFunc result", async () => {
+      checkIfBoardedMockFuncResult = false;
+
+      await exec();
+
+      expect(device.Boarded).toEqual(false);
+    });
+
+    it("should refresh Boarded state based on result of checkIfBoardedMockFunc result - if initialBoardedState is true and now it is true", async () => {
+      boardedInitialState = true;
+      checkIfBoardedMockFuncResult = true;
+
+      await exec();
+
+      expect(device.Boarded).toEqual(true);
+    });
+
+    it("should refresh Boarded state based on result of checkIfBoardedMockFunc result - if initialBoardedState is true and now it is false", async () => {
+      boardedInitialState = true;
+      checkIfBoardedMockFuncResult = false;
+
+      await exec();
+
+      expect(device.Boarded).toEqual(false);
+    });
+
+    it("should call logger.error and set boareded as false but not throw - if checkIfBoarded throws", async () => {
+      boardedInitialState = true;
+
+      checkIfBoardedMockFunc = async () => {
+        throw new Error("testError");
+      };
+
+      await exec();
+
+      expect(device.Boarded).toEqual(false);
+
+      expect(logActionMock).toHaveBeenCalledTimes(1);
+
+      expect(logActionMock.mock.calls[0][0]).toEqual("testError");
+    });
+  });
+
+  describe("_checkIfShouldBoard", () => {
+    let project;
+    let payload;
+    let device;
+    let boardedInitialState;
+    let tryBoardOnSendData;
+    let tryBoardOnSendEvent;
+    let sendDataInterval;
+    let sendEventInterval;
+    let tickId;
+
+    beforeEach(async () => {
+      await createDirIfNotExists(AgentDirPath);
+      await clearDirectoryAsync(AgentDirPath);
+
+      project = {
+        AgentDirPath: AgentDirPath,
+        getElement: () => null,
+      };
+
+      payload = {
+        id: "deviceID",
+        name: "deviceName",
+        type: "AgentDevice",
+        variables: {},
+        calcElements: {},
+        alerts: {},
+        isActive: true,
+        sendDataFileInterval: 10,
+        sendEventFileInterval: 5,
+        dataStorageSize: 20,
+        eventStorageSize: 30,
+        numberOfDataFilesToSend: 3,
+        numberOfEventFilesToSend: 6,
+        dataToSendConfig: {},
+        eventsToSendConfig: {},
+      };
+
+      checkIfBoardedMockFuncResult = true;
+      checkIfBoardedMockFunc = jest.fn(async () => {
+        await snooze(10);
+        return checkIfBoardedMockFuncResult;
+      });
+      boardedInitialState = false;
+
+      sendDataInterval = 15;
+      sendEventInterval = 15;
+
+      tryBoardOnSendData = true;
+      tryBoardOnSendEvent = true;
+
+      tickId = 1000;
+    });
+
+    afterEach(async () => {
+      await createDirIfNotExists(AgentDirPath);
+      await clearDirectoryAsync(AgentDirPath);
+    });
+
+    let exec = async () => {
+      payload.sendDataFileInterval = sendDataInterval;
+      payload.sendEventFileInterval = sendEventInterval;
+
+      device = new AgentDevice(project);
+
+      await device.init(payload);
+
+      device._boarded = boardedInitialState;
+      device._tryBoardOnSendData = tryBoardOnSendData;
+      device._tryBoardOnSendEvent = tryBoardOnSendEvent;
+
+      return device._checkIfShouldBoard(tickId);
+    };
+
+    it("should return true - if device is not boarded, sendInterval fits tickId and tryBoardOnSendData is true - boarding on sending event is disabled", async () => {
+      sendDataInterval = 10;
+      sendEventInterval = 123;
+
+      tryBoardOnSendData = true;
+      tryBoardOnSendEvent = false;
+
+      tickId = 1000;
+
+      let result = await exec();
+
+      expect(result).toEqual(true);
+    });
+
+    it("should return false - if device is not boarded, sendInterval doesn't fit tickId and tryBoardOnSendData is true - boarding on sending event is disabled", async () => {
+      sendDataInterval = 11;
+      sendEventInterval = 123;
+
+      tryBoardOnSendData = true;
+      tryBoardOnSendEvent = false;
+
+      tickId = 1000;
+
+      let result = await exec();
+
+      expect(result).toEqual(false);
+    });
+
+    it("should return false - if device is not boarded, sendInterval fits tickId and tryBoardOnSendData is false - boarding on sending event is disabled", async () => {
+      sendDataInterval = 10;
+      sendEventInterval = 123;
+
+      tryBoardOnSendData = false;
+      tryBoardOnSendEvent = false;
+
+      tickId = 1000;
+
+      let result = await exec();
+
+      expect(result).toEqual(false);
+    });
+
+    it("should return true - if device is not boarded, sendInterval fits tickId and tryBoardOnSendEvent is true - boarding on sending data is disabled", async () => {
+      sendDataInterval = 123;
+      sendEventInterval = 10;
+
+      tryBoardOnSendData = false;
+      tryBoardOnSendEvent = true;
+
+      tickId = 1000;
+
+      let result = await exec();
+
+      expect(result).toEqual(true);
+    });
+
+    it("should return false - if device is not boarded, sendInterval doesn't fit tickId and tryBoardOnSendEvent is true - boarding on sending data is disabled", async () => {
+      sendDataInterval = 123;
+      sendEventInterval = 11;
+
+      tryBoardOnSendData = false;
+      tryBoardOnSendEvent = true;
+
+      tickId = 1000;
+
+      let result = await exec();
+
+      expect(result).toEqual(false);
+    });
+
+    it("should return false - if device is not boarded, sendInterval fits tickId and tryBoardOnSendEvent is false - boarding on sending data is disabled", async () => {
+      sendDataInterval = 123;
+      sendEventInterval = 10;
+
+      tryBoardOnSendData = false;
+      tryBoardOnSendEvent = false;
+
+      tickId = 1000;
+
+      let result = await exec();
+
+      expect(result).toEqual(false);
+    });
+
+    it("should return true - if device is not boarded, sendInterval fits tickId for event and data and tryBoardOnSendEvent and tryBoardOnSendData is true", async () => {
+      sendDataInterval = 10;
+      sendEventInterval = 10;
+
+      tryBoardOnSendData = true;
+      tryBoardOnSendEvent = true;
+
+      tickId = 1000;
+
+      let result = await exec();
+
+      expect(result).toEqual(true);
+    });
+
+    it("should return false - if device is already boarded", async () => {
+      boardedInitialState = true;
+
+      sendDataInterval = 10;
+      sendEventInterval = 10;
+
+      tryBoardOnSendData = true;
+      tryBoardOnSendEvent = true;
+
+      tickId = 1000;
+
+      let result = await exec();
+
+      expect(result).toEqual(false);
+    });
+  });
+
+  describe("_tryBoard", () => {
+    let project;
+    let payload;
+    let device;
+    let OnBoardMockFunc;
+    let logActionMock;
+
+    beforeEach(async () => {
+      await createDirIfNotExists(AgentDirPath);
+      await clearDirectoryAsync(AgentDirPath);
+
+      project = {
+        AgentDirPath: AgentDirPath,
+        getElement: () => null,
+      };
+
+      payload = {
+        id: "deviceID",
+        name: "deviceName",
+        type: "AgentDevice",
+        variables: {},
+        calcElements: {},
+        alerts: {},
+        isActive: true,
+        sendDataFileInterval: 10,
+        sendEventFileInterval: 5,
+        dataStorageSize: 20,
+        eventStorageSize: 30,
+        numberOfDataFilesToSend: 3,
+        numberOfEventFilesToSend: 6,
+        dataToSendConfig: {},
+        eventsToSendConfig: {},
+      };
+
+      OnBoardMockFunc = jest.fn();
+
+      //Overwriting logger action method
+      logActionMock = jest.fn();
+      logger.error = logActionMock;
+    });
+
+    afterEach(async () => {
+      await createDirIfNotExists(AgentDirPath);
+      await clearDirectoryAsync(AgentDirPath);
+    });
+
+    let exec = async () => {
+      device = new AgentDevice(project);
+
+      device.OnBoard = OnBoardMockFunc;
+
+      await device.init(payload);
+
+      return device._tryBoard();
+    };
+
+    it("should invoke OnBoard", async () => {
+      await exec();
+
+      expect(OnBoardMockFunc).toHaveBeenCalledTimes(1);
+    });
+
+    it("should not throw and call logger - if OnBoard throw", async () => {
+      OnBoardMockFunc = () => {
+        throw new Error("testError");
+      };
+
+      await exec();
+
+      expect(logActionMock).toHaveBeenCalledTimes(1);
+      expect(logActionMock.mock.calls[0][0]).toEqual("testError");
+    });
+  });
+
+  describe("_checkIfDataShouldBeSent", () => {
+    let project;
+    let payload;
+    let device;
+    let sendDataInterval;
+    let tickId;
+
+    beforeEach(async () => {
+      await createDirIfNotExists(AgentDirPath);
+      await clearDirectoryAsync(AgentDirPath);
+
+      project = {
+        AgentDirPath: AgentDirPath,
+        getElement: () => null,
+      };
+
+      payload = {
+        id: "deviceID",
+        name: "deviceName",
+        type: "AgentDevice",
+        variables: {},
+        calcElements: {},
+        alerts: {},
+        isActive: true,
+        sendDataFileInterval: 10,
+        sendEventFileInterval: 5,
+        dataStorageSize: 20,
+        eventStorageSize: 30,
+        numberOfDataFilesToSend: 3,
+        numberOfEventFilesToSend: 6,
+        dataToSendConfig: {},
+        eventsToSendConfig: {},
+      };
+
+      sendDataInterval = 15;
+
+      tickId = 1000;
+    });
+
+    afterEach(async () => {
+      await createDirIfNotExists(AgentDirPath);
+      await clearDirectoryAsync(AgentDirPath);
+    });
+
+    let exec = async () => {
+      payload.sendDataFileInterval = sendDataInterval;
+
+      device = new AgentDevice(project);
+
+      await device.init(payload);
+
+      return device._checkIfDataShouldBeSent(tickId);
+    };
+
+    it("should return true - if tickId fits sendDataInterval", async () => {
+      sendDataInterval = 10;
+
+      tickId = 1000;
+
+      let result = await exec();
+
+      expect(result).toEqual(true);
+    });
+
+    it("should return false - if tickId doesn't fit sendDataInterval", async () => {
+      sendDataInterval = 10;
+
+      tickId = 1001;
+
+      let result = await exec();
+
+      expect(result).toEqual(false);
+    });
+  });
+
+  describe("_checkIfEventsShouldBeSent", () => {
+    let project;
+    let payload;
+    let device;
+    let sendEventInterval;
+    let tickId;
+
+    beforeEach(async () => {
+      await createDirIfNotExists(AgentDirPath);
+      await clearDirectoryAsync(AgentDirPath);
+
+      project = {
+        AgentDirPath: AgentDirPath,
+        getElement: () => null,
+      };
+
+      payload = {
+        id: "deviceID",
+        name: "deviceName",
+        type: "AgentDevice",
+        variables: {},
+        calcElements: {},
+        alerts: {},
+        isActive: true,
+        sendDataFileInterval: 10,
+        sendEventFileInterval: 5,
+        dataStorageSize: 20,
+        eventStorageSize: 30,
+        numberOfDataFilesToSend: 3,
+        numberOfEventFilesToSend: 6,
+        dataToSendConfig: {},
+        eventsToSendConfig: {},
+      };
+
+      sendEventInterval = 15;
+
+      tickId = 1000;
+    });
+
+    afterEach(async () => {
+      await createDirIfNotExists(AgentDirPath);
+      await clearDirectoryAsync(AgentDirPath);
+    });
+
+    let exec = async () => {
+      payload.sendEventFileInterval = sendEventInterval;
+
+      device = new AgentDevice(project);
+
+      await device.init(payload);
+
+      return device._checkIfEventsShouldBeSent(tickId);
+    };
+
+    it("should return true - if tickId fits sendEventInterval", async () => {
+      sendEventInterval = 10;
+
+      tickId = 1000;
+
+      let result = await exec();
+
+      expect(result).toEqual(true);
+    });
+
+    it("should return false - if tickId doesn't fit sendEventInterval", async () => {
+      sendEventInterval = 10;
+
+      tickId = 1001;
+
+      let result = await exec();
+
+      expect(result).toEqual(false);
+    });
+  });
 });
