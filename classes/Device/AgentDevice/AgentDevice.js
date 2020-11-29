@@ -160,7 +160,10 @@ class AgentDevice extends Device {
    */
   _getAndSaveDataToClipboard(tickNumber) {
     for (let elementId of Object.keys(this.DataToSendConfig)) {
-      _getAndSaveElementsDataToClipboard(elementId, tickNumber);
+      this._getAndSaveElementsDataToClipboardIfFitsSendingInterval(
+        elementId,
+        tickNumber
+      );
     }
   }
 
@@ -169,10 +172,16 @@ class AgentDevice extends Device {
    * @param {String} elementId id of element
    * @param {String} tickNumber tick number
    */
-  _getAndSaveElementsDataToClipboard(elementId, tickNumber) {
+  _getAndSaveElementsDataToClipboardIfFitsSendingInterval(
+    elementId,
+    tickNumber
+  ) {
+    let elementConfig = this.DataToSendConfig[elementId];
+    if (!exists(elementConfig)) return;
+
     //Getting deviceId and sendingInterval from element's config
-    let deviceId = this.DataToSendConfig[elementId].deviceId;
-    let sendingInterval = this.DataToSendConfig[elementId].sendingInterval;
+    let deviceId = elementConfig.deviceId;
+    let sendingInterval = elementConfig.sendingInterval;
 
     //Getting element from project
     let element = this._project.getElement(deviceId, elementId);
@@ -214,7 +223,10 @@ class AgentDevice extends Device {
    */
   _getAndSaveEventsToClipboard(tickNumber) {
     for (let elementId of Object.keys(this.EventsToSendConfig)) {
-      _getAndSaveElementsEventToClipboard(elementId, tickNumber);
+      this._getAndSaveElementsEventToClipboardIfFitsSendingInterval(
+        elementId,
+        tickNumber
+      );
     }
   }
 
@@ -223,10 +235,16 @@ class AgentDevice extends Device {
    * @param {String} elementId id of element
    * @param {String} tickNumber tick number
    */
-  _getAndSaveElementsEventToClipboard(elementId, tickNumber) {
+  _getAndSaveElementsEventToClipboardIfFitsSendingInterval(
+    elementId,
+    tickNumber
+  ) {
+    let elementConfig = this.EventsToSendConfig[elementId];
+    if (!exists(elementConfig)) return;
+
     //Getting deviceId and sendingInterval from element's config
-    let deviceId = this.EventsToSendConfig[elementId].deviceId;
-    let sendingInterval = this.EventsToSendConfig[elementId].sendingInterval;
+    let deviceId = elementConfig.deviceId;
+    let sendingInterval = elementConfig.sendingInterval;
 
     //Getting element from project
     let element = this._project.getElement(deviceId, elementId);
@@ -250,7 +268,7 @@ class AgentDevice extends Device {
       return;
 
     //Value cannot be null - if value is null it should not be added to cliboard but should be save in lastEventValues
-    if (value !== null) {
+    if (elementsValue !== null) {
       //Adding data to clipboard
       this._eventClipboard.addData(
         elementsLastValueTick,
@@ -330,7 +348,7 @@ class AgentDevice extends Device {
   /**
    * @description Method for writing data from data clipboard to data storage and clear data clipboard
    */
-  async _moveDataFromClipboardToStorage() {
+  async _tryMovingDataFromClipboardToStorage() {
     try {
       //Getting data from clipboard and saving it into storage
       let clipboardContent = this._dataClipboard.getAllData();
@@ -338,31 +356,41 @@ class AgentDevice extends Device {
 
       //Clearing data form clipboard
       this._dataClipboard.clearAllData();
+      return true;
     } catch (err) {
       logger.error(err, err.message);
+      return false;
     }
   }
 
   /**
    * @description Method for sending data from cliboard or write it to storage if sending failed. Throws if data was no send successfully
    */
-  async _sendDataFromClipboardAndClearIt() {
+  async _trySendingDataFromClipboardAndClearItOrMoveThemToStorage() {
     //If data clipboard content is empty - don't proceed with sending or saving data
     let dataClipboardContent = this._dataClipboard.getAllData();
     if (!exists(dataClipboardContent) || dataClipboardContent === {}) {
-      return;
+      return true;
     }
 
-    await this._sendData(dataClipboardContent);
+    try {
+      await this._sendData(dataClipboardContent);
 
-    //Send successfully - clear data clipboard
-    this._dataClipboard.clearAllData();
+      //Send successfully - clear data clipboard
+      this._dataClipboard.clearAllData();
+      return true;
+    } catch (err) {
+      logger.warn(err, err.message);
+      //If data not send successfully - write it to clipboard storage and do not proceed
+      await this._tryMovingDataFromClipboardToStorage();
+      return false;
+    }
   }
 
   /**
    * @description Method for sending data from files storage.
    */
-  async _sendDataFromStorage() {
+  async _trySendingDataFromStorage() {
     //Getting number of files to send
     let fileIdsToSend = [];
     try {
@@ -372,8 +400,10 @@ class AgentDevice extends Device {
       fileIdsToSend = allFileIds.slice(0, this.NumberOfDataFilesToSend);
     } catch (err) {
       logger.error(err.message, err);
-      return;
+      return false;
     }
+
+    let sendingAtLeastOneFileFails = false;
 
     //Trying to send all files to send and delete them after
     for (let fileId of fileIdsToSend) {
@@ -384,9 +414,11 @@ class AgentDevice extends Device {
         await this._dataStorage.deleteData(fileId);
       } catch (err) {
         logger.error(err.message, err);
-        return;
+        sendingAtLeastOneFileFails = true;
       }
     }
+
+    return !sendingAtLeastOneFileFails;
   }
 
   /**
@@ -401,9 +433,24 @@ class AgentDevice extends Device {
   }
 
   /**
+   * @description Method for saving event to storage. Returns true if saving was successfull or false otherwise
+   * @param {JSON} eventToSave Event to save
+   */
+  async _trySavingEventToStorage(eventToSave) {
+    try {
+      //If event not send successfully - write it to storage
+      await this._eventStorage.createData(eventToSave);
+      return true;
+    } catch (err2) {
+      logger.error(err2, err2.message);
+      return false;
+    }
+  }
+
+  /**
    * @description Method for sending events from cliboard or write it to storage if sending failed. Return true if sending of all events was successfull (or events to send is empty) or false otherwise
    */
-  async _sendEventsFromClipboardAndClearItOrSaveThemToStorage() {
+  async _trySendingEventsFromClipboardAndClearItOrMoveThemToStorage() {
     //If data clipboard content is empty - don't proceed with sending or saving data
     let eventClipboardContent = this._eventClipboard.getAllData();
     if (!exists(eventClipboardContent) || eventClipboardContent === []) {
@@ -423,12 +470,9 @@ class AgentDevice extends Device {
       } catch (err) {
         logger.error(err, err.message);
 
-        try {
-          //If event not send successfully - write it to storage
-          await this._eventStorage.createData(eventToSend);
-        } catch (err2) {
-          logger.error(err2, err2.message);
-        }
+        //Saving event into storage
+        await this._trySavingEventToStorage(eventToSend);
+
         //sending data failed
         allEventsSendSuccessfully = false;
       }
@@ -443,7 +487,7 @@ class AgentDevice extends Device {
   /**
    * @description Method for sending event from files.
    */
-  async _sendEventsFromStorage() {
+  async _trySendingEventsFromStorage() {
     let fileIdsToSend = [];
     try {
       //Getting number of files to send
@@ -453,8 +497,10 @@ class AgentDevice extends Device {
       fileIdsToSend = allFileIds.slice(0, this.NumberOfEventFilesToSend);
     } catch (err) {
       logger.error(err.message, err);
-      return;
+      return false;
     }
+
+    let sendingAtLeastOneFileFails = false;
 
     //Trying to send all files
     for (let fileId of fileIdsToSend) {
@@ -470,10 +516,11 @@ class AgentDevice extends Device {
         }
       } catch (err) {
         logger.error(err, err.message);
+        sendingAtLeastOneFileFails = true;
       }
     }
 
-    return;
+    return !sendingAtLeastOneFileFails;
   }
 
   //#endregion ========= PRIVATE METHODS =========
@@ -491,11 +538,15 @@ class AgentDevice extends Device {
     //Refreshing all variables/calcElements/alerts
     await super.refresh(tickNumber);
 
+    //#region SAVING DATA AND EVENTS TO CLIPBOARD
+
     //Adjusting data clipboard
     this._getAndSaveDataToClipboard();
 
     //Adjusting event clipboard
     this._getAndSaveEventsToClipboard();
+
+    //#endregion SAVING DATA AND EVENTS TO CLIPBOARD
 
     //#region CHECKING BOARDING STATE
 
@@ -529,23 +580,11 @@ class AgentDevice extends Device {
     let shouldDataBeSend = this._checkIfDataShouldBeSent(tickNumber);
 
     if (shouldDataBeSend) {
-      let dataSendSuccessfully = true;
-      try {
-        await this._sendDataFromClipboardAndClearIt();
-      } catch (err) {
-        logger.warn("Error while sending data with agent");
-        //If data not send successfully - write it to clipboard storage and do not proceed
-        await this._moveDataFromClipboardToStorage();
-        dataSendSuccessfully = false;
-      }
+      let dataSendSuccessfully = await this._trySendingDataFromClipboardAndClearItOrMoveThemToStorage();
 
       //If data send successfully - try sending data from files
       if (dataSendSuccessfully) {
-        try {
-          await this._sendDataFromStorage();
-        } catch (err) {
-          logger.warn("Error while sending data from files with agent");
-        }
+        await this._trySendingDataFromStorage();
       }
     }
 
@@ -558,17 +597,10 @@ class AgentDevice extends Device {
 
     //At this point device should be boarded - no point to board again
     if (shouldEventsBeSend) {
-      let allEventsSendSuccessfully = false;
+      let allEventsSendSuccessfully = await this._trySendingEventsFromClipboardAndClearItOrMoveThemToStorage();
 
-      //_sendEventsFromClipboard return true even if any event was sent - empty clipboard
-      try {
-        allEventsSendSuccessfully = await this._sendEventsFromClipboardAndClearItOrSaveThemToStorage();
-      } catch (err) {
-        logger.warn("Error while sending events from clipboard");
-        allEventsSendSuccessfully = false;
-      }
       if (allEventsSendSuccessfully) {
-        await this._sendEventsFromStorage();
+        await this._trySendingEventsFromStorage()();
       }
     }
 

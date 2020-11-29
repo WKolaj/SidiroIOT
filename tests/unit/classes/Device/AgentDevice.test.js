@@ -18,7 +18,6 @@ const {
 const logger = require("../../../../logger/logger");
 const AgentDevice = require("../../../../classes/Device/AgentDevice/AgentDevice");
 const path = require("path");
-const { Agent } = require("http");
 
 const AgentDirPath = "__testDir/settings/agentsData";
 
@@ -1680,6 +1679,2057 @@ describe("AgentDevice", () => {
       let result = await exec();
 
       expect(result).toEqual("deviceID");
+    });
+  });
+
+  describe("_getAndSaveElementsDataToClipboardIfFitsSendingInterval", () => {
+    let project;
+    let payload;
+    let device;
+    let variable1;
+    let variable1ID;
+    let variable1Value;
+    let variable1LastValueTick;
+    let variable2;
+    let variable2ID;
+    let variable2Value;
+    let variable2LastValueTick;
+    let variable3;
+    let variable3ID;
+    let variable3Value;
+    let variable3LastValueTick;
+    let getElementMockFunc;
+    let lastDataValues;
+    let dataClipboardContent;
+    let elementId;
+    let tickId;
+
+    beforeEach(async () => {
+      await createDirIfNotExists(AgentDirPath);
+      await clearDirectoryAsync(AgentDirPath);
+
+      variable1ID = "variable1ID";
+      variable1Value = 1001;
+      variable1LastValueTick = 101;
+
+      variable2ID = "variable2ID";
+      variable2Value = 1002;
+      variable2LastValueTick = 102;
+
+      variable3ID = "variable3ID";
+      variable3Value = 1003;
+      variable3LastValueTick = 103;
+
+      getElementMockFunc = (deviceId, variableId) => {
+        switch (variableId) {
+          case variable1ID: {
+            return variable1;
+          }
+          case variable2ID: {
+            return variable2;
+          }
+          case variable3ID: {
+            return variable3;
+          }
+          default: {
+            return null;
+          }
+        }
+      };
+
+      project = {
+        AgentDirPath: AgentDirPath,
+        getElement: getElementMockFunc,
+      };
+
+      lastDataValues = {};
+      dataClipboardContent = {};
+
+      payload = {
+        id: "deviceID",
+        name: "deviceName",
+        type: "AgentDevice",
+        variables: {},
+        calcElements: {},
+        alerts: {},
+        isActive: true,
+        sendDataFileInterval: 10,
+        sendEventFileInterval: 5,
+        dataStorageSize: 20,
+        eventStorageSize: 30,
+        numberOfDataFilesToSend: 3,
+        numberOfEventFilesToSend: 6,
+        dataToSendConfig: {
+          [variable1ID]: {
+            elementId: variable1ID,
+            deviceId: "testDevice1ID",
+            sendingInterval: 10,
+          },
+          [variable2ID]: {
+            elementId: variable2ID,
+            deviceId: "testDevice1ID",
+            sendingInterval: 20,
+          },
+          [variable3ID]: {
+            elementId: variable3ID,
+            deviceId: "testDevice1ID",
+            sendingInterval: 30,
+          },
+        },
+        eventsToSendConfig: {},
+      };
+
+      elementId = "variable2ID";
+      tickId = 1000;
+    });
+
+    afterEach(async () => {
+      await createDirIfNotExists(AgentDirPath);
+      await clearDirectoryAsync(AgentDirPath);
+    });
+
+    let exec = async () => {
+      variable1 = {
+        ID: variable1ID,
+        LastValueTick: variable1LastValueTick,
+        Value: variable1Value,
+      };
+
+      variable2 = {
+        ID: variable2ID,
+        LastValueTick: variable2LastValueTick,
+        Value: variable2Value,
+      };
+
+      variable3 = {
+        ID: variable3ID,
+        LastValueTick: variable3LastValueTick,
+        Value: variable3Value,
+      };
+
+      device = new AgentDevice(project);
+
+      await device.init(payload);
+
+      device._lastDataValues = lastDataValues;
+      device._dataClipboard._data = dataClipboardContent;
+
+      return device._getAndSaveElementsDataToClipboardIfFitsSendingInterval(
+        elementId,
+        tickId
+      );
+    };
+
+    it("should assign value to lastDataValue and to clipboard - if elements sending interval fits tickId", async () => {
+      lastDataValues = {};
+      dataClipboardContent = {};
+
+      elementId = "variable2ID";
+      tickId = 1000;
+      payload.dataToSendConfig.variable2ID.sendingInterval = 20;
+
+      variable2LastValueTick = 123;
+      variable2ID = "variable2ID";
+      variable2Value = 456;
+
+      await exec();
+
+      //value should be assigned to data clipboard
+      let clipboardContent = device._dataClipboard.getAllData();
+      expect(clipboardContent).toEqual({
+        [variable2LastValueTick]: { [variable2ID]: variable2Value },
+      });
+
+      //value should be assigned to lastValueData
+      let newLastDataValues = device._lastDataValues;
+
+      expect(newLastDataValues).toEqual({
+        [variable2ID]: {
+          tickId: variable2LastValueTick,
+          value: variable2Value,
+        },
+      });
+    });
+
+    it("should not assign value to lastDataValue nor to clipboard - if elements sending interval does not fit tickId", async () => {
+      lastDataValues = {
+        [variable1LastValueTick]: { [variable1ID]: variable1Value },
+        [variable3LastValueTick]: { [variable3ID]: variable3Value },
+      };
+      dataClipboardContent = {
+        [variable3ID]: {
+          tickId: variable3LastValueTick,
+          value: variable3Value,
+        },
+        [variable1ID]: {
+          tickId: variable1LastValueTick,
+          value: variable1Value,
+        },
+      };
+
+      elementId = "variable2ID";
+      tickId = 1000;
+      payload.dataToSendConfig.variable2ID.sendingInterval = 11;
+
+      variable2LastValueTick = 123;
+      variable2ID = "variable2ID";
+      variable2Value = 456;
+
+      await exec();
+
+      //value should be assigned to data clipboard
+      let clipboardContent = device._dataClipboard.getAllData();
+      expect(clipboardContent).toEqual({
+        [variable3ID]: {
+          tickId: variable3LastValueTick,
+          value: variable3Value,
+        },
+        [variable1ID]: {
+          tickId: variable1LastValueTick,
+          value: variable1Value,
+        },
+      });
+
+      //value should be assigned to lastValueData
+      let newLastDataValues = device._lastDataValues;
+
+      expect(newLastDataValues).toEqual({
+        [variable1LastValueTick]: { [variable1ID]: variable1Value },
+        [variable3LastValueTick]: { [variable3ID]: variable3Value },
+      });
+    });
+
+    it("should not assign value to lastDataValue nor to clipboard - if element config does not exist", async () => {
+      lastDataValues = {
+        [variable1LastValueTick]: { [variable1ID]: variable1Value },
+        [variable3LastValueTick]: { [variable3ID]: variable3Value },
+      };
+      dataClipboardContent = {
+        [variable3ID]: {
+          tickId: variable3LastValueTick,
+          value: variable3Value,
+        },
+        [variable1ID]: {
+          tickId: variable1LastValueTick,
+          value: variable1Value,
+        },
+      };
+
+      delete payload.dataToSendConfig.variable2ID;
+
+      await exec();
+
+      //value should be assigned to data clipboard
+      let clipboardContent = device._dataClipboard.getAllData();
+      expect(clipboardContent).toEqual({
+        [variable3ID]: {
+          tickId: variable3LastValueTick,
+          value: variable3Value,
+        },
+        [variable1ID]: {
+          tickId: variable1LastValueTick,
+          value: variable1Value,
+        },
+      });
+
+      //value should be assigned to lastValueData
+      let newLastDataValues = device._lastDataValues;
+
+      expect(newLastDataValues).toEqual({
+        [variable1LastValueTick]: { [variable1ID]: variable1Value },
+        [variable3LastValueTick]: { [variable3ID]: variable3Value },
+      });
+    });
+
+    it("should not assign value to lastDataValue nor to clipboard - if element does not exist", async () => {
+      lastDataValues = {
+        [variable1LastValueTick]: { [variable1ID]: variable1Value },
+        [variable3LastValueTick]: { [variable3ID]: variable3Value },
+      };
+      dataClipboardContent = {
+        [variable3ID]: {
+          tickId: variable3LastValueTick,
+          value: variable3Value,
+        },
+        [variable1ID]: {
+          tickId: variable1LastValueTick,
+          value: variable1Value,
+        },
+      };
+
+      elementId = "variable4ID";
+
+      payload.dataToSendConfig.variable4ID = {
+        elementId: "variable4ID",
+        deviceId: "testDevice1ID",
+        sendingInterval: 40,
+      };
+
+      await exec();
+
+      //value should be assigned to data clipboard
+      let clipboardContent = device._dataClipboard.getAllData();
+      expect(clipboardContent).toEqual({
+        [variable3ID]: {
+          tickId: variable3LastValueTick,
+          value: variable3Value,
+        },
+        [variable1ID]: {
+          tickId: variable1LastValueTick,
+          value: variable1Value,
+        },
+      });
+
+      //value should be assigned to lastValueData
+      let newLastDataValues = device._lastDataValues;
+
+      expect(newLastDataValues).toEqual({
+        [variable1LastValueTick]: { [variable1ID]: variable1Value },
+        [variable3LastValueTick]: { [variable3ID]: variable3Value },
+      });
+    });
+
+    it("should assign value to clipboard - if clipboard is not empty with different tickId and different vairableID", async () => {
+      lastDataValues = {};
+      dataClipboardContent = {
+        [variable1LastValueTick]: { [variable1ID]: variable1Value },
+        [variable3LastValueTick]: { [variable3ID]: variable3Value },
+      };
+
+      elementId = "variable2ID";
+      tickId = 1000;
+      payload.dataToSendConfig.variable2ID.sendingInterval = 20;
+
+      variable2LastValueTick = 123;
+      variable2ID = "variable2ID";
+      variable2Value = 456;
+
+      await exec();
+
+      //value should be assigned to data clipboard
+      let clipboardContent = device._dataClipboard.getAllData();
+      expect(clipboardContent).toEqual({
+        [variable2LastValueTick]: { [variable2ID]: variable2Value },
+        [variable1LastValueTick]: { [variable1ID]: variable1Value },
+        [variable3LastValueTick]: { [variable3ID]: variable3Value },
+      });
+    });
+
+    it("should assign value to clipboard - if clipboard is not empty with the same tickId but different vairableID", async () => {
+      variable2LastValueTick = 123;
+      variable2ID = "variable2ID";
+      variable2Value = 456;
+
+      lastDataValues = {};
+      dataClipboardContent = {
+        [variable2LastValueTick]: {
+          [variable1ID]: variable1Value,
+          [variable3ID]: variable3Value,
+        },
+      };
+
+      elementId = "variable2ID";
+      tickId = 1000;
+      payload.dataToSendConfig.variable2ID.sendingInterval = 20;
+
+      await exec();
+
+      //value should be assigned to data clipboard
+      let clipboardContent = device._dataClipboard.getAllData();
+      expect(clipboardContent).toEqual({
+        [variable2LastValueTick]: {
+          [variable1ID]: variable1Value,
+          [variable3ID]: variable3Value,
+          [variable2ID]: variable2Value,
+        },
+      });
+    });
+
+    it("should assign value to clipboard - if clipboard is not empty with the same tickId and the same variableID but different value", async () => {
+      variable2LastValueTick = 123;
+      variable2ID = "variable2ID";
+      variable2Value = 456;
+
+      lastDataValues = {};
+      dataClipboardContent = {
+        [variable2LastValueTick]: {
+          [variable1ID]: variable1Value,
+          [variable2ID]: 123.456,
+          [variable3ID]: variable3Value,
+        },
+      };
+
+      elementId = "variable2ID";
+      tickId = 1000;
+      payload.dataToSendConfig.variable2ID.sendingInterval = 20;
+
+      await exec();
+
+      //value should be assigned to data clipboard
+      let clipboardContent = device._dataClipboard.getAllData();
+      expect(clipboardContent).toEqual({
+        [variable2LastValueTick]: {
+          [variable1ID]: variable1Value,
+          [variable3ID]: variable3Value,
+          [variable2ID]: variable2Value,
+        },
+      });
+    });
+
+    it("should assign value to clipboard - if clipboard is not empty with the same tickId and the same variableID and the same value", async () => {
+      variable2LastValueTick = 123;
+      variable2ID = "variable2ID";
+      variable2Value = 456;
+
+      lastDataValues = {};
+      dataClipboardContent = {
+        [variable2LastValueTick]: {
+          [variable1ID]: variable1Value,
+          [variable2ID]: variable2Value,
+          [variable3ID]: variable3Value,
+        },
+      };
+
+      elementId = "variable2ID";
+      tickId = 1000;
+      payload.dataToSendConfig.variable2ID.sendingInterval = 20;
+
+      await exec();
+
+      //value should be assigned to data clipboard
+      let clipboardContent = device._dataClipboard.getAllData();
+      expect(clipboardContent).toEqual({
+        [variable2LastValueTick]: {
+          [variable1ID]: variable1Value,
+          [variable3ID]: variable3Value,
+          [variable2ID]: variable2Value,
+        },
+      });
+    });
+
+    it("should assign value to lastDataValue and to clipboard - if lastDataValue is already with some data of different variables", async () => {
+      lastDataValues = {
+        [variable3ID]: {
+          tickId: variable3LastValueTick,
+          value: variable3Value,
+        },
+        [variable1ID]: {
+          tickId: variable1LastValueTick,
+          value: variable1Value,
+        },
+      };
+      dataClipboardContent = {};
+
+      elementId = "variable2ID";
+      tickId = 1000;
+      payload.dataToSendConfig.variable2ID.sendingInterval = 20;
+
+      variable2LastValueTick = 123;
+      variable2ID = "variable2ID";
+      variable2Value = 456;
+
+      await exec();
+
+      //value should be assigned to data clipboard
+      let clipboardContent = device._dataClipboard.getAllData();
+      expect(clipboardContent).toEqual({
+        [variable2LastValueTick]: { [variable2ID]: variable2Value },
+      });
+
+      //value should be assigned to lastValueData
+      let newLastDataValues = device._lastDataValues;
+
+      expect(newLastDataValues).toEqual({
+        [variable3ID]: {
+          tickId: variable3LastValueTick,
+          value: variable3Value,
+        },
+        [variable1ID]: {
+          tickId: variable1LastValueTick,
+          value: variable1Value,
+        },
+        [variable2ID]: {
+          tickId: variable2LastValueTick,
+          value: variable2Value,
+        },
+      });
+    });
+
+    it("should assign value to lastDataValue and to clipboard - if lastDataValue is already with some data of the same variable but different tickId", async () => {
+      variable2LastValueTick = 123;
+      variable2ID = "variable2ID";
+      variable2Value = 456;
+
+      lastDataValues = {
+        [variable3ID]: {
+          tickId: variable3LastValueTick,
+          value: variable3Value,
+        },
+        [variable2ID]: {
+          tickId: variable2LastValueTick - 1,
+          value: variable2Value,
+        },
+        [variable1ID]: {
+          tickId: variable1LastValueTick,
+          value: variable1Value,
+        },
+      };
+      dataClipboardContent = {};
+
+      elementId = "variable2ID";
+      tickId = 1000;
+      payload.dataToSendConfig.variable2ID.sendingInterval = 20;
+
+      await exec();
+
+      //value should be assigned to data clipboard
+      let clipboardContent = device._dataClipboard.getAllData();
+      expect(clipboardContent).toEqual({
+        [variable2LastValueTick]: { [variable2ID]: variable2Value },
+      });
+
+      //value should be assigned to lastValueData
+      let newLastDataValues = device._lastDataValues;
+
+      expect(newLastDataValues).toEqual({
+        [variable3ID]: {
+          tickId: variable3LastValueTick,
+          value: variable3Value,
+        },
+        [variable1ID]: {
+          tickId: variable1LastValueTick,
+          value: variable1Value,
+        },
+        [variable2ID]: {
+          tickId: variable2LastValueTick,
+          value: variable2Value,
+        },
+      });
+    });
+
+    it("should assign value to lastDataValue and to clipboard - if lastDataValue is already with some data of the same variable but different value", async () => {
+      variable2LastValueTick = 123;
+      variable2ID = "variable2ID";
+      variable2Value = 456;
+
+      lastDataValues = {
+        [variable3ID]: {
+          tickId: variable3LastValueTick,
+          value: variable3Value,
+        },
+        [variable2ID]: {
+          tickId: variable2LastValueTick,
+          value: variable2Value - 1,
+        },
+        [variable1ID]: {
+          tickId: variable1LastValueTick,
+          value: variable1Value,
+        },
+      };
+      dataClipboardContent = {};
+
+      elementId = "variable2ID";
+      tickId = 1000;
+      payload.dataToSendConfig.variable2ID.sendingInterval = 20;
+
+      await exec();
+
+      //value should be assigned to data clipboard
+      let clipboardContent = device._dataClipboard.getAllData();
+      expect(clipboardContent).toEqual({
+        [variable2LastValueTick]: { [variable2ID]: variable2Value },
+      });
+
+      //value should be assigned to lastValueData
+      let newLastDataValues = device._lastDataValues;
+
+      expect(newLastDataValues).toEqual({
+        [variable3ID]: {
+          tickId: variable3LastValueTick,
+          value: variable3Value,
+        },
+        [variable1ID]: {
+          tickId: variable1LastValueTick,
+          value: variable1Value,
+        },
+        [variable2ID]: {
+          tickId: variable2LastValueTick,
+          value: variable2Value,
+        },
+      });
+    });
+
+    it("should not assign value to clipboard - if lastDataValue is already with some data of the same variable with the same value and tickId", async () => {
+      variable2LastValueTick = 123;
+      variable2ID = "variable2ID";
+      variable2Value = 456;
+
+      lastDataValues = {
+        [variable3ID]: {
+          tickId: variable3LastValueTick,
+          value: variable3Value,
+        },
+        [variable2ID]: {
+          tickId: variable2LastValueTick,
+          value: variable2Value,
+        },
+        [variable1ID]: {
+          tickId: variable1LastValueTick,
+          value: variable1Value,
+        },
+      };
+      dataClipboardContent = {};
+
+      elementId = "variable2ID";
+      tickId = 1000;
+      payload.dataToSendConfig.variable2ID.sendingInterval = 20;
+
+      await exec();
+
+      //value should be assigned to data clipboard
+      let clipboardContent = device._dataClipboard.getAllData();
+      expect(clipboardContent).toEqual({});
+
+      //value should be assigned to lastValueData
+      let newLastDataValues = device._lastDataValues;
+
+      expect(newLastDataValues).toEqual({
+        [variable3ID]: {
+          tickId: variable3LastValueTick,
+          value: variable3Value,
+        },
+        [variable1ID]: {
+          tickId: variable1LastValueTick,
+          value: variable1Value,
+        },
+        [variable2ID]: {
+          tickId: variable2LastValueTick,
+          value: variable2Value,
+        },
+      });
+    });
+  });
+
+  describe("_getAndSaveElementsEventToClipboardIfFitsSendingInterval", () => {
+    let project;
+    let payload;
+    let device;
+    let alert1;
+    let alert1ID;
+    let alert1Value;
+    let alert1LastValueTick;
+    let alert2;
+    let alert2ID;
+    let alert2Value;
+    let alert2LastValueTick;
+    let alert3;
+    let alert3ID;
+    let alert3Value;
+    let alert3LastValueTick;
+    let getElementMockFunc;
+    let lastEventValues;
+    let eventClipboardContent;
+    let elementId;
+    let tickId;
+
+    beforeEach(async () => {
+      await createDirIfNotExists(AgentDirPath);
+      await clearDirectoryAsync(AgentDirPath);
+
+      alert1ID = "alert1ID";
+      alert1Value = "alert1 - alert text";
+      alert1LastValueTick = 101;
+
+      alert2ID = "alert2ID";
+      alert2Value = "alert2 - alert text";
+      alert2LastValueTick = 102;
+
+      alert3ID = "alert3ID";
+      alert3Value = "alert3 - alert text";
+      alert3LastValueTick = 103;
+
+      getElementMockFunc = (deviceId, alertId) => {
+        switch (alertId) {
+          case alert1ID: {
+            return alert1;
+          }
+          case alert2ID: {
+            return alert2;
+          }
+          case alert3ID: {
+            return alert3;
+          }
+          default: {
+            return null;
+          }
+        }
+      };
+
+      project = {
+        AgentDirPath: AgentDirPath,
+        getElement: getElementMockFunc,
+      };
+
+      lastEventValues = {};
+      eventClipboardContent = {};
+
+      payload = {
+        id: "deviceID",
+        name: "deviceName",
+        type: "AgentDevice",
+        variables: {},
+        calcElements: {},
+        alerts: {},
+        isActive: true,
+        sendDataFileInterval: 10,
+        sendEventFileInterval: 5,
+        dataStorageSize: 20,
+        eventStorageSize: 30,
+        numberOfDataFilesToSend: 3,
+        numberOfEventFilesToSend: 6,
+        dataToSendConfig: {},
+        eventsToSendConfig: {
+          [alert1ID]: {
+            elementId: alert1ID,
+            deviceId: "testDevice1ID",
+            sendingInterval: 10,
+          },
+          [alert2ID]: {
+            elementId: alert2ID,
+            deviceId: "testDevice1ID",
+            sendingInterval: 20,
+          },
+          [alert3ID]: {
+            elementId: alert3ID,
+            deviceId: "testDevice1ID",
+            sendingInterval: 30,
+          },
+        },
+      };
+
+      elementId = "alert2ID";
+      tickId = 1000;
+    });
+
+    afterEach(async () => {
+      await createDirIfNotExists(AgentDirPath);
+      await clearDirectoryAsync(AgentDirPath);
+    });
+
+    let exec = async () => {
+      alert1 = {
+        ID: alert1ID,
+        LastValueTick: alert1LastValueTick,
+        Value: alert1Value,
+      };
+
+      alert2 = {
+        ID: alert2ID,
+        LastValueTick: alert2LastValueTick,
+        Value: alert2Value,
+      };
+
+      alert3 = {
+        ID: alert3ID,
+        LastValueTick: alert3LastValueTick,
+        Value: alert3Value,
+      };
+
+      device = new AgentDevice(project);
+
+      await device.init(payload);
+
+      device._lastEventValues = lastEventValues;
+      device._eventClipboard._data = eventClipboardContent;
+
+      return device._getAndSaveElementsEventToClipboardIfFitsSendingInterval(
+        elementId,
+        tickId
+      );
+    };
+
+    it("should assign value to lastEventValues and to clipboard - if elements sending interval fits tickId", async () => {
+      lastEventValues = {};
+      eventClipboardContent = [];
+
+      elementId = "alert2ID";
+      tickId = 1000;
+      payload.eventsToSendConfig.alert2ID.sendingInterval = 20;
+
+      alert2LastValueTick = 123;
+      alert2ID = "alert2ID";
+      alert2Value = "alert2 - test texts";
+
+      await exec();
+
+      //value should be assigned to events clipboard
+      let clipboardContent = device._eventClipboard.getAllData();
+      expect(clipboardContent).toEqual([
+        {
+          tickId: alert2LastValueTick,
+          elementId: alert2ID,
+          value: alert2Value,
+        },
+      ]);
+
+      //value should be assigned to lastEventData
+      let newLastEventValues = device._lastEventValues;
+
+      expect(newLastEventValues).toEqual({
+        [alert2ID]: {
+          tickId: alert2LastValueTick,
+          value: alert2Value,
+        },
+      });
+    });
+
+    it("should not assign value to lastEventValues nor to clipboard - if elements sending interval does not fit tickId", async () => {
+      lastEventValues = {
+        [alert1LastValueTick]: { [alert1ID]: alert1Value },
+        [alert3LastValueTick]: { [alert3ID]: alert3Value },
+      };
+      eventClipboardContent = [
+        {
+          tickId: alert3LastValueTick,
+          elementId: alert3ID,
+          value: alert3Value,
+        },
+
+        {
+          tickId: alert1LastValueTick,
+          elementId: alert1ID,
+          value: alert1Value,
+        },
+      ];
+
+      elementId = "alert2ID";
+      tickId = 1000;
+      payload.eventsToSendConfig.alert2ID.sendingInterval = 11;
+
+      alert2LastValueTick = 123;
+      alert2ID = "alert2ID";
+      alert2Value = "alert2 - test texts";
+
+      await exec();
+
+      //value should be assigned to events clipboard
+      let clipboardContent = device._eventClipboard.getAllData();
+      expect(clipboardContent).toEqual([
+        {
+          tickId: alert3LastValueTick,
+          elementId: alert3ID,
+          value: alert3Value,
+        },
+
+        {
+          tickId: alert1LastValueTick,
+          elementId: alert1ID,
+          value: alert1Value,
+        },
+      ]);
+
+      //value should be assigned to lastEventData
+      let newLastEventValues = device._lastEventValues;
+
+      expect(newLastEventValues).toEqual({
+        [alert1LastValueTick]: { [alert1ID]: alert1Value },
+        [alert3LastValueTick]: { [alert3ID]: alert3Value },
+      });
+    });
+
+    it("should not assign value to lastEventValues nor to clipboard - if element config does not exist", async () => {
+      lastEventValues = {
+        [alert1LastValueTick]: { [alert1ID]: alert1Value },
+        [alert3LastValueTick]: { [alert3ID]: alert3Value },
+      };
+      eventClipboardContent = [
+        {
+          tickId: alert3LastValueTick,
+          elementId: alert3ID,
+          value: alert3Value,
+        },
+
+        {
+          tickId: alert1LastValueTick,
+          elementId: alert1ID,
+          value: alert1Value,
+        },
+      ];
+
+      delete payload.eventsToSendConfig.alert2ID;
+
+      await exec();
+
+      //value should be assigned to events clipboard
+      let clipboardContent = device._eventClipboard.getAllData();
+      expect(clipboardContent).toEqual([
+        {
+          tickId: alert3LastValueTick,
+          elementId: alert3ID,
+          value: alert3Value,
+        },
+
+        {
+          tickId: alert1LastValueTick,
+          elementId: alert1ID,
+          value: alert1Value,
+        },
+      ]);
+
+      //value should be assigned to lastEventData
+      let newLastEventValues = device._lastEventValues;
+
+      expect(newLastEventValues).toEqual({
+        [alert1LastValueTick]: { [alert1ID]: alert1Value },
+        [alert3LastValueTick]: { [alert3ID]: alert3Value },
+      });
+    });
+
+    it("should not assign value to lastEventValues nor to clipboard - if element does not exist", async () => {
+      lastEventValues = {
+        [alert1LastValueTick]: { [alert1ID]: alert1Value },
+        [alert3LastValueTick]: { [alert3ID]: alert3Value },
+      };
+      eventClipboardContent = [
+        {
+          tickId: alert3LastValueTick,
+          elementId: alert3ID,
+          value: alert3Value,
+        },
+        {
+          tickId: alert1LastValueTick,
+          elementId: alert1ID,
+          value: alert1Value,
+        },
+      ];
+
+      elementId = "alert4ID";
+
+      payload.eventsToSendConfig.alert4ID = {
+        elementId: "alert4ID",
+        deviceId: "testDevice1ID",
+        sendingInterval: 40,
+      };
+
+      await exec();
+
+      //value should be assigned to events clipboard
+      let clipboardContent = device._eventClipboard.getAllData();
+      expect(clipboardContent).toEqual([
+        {
+          tickId: alert3LastValueTick,
+          elementId: alert3ID,
+          value: alert3Value,
+        },
+        {
+          tickId: alert1LastValueTick,
+          elementId: alert1ID,
+          value: alert1Value,
+        },
+      ]);
+
+      //value should be assigned to lastEventData
+      let newLastEventValues = device._lastEventValues;
+
+      expect(newLastEventValues).toEqual({
+        [alert1LastValueTick]: { [alert1ID]: alert1Value },
+        [alert3LastValueTick]: { [alert3ID]: alert3Value },
+      });
+    });
+
+    it("should assign value to clipboard - if clipboard is not empty with different tickId and different vairableID", async () => {
+      lastEventValues = {};
+      eventClipboardContent = [
+        {
+          tickId: alert3LastValueTick,
+          elementId: alert3ID,
+          value: alert3Value,
+        },
+        {
+          tickId: alert1LastValueTick,
+          elementId: alert1ID,
+          value: alert1Value,
+        },
+      ];
+
+      elementId = "alert2ID";
+      tickId = 1000;
+      payload.eventsToSendConfig.alert2ID.sendingInterval = 20;
+
+      alert2LastValueTick = 123;
+      alert2ID = "alert2ID";
+      alert2Value = "alert2 - test texts";
+
+      await exec();
+
+      //value should be assigned to events clipboard
+      let clipboardContent = device._eventClipboard.getAllData();
+      expect(clipboardContent).toEqual([
+        {
+          tickId: alert3LastValueTick,
+          elementId: alert3ID,
+          value: alert3Value,
+        },
+        {
+          tickId: alert1LastValueTick,
+          elementId: alert1ID,
+          value: alert1Value,
+        },
+        {
+          tickId: alert2LastValueTick,
+          elementId: alert2ID,
+          value: alert2Value,
+        },
+      ]);
+    });
+
+    it("should assign value to clipboard - if clipboard is not empty with the same tickId but different variableID", async () => {
+      alert2LastValueTick = 123;
+      alert2ID = "alert2ID";
+      alert2Value = "alert2 - test texts";
+
+      lastEventValues = {};
+      eventClipboardContent = [
+        {
+          tickId: alert2LastValueTick,
+          elementId: alert3ID,
+          value: alert3Value,
+        },
+        {
+          tickId: alert1LastValueTick,
+          elementId: alert1ID,
+          value: alert1Value,
+        },
+      ];
+
+      elementId = "alert2ID";
+      tickId = 1000;
+      payload.eventsToSendConfig.alert2ID.sendingInterval = 20;
+
+      await exec();
+
+      //value should be assigned to events clipboard
+      let clipboardContent = device._eventClipboard.getAllData();
+      expect(clipboardContent).toEqual([
+        {
+          tickId: alert2LastValueTick,
+          elementId: alert3ID,
+          value: alert3Value,
+        },
+        {
+          tickId: alert1LastValueTick,
+          elementId: alert1ID,
+          value: alert1Value,
+        },
+        {
+          tickId: alert2LastValueTick,
+          elementId: alert2ID,
+          value: alert2Value,
+        },
+      ]);
+    });
+
+    it("should assign value to clipboard - if clipboard is not empty with the same tickId and the same variableID but different value", async () => {
+      alert2LastValueTick = 123;
+      alert2ID = "alert2ID";
+      alert2Value = "alert2 - test texts";
+
+      lastEventValues = {};
+      eventClipboardContent = [
+        {
+          tickId: alert2LastValueTick,
+          elementId: alert3ID,
+          value: alert2Value,
+        },
+        {
+          tickId: alert1LastValueTick,
+          elementId: alert1ID,
+          value: alert1Value,
+        },
+      ];
+
+      elementId = "alert2ID";
+      tickId = 1000;
+      payload.eventsToSendConfig.alert2ID.sendingInterval = 20;
+
+      await exec();
+
+      //value should be assigned to events clipboard
+      let clipboardContent = device._eventClipboard.getAllData();
+      expect(clipboardContent).toEqual([
+        {
+          tickId: alert2LastValueTick,
+          elementId: alert3ID,
+          value: alert2Value,
+        },
+        {
+          tickId: alert1LastValueTick,
+          elementId: alert1ID,
+          value: alert1Value,
+        },
+        {
+          tickId: alert2LastValueTick,
+          elementId: alert2ID,
+          value: alert2Value,
+        },
+      ]);
+    });
+
+    it("should assign value to clipboard once again - if clipboard is not empty with the same tickId and the same variableID and the same value", async () => {
+      alert2LastValueTick = 123;
+      alert2ID = "alert2ID";
+      alert2Value = "alert2 - test texts";
+
+      lastEventValues = {};
+      eventClipboardContent = [
+        {
+          tickId: alert3LastValueTick,
+          elementId: alert3ID,
+          value: alert3Value,
+        },
+        {
+          tickId: alert2LastValueTick,
+          elementId: alert2ID,
+          value: alert2Value,
+        },
+        {
+          tickId: alert1LastValueTick,
+          elementId: alert1ID,
+          value: alert1Value,
+        },
+      ];
+
+      elementId = "alert2ID";
+      tickId = 1000;
+      payload.eventsToSendConfig.alert2ID.sendingInterval = 20;
+
+      await exec();
+
+      //value should be assigned to events clipboard
+      let clipboardContent = device._eventClipboard.getAllData();
+      expect(clipboardContent).toEqual([
+        {
+          tickId: alert3LastValueTick,
+          elementId: alert3ID,
+          value: alert3Value,
+        },
+        {
+          tickId: alert2LastValueTick,
+          elementId: alert2ID,
+          value: alert2Value,
+        },
+        {
+          tickId: alert1LastValueTick,
+          elementId: alert1ID,
+          value: alert1Value,
+        },
+        {
+          tickId: alert2LastValueTick,
+          elementId: alert2ID,
+          value: alert2Value,
+        },
+      ]);
+    });
+
+    it("should assign value to lastEventValues and to clipboard - if lastEventValues is already with some data of different variables", async () => {
+      alert2LastValueTick = 123;
+      alert2ID = "alert2ID";
+      alert2Value = "test alert2 text";
+
+      lastEventValues = {
+        [alert3ID]: {
+          tickId: alert3LastValueTick,
+          value: alert3Value,
+        },
+        [alert1ID]: {
+          tickId: alert1LastValueTick,
+          value: alert1Value,
+        },
+      };
+      eventClipboardContent = [];
+
+      elementId = "alert2ID";
+      tickId = 1000;
+      payload.eventsToSendConfig.alert2ID.sendingInterval = 20;
+
+      await exec();
+
+      //vale should be assinged to event clipboard
+      let clipboardContent = device._eventClipboard.getAllData();
+      expect(clipboardContent).toEqual([
+        {
+          tickId: alert2LastValueTick,
+          elementId: alert2ID,
+          value: alert2Value,
+        },
+      ]);
+
+      //value should be assigned to lastEventData
+      let newLastEventValues = device._lastEventValues;
+
+      expect(newLastEventValues).toEqual({
+        [alert3ID]: {
+          tickId: alert3LastValueTick,
+          value: alert3Value,
+        },
+        [alert1ID]: {
+          tickId: alert1LastValueTick,
+          value: alert1Value,
+        },
+        [alert2ID]: {
+          tickId: alert2LastValueTick,
+          value: alert2Value,
+        },
+      });
+    });
+
+    it("should assign value to lastEventValues and to clipboard - if lastEventValues is already with some data of the same variable but different tickId", async () => {
+      elementId = "alert2ID";
+      tickId = 1000;
+      payload.eventsToSendConfig.alert2ID.sendingInterval = 20;
+
+      alert2LastValueTick = 123;
+      alert2ID = "alert2ID";
+      alert2Value = "test alert2 text";
+
+      lastEventValues = {
+        [alert2ID]: {
+          tickId: alert3LastValueTick,
+          value: alert3Value,
+        },
+        [alert1ID]: {
+          tickId: alert1LastValueTick,
+          value: alert1Value,
+        },
+      };
+      eventClipboardContent = [];
+
+      await exec();
+
+      //vale should be assinged to event clipboard
+      let clipboardContent = device._eventClipboard.getAllData();
+      expect(clipboardContent).toEqual([
+        {
+          tickId: alert2LastValueTick,
+          elementId: alert2ID,
+          value: alert2Value,
+        },
+      ]);
+
+      //value should be assigned to lastEventData
+      let newLastEventValues = device._lastEventValues;
+
+      expect(newLastEventValues).toEqual({
+        [alert2ID]: {
+          tickId: alert2LastValueTick,
+          value: alert2Value,
+        },
+        [alert1ID]: {
+          tickId: alert1LastValueTick,
+          value: alert1Value,
+        },
+      });
+    });
+
+    it("should assign value to lastEventValues and to clipboard - if lastEventValues is already with some data of the same variable but different tickId", async () => {
+      elementId = "alert2ID";
+      tickId = 1000;
+      payload.eventsToSendConfig.alert2ID.sendingInterval = 20;
+
+      alert2LastValueTick = 123;
+      alert2ID = "alert2ID";
+      alert2Value = "test alert2 text";
+
+      lastEventValues = {
+        [alert2ID]: {
+          tickId: alert3LastValueTick,
+          value: alert2Value,
+        },
+        [alert1ID]: {
+          tickId: alert1LastValueTick,
+          value: alert1Value,
+        },
+      };
+      eventClipboardContent = [];
+
+      await exec();
+
+      //vale should be assinged to event clipboard
+      let clipboardContent = device._eventClipboard.getAllData();
+      expect(clipboardContent).toEqual([
+        {
+          tickId: alert2LastValueTick,
+          elementId: alert2ID,
+          value: alert2Value,
+        },
+      ]);
+
+      //value should be assigned to lastEventData
+      let newLastEventValues = device._lastEventValues;
+
+      expect(newLastEventValues).toEqual({
+        [alert2ID]: {
+          tickId: alert2LastValueTick,
+          value: alert2Value,
+        },
+        [alert1ID]: {
+          tickId: alert1LastValueTick,
+          value: alert1Value,
+        },
+      });
+    });
+
+    it("should assign value to lastEventValues and to clipboard - if lastEventValues is already with some data of the same variable but different value", async () => {
+      elementId = "alert2ID";
+      tickId = 1000;
+      payload.eventsToSendConfig.alert2ID.sendingInterval = 20;
+
+      alert2LastValueTick = 123;
+      alert2ID = "alert2ID";
+      alert2Value = "test alert2 text";
+
+      lastEventValues = {
+        [alert2ID]: {
+          tickId: alert2LastValueTick,
+          value: alert3Value,
+        },
+        [alert1ID]: {
+          tickId: alert1LastValueTick,
+          value: alert1Value,
+        },
+      };
+      eventClipboardContent = [];
+
+      await exec();
+
+      //vale should be assinged to event clipboard
+      let clipboardContent = device._eventClipboard.getAllData();
+      expect(clipboardContent).toEqual([
+        {
+          tickId: alert2LastValueTick,
+          elementId: alert2ID,
+          value: alert2Value,
+        },
+      ]);
+
+      //value should be assigned to lastEventData
+      let newLastEventValues = device._lastEventValues;
+
+      expect(newLastEventValues).toEqual({
+        [alert2ID]: {
+          tickId: alert2LastValueTick,
+          value: alert2Value,
+        },
+        [alert1ID]: {
+          tickId: alert1LastValueTick,
+          value: alert1Value,
+        },
+      });
+    });
+
+    it("should not assign value to clipboard - if lastEventValues is already with some data of the same variable with the same value and tickId", async () => {
+      elementId = "alert2ID";
+      tickId = 1000;
+      payload.eventsToSendConfig.alert2ID.sendingInterval = 20;
+
+      alert2LastValueTick = 123;
+      alert2ID = "alert2ID";
+      alert2Value = "test alert2 text";
+
+      lastEventValues = {
+        [alert2ID]: {
+          tickId: alert2LastValueTick,
+          value: alert2Value,
+        },
+        [alert1ID]: {
+          tickId: alert1LastValueTick,
+          value: alert1Value,
+        },
+      };
+      eventClipboardContent = [];
+
+      await exec();
+
+      //vale should be assinged to event clipboard
+      let clipboardContent = device._eventClipboard.getAllData();
+      expect(clipboardContent).toEqual([]);
+
+      //value should be assigned to lastEventData
+      let newLastEventValues = device._lastEventValues;
+
+      expect(newLastEventValues).toEqual({
+        [alert2ID]: {
+          tickId: alert2LastValueTick,
+          value: alert2Value,
+        },
+        [alert1ID]: {
+          tickId: alert1LastValueTick,
+          value: alert1Value,
+        },
+      });
+    });
+
+    it("should not assign value to clipboard but to lastEventValue - if lastEventValues is already with some data of the same variable with the same tickId but not the same variable - new variable value is null", async () => {
+      elementId = "alert2ID";
+      tickId = 1000;
+      payload.eventsToSendConfig.alert2ID.sendingInterval = 20;
+
+      alert2LastValueTick = 123;
+      alert2ID = "alert2ID";
+      alert2Value = null;
+
+      lastEventValues = {
+        [alert2ID]: {
+          tickId: alert2LastValueTick,
+          value: "some test text",
+        },
+        [alert1ID]: {
+          tickId: alert1LastValueTick,
+          value: alert1Value,
+        },
+      };
+      eventClipboardContent = [];
+
+      await exec();
+
+      //vale should not be assinged to event clipboard
+      let clipboardContent = device._eventClipboard.getAllData();
+      expect(clipboardContent).toEqual([]);
+
+      //value should be assigned to lastEventData
+      let newLastEventValues = device._lastEventValues;
+
+      expect(newLastEventValues).toEqual({
+        [alert2ID]: {
+          tickId: alert2LastValueTick,
+          value: alert2Value,
+        },
+        [alert1ID]: {
+          tickId: alert1LastValueTick,
+          value: alert1Value,
+        },
+      });
+    });
+  });
+
+  describe("_getAndSaveDataToClipboard", () => {
+    let project;
+    let payload;
+    let device;
+    let variable1;
+    let variable1ID;
+    let variable1Value;
+    let variable1LastValueTick;
+    let variable2;
+    let variable2ID;
+    let variable2Value;
+    let variable2LastValueTick;
+    let variable3;
+    let variable3ID;
+    let variable3Value;
+    let variable3LastValueTick;
+    let variable4;
+    let variable4ID;
+    let variable4Value;
+    let variable4LastValueTick;
+    let variable5;
+    let variable5ID;
+    let variable5Value;
+    let variable5LastValueTick;
+    let getElementMockFunc;
+    let lastDataValues;
+    let dataClipboardContent;
+    let getAndSaveElementsDataToClipboardIfFitsSendingIntervalMockFunc;
+    let tickId;
+
+    beforeEach(async () => {
+      await createDirIfNotExists(AgentDirPath);
+      await clearDirectoryAsync(AgentDirPath);
+
+      variable1ID = "variable1ID";
+      variable1Value = 1001;
+      variable1LastValueTick = 101;
+
+      variable2ID = "variable2ID";
+      variable2Value = 1002;
+      variable2LastValueTick = 102;
+
+      variable3ID = "variable3ID";
+      variable3Value = 1003;
+      variable3LastValueTick = 103;
+
+      variable4ID = "variable4ID";
+      variable4Value = 1004;
+      variable4LastValueTick = 104;
+
+      variable5ID = "variable5ID";
+      variable5Value = 1005;
+      variable5LastValueTick = 105;
+
+      getElementMockFunc = (deviceId, variableId) => {
+        switch (variableId) {
+          case variable1ID: {
+            return variable1;
+          }
+          case variable2ID: {
+            return variable2;
+          }
+          case variable3ID: {
+            return variable3;
+          }
+          case variable4ID: {
+            return variable4;
+          }
+          case variable5ID: {
+            return variable5;
+          }
+          default: {
+            return null;
+          }
+        }
+      };
+
+      project = {
+        AgentDirPath: AgentDirPath,
+        getElement: getElementMockFunc,
+      };
+
+      lastDataValues = {};
+      dataClipboardContent = {};
+
+      payload = {
+        id: "deviceID",
+        name: "deviceName",
+        type: "AgentDevice",
+        variables: {},
+        calcElements: {},
+        alerts: {},
+        isActive: true,
+        sendDataFileInterval: 10,
+        sendEventFileInterval: 5,
+        dataStorageSize: 20,
+        eventStorageSize: 30,
+        numberOfDataFilesToSend: 3,
+        numberOfEventFilesToSend: 6,
+        dataToSendConfig: {
+          [variable1ID]: {
+            elementId: variable1ID,
+            deviceId: "testDevice1ID",
+            sendingInterval: 10,
+          },
+          [variable2ID]: {
+            elementId: variable2ID,
+            deviceId: "testDevice1ID",
+            sendingInterval: 20,
+          },
+          [variable3ID]: {
+            elementId: variable3ID,
+            deviceId: "testDevice1ID",
+            sendingInterval: 30,
+          },
+        },
+        eventsToSendConfig: {},
+      };
+
+      tickId = 1000;
+    });
+
+    afterEach(async () => {
+      await createDirIfNotExists(AgentDirPath);
+      await clearDirectoryAsync(AgentDirPath);
+    });
+
+    let exec = async () => {
+      variable1 = {
+        ID: variable1ID,
+        LastValueTick: variable1LastValueTick,
+        Value: variable1Value,
+      };
+
+      variable2 = {
+        ID: variable2ID,
+        LastValueTick: variable2LastValueTick,
+        Value: variable2Value,
+      };
+
+      variable3 = {
+        ID: variable3ID,
+        LastValueTick: variable3LastValueTick,
+        Value: variable3Value,
+      };
+
+      variable4 = {
+        ID: variable4ID,
+        LastValueTick: variable4LastValueTick,
+        Value: variable4Value,
+      };
+
+      variable5 = {
+        ID: variable5ID,
+        LastValueTick: variable5LastValueTick,
+        Value: variable5Value,
+      };
+
+      device = new AgentDevice(project);
+
+      await device.init(payload);
+
+      device._lastDataValues = lastDataValues;
+      device._dataClipboard._data = dataClipboardContent;
+
+      getAndSaveElementsDataToClipboardIfFitsSendingIntervalMockFunc = jest.fn(
+        device._getAndSaveElementsDataToClipboardIfFitsSendingInterval
+      );
+      device._getAndSaveElementsDataToClipboardIfFitsSendingInterval = getAndSaveElementsDataToClipboardIfFitsSendingIntervalMockFunc;
+
+      return device._getAndSaveDataToClipboard(tickId);
+    };
+
+    it("should call _getAndSaveElementsEventToClipboardIfFitsSendingInterval - for every elements from dataConfig", async () => {
+      await exec();
+
+      expect(
+        getAndSaveElementsDataToClipboardIfFitsSendingIntervalMockFunc
+      ).toHaveBeenCalledTimes(3);
+
+      expect(
+        getAndSaveElementsDataToClipboardIfFitsSendingIntervalMockFunc.mock
+          .calls[0][0]
+      ).toEqual(variable1ID);
+      expect(
+        getAndSaveElementsDataToClipboardIfFitsSendingIntervalMockFunc.mock
+          .calls[0][1]
+      ).toEqual(tickId);
+
+      expect(
+        getAndSaveElementsDataToClipboardIfFitsSendingIntervalMockFunc.mock
+          .calls[1][0]
+      ).toEqual(variable2ID);
+      expect(
+        getAndSaveElementsDataToClipboardIfFitsSendingIntervalMockFunc.mock
+          .calls[1][1]
+      ).toEqual(tickId);
+
+      expect(
+        getAndSaveElementsDataToClipboardIfFitsSendingIntervalMockFunc.mock
+          .calls[2][0]
+      ).toEqual(variable3ID);
+      expect(
+        getAndSaveElementsDataToClipboardIfFitsSendingIntervalMockFunc.mock
+          .calls[2][1]
+      ).toEqual(tickId);
+    });
+
+    it("should assign all values to lastDataValue and to clipboards - for every elements from data that's sendingInterval fits tickNumber", async () => {
+      tickId = 1000;
+
+      payload.dataToSendConfig.variable1ID.sendingInterval = 1;
+      payload.dataToSendConfig.variable2ID.sendingInterval = 2;
+      payload.dataToSendConfig.variable3ID.sendingInterval = 3;
+
+      await exec();
+
+      //value should be assigned to data clipboard
+      let clipboardContent = device._dataClipboard.getAllData();
+      expect(clipboardContent).toEqual({
+        [variable1LastValueTick]: { [variable1ID]: variable1Value },
+        [variable2LastValueTick]: { [variable2ID]: variable2Value },
+      });
+
+      //value should be assigned to lastValueData
+      let newLastDataValues = device._lastDataValues;
+
+      expect(newLastDataValues).toEqual({
+        [variable1ID]: {
+          tickId: variable1LastValueTick,
+          value: variable1Value,
+        },
+        [variable2ID]: {
+          tickId: variable2LastValueTick,
+          value: variable2Value,
+        },
+      });
+    });
+
+    it("should assign all values to lastDataValue and to clipboards - for every elements from data that's sendingInterval fits tickNumber and is different then in lastDataValues", async () => {
+      tickId = 1000;
+
+      lastDataValues = {
+        [variable1ID]: {
+          tickId: variable1LastValueTick,
+          value: variable1Value,
+        },
+        [variable2ID]: {
+          tickId: 123,
+          value: 456,
+        },
+      };
+
+      payload.dataToSendConfig.variable1ID.sendingInterval = 1;
+      payload.dataToSendConfig.variable2ID.sendingInterval = 2;
+      payload.dataToSendConfig.variable3ID.sendingInterval = 3;
+
+      await exec();
+
+      //value should be assigned to data clipboard
+      let clipboardContent = device._dataClipboard.getAllData();
+      expect(clipboardContent).toEqual({
+        [variable2LastValueTick]: { [variable2ID]: variable2Value },
+      });
+
+      //value should be assigned to lastValueData
+      let newLastDataValues = device._lastDataValues;
+
+      expect(newLastDataValues).toEqual({
+        [variable1ID]: {
+          tickId: variable1LastValueTick,
+          value: variable1Value,
+        },
+        [variable2ID]: {
+          tickId: variable2LastValueTick,
+          value: variable2Value,
+        },
+      });
+    });
+  });
+
+  describe("_getAndSaveEventToClipboard", () => {
+    let project;
+    let payload;
+    let device;
+    let alert1;
+    let alert1ID;
+    let alert1Value;
+    let alert1LastValueTick;
+    let alert2;
+    let alert2ID;
+    let alert2Value;
+    let alert2LastValueTick;
+    let alert3;
+    let alert3ID;
+    let alert3Value;
+    let alert3LastValueTick;
+    let alert4;
+    let alert4ID;
+    let alert4Value;
+    let alert4LastValueTick;
+    let alert5;
+    let alert5ID;
+    let alert5Value;
+    let alert5LastValueTick;
+    let getElementMockFunc;
+    let lastEventValues;
+    let eventClipboardContent;
+    let getAndSaveElementsEventToClipboardIfFitsSendingIntervalMockFunc;
+    let tickId;
+
+    beforeEach(async () => {
+      await createDirIfNotExists(AgentDirPath);
+      await clearDirectoryAsync(AgentDirPath);
+
+      alert1ID = "alert1ID";
+      alert1Value = "test text 1";
+      alert1LastValueTick = 101;
+
+      alert2ID = "alert2ID";
+      alert2Value = "test text 2";
+      alert2LastValueTick = 102;
+
+      alert3ID = "alert3ID";
+      alert3Value = "test text 3";
+      alert3LastValueTick = 103;
+
+      alert4ID = "alert4ID";
+      alert4Value = "test text 4";
+      alert4LastValueTick = 104;
+
+      alert5ID = "alert5ID";
+      alert5Value = "test text 5";
+      alert5LastValueTick = 105;
+
+      getElementMockFunc = (deviceId, variableId) => {
+        switch (variableId) {
+          case alert1ID: {
+            return alert1;
+          }
+          case alert2ID: {
+            return alert2;
+          }
+          case alert3ID: {
+            return alert3;
+          }
+          case alert4ID: {
+            return alert4;
+          }
+          case alert5ID: {
+            return alert5;
+          }
+          default: {
+            return null;
+          }
+        }
+      };
+
+      project = {
+        AgentDirPath: AgentDirPath,
+        getElement: getElementMockFunc,
+      };
+
+      lastEventValues = {};
+      eventClipboardContent = [];
+
+      payload = {
+        id: "deviceID",
+        name: "deviceName",
+        type: "AgentDevice",
+        variables: {},
+        calcElements: {},
+        alerts: {},
+        isActive: true,
+        sendDataFileInterval: 10,
+        sendEventFileInterval: 5,
+        dataStorageSize: 20,
+        eventStorageSize: 30,
+        numberOfDataFilesToSend: 3,
+        numberOfEventFilesToSend: 6,
+        dataToSendConfig: {},
+        eventsToSendConfig: {
+          [alert1ID]: {
+            elementId: alert1ID,
+            deviceId: "testDevice1ID",
+            sendingInterval: 10,
+          },
+          [alert2ID]: {
+            elementId: alert2ID,
+            deviceId: "testDevice1ID",
+            sendingInterval: 20,
+          },
+          [alert3ID]: {
+            elementId: alert3ID,
+            deviceId: "testDevice1ID",
+            sendingInterval: 30,
+          },
+        },
+      };
+
+      tickId = 1000;
+    });
+
+    afterEach(async () => {
+      await createDirIfNotExists(AgentDirPath);
+      await clearDirectoryAsync(AgentDirPath);
+    });
+
+    let exec = async () => {
+      alert1 = {
+        ID: alert1ID,
+        LastValueTick: alert1LastValueTick,
+        Value: alert1Value,
+      };
+
+      alert2 = {
+        ID: alert2ID,
+        LastValueTick: alert2LastValueTick,
+        Value: alert2Value,
+      };
+
+      alert3 = {
+        ID: alert3ID,
+        LastValueTick: alert3LastValueTick,
+        Value: alert3Value,
+      };
+
+      alert4 = {
+        ID: alert4ID,
+        LastValueTick: alert4LastValueTick,
+        Value: alert4Value,
+      };
+
+      alert5 = {
+        ID: alert5ID,
+        LastValueTick: alert5LastValueTick,
+        Value: alert5Value,
+      };
+
+      device = new AgentDevice(project);
+
+      await device.init(payload);
+
+      device._lastEventValues = lastEventValues;
+      device._eventClipboard._data = eventClipboardContent;
+
+      getAndSaveElementsEventToClipboardIfFitsSendingIntervalMockFunc = jest.fn(
+        device._getAndSaveElementsEventToClipboardIfFitsSendingInterval
+      );
+      device._getAndSaveElementsEventToClipboardIfFitsSendingInterval = getAndSaveElementsEventToClipboardIfFitsSendingIntervalMockFunc;
+
+      return device._getAndSaveEventsToClipboard(tickId);
+    };
+
+    it("should call _getAndSaveElementsEventToClipboardIfFitsSendingInterval - for every elements from dataConfig", async () => {
+      await exec();
+
+      expect(
+        getAndSaveElementsEventToClipboardIfFitsSendingIntervalMockFunc
+      ).toHaveBeenCalledTimes(3);
+
+      expect(
+        getAndSaveElementsEventToClipboardIfFitsSendingIntervalMockFunc.mock
+          .calls[0][0]
+      ).toEqual(alert1ID);
+      expect(
+        getAndSaveElementsEventToClipboardIfFitsSendingIntervalMockFunc.mock
+          .calls[0][1]
+      ).toEqual(tickId);
+
+      expect(
+        getAndSaveElementsEventToClipboardIfFitsSendingIntervalMockFunc.mock
+          .calls[1][0]
+      ).toEqual(alert2ID);
+      expect(
+        getAndSaveElementsEventToClipboardIfFitsSendingIntervalMockFunc.mock
+          .calls[1][1]
+      ).toEqual(tickId);
+
+      expect(
+        getAndSaveElementsEventToClipboardIfFitsSendingIntervalMockFunc.mock
+          .calls[2][0]
+      ).toEqual(alert3ID);
+      expect(
+        getAndSaveElementsEventToClipboardIfFitsSendingIntervalMockFunc.mock
+          .calls[2][1]
+      ).toEqual(tickId);
+    });
+
+    it("should assign all values to lastDataValue and to clipboards - for every elements from data that's sendingInterval fits tickNumber", async () => {
+      tickId = 1000;
+
+      payload.eventsToSendConfig.alert1ID.sendingInterval = 1;
+      payload.eventsToSendConfig.alert2ID.sendingInterval = 2;
+      payload.eventsToSendConfig.alert3ID.sendingInterval = 3;
+
+      await exec();
+
+      //value should be assigned to event clipboard
+      let clipboardContent = device._eventClipboard.getAllData();
+      expect(clipboardContent).toEqual([
+        {
+          elementId: alert1ID,
+          tickId: alert1LastValueTick,
+          value: alert1Value,
+        },
+        {
+          elementId: alert2ID,
+          tickId: alert2LastValueTick,
+          value: alert2Value,
+        },
+      ]);
+
+      //value should be assigned to lastValueData
+      let newLastEventsValues = device._lastEventValues;
+
+      expect(newLastEventsValues).toEqual({
+        [alert1ID]: {
+          tickId: alert1LastValueTick,
+          value: alert1Value,
+        },
+        [alert2ID]: {
+          tickId: alert2LastValueTick,
+          value: alert2Value,
+        },
+      });
+    });
+
+    it("should assign all values to lastDataValue and to clipboards - for every elements from data that's sendingInterval fits tickNumber and is different then in lastDataValues", async () => {
+      tickId = 1000;
+
+      lastEventValues = {
+        [alert1ID]: {
+          tickId: alert1LastValueTick,
+          value: alert1Value,
+        },
+        [alert2ID]: {
+          tickId: 123,
+          value: "fake test text",
+        },
+      };
+
+      payload.eventsToSendConfig.alert1ID.sendingInterval = 1;
+      payload.eventsToSendConfig.alert2ID.sendingInterval = 2;
+      payload.eventsToSendConfig.alert3ID.sendingInterval = 3;
+
+      await exec();
+
+      //value should be assigned to event clipboard
+      let clipboardContent = device._eventClipboard.getAllData();
+      expect(clipboardContent).toEqual([
+        {
+          elementId: alert2ID,
+          tickId: alert2LastValueTick,
+          value: alert2Value,
+        },
+      ]);
+
+      //value should be assigned to lastValueData
+      let newLastDataValues = device._lastEventValues;
+
+      expect(newLastDataValues).toEqual({
+        [alert1ID]: {
+          tickId: alert1LastValueTick,
+          value: alert1Value,
+        },
+        [alert2ID]: {
+          tickId: alert2LastValueTick,
+          value: alert2Value,
+        },
+      });
+    });
+
+    it("should assign all values to lastDataValue and to clipboards - for every elements from data that's sendingInterval fits tickNumber and is different then in lastDataValues and assign all values to lastDataValue but not to clipboards - for every different value that is now null", async () => {
+      tickId = 1000;
+
+      lastEventValues = {
+        [alert1ID]: {
+          tickId: alert1LastValueTick - 1,
+          value: "fake text value1",
+        },
+        [alert2ID]: {
+          tickId: alert2LastValueTick - 1,
+          value: "fake text value2",
+        },
+      };
+
+      alert2Value = null;
+
+      payload.eventsToSendConfig.alert1ID.sendingInterval = 1;
+      payload.eventsToSendConfig.alert2ID.sendingInterval = 2;
+      payload.eventsToSendConfig.alert3ID.sendingInterval = 3;
+
+      await exec();
+
+      //value should be assigned to event clipboard
+      let clipboardContent = device._eventClipboard.getAllData();
+      expect(clipboardContent).toEqual([
+        {
+          elementId: alert1ID,
+          tickId: alert1LastValueTick,
+          value: alert1Value,
+        },
+      ]);
+
+      //value should be assigned to lastValueData
+      let newLastDataValues = device._lastEventValues;
+
+      expect(newLastDataValues).toEqual({
+        [alert1ID]: {
+          tickId: alert1LastValueTick,
+          value: alert1Value,
+        },
+        [alert2ID]: {
+          tickId: alert2LastValueTick,
+          value: null,
+        },
+      });
     });
   });
 });
