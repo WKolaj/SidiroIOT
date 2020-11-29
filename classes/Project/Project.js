@@ -15,7 +15,9 @@ const {
 class Project {
   //#region ========= CONSTRUCTOR =========
 
-  constructor() {
+  constructor(projFilePath, agentsDirPath) {
+    this._projFilePath = projFilePath;
+    this._agentsDirPath = agentsDirPath;
     this._connectableDevices = {};
     this._internalDevices = {};
     this._agentDevices = {};
@@ -55,6 +57,20 @@ class Project {
   //#endregion  ========= PUBLIC STATIC METHODS =========
 
   //#region ========= PROPERTIES =========
+
+  /**
+   * @description Path to projects file
+   */
+  get ProjectFilePath() {
+    return this._projFilePath;
+  }
+
+  /**
+   * @description Paths to projects agents directory
+   */
+  get AgentsDirPath() {
+    return this._agentsDirPath;
+  }
 
   /**
    * @description All Devices of the project

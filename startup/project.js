@@ -10,6 +10,7 @@ const {
   readFileAsync,
   writeFileAsync,
   isStringAValidJSON,
+  createDirAsync,
 } = require("../utilities/utilities");
 
 //Method for initializing database connection
@@ -18,8 +19,10 @@ module.exports = async function () {
 
   //Create project file if not exists
   let settingsDirPath = config.get("settingsPath");
+  let agentsDirName = config.get("agentsDirName");
   let projectFileName = config.get("projectFileName");
   let projectFilePath = path.join(settingsDirPath, projectFileName);
+  let agentsDirPath = path.join(settingsDirPath, agentsDirName);
 
   //Checking if settings dir exists
   let settingsDirExists = await checkIfDirectoryExistsAsync(settingsDirPath);
@@ -28,8 +31,15 @@ module.exports = async function () {
     logger.info("Settings dir created");
   }
 
+  //Checking if agentsData dir exists
+  let agentsDirExists = await checkIfDirectoryExistsAsync(agentsDirPath);
+  if (!agentsDirExists) {
+    await createDirAsync(agentsDirPath);
+    logger.info("Agents dir created");
+  }
+
   //Initializing project service
-  await projectService.init(projectFilePath);
+  await projectService.init(projectFilePath, agentsDirPath);
 
   //Checking if project file exists - if exists and is valid - set ipconfig from proj to netplan
   //Otherwise - create new project file and load ipConfig from netplan to project file

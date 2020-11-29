@@ -15,6 +15,7 @@ module.exports = async function () {
   throwIfConfigDoesNotExist("netplanConfigSocketFilePath");
   throwIfConfigDoesNotExist("netplanConfigAuthToken");
   throwIfConfigDoesNotExist("maxProjectFileSize");
+  throwIfConfigDoesNotExist("agentsDirName");
 
   //#endregion ========== CUSTOM CONFIG PROPERTIES ==========
 

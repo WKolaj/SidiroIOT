@@ -1,4 +1,19 @@
+const {
+  cloneObject,
+  createDirIfNotExists,
+  exists,
+} = require("../../../utilities/utilities");
+const { getAgentsDiPath } = require("../../../services/projectService");
+const DataClipboard = require("../../Clipboard/DataClipboard");
+const EventClipboard = require("../../Clipboard/EventClipboard");
+const FileStorage = require("../../Storage/FileStorage");
 const Device = require("../Device");
+const path = require("path");
+const Sampler = require("../../Sampler/Sampler");
+const logger = require("../../../logger/logger");
+
+const dataStorageDirName = "dataToSend";
+const eventStorageDirName = "eventsToSend";
 
 class AgentDevice extends Device {
   //#region ========= CONSTRUCTOR =========
@@ -6,49 +21,585 @@ class AgentDevice extends Device {
   constructor(project) {
     super(project);
 
-    this._dataBuffer = null;
-    this._eventBuffer = null;
+    this._dirPath = null;
+    this._dataClipboard = null;
+    this._eventClipboard = null;
     this._tryBoardOnSendData = null;
     this._tryBoardOnSendEvent = null;
-    this._boarded = null;
-    this._boardingKey = null;
-    this._sendDataInternval = null;
-    this._sendEventInterval = null;
+    this._lastDataValues = null;
+    this._lastEventValues = null;
     this._dataStorage = null;
     this._eventStorage = null;
+    this._sendDataFileInterval = null;
+    this._sendEventFileInterval = null;
+    this._dataStorageSize = null;
+    this._eventStorageSize = null;
+    this._numberOfDataFilesToSend = null;
+    this._numberOfEventFilesToSend = null;
+    this._dataToSendConfig = null;
+    this._eventsToSendConfig = null;
+    this._boarded = null;
   }
 
   //#endregion ========= CONSTRUCTOR =========
 
   //#region ========= PROPERTIES =========
 
+  /**
+   * @description Interval between sending data files
+   */
+  get SendDataFileInterval() {
+    return this._sendDataFileInterval;
+  }
+
+  /**
+   * @description Interval between sending event files
+   */
+  get SendEventFileInterval() {
+    return this._sendEventFileInterval;
+  }
+
+  /**
+   * @description Maxium number of data files to be stored
+   */
+  get DataStorageSize() {
+    return this._dataStorageSize;
+  }
+
+  /**
+   * @description Maximum number of event files to be stored
+   */
+  get EventStorageSize() {
+    return this._eventStorageSize;
+  }
+
+  /**
+   * @description Max number of data files to be send with one request
+   */
+  get NumberOfDataFilesToSend() {
+    return this._numberOfDataFilesToSend;
+  }
+
+  /**
+   * @description Max number of event files to be send with one request
+   */
+  get NumberOfEventFilesToSend() {
+    return this._numberOfEventFilesToSend;
+  }
+
+  /**
+   * @description Configuration of elements to be sent
+   */
+  get DataToSendConfig() {
+    return this._dataToSendConfig;
+  }
+
+  /**
+   * @description Configuration of elements to be sent
+   */
+  get EventsToSendConfig() {
+    return this._eventsToSendConfig;
+  }
+
+  /**
+   * @description Is element boarded. Method for checking board between refreshing - not for real check inside refresh
+   */
   get Boarded() {
     return this._boarded;
   }
 
-  get BoardingKey() {
-    return this._boardingKey;
-  }
-
-  get SendDataInterval() {
-    return this._sendDataInternval;
-  }
-
-  get SendEventInterval() {
-    return this._sendEventInterval;
-  }
-
-  get DataStorage() {
-    return this._dataStorage;
-  }
-
-  get EventStorage() {
-    return this._eventStorage;
-  }
-
   //#endregion ========= PROPERTIES ========
 
+  //#region ========= PRIVATE METHODS =========
+
+  /**
+   * @description Method for assigning and creating main directory for agent
+   */
+  async _initializeMainDirectory() {
+    //Creating directory for agent
+    let agentsDirPath = this._project.AgentDirPath;
+    let agentDirPath = path.join(agentsDirPath, this.ID);
+    await createDirIfNotExists(agentDirPath);
+    this._dirPath = agentDirPath;
+  }
+
+  /**
+   * @description Method for initialzing and creating new Clipboards
+   */
+  async _initializeClipboards() {
+    this._dataClipboard = new DataClipboard();
+    this._dataClipboard.init();
+    this._eventClipboard = new EventClipboard();
+    this._eventClipboard.init();
+  }
+
+  /**
+   * @description Method for initializing storages - SHOULD BE USED AFTER INITIALIZING MAIN DIRECTORY
+   */
+  async _initializeStorages() {
+    //Determining dataStorage and agentStorage paths
+    let dataStorageDirPath = path.join(this._dirPath, dataStorageDirName);
+    let eventStorageDirPath = path.join(this._dirPath, eventStorageDirName);
+
+    this._dataStorage = new FileStorage();
+    await this._dataStorage.init({
+      dirPath: dataStorageDirPath,
+      bufferLength: this.NumberOfDataFilesToSend,
+    });
+
+    this._eventStorage = new FileStorage();
+    await this._eventStorage.init({
+      dirPath: eventStorageDirPath,
+      bufferLength: this.NumberOfEventFilesToSend,
+    });
+  }
+
+  /**
+   * @description Method for getting and saving all actual values of elements from data
+   * @param {Number} tickNumber actual tick number
+   */
+  _getAndSaveDataToClipboard(tickNumber) {
+    for (let elementId of Object.keys(this.DataToSendConfig)) {
+      _getAndSaveElementsDataToClipboard(elementId, tickNumber);
+    }
+  }
+
+  /**
+   * @description Method for adding elements value and lastValueTick to data cliboard - only if element is valid and meets requirements
+   * @param {String} elementId id of element
+   * @param {String} tickNumber tick number
+   */
+  _getAndSaveElementsDataToClipboard(elementId, tickNumber) {
+    //Getting deviceId and sendingInterval from element's config
+    let deviceId = this.DataToSendConfig[elementId].deviceId;
+    let sendingInterval = this.DataToSendConfig[elementId].sendingInterval;
+
+    //Getting element from project
+    let element = this._project.getElement(deviceId, elementId);
+
+    //If element does not exist - return
+    if (!exists(element)) return;
+
+    //If element sending interval does not meet requriements - return
+    if (!Sampler.doesSampleTimeMatchesTick(tickNumber, sendingInterval)) return;
+
+    let elementsValue = element.Value;
+    let elementsLastValueTick = element.LastValueTick;
+
+    //Checking if element's value is different then element's value in lastDataValues
+    let valueFromLastValues = this._lastDataValues[elementId];
+    if (
+      exists(valueFromLastValues) &&
+      valueFromLastValues.tickId === elementsLastValueTick &&
+      valueFromLastValues.value === elementsValue
+    )
+      return;
+
+    //Adding data to clipboard
+    this._dataClipboard.addData(
+      elementsLastValueTick,
+      elementId,
+      elementsValue
+    );
+    //Adding data to lastDataValues
+    this._lastDataValues[elementId] = {
+      tickId: elementsLastValueTick,
+      value: elementsValue,
+    };
+  }
+
+  /**
+   * @description Method for getting and saving all actual values of elements from events data
+   * @param {Number} tickNumber actual tick number
+   */
+  _getAndSaveEventsToClipboard(tickNumber) {
+    for (let elementId of Object.keys(this.EventsToSendConfig)) {
+      _getAndSaveElementsEventToClipboard(elementId, tickNumber);
+    }
+  }
+
+  /**
+   * @description Method for adding elements value and lastValueTick to event cliboard - only if element is valid and meets requirements
+   * @param {String} elementId id of element
+   * @param {String} tickNumber tick number
+   */
+  _getAndSaveElementsEventToClipboard(elementId, tickNumber) {
+    //Getting deviceId and sendingInterval from element's config
+    let deviceId = this.EventsToSendConfig[elementId].deviceId;
+    let sendingInterval = this.EventsToSendConfig[elementId].sendingInterval;
+
+    //Getting element from project
+    let element = this._project.getElement(deviceId, elementId);
+
+    //If element does not exist - return
+    if (!exists(element)) return;
+
+    //If element sending interval does not meet requriements - return
+    if (!Sampler.doesSampleTimeMatchesTick(tickNumber, sendingInterval)) return;
+
+    let elementsValue = element.Value;
+    let elementsLastValueTick = element.LastValueTick;
+
+    //Checking if element's value is different then element's value in lastEventValues
+    let valueFromLastValues = this._lastEventValues[elementId];
+    if (
+      exists(valueFromLastValues) &&
+      valueFromLastValues.tickId === elementsLastValueTick &&
+      valueFromLastValues.value === elementsValue
+    )
+      return;
+
+    //Value cannot be null - if value is null it should not be added to cliboard but should be save in lastEventValues
+    if (value !== null) {
+      //Adding data to clipboard
+      this._eventClipboard.addData(
+        elementsLastValueTick,
+        elementId,
+        elementsValue
+      );
+    }
+
+    //Adding data to lastDataValues
+    this._lastEventValues[elementId] = {
+      tickId: elementsLastValueTick,
+      value: elementsValue,
+    };
+  }
+
+  /**
+   * @description Method for refrehsing Boarded state. Method will never throw na set false to Boarded in case error appears
+   */
+  async _refreshBoardedState() {
+    let newBoardedState = false;
+    try {
+      newBoardedState = await this._checkIfBoarded();
+    } catch (err) {
+      logger.err(err, err.message);
+    }
+
+    this._boarded = newBoardedState;
+  }
+
+  /**
+   * @description Method for checking whether device should be boarded. INVOKE REFRESH BOARD STATE BEFORE THIS METHOD!
+   */
+  async _checkIfShouldBoard(tickNumber) {
+    //If device is already boarded - no need to board it again
+    if (this.Boarded) return false;
+
+    //if device is not boarded - continue and check if should be boarded due to sending data or event
+
+    //Checking if data should be send
+    let shouldDataBeSend = this._checkIfDataShouldBeSent(tickNumber);
+
+    //Boarding should be performed only if tick of sending data Interval fits tickNumber and device is allowed to try boarding on send data
+    if (shouldDataBeSend && this._tryBoardOnSendData) return true;
+
+    //Checking if data should be send
+    let shouldEventsBeSend = this._checkIfEventsShouldBeSent(tickNumber);
+
+    //Boarding should be performed only if tick of sending event Interval fits tickNumber and device is allowed to try boarding on send event
+    if (shouldEventsBeSend && this._tryBoardOnSendEvent) return true;
+
+    //Otherwise - device should not be boarded
+    return false;
+  }
+
+  /**
+   * @description Method for trying boarding.
+   */
+  async _tryBoard() {
+    try {
+      await this.OnBoard();
+    } catch (err) {
+      logger.error(err.message, err);
+    }
+  }
+
+  /**
+   * @description Method for checking if data should be sent in given refresh cycle
+   * @param {NodeRequire} tickNumber tickNumber of given refresh cycle
+   */
+  _checkIfDataShouldBeSent(tickNumber) {
+    return Sampler.doesSampleTimeMatchesTick(
+      tickNumber,
+      this.SendDataFileInterval
+    );
+  }
+
+  /**
+   * @description Method for writing data from data clipboard to data storage and clear data clipboard
+   */
+  async _moveDataFromClipboardToStorage() {
+    try {
+      //Getting data from clipboard and saving it into storage
+      let clipboardContent = this._dataClipboard.getAllData();
+      await this._dataStorage.createData(clipboardContent);
+
+      //Clearing data form clipboard
+      this._dataClipboard.clearAllData();
+    } catch (err) {
+      logger.error(err, err.message);
+    }
+  }
+
+  /**
+   * @description Method for sending data from cliboard or write it to storage if sending failed. Throws if data was no send successfully
+   */
+  async _sendDataFromClipboardAndClearIt() {
+    //If data clipboard content is empty - don't proceed with sending or saving data
+    let dataClipboardContent = this._dataClipboard.getAllData();
+    if (!exists(dataClipboardContent) || dataClipboardContent === {}) {
+      return;
+    }
+
+    await this._sendData(dataClipboardContent);
+
+    //Send successfully - clear data clipboard
+    this._dataClipboard.clearAllData();
+  }
+
+  /**
+   * @description Method for sending data from files storage.
+   */
+  async _sendDataFromStorage() {
+    //Getting number of files to send
+    let fileIdsToSend = [];
+    try {
+      let allFileIds = await this._dataStorage.getAllIDs();
+      //If there was an error during getting ids - method getAllIDs returns null
+      if (exists(allFileIds)) return;
+      fileIdsToSend = allFileIds.slice(0, this.NumberOfDataFilesToSend);
+    } catch (err) {
+      logger.error(err.message, err);
+      return;
+    }
+
+    //Trying to send all files to send and delete them after
+    for (let fileId of fileIdsToSend) {
+      try {
+        let fileContent = await this._dataStorage.getData(fileId);
+        //If there was an error during getting data - method getData returns null
+        if (exists(fileContent)) await this._sendData(fileContent);
+        await this._dataStorage.deleteData(fileId);
+      } catch (err) {
+        logger.error(err.message, err);
+        return;
+      }
+    }
+  }
+
+  /**
+   * @description Method for checking if event should be sent in given refresh cycle
+   * @param {NodeRequire} tickNumber tickNumber of given refresh cycle
+   */
+  _checkIfEventsShouldBeSent(tickNumber) {
+    return Sampler.doesSampleTimeMatchesTick(
+      tickNumber,
+      this.SendEventFileInterval
+    );
+  }
+
+  /**
+   * @description Method for sending events from cliboard or write it to storage if sending failed. Return true if sending of all events was successfull (or events to send is empty) or false otherwise
+   */
+  async _sendEventsFromClipboardAndClearItOrSaveThemToStorage() {
+    //If data clipboard content is empty - don't proceed with sending or saving data
+    let eventClipboardContent = this._eventClipboard.getAllData();
+    if (!exists(eventClipboardContent) || eventClipboardContent === []) {
+      //Returning true - if data is empty it does not indicate that there was an error during sending
+      return true;
+    }
+
+    let allEventsSendSuccessfully = true;
+    for (let eventToSend of this.eventClipboardContent) {
+      try {
+        let tickId = eventToSend.tickId;
+        let elementId = eventToSend.elementId;
+        let elementValue = eventToSend.elementValue;
+
+        //Sending event
+        await this._sendEvent(tickId, elementId, elementValue);
+      } catch (err) {
+        logger.error(err, err.message);
+
+        try {
+          //If event not send successfully - write it to storage
+          await this._eventStorage.createData(eventToSend);
+        } catch (err2) {
+          logger.error(err2, err2.message);
+        }
+        //sending data failed
+        allEventsSendSuccessfully = false;
+      }
+    }
+
+    //All events not send saved to storage - clear event clipboard
+    this._eventClipboard.clearAllData();
+
+    return allEventsSendSuccessfully;
+  }
+
+  /**
+   * @description Method for sending event from files.
+   */
+  async _sendEventsFromStorage() {
+    let fileIdsToSend = [];
+    try {
+      //Getting number of files to send
+      let allFileIds = await this._eventStorage.getAllIDs();
+      //If there was an error during getting ids - method getAllIDs returns null
+      if (exists(allFileIds)) return;
+      fileIdsToSend = allFileIds.slice(0, this.NumberOfEventFilesToSend);
+    } catch (err) {
+      logger.error(err.message, err);
+      return;
+    }
+
+    //Trying to send all files
+    for (let fileId of fileIdsToSend) {
+      try {
+        let fileContent = await this._eventStorage.getData(fileId);
+
+        if (exists(fileContent)) {
+          let tickId = fileContent.tickId;
+          let elementId = fileContent.elementId;
+          let elementValue = fileContent.elementValue;
+          await this._sendEvent(tickId, elementId, elementValue);
+          await this._eventStorage.deleteData(fileId);
+        }
+      } catch (err) {
+        logger.error(err, err.message);
+      }
+    }
+
+    return;
+  }
+
+  //#endregion ========= PRIVATE METHODS =========
+
   //#region ========= OVERRIDE PUBLIC METHODS =========
+
+  /**
+   * @description Method for refreshing device - invoked per tick.
+   * @param {Number} tickNumber tick number of actual date
+   */
+  async refresh(tickNumber) {
+    //Return immediatelly if device is not active
+    if (!this.IsActive) return;
+
+    //Refreshing all variables/calcElements/alerts
+    await super.refresh(tickNumber);
+
+    //Adjusting data clipboard
+    this._getAndSaveDataToClipboard();
+
+    //Adjusting event clipboard
+    this._getAndSaveEventsToClipboard();
+
+    //#region CHECKING BOARDING STATE
+
+    //Refreshing boarded state
+    await this._refreshBoardedState();
+
+    if (!this.Boarded) {
+      //Checking if agent should be boarded
+      let shouldBeBoarded = await this._checkIfShouldBoard();
+
+      //If device is not boarded and should not be boarded in this refresh cycle - no point to continue
+      if (!shouldBeBoarded) return;
+
+      //Trying to board if should be boarded
+      await this._tryBoard();
+
+      //Refreshing boarding state after attempt to board
+      await this._refreshBoardedState();
+
+      //If attemp failed - no point to continue
+      if (!this.Boarded) return;
+    }
+
+    //#endregion CHECKING BOARDING STATE
+
+    //At this poing - device is boarded
+
+    //#region SENDING DATA
+
+    //Checking if data should be send
+    let shouldDataBeSend = this._checkIfDataShouldBeSent(tickNumber);
+
+    if (shouldDataBeSend) {
+      let dataSendSuccessfully = true;
+      try {
+        await this._sendDataFromClipboardAndClearIt();
+      } catch (err) {
+        logger.warn("Error while sending data with agent");
+        //If data not send successfully - write it to clipboard storage and do not proceed
+        await this._moveDataFromClipboardToStorage();
+        dataSendSuccessfully = false;
+      }
+
+      //If data send successfully - try sending data from files
+      if (dataSendSuccessfully) {
+        try {
+          await this._sendDataFromStorage();
+        } catch (err) {
+          logger.warn("Error while sending data from files with agent");
+        }
+      }
+    }
+
+    //#endregion SENDING DATA
+
+    //#region SENDING EVENTS
+
+    //Checking if events should be send
+    let shouldEventsBeSend = this._checkIfEventsShouldBeSent(tickNumber);
+
+    //At this point device should be boarded - no point to board again
+    if (shouldEventsBeSend) {
+      let allEventsSendSuccessfully = false;
+
+      //_sendEventsFromClipboard return true even if any event was sent - empty clipboard
+      try {
+        allEventsSendSuccessfully = await this._sendEventsFromClipboardAndClearItOrSaveThemToStorage();
+      } catch (err) {
+        logger.warn("Error while sending events from clipboard");
+        allEventsSendSuccessfully = false;
+      }
+      if (allEventsSendSuccessfully) {
+        await this._sendEventsFromStorage();
+      }
+    }
+
+    //#endregion SENDING EVENTS
+  }
+
+  /**
+   * @description Method for initializing device.
+   * @param {JSON} payload Payload to initialize
+   */
+  async init(payload) {
+    await super.init(payload);
+
+    this._tryBoardOnSendData = true;
+    this._tryBoardOnSendEvent = true;
+    this._lastDataValues = {};
+    this._lastEventValues = {};
+    this._sendDataFileInterval = payload.sendDataFileInterval;
+    this._sendEventFileInterval = payload.sendEventFileInterval;
+    this._dataStorageSize = payload.dataStorageSize;
+    this._eventStorageSize = payload.eventStorageSize;
+    this._numberOfDataFilesToSend = payload.numberOfDataFilesToSend;
+    this._numberOfEventFilesToSend = payload.numberOfEventFilesToSend;
+    this._dataToSendConfig = payload.dataToSendConfig;
+    this._eventsToSendConfig = payload.eventsToSendConfig;
+    this._boarded = false;
+
+    await this._initializeMainDirectory();
+    await this._initializeClipboards();
+    await this._initializeStorages();
+  }
 
   /**
    * @description Method for getting refresh group of devices - devices with the same group id WILL NOT be refreshed simuntaneusly.
@@ -62,9 +613,60 @@ class AgentDevice extends Device {
    */
   generatePayload() {
     let superPayload = super.generatePayload();
-    //TODO - implement this method
+
+    superPayload.sendDataFileInterval = this.SendDataFileInterval;
+    superPayload.sendEventFileInterval = this.SendEventFileInterval;
+    superPayload.dataStorageSize = this.DataStorageSize;
+    superPayload.eventStorageSize = this.EventStorageSize;
+    superPayload.numberOfDataFilesToSend = this.NumberOfDataFilesToSend;
+    superPayload.numberOfEventFilesToSend = this.NumberOfEventFilesToSend;
+    superPayload.dataToSendConfig = cloneObject(this.DataToSendConfig);
+    superPayload.eventsToSendConfig = cloneObject(this.EventsToSendConfig);
+    superPayload.boarded = this.Boarded;
+
+    return superPayload;
   }
+
   //#endregion ========= OVERRIDE PUBLIC METHODS =========
+
+  //#region ========= ABSTRACT PRIVATE METHODS =========
+
+  /**
+   * @description Method for REAL check if device is boarded. MUST BE OVERRIDEN IN CHILD CLASSES.
+   */
+  async _checkIfBoarded() {}
+
+  /**
+   * @description Method for send data (content of Clipboard). MUST BE OVERRIDEN IN CHILD CLASSES.
+   * @param {JSON} payload Payload of data to send
+   */
+  async _sendData(payload) {}
+
+  /**
+   * @description Method sending event. MUST BE OVERRIDEN IN CHILD CLASSES
+   * @param {Number} tickId tick if of event
+   * @param {String} elementId it of element associated with event
+   * @param {Object} value value (text) of event
+   */
+  async _sendEvent(tickId, elementId, value) {}
+
+  //#endregion ========= ABSTRACT PRIVATE METHODS =========
+
+  //#region ========= ABSTRACT PUBLIC METHODS =========
+
+  /**
+   * @description Method for onboarding the device. MUST BE OVERRIDEN IN CHILD CLASSES.
+   */
+  async OnBoard() {}
+
+  /**
+   * @description Method for offboarding the device. MUST BE OVERRIDEN IN CHILD CLASSES.
+   */
+  async OffBoard() {}
+
+  //#endregion ========= ABSTRACT PUBLIC METHODS =========
 }
 
 module.exports = AgentDevice;
+
+//TODO - TEST THIS CLASS!!

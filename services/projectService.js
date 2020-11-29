@@ -105,11 +105,6 @@ const joiSchema = Joi.object({
 let project = null;
 
 /**
- * @description project file path
- */
-let projectFilePath = null;
-
-/**
  * @description Method for checking if payload is a valid project payload. Returns null if yes. Returns message if not.
  * @param {JSON} payload Payload to check
  */
@@ -123,16 +118,23 @@ module.exports.validateProjectPayload = (payload) => {
  * @description Method for getting project file path
  */
 module.exports.getProjectFilePath = () => {
-  return projectFilePath;
+  return project.ProjectFilePath;
+};
+
+/**
+ * @description Method for getting project file path
+ */
+module.exports.getAgentsDiPath = () => {
+  return project.AgentsDirPath;
 };
 
 /**
  * @description Method for initializing project service
  * @param {String} filePath Path to project file
+ * @param {String} agentsDirPath Path to agents directory
  */
-module.exports.init = async (filePath) => {
-  projectFilePath = filePath;
-  project = new Project();
+module.exports.init = async (filePath, agentsDirPath) => {
+  project = new Project(filePath, agentsDirPath);
 };
 
 /**
@@ -140,11 +142,10 @@ module.exports.init = async (filePath) => {
  */
 module.exports.getProjectContentFromFile = async () => {
   //Checking if project service is initialized
-  if (!exists(projectFilePath))
-    throw new Error("project service not initialized");
+  if (!exists(project)) throw new Error("project service not initialized");
 
   //Reading and parsing file content
-  return JSON.parse(await readFileAsync(projectFilePath, "utf8"));
+  return JSON.parse(await readFileAsync(project.ProjectFilePath, "utf8"));
 };
 
 /**
@@ -153,8 +154,7 @@ module.exports.getProjectContentFromFile = async () => {
  */
 module.exports.saveProjectContentToFile = async (projectContent) => {
   //Checking if project service is initialized
-  if (!exists(projectFilePath))
-    throw new Error("project service not initialized");
+  if (!exists(project)) throw new Error("project service not initialized");
 
   if (!exists(projectContent)) throw new Error("project content must exists!");
 
@@ -164,7 +164,7 @@ module.exports.saveProjectContentToFile = async (projectContent) => {
 
   //Writing new project content to file
   return writeFileAsync(
-    projectFilePath,
+    project.ProjectFilePath,
     JSON.stringify(projectContent),
     "utf8"
   );
@@ -191,8 +191,7 @@ const getInitialProjectContent = async () => {
  */
 module.exports.createNewProjectFile = async () => {
   //Checking if project service is initialized
-  if (!exists(projectFilePath))
-    throw new Error("project service not initialized");
+  if (!exists(project)) throw new Error("project service not initialized");
 
   let initialFileContent = await getInitialProjectContent();
 
@@ -208,15 +207,14 @@ module.exports.createNewProjectFile = async () => {
  */
 module.exports.checkIfProjFileExistsAndIsValid = async () => {
   //Checking if project service is initialized
-  if (!exists(projectFilePath))
-    throw new Error("project service not initialized");
+  if (!exists(project)) throw new Error("project service not initialized");
 
   //Checking if file exists
-  let fileExists = await checkIfFileExistsAsync(projectFilePath);
+  let fileExists = await checkIfFileExistsAsync(project.ProjectFilePath);
   if (!fileExists) return false;
 
   //Checking if file is a valid JSON
-  let fileContent = await readFileAsync(projectFilePath, "utf8");
+  let fileContent = await readFileAsync(project.ProjectFilePath, "utf8");
   if (!isStringAValidJSON(fileContent)) {
     return false;
   }
@@ -239,8 +237,7 @@ module.exports.checkIfProjFileExistsAndIsValid = async () => {
  */
 module.exports.getIPConfig = async () => {
   //Checking if project service is initialized
-  if (!exists(projectFilePath))
-    throw new Error("project service not initialized");
+  if (!exists(project)) throw new Error("project service not initialized");
 
   fileContent = await module.exports.getProjectContentFromFile();
 
@@ -253,8 +250,7 @@ module.exports.getIPConfig = async () => {
  */
 module.exports.setIPConfig = async (ipConfig) => {
   //Checking if project service is initialized
-  if (!exists(projectFilePath))
-    throw new Error("project service not initialized");
+  if (!exists(project)) throw new Error("project service not initialized");
 
   fileContent = await module.exports.getProjectContentFromFile();
   fileContent.ipConfig = ipConfig;
@@ -267,8 +263,7 @@ module.exports.setIPConfig = async (ipConfig) => {
  */
 module.exports.setIPConfigFromProjectToNetplan = async () => {
   //Checking if project service is initialized
-  if (!exists(projectFilePath))
-    throw new Error("project service not initialized");
+  if (!exists(project)) throw new Error("project service not initialized");
 
   //Getting and comparing ipConfig from netplan and from project file
   let ipConfigFromFile = await module.exports.getIPConfig();
@@ -288,8 +283,7 @@ module.exports.setIPConfigFromProjectToNetplan = async () => {
  */
 module.exports.setIPConfigFromNetplanToProject = async () => {
   //Checking if project service is initialized
-  if (!exists(projectFilePath))
-    throw new Error("project service not initialized");
+  if (!exists(project)) throw new Error("project service not initialized");
 
   //Getting and comparing ipConfig from netplan and from project file
   let ipConfigFromFile = await module.exports.getIPConfig();
@@ -309,8 +303,7 @@ module.exports.setIPConfigFromNetplanToProject = async () => {
  */
 module.exports.loadProjectFile = async () => {
   //Checking if project service is initialized
-  if (!exists(projectFilePath))
-    throw new Error("project service not initialized");
+  if (!exists(project)) throw new Error("project service not initialized");
 
   //Setting new ip from project file
   await module.exports.setIPConfigFromProjectToNetplan();
@@ -327,8 +320,7 @@ module.exports.loadProjectFile = async () => {
  */
 module.exports._getProject = () => {
   //Checking if project service is initialized
-  if (!exists(projectFilePath))
-    throw new Error("project service not initialized");
+  if (!exists(project)) throw new Error("project service not initialized");
 
   return project;
 };
@@ -338,8 +330,7 @@ module.exports._getProject = () => {
  */
 module.exports.getDevices = () => {
   //Checking if project service is initialized
-  if (!exists(projectFilePath))
-    throw new Error("project service not initialized");
+  if (!exists(project)) throw new Error("project service not initialized");
 
   return project.getDevices();
 };
@@ -350,8 +341,7 @@ module.exports.getDevices = () => {
  */
 module.exports.getDevice = (deviceId) => {
   //Checking if project service is initialized
-  if (!exists(projectFilePath))
-    throw new Error("project service not initialized");
+  if (!exists(project)) throw new Error("project service not initialized");
 
   return project.getDevice(deviceId);
 };
@@ -362,8 +352,7 @@ module.exports.getDevice = (deviceId) => {
  */
 module.exports.getElements = (deviceIds = null) => {
   //Checking if project service is initialized
-  if (!exists(projectFilePath))
-    throw new Error("project service not initialized");
+  if (!exists(project)) throw new Error("project service not initialized");
 
   return project.getElements(deviceIds);
 };
@@ -375,8 +364,7 @@ module.exports.getElements = (deviceIds = null) => {
  */
 module.exports.getElement = (deviceId, elementId) => {
   //Checking if project service is initialized
-  if (!exists(projectFilePath))
-    throw new Error("project service not initialized");
+  if (!exists(project)) throw new Error("project service not initialized");
 
   return project.getElement(deviceId, elementId);
 };
@@ -387,8 +375,7 @@ module.exports.getElement = (deviceId, elementId) => {
  */
 module.exports.getVariables = (deviceIds = null) => {
   //Checking if project service is initialized
-  if (!exists(projectFilePath))
-    throw new Error("project service not initialized");
+  if (!exists(project)) throw new Error("project service not initialized");
 
   return project.getVariables(deviceIds);
 };
@@ -400,8 +387,7 @@ module.exports.getVariables = (deviceIds = null) => {
  */
 module.exports.getVariable = (deviceId, variableID) => {
   //Checking if project service is initialized
-  if (!exists(projectFilePath))
-    throw new Error("project service not initialized");
+  if (!exists(project)) throw new Error("project service not initialized");
 
   return project.getVariable(deviceId, variableID);
 };
@@ -412,8 +398,7 @@ module.exports.getVariable = (deviceId, variableID) => {
  */
 module.exports.getCalcElements = (deviceIds = null) => {
   //Checking if project service is initialized
-  if (!exists(projectFilePath))
-    throw new Error("project service not initialized");
+  if (!exists(project)) throw new Error("project service not initialized");
 
   return project.getCalcElements(deviceIds);
 };
@@ -425,8 +410,7 @@ module.exports.getCalcElements = (deviceIds = null) => {
  */
 module.exports.getCalcElement = (deviceId, calcElementID) => {
   //Checking if project service is initialized
-  if (!exists(projectFilePath))
-    throw new Error("project service not initialized");
+  if (!exists(project)) throw new Error("project service not initialized");
 
   return project.getCalcElement(deviceId, calcElementID);
 };
@@ -437,8 +421,7 @@ module.exports.getCalcElement = (deviceId, calcElementID) => {
  */
 module.exports.getAlerts = (deviceIds = null) => {
   //Checking if project service is initialized
-  if (!exists(projectFilePath))
-    throw new Error("project service not initialized");
+  if (!exists(project)) throw new Error("project service not initialized");
 
   return project.getAlerts(deviceIds);
 };
@@ -450,8 +433,7 @@ module.exports.getAlerts = (deviceIds = null) => {
  */
 module.exports.getAlert = (deviceId, alertID) => {
   //Checking if project service is initialized
-  if (!exists(projectFilePath))
-    throw new Error("project service not initialized");
+  if (!exists(project)) throw new Error("project service not initialized");
 
   return project.getAlert(deviceId, alertID);
 };
@@ -462,8 +444,7 @@ module.exports.getAlert = (deviceId, alertID) => {
  */
 module.exports.activateDevice = async (deviceId) => {
   //Checking if project service is initialized
-  if (!exists(projectFilePath))
-    throw new Error("project service not initialized");
+  if (!exists(project)) throw new Error("project service not initialized");
 
   return project.activateDevice(deviceId);
 };
@@ -474,8 +455,7 @@ module.exports.activateDevice = async (deviceId) => {
  */
 module.exports.deactivateDevice = async (deviceId) => {
   //Checking if project service is initialized
-  if (!exists(projectFilePath))
-    throw new Error("project service not initialized");
+  if (!exists(project)) throw new Error("project service not initialized");
 
   return project.deactivateDevice(deviceId);
 };
@@ -485,7 +465,7 @@ module.exports.deactivateDevice = async (deviceId) => {
  */
 module.exports.getLastCycleDuration = () => {
   //Checking if project service is initialized
-  if (!exists(projectFilePath) || !exists(project)) return null;
+  if (!exists(project) || !exists(project)) return null;
 
   return project.LastCycleDuration;
 };

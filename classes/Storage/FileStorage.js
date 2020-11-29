@@ -11,6 +11,7 @@ const {
   removeFileIfExistsAsync,
   writeFileAsync,
 } = require("../../utilities/utilities");
+const logger = require("../../logger/logger");
 
 const fileExtension = "data";
 
@@ -49,7 +50,7 @@ class FileStorage extends Storage {
    * @description Method for deleting all data from storage. By default calls deleteData for every id. CAN BE OVERRIDEN IN CHILD CLASSES - performance
    */
   async clearAllData() {
-    return clearDirectoryAsync(this.DirPath);
+    await clearDirectoryAsync(this.DirPath);
   }
 
   /**
@@ -133,4 +134,4 @@ class FileStorage extends Storage {
 
 module.exports = FileStorage;
 
-//TODO - test this class
+//TODO - TEST IF ERRORS THROWS!

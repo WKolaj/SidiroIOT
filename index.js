@@ -1,29 +1,36 @@
 const DataClipboard = require("./classes/Clipboard/DataClipboard");
-
-let clipboard = new DataClipboard();
+const AgentDevice = require("./classes/Device/AgentDevice/AgentDevice");
 
 let exec = async () => {
-  try {
-    clipboard.init();
+  //starting the server
+  let server = await require("./startup/app")();
 
-    for (let i = 100; i < 110; i++) {
-      for (let j = 0; j < 10; j++) {
-        let elementId = "testElement" + j;
-        let elementValue = j * i + 123;
-        let tickId = i;
+  let projectService = require("./services/projectService");
 
-        clipboard.addData(tickId, elementId, elementValue);
-      }
-    }
+  let project = projectService._getProject();
 
-    console.log("done");
+  let agent = new AgentDevice(project);
 
-    console.log(clipboard.getAllData());
-    clipboard.clearAllData();
-    console.log(clipboard.getAllData());
-  } catch (err) {
-    console.log(err);
-  }
+  let payload = {
+    id: "testAgent1ID",
+    name: "testAgentName",
+    type: "AgentDevice",
+    variables: {},
+    calcElements: {},
+    alerts: {},
+    sendDataFileInterval: 12,
+    sendEventFileInterval: 23,
+    dataStorageSize: 3,
+    eventStorageSize: 4,
+    numberOfDataFilesToSend: 5,
+    numberOfEventFilesToSend: 6,
+    dataToSendConfig: {},
+    eventsToSendConfig: {},
+  };
+
+  await agent.init(payload);
+
+  console.log(agent.generatePayload());
 };
 
 exec();
