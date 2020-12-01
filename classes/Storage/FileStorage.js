@@ -71,7 +71,9 @@ class FileStorage extends Storage {
   async getAllIDs() {
     //Returning all file names without extensions - from directory
     let allFiles = await readDirAsync(this.DirPath);
-    return allFiles.map((fileName) => removeExtensionFromFileName(fileName));
+    return allFiles
+      .filter((fileName) => fileName.includes(fileExtension))
+      .map((fileName) => removeExtensionFromFileName(fileName));
   }
 
   /**

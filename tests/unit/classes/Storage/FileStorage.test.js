@@ -198,16 +198,16 @@ describe("FileStorage", () => {
       fileStorage = new FileStorage();
       numberOfIds = 5;
       fileNames = [
-        "1606330872900-abcdefgh.test",
-        "1606330872902-abcdefgh.test",
-        "1606330872904-abcdefgh.test",
-        "1606330872905-abcdefgh.test",
-        "1606330872907-abcdefgh.test",
-        "1606330872909-abcdefgh.test",
-        "1606330872901-abcdefgh.test",
-        "1606330872903-abcdefgh.test",
-        "1606330872908-abcdefgh.test",
-        "1606330872906-abcdefgh.test",
+        "1606330872900-abcdefgh.data",
+        "1606330872902-abcdefgh.data",
+        "1606330872904-abcdefgh.data",
+        "1606330872905-abcdefgh.data",
+        "1606330872907-abcdefgh.data",
+        "1606330872909-abcdefgh.data",
+        "1606330872901-abcdefgh.data",
+        "1606330872903-abcdefgh.data",
+        "1606330872908-abcdefgh.data",
+        "1606330872906-abcdefgh.data",
       ];
     });
 
@@ -260,9 +260,9 @@ describe("FileStorage", () => {
     it("should return last 3 ids after sorting - if numberOfIds is 5 and there are 3 fileNames", async () => {
       numberOfIds = 5;
       fileNames = [
-        "1606330872902-abcdefgh",
-        "1606330872903-abcdefgh",
-        "1606330872901-abcdefgh",
+        "1606330872902-abcdefgh.data",
+        "1606330872903-abcdefgh.data",
+        "1606330872901-abcdefgh.data",
       ];
 
       let result = await exec();
@@ -271,6 +271,33 @@ describe("FileStorage", () => {
         "1606330872903-abcdefgh",
         "1606330872902-abcdefgh",
         "1606330872901-abcdefgh",
+      ];
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should take into account only files with valid extensions", async () => {
+      numberOfIds = 3;
+
+      fileNames = [
+        "1606330872900-abcdefgh.test",
+        "1606330872902-abcdefgh.data",
+        "1606330872904-abcdefgh.test",
+        "1606330872905-abcdefgh.data",
+        "1606330872907-abcdefgh.test",
+        "1606330872909-abcdefgh.data",
+        "1606330872901-abcdefgh.test",
+        "1606330872903-abcdefgh.data",
+        "1606330872908-abcdefgh.test",
+        "1606330872906-abcdefgh.data",
+      ];
+
+      let result = await exec();
+
+      let expectedResult = [
+        "1606330872905-abcdefgh",
+        "1606330872903-abcdefgh",
+        "1606330872902-abcdefgh",
       ];
 
       expect(result).toEqual(expectedResult);
@@ -369,16 +396,16 @@ describe("FileStorage", () => {
       fileStorage = new FileStorage();
       numberOfIds = 5;
       fileNames = [
-        "1606330872900-abcdefgh.test",
-        "1606330872902-abcdefgh.test",
-        "1606330872904-abcdefgh.test",
-        "1606330872905-abcdefgh.test",
-        "1606330872907-abcdefgh.test",
-        "1606330872909-abcdefgh.test",
-        "1606330872901-abcdefgh.test",
-        "1606330872903-abcdefgh.test",
-        "1606330872908-abcdefgh.test",
-        "1606330872906-abcdefgh.test",
+        "1606330872900-abcdefgh.data",
+        "1606330872902-abcdefgh.data",
+        "1606330872904-abcdefgh.data",
+        "1606330872905-abcdefgh.data",
+        "1606330872907-abcdefgh.data",
+        "1606330872909-abcdefgh.data",
+        "1606330872901-abcdefgh.data",
+        "1606330872903-abcdefgh.data",
+        "1606330872908-abcdefgh.data",
+        "1606330872906-abcdefgh.data",
       ];
     });
 
@@ -408,6 +435,33 @@ describe("FileStorage", () => {
         "1606330872907-abcdefgh",
         "1606330872908-abcdefgh",
         "1606330872909-abcdefgh",
+      ];
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should return all fileNames only with valid extensions", async () => {
+      fileNames = [
+        "1606330872900-abcdefgh.data",
+        "1606330872902-abcdefgh.test",
+        "1606330872904-abcdefgh.data",
+        "1606330872905-abcdefgh.test",
+        "1606330872907-abcdefgh.data",
+        "1606330872909-abcdefgh.test",
+        "1606330872901-abcdefgh.data",
+        "1606330872903-abcdefgh.test",
+        "1606330872908-abcdefgh.data",
+        "1606330872906-abcdefgh.test",
+      ];
+
+      let result = await exec();
+
+      let expectedResult = [
+        "1606330872900-abcdefgh",
+        "1606330872901-abcdefgh",
+        "1606330872904-abcdefgh",
+        "1606330872907-abcdefgh",
+        "1606330872908-abcdefgh",
       ];
 
       expect(result).toEqual(expectedResult);

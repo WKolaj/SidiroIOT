@@ -144,13 +144,13 @@ class AgentDevice extends Device {
     this._dataStorage = new FileStorage();
     await this._dataStorage.init({
       dirPath: dataStorageDirPath,
-      bufferLength: this.NumberOfDataFilesToSend,
+      bufferLength: this.DataStorageSize,
     });
 
     this._eventStorage = new FileStorage();
     await this._eventStorage.init({
       dirPath: eventStorageDirPath,
-      bufferLength: this.NumberOfEventFilesToSend,
+      bufferLength: this.EventStorageSize,
     });
   }
 
@@ -370,6 +370,8 @@ class AgentDevice extends Device {
     //If data clipboard content is empty - don't proceed with sending or saving data
     let dataClipboardContent = this._dataClipboard.getAllData();
     if (!exists(dataClipboardContent) || dataClipboardContent === {}) {
+      //Clearing data form clipboard
+      this._dataClipboard.clearAllData();
       return true;
     }
 
@@ -395,8 +397,7 @@ class AgentDevice extends Device {
     let fileIdsToSend = [];
     try {
       let allFileIds = await this._dataStorage.getAllIDs();
-      //If there was an error during getting ids - method getAllIDs returns null
-      if (exists(allFileIds)) return;
+      if (!exists(allFileIds)) return false;
       fileIdsToSend = allFileIds.slice(0, this.NumberOfDataFilesToSend);
     } catch (err) {
       logger.error(err.message, err);
@@ -454,6 +455,8 @@ class AgentDevice extends Device {
     //If data clipboard content is empty - don't proceed with sending or saving data
     let eventClipboardContent = this._eventClipboard.getAllData();
     if (!exists(eventClipboardContent) || eventClipboardContent === []) {
+      //Clearing data form clipboard
+      this._eventClipboard.clearAllData();
       //Returning true - if data is empty it does not indicate that there was an error during sending
       return true;
     }
@@ -492,8 +495,7 @@ class AgentDevice extends Device {
     try {
       //Getting number of files to send
       let allFileIds = await this._eventStorage.getAllIDs();
-      //If there was an error during getting ids - method getAllIDs returns null
-      if (exists(allFileIds)) return;
+      if (!exists(allFileIds)) return false;
       fileIdsToSend = allFileIds.slice(0, this.NumberOfEventFilesToSend);
     } catch (err) {
       logger.error(err.message, err);
