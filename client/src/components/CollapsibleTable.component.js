@@ -62,27 +62,27 @@ function Row(props) {
           </IconButton>
         </TableCell>
         {row.map((cell, index) => {
-          return <TableCell key={index}>{typeof cell === "boolean" ? cell.toString() : typeof cell === "object" ? 
-          (<IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)}>
-          {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-        </IconButton>) : cell}</TableCell>
+          return <TableCell key={index}>{typeof cell === "boolean" ? cell.toString() : typeof cell === "object" ?
+            (<IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)}>
+              {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+            </IconButton>) : cell}</TableCell>
         })}
       </TableRow>
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={row.length}>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={row.length+1}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box margin={1}>
               {objects !== null ? objects.map((obj, index) => {
                 return (
                   <React.Fragment key={index}>
-                    <Typography variant="h6" gutterBottom component="div" style={{marginTop:'20px'}}>
+                    <Typography variant="h6" gutterBottom component="div" style={{ marginTop: '20px' }}>
                       {columns[obj.index]}
                     </Typography>
                     <Table size="small" aria-label="purchases">
                       <TableHead>
                         <TableRow>
                           {createCollapsedTable(Object.entries(obj.cell)).columns.map((col, index) => {
-                            return <TableCell key={index}>{col}</TableCell>
+                            return <TableCell style={{ width: `${100 / Object.entries(obj.cell).length}%` }} key={index}>{col}</TableCell>
                           })}
                         </TableRow>
                       </TableHead>
@@ -91,7 +91,7 @@ function Row(props) {
                           {createCollapsedTable(Object.entries(objects[index].cell)).rows.map((row) => {
                             return <TableCell key={row}>{row}</TableCell>
                           })}
-                          </TableRow>
+                        </TableRow>
                       </TableBody>
                     </Table>
                   </React.Fragment>
@@ -109,41 +109,41 @@ function Row(props) {
 function SimpleRow(props) {
   const classes = useRowStyles();
   return (
-      <TableRow className={classes.root}>
-          {props.row.map((cell, index) => <TableCell key={index}>{typeof cell === "boolean" ? cell.toString() : typeof cell === "object" ? JSON.stringify(cell) : cell}</TableCell>)}
-        </TableRow>
+    <TableRow className={classes.root}>
+      {props.row.map((cell, index) => <TableCell key={index}>{typeof cell === "boolean" ? cell.toString() : typeof cell === "object" ? JSON.stringify(cell) : cell}</TableCell>)}
+    </TableRow>
   )
 }
 
 export default function CollapsibleTable(props) {
   return (
-      <TableContainer component={Paper}>
-          <Table aria-label="collapsible table">
-            <TableHead>
-              <TableRow>
-                {props.rows.map((row, index) => {
-                  if (!row.every(isNotObject)) {
-                    return <TableCell key={index} />
-                  }
-                  return null
-                })}
-                {props.columns.map((column, index) => {
-                  return <TableCell key={index}>{column}</TableCell>
-                })}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {props.rows.map((row, index) => {
-                if (row.every(isNotObject)) {
-                  return <SimpleRow row={row} key={index} />
-                }
-                else {
-                  return <Row key={index} row={row} columns={props.columns} />
-                }
-              })}
-            </TableBody>
-          </Table>
-        </TableContainer>
+    <TableContainer component={Paper}>
+      <Table aria-label="collapsible table">
+        <TableHead>
+          <TableRow>
+            {props.rows.map((row, index) => {
+              if (!row.every(isNotObject)) {
+                return <TableCell key={index} />
+              }
+              return null
+            })}
+            {props.columns.map((column, index) => {
+              return <TableCell key={index}>{column}</TableCell>
+            })}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {props.rows.map((row, index) => {
+            if (row.every(isNotObject)) {
+              return <SimpleRow row={row} key={index} />
+            }
+            else {
+              return <Row key={index} row={row} columns={props.columns} />
+            }
+          })}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 }
 

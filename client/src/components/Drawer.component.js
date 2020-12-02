@@ -111,7 +111,7 @@ const useStyles = makeStyles((theme) => ({
     width: `calc(100% - 57px)`,
     padding: theme.spacing(1),
     [`${theme.breakpoints.down('sm')} and (orientation: portrait)`]: {
-      paddingBottom: theme.spacing(7),
+      paddingBottom: theme.spacing(10),
       paddingTop: theme.spacing(1),
       paddingLeft: theme.spacing(1),
       paddingRight: theme.spacing(1)
@@ -270,6 +270,15 @@ function MiniDrawer(props) {
     </Menu >
   );
 
+  const toFixed = (num) => {
+    if(num!==null) {
+      return num.toFixed()
+    }
+    else {
+      return null
+    }
+  }
+
   const mobileMenuId = 'primary-search-account-menu-mobile';
   const renderMobileMenu = (
     <Menu
@@ -282,7 +291,7 @@ function MiniDrawer(props) {
       onClose={handleMobileMenuClose}
     >
       <MenuItem>
-        <Badge badgeContent={`${props.hardwareUsage.cpuUsage}%`} color="primary" >
+        <Badge badgeContent={`${toFixed(props.hardwareUsage.cpuUsage)}%`} color="primary" >
           <IconButton aria-label="cpu usage" color="inherit" className={classes.hardwareUsage} >
             <FontAwesomeIcon icon={faMicrochip} />
           </IconButton>
@@ -290,7 +299,7 @@ function MiniDrawer(props) {
         <p>CPU</p>
       </MenuItem>
       <MenuItem>
-        <Badge badgeContent={`${props.hardwareUsage.cpuTemperature}°C`} color="primary">
+        <Badge badgeContent={`${toFixed(props.hardwareUsage.cpuTemperature)}°C`} color="primary">
           <IconButton aria-label="cpu temperature" color="inherit" className={classes.hardwareUsage}>
             <FontAwesomeIcon icon={faThermometerHalf} />
           </IconButton>
@@ -298,7 +307,7 @@ function MiniDrawer(props) {
         <p>TEMP</p>
       </MenuItem>
       <MenuItem>
-        <Badge badgeContent={`${props.hardwareUsage.ramUsage}%`} color="primary" >
+        <Badge badgeContent={`${toFixed(props.hardwareUsage.ramUsage)}%`} color="primary" >
           <IconButton aria-label="memory usage" color="inherit" className={classes.hardwareUsage}>
             <FontAwesomeIcon icon={faMemory} />
           </IconButton>
@@ -306,7 +315,7 @@ function MiniDrawer(props) {
         <p>MEM</p>
       </MenuItem>
       <MenuItem>
-        <Badge badgeContent={`${props.hardwareUsage.diskUsage}%`} color="primary">
+        <Badge badgeContent={`${toFixed(props.hardwareUsage.diskUsage)}%`} color="primary">
           <IconButton aria-label="space usage" color="inherit" className={classes.hardwareUsage}>
             <FontAwesomeIcon icon={faHdd} />
           </IconButton>

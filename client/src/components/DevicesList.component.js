@@ -15,7 +15,6 @@ const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
     //backgroundColor: theme.palette.background.paper,
-    
   },
   active: {
     color: 'green'
@@ -30,11 +29,13 @@ function SimpleList(props) {
   const { allDevices, selectedDevice, selectDevice } = props;
 
   useEffect(() => {
-    if(selectedDevice.selectedDeviceName === '' && allDevices.length>0) {
+    if(selectedDevice.selectedDeviceID === '' && allDevices.length>0) {
       const firstEntry = Object.entries(allDevices[0])
-      selectDevice(0, firstEntry[0][1].name, firstEntry[0][1].type)
+      selectDevice(0, firstEntry[0][1].id, firstEntry[0][1].type)
     }
-  }, [allDevices, selectDevice, selectedDevice.selectedDeviceName])
+  }, [allDevices, selectDevice, selectedDevice.selectedDeviceID])
+
+  
 
   return (
     <div className={classes.root}>
@@ -42,16 +43,17 @@ function SimpleList(props) {
         {allDevices.map((dev, index) => {
           const entries = Object.entries(dev)
           for (const [, properties] of entries) {
+            const isActive = properties.isConnected !==undefined? properties.isConnected && properties.isActive : properties.isActive;
             return (<ListItem key={index} button
               selected={selectedDevice.selectedDeviceIndex === index ? true : false}
-              onClick={() => props.selectDevice(index, properties.name, properties.type)}>
+              onClick={() => props.selectDevice(index, properties.id, properties.type)}>
               <ListItemIcon>
-                {properties.type === 'MBDevice' ? <AssessmentIcon className={properties.isActive ? classes.active : classes.inactive} />
-                  : properties.type === 'S7Device' ? <MemoryIcon className={properties.isActive ? classes.active : classes.inactive} />
-                    : properties.type === 'InternalDevice' ? <StorageIcon className={properties.isActive ? classes.active : classes.inactive} />
-                      : <CloudIcon className={properties.isActive ? classes.active : classes.inactive} />}
+                {properties.type === 'MBDevice' ? <AssessmentIcon className={isActive ? classes.active : classes.inactive} />
+                  : properties.type === 'S7Device' ? <MemoryIcon className={isActive ? classes.active : classes.inactive} />
+                    : properties.type === 'InternalDevice' ? <StorageIcon className={isActive ? classes.active : classes.inactive} />
+                      : <CloudIcon className={isActive ? classes.active : classes.inactive} />}
               </ListItemIcon>
-              <ListItemText primary={properties.name} />
+              <ListItemText primary={properties.id} />
             </ListItem>)
           }
           return null

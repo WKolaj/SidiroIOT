@@ -17,6 +17,7 @@ export const resources = {
         "EventsTab": "Events",
         "DevicesTitle": "Devices",
         "StatusConnected": "Connected",
+        "StatusDisconnected": "Disconnected",
         "Status": "Status",
         "Connect": "Connect",
         "Disconnect": "Disconnect",
@@ -43,15 +44,15 @@ export const resources = {
           "readAsSingle": "Read as single",
           "writeAsSingle": "Write as single",
           "value": "Value",
-          "variableId": "Variable ID",
+          "variableID": "Variable ID",
           "factor": "Factor",
           "calculationInterval": "Calculation interval",
           "highLimit": "High limit",
           "texts": "Texts",
           "severity": "Severity",
           "hysteresis": "Hysteresis",
-          "timeDelayOn": "Time delay on",
-          "timeDelayOff": "Time delay off",
+          "timeOnDelay": "Time on delay",
+          "timeOffDelay": "Time off delay",
           "areaType": "Area type",
           "dbNumber": "DB number",
           "lowLimit": "Low limit",
@@ -70,7 +71,8 @@ export const resources = {
           "sendEventLimit": "Send event limit",
           "sendingInterval": "Sending interval",
           "numberOfSendRetries": "Number of send retries",
-          "boarded": "Boarded"
+          "boarded": "Boarded",
+          "lastValueTick": "Last value tick"
         },
         "Tabs": {
           "calcElements": "Edge computing",
@@ -86,9 +88,8 @@ export const resources = {
       },
       "SettingsPage": {
         "Title": "Settings",
-        "LoadButton": "Load",
-        "SaveButton": "Save",
-        "DropzoneText": "Drag & drop or click to select a file"
+        "LoadButton": "Download settings",
+        "DropzoneText": "Drag & drop or click to upload a file"
       },
       "LoginPage": {
         "LoginTitle": "Please log in",
@@ -176,6 +177,7 @@ export const resources = {
         "EventsTab": "Zdarzenia",
         "DevicesTitle": "Urządzenia",
         "StatusConnected": "Połączony",
+        "StatusDisconnected": "Rozłączony",
         "Status": "Stan",
         "Connect": "Połącz",
         "Disconnect": "Rozłącz",
@@ -193,9 +195,8 @@ export const resources = {
       },
       "SettingsPage": {
         "Title": "Ustawienia",
-        "LoadButton": "Wczytaj",
-        "SaveButton": "Zapisz",
-        "DropzoneText": "Przeciągnij i upuść tutaj lub kliknij, aby wybrać plik"
+        "LoadButton": "Pobierz ustawienia",
+        "DropzoneText": "Przeciągnij i upuść tutaj lub kliknij, aby wczytać plik"
       },
       "LoginPage": {
         "LoginTitle": "Zaloguj się",

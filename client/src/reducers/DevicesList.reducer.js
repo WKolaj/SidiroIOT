@@ -2,7 +2,7 @@ import { SELECT_DEVICE } from '../actions/DevicesList.action';
 
 const initialState = {
     selectedDeviceIndex: 0,
-    selectedDeviceName: '',
+    selectedDeviceID: '',
     selectedDeviceType: '',
     
 }
@@ -13,7 +13,7 @@ export const DevicesListReducer = (state = initialState, action) => {
             return {
                 ...state,
                 selectedDeviceIndex: action.deviceIndex,
-                selectedDeviceName: action.deviceName,
+                selectedDeviceID: action.deviceID,
                 selectedDeviceType: action.deviceType
             }
         default:

@@ -18,7 +18,7 @@ function Dropzone({ setSnackbarText, setSnackbarShown }) {
   const { t } = useTranslation();
   const onDrop = useCallback(acceptedFiles => {
     // Do something with the files
-    FileService.uploadFile(acceptedFiles[0]).then(res => {
+    FileService.uploadConfigFile(acceptedFiles[0]).then(res => {
       if (res.status === 200) {
         setSnackbarText(t('Snackbar.SuccessfulFileUpload'), 'success')
         setSnackbarShown(true)
