@@ -1280,17 +1280,17 @@ describe("AgentDevice", () => {
       storageFile1Content = {
         tickId: 101,
         elementID: "elementID1",
-        elementValue: "testAlertText1",
+        value: "testAlertText1",
       };
       storageFile2Content = {
         tickId: 201,
         elementID: "elementID2",
-        elementValue: "testAlertText2",
+        value: "testAlertText2",
       };
       storageFile3Content = {
         tickId: 301,
         elementID: "elementID3",
-        elementValue: "testAlertText3",
+        value: "testAlertText3",
       };
 
       await createDirIfNotExists(AgentDirPath);
@@ -1304,17 +1304,17 @@ describe("AgentDevice", () => {
         {
           tickId: 501,
           elementId: "element5ID",
-          elementValue: "textElementTest5",
+          value: "textElementTest5",
         },
         {
           tickId: 601,
           elementId: "element6ID",
-          elementValue: "textElementTest6",
+          value: "textElementTest6",
         },
         {
           tickId: 701,
           elementId: "element7ID",
-          elementValue: "textElementTest7",
+          value: "textElementTest7",
         },
       ];
       payload = {
@@ -1338,7 +1338,7 @@ describe("AgentDevice", () => {
       eventToSave = {
         tickId: 401,
         elementId: "element4ID",
-        elementValue: "textElementTest4",
+        value: "textElementTest4",
       };
 
       //Overwriting logger action method
@@ -1561,17 +1561,17 @@ describe("AgentDevice", () => {
       storageFile1Content = {
         tickId: 101,
         elementID: "elementID1",
-        elementValue: "testAlertText1",
+        value: "testAlertText1",
       };
       storageFile2Content = {
         tickId: 201,
         elementID: "elementID2",
-        elementValue: "testAlertText2",
+        value: "testAlertText2",
       };
       storageFile3Content = {
         tickId: 301,
         elementID: "elementID3",
-        elementValue: "testAlertText3",
+        value: "testAlertText3",
       };
 
       await createDirIfNotExists(AgentDirPath);
@@ -1585,17 +1585,17 @@ describe("AgentDevice", () => {
         {
           tickId: 501,
           elementId: "element5ID",
-          elementValue: "textElementTest5",
+          value: "textElementTest5",
         },
         {
           tickId: 601,
           elementId: "element6ID",
-          elementValue: "textElementTest6",
+          value: "textElementTest6",
         },
         {
           tickId: 701,
           elementId: "element7ID",
-          elementValue: "textElementTest7",
+          value: "textElementTest7",
         },
       ];
       payload = {
@@ -1619,7 +1619,7 @@ describe("AgentDevice", () => {
       eventToSave = {
         tickId: 401,
         elementId: "element4ID",
-        elementValue: "textElementTest4",
+        value: "textElementTest4",
       };
 
       //Overwriting logger action method
@@ -1699,7 +1699,7 @@ describe("AgentDevice", () => {
         clipboardContent[0].elementId
       );
       expect(device._sendEvent.mock.calls[0][2]).toEqual(
-        clipboardContent[0].elementValue
+        clipboardContent[0].value
       );
 
       expect(device._sendEvent.mock.calls[1][0]).toEqual(
@@ -1709,7 +1709,7 @@ describe("AgentDevice", () => {
         clipboardContent[1].elementId
       );
       expect(device._sendEvent.mock.calls[1][2]).toEqual(
-        clipboardContent[1].elementValue
+        clipboardContent[1].value
       );
 
       expect(device._sendEvent.mock.calls[2][0]).toEqual(
@@ -1719,7 +1719,7 @@ describe("AgentDevice", () => {
         clipboardContent[2].elementId
       );
       expect(device._sendEvent.mock.calls[2][2]).toEqual(
-        clipboardContent[2].elementValue
+        clipboardContent[2].value
       );
 
       //clipboard should be cleared
@@ -1806,7 +1806,7 @@ describe("AgentDevice", () => {
         clipboardContent[0].elementId
       );
       expect(device._sendEvent.mock.calls[0][2]).toEqual(
-        clipboardContent[0].elementValue
+        clipboardContent[0].value
       );
 
       expect(device._sendEvent.mock.calls[1][0]).toEqual(
@@ -1816,7 +1816,7 @@ describe("AgentDevice", () => {
         clipboardContent[1].elementId
       );
       expect(device._sendEvent.mock.calls[1][2]).toEqual(
-        clipboardContent[1].elementValue
+        clipboardContent[1].value
       );
 
       expect(device._sendEvent.mock.calls[2][0]).toEqual(
@@ -1826,7 +1826,7 @@ describe("AgentDevice", () => {
         clipboardContent[2].elementId
       );
       expect(device._sendEvent.mock.calls[2][2]).toEqual(
-        clipboardContent[2].elementValue
+        clipboardContent[2].value
       );
 
       //clipboard should be cleared
@@ -1890,7 +1890,7 @@ describe("AgentDevice", () => {
         clipboardContent[0].elementId
       );
       expect(device._sendEvent.mock.calls[0][2]).toEqual(
-        clipboardContent[0].elementValue
+        clipboardContent[0].value
       );
 
       expect(device._sendEvent.mock.calls[1][0]).toEqual(
@@ -1900,7 +1900,7 @@ describe("AgentDevice", () => {
         clipboardContent[1].elementId
       );
       expect(device._sendEvent.mock.calls[1][2]).toEqual(
-        clipboardContent[1].elementValue
+        clipboardContent[1].value
       );
 
       expect(device._sendEvent.mock.calls[2][0]).toEqual(
@@ -1910,7 +1910,7 @@ describe("AgentDevice", () => {
         clipboardContent[2].elementId
       );
       expect(device._sendEvent.mock.calls[2][2]).toEqual(
-        clipboardContent[2].elementValue
+        clipboardContent[2].value
       );
 
       //clipboard should be cleared
@@ -1987,7 +1987,7 @@ describe("AgentDevice", () => {
         clipboardContent[0].elementId
       );
       expect(device._sendEvent.mock.calls[0][2]).toEqual(
-        clipboardContent[0].elementValue
+        clipboardContent[0].value
       );
 
       expect(device._sendEvent.mock.calls[1][0]).toEqual(
@@ -1997,7 +1997,7 @@ describe("AgentDevice", () => {
         clipboardContent[1].elementId
       );
       expect(device._sendEvent.mock.calls[1][2]).toEqual(
-        clipboardContent[1].elementValue
+        clipboardContent[1].value
       );
 
       expect(device._sendEvent.mock.calls[2][0]).toEqual(
@@ -2007,7 +2007,7 @@ describe("AgentDevice", () => {
         clipboardContent[2].elementId
       );
       expect(device._sendEvent.mock.calls[2][2]).toEqual(
-        clipboardContent[2].elementValue
+        clipboardContent[2].value
       );
 
       //clipboard should be cleared
@@ -2069,7 +2069,7 @@ describe("AgentDevice", () => {
         clipboardContent[0].elementId
       );
       expect(device._sendEvent.mock.calls[0][2]).toEqual(
-        clipboardContent[0].elementValue
+        clipboardContent[0].value
       );
 
       expect(device._sendEvent.mock.calls[1][0]).toEqual(
@@ -2079,7 +2079,7 @@ describe("AgentDevice", () => {
         clipboardContent[1].elementId
       );
       expect(device._sendEvent.mock.calls[1][2]).toEqual(
-        clipboardContent[1].elementValue
+        clipboardContent[1].value
       );
 
       expect(device._sendEvent.mock.calls[2][0]).toEqual(
@@ -2089,7 +2089,7 @@ describe("AgentDevice", () => {
         clipboardContent[2].elementId
       );
       expect(device._sendEvent.mock.calls[2][2]).toEqual(
-        clipboardContent[2].elementValue
+        clipboardContent[2].value
       );
 
       //clipboard should be cleared
@@ -2164,17 +2164,17 @@ describe("AgentDevice", () => {
       storageFile1Content = {
         tickId: 101,
         elementID: "elementID1",
-        elementValue: "testAlertText1",
+        value: "testAlertText1",
       };
       storageFile2Content = {
         tickId: 201,
         elementID: "elementID2",
-        elementValue: "testAlertText2",
+        value: "testAlertText2",
       };
       storageFile3Content = {
         tickId: 301,
         elementID: "elementID3",
-        elementValue: "testAlertText3",
+        value: "testAlertText3",
       };
 
       await createDirIfNotExists(AgentDirPath);
@@ -2188,17 +2188,17 @@ describe("AgentDevice", () => {
         {
           tickId: 501,
           elementId: "element5ID",
-          elementValue: "textElementTest5",
+          value: "textElementTest5",
         },
         {
           tickId: 601,
           elementId: "element6ID",
-          elementValue: "textElementTest6",
+          value: "textElementTest6",
         },
         {
           tickId: 701,
           elementId: "element7ID",
-          elementValue: "textElementTest7",
+          value: "textElementTest7",
         },
       ];
       payload = {
@@ -2222,7 +2222,7 @@ describe("AgentDevice", () => {
       eventToSave = {
         tickId: 401,
         elementId: "element4ID",
-        elementValue: "textElementTest4",
+        value: "textElementTest4",
       };
 
       //Overwriting logger action method
@@ -2325,7 +2325,7 @@ describe("AgentDevice", () => {
         storageFile3Content.elementId
       );
       expect(device._sendEvent.mock.calls[0][2]).toEqual(
-        storageFile3Content.elementValue
+        storageFile3Content.value
       );
 
       expect(device._sendEvent.mock.calls[1][0]).toEqual(
@@ -2335,7 +2335,7 @@ describe("AgentDevice", () => {
         storageFile2Content.elementId
       );
       expect(device._sendEvent.mock.calls[1][2]).toEqual(
-        storageFile2Content.elementValue
+        storageFile2Content.value
       );
 
       expect(device._sendEvent.mock.calls[2][0]).toEqual(
@@ -2345,7 +2345,7 @@ describe("AgentDevice", () => {
         storageFile1Content.elementId
       );
       expect(device._sendEvent.mock.calls[2][2]).toEqual(
-        storageFile1Content.elementValue
+        storageFile1Content.value
       );
 
       //clipboard should not been cleared
@@ -2381,7 +2381,7 @@ describe("AgentDevice", () => {
         storageFile3Content.elementId
       );
       expect(device._sendEvent.mock.calls[0][2]).toEqual(
-        storageFile3Content.elementValue
+        storageFile3Content.value
       );
 
       expect(device._sendEvent.mock.calls[1][0]).toEqual(
@@ -2391,7 +2391,7 @@ describe("AgentDevice", () => {
         storageFile2Content.elementId
       );
       expect(device._sendEvent.mock.calls[1][2]).toEqual(
-        storageFile2Content.elementValue
+        storageFile2Content.value
       );
 
       //clipboard should not been cleared
@@ -2460,7 +2460,7 @@ describe("AgentDevice", () => {
         storageFile3Content.elementId
       );
       expect(device._sendEvent.mock.calls[0][2]).toEqual(
-        storageFile3Content.elementValue
+        storageFile3Content.value
       );
 
       expect(device._sendEvent.mock.calls[1][0]).toEqual(
@@ -2470,7 +2470,7 @@ describe("AgentDevice", () => {
         storageFile2Content.elementId
       );
       expect(device._sendEvent.mock.calls[1][2]).toEqual(
-        storageFile2Content.elementValue
+        storageFile2Content.value
       );
 
       expect(device._sendEvent.mock.calls[2][0]).toEqual(
@@ -2480,7 +2480,7 @@ describe("AgentDevice", () => {
         storageFile1Content.elementId
       );
       expect(device._sendEvent.mock.calls[2][2]).toEqual(
-        storageFile1Content.elementValue
+        storageFile1Content.value
       );
 
       //clipboard should not been cleared
@@ -2526,7 +2526,7 @@ describe("AgentDevice", () => {
         storageFile3Content.elementId
       );
       expect(device._sendEvent.mock.calls[0][2]).toEqual(
-        storageFile3Content.elementValue
+        storageFile3Content.value
       );
 
       expect(device._sendEvent.mock.calls[1][0]).toEqual(
@@ -2536,7 +2536,7 @@ describe("AgentDevice", () => {
         storageFile2Content.elementId
       );
       expect(device._sendEvent.mock.calls[1][2]).toEqual(
-        storageFile2Content.elementValue
+        storageFile2Content.value
       );
 
       expect(device._sendEvent.mock.calls[2][0]).toEqual(
@@ -2546,7 +2546,7 @@ describe("AgentDevice", () => {
         storageFile1Content.elementId
       );
       expect(device._sendEvent.mock.calls[2][2]).toEqual(
-        storageFile1Content.elementValue
+        storageFile1Content.value
       );
 
       //clipboard should not been cleared
@@ -2645,7 +2645,7 @@ describe("AgentDevice", () => {
         storageFile3Content.elementId
       );
       expect(device._sendEvent.mock.calls[0][2]).toEqual(
-        storageFile3Content.elementValue
+        storageFile3Content.value
       );
 
       expect(device._sendEvent.mock.calls[1][0]).toEqual(
@@ -2655,7 +2655,7 @@ describe("AgentDevice", () => {
         storageFile2Content.elementId
       );
       expect(device._sendEvent.mock.calls[1][2]).toEqual(
-        storageFile2Content.elementValue
+        storageFile2Content.value
       );
 
       expect(device._sendEvent.mock.calls[2][0]).toEqual(
@@ -2665,7 +2665,7 @@ describe("AgentDevice", () => {
         storageFile1Content.elementId
       );
       expect(device._sendEvent.mock.calls[2][2]).toEqual(
-        storageFile1Content.elementValue
+        storageFile1Content.value
       );
 
       //clipboard should not been cleared

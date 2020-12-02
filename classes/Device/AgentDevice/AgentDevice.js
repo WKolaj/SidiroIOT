@@ -400,6 +400,7 @@ class AgentDevice extends Device {
       fileIdsToSend = await this._dataStorage.getNewestDataID(
         this.NumberOfDataFilesToSend
       );
+
       if (!exists(fileIdsToSend)) return false;
       if (isObjectEmpty(fileIdsToSend)) return true;
     } catch (err) {
@@ -473,10 +474,10 @@ class AgentDevice extends Device {
       try {
         let tickId = eventToSend.tickId;
         let elementId = eventToSend.elementId;
-        let elementValue = eventToSend.elementValue;
+        let value = eventToSend.value;
 
         //Sending event
-        await this._sendEvent(tickId, elementId, elementValue);
+        await this._sendEvent(tickId, elementId, value);
       } catch (err) {
         logger.error(err.message, err);
 
@@ -521,8 +522,8 @@ class AgentDevice extends Device {
         if (exists(fileContent)) {
           let tickId = fileContent.tickId;
           let elementId = fileContent.elementId;
-          let elementValue = fileContent.elementValue;
-          await this._sendEvent(tickId, elementId, elementValue);
+          let value = fileContent.value;
+          await this._sendEvent(tickId, elementId, value);
         }
 
         //File should have been deleted even if it is empty
@@ -554,10 +555,10 @@ class AgentDevice extends Device {
     //#region SAVING DATA AND EVENTS TO CLIPBOARD
 
     //Adjusting data clipboard
-    this._getAndSaveDataToClipboard();
+    this._getAndSaveDataToClipboard(tickNumber);
 
     //Adjusting event clipboard
-    this._getAndSaveEventsToClipboard();
+    this._getAndSaveEventsToClipboard(tickNumber);
 
     //#endregion SAVING DATA AND EVENTS TO CLIPBOARD
 
@@ -568,7 +569,7 @@ class AgentDevice extends Device {
 
     if (!this.Boarded) {
       //Checking if agent should be boarded
-      let shouldBeBoarded = await this._checkIfShouldBoard();
+      let shouldBeBoarded = await this._checkIfShouldBoard(tickNumber);
 
       //If device is not boarded and should not be boarded in this refresh cycle - no point to continue
       if (!shouldBeBoarded) return;
@@ -613,7 +614,7 @@ class AgentDevice extends Device {
       let allEventsSendSuccessfully = await this._trySendingEventsFromClipboardAndClearItOrMoveThemToStorage();
 
       if (allEventsSendSuccessfully) {
-        await this._trySendingEventsFromStorage()();
+        await this._trySendingEventsFromStorage();
       }
     }
 
@@ -713,5 +714,3 @@ class AgentDevice extends Device {
 }
 
 module.exports = AgentDevice;
-
-//TODO - TEST THIS CLASS!!
