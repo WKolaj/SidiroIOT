@@ -1860,9 +1860,9 @@ describe("AgentDevice", () => {
       expect(sendDataMockFunc).toHaveBeenCalledTimes(3);
 
       //Send data should have been called with data from storage
-      expect(sendDataMockFunc.mock.calls[0][0]).toEqual(storageFile1Content);
+      expect(sendDataMockFunc.mock.calls[0][0]).toEqual(storageFile3Content);
       expect(sendDataMockFunc.mock.calls[1][0]).toEqual(storageFile2Content);
-      expect(sendDataMockFunc.mock.calls[2][0]).toEqual(storageFile3Content);
+      expect(sendDataMockFunc.mock.calls[2][0]).toEqual(storageFile1Content);
 
       //storage should be cleared
       let allIds = await device._dataStorage.getAllIDs();
@@ -1872,6 +1872,34 @@ describe("AgentDevice", () => {
       let dirFiles = await readDirAsync(device._dataStorage._dirPath);
 
       expect(dirFiles).toEqual([]);
+    });
+
+    it("should return true and send only given number of files - if number of files exceeds SendDataFile", async () => {
+      payload.numberOfDataFilesToSend = 2;
+
+      let result = await exec();
+
+      expect(result).toEqual(true);
+
+      //Send data should have been called
+      expect(sendDataMockFunc).toHaveBeenCalledTimes(2);
+
+      //Send data should have been called with data from storage
+      expect(sendDataMockFunc.mock.calls[0][0]).toEqual(storageFile3Content);
+      expect(sendDataMockFunc.mock.calls[1][0]).toEqual(storageFile2Content);
+
+      //storage should be cleared except files that were not sent
+      let allIds = await device._dataStorage.getAllIDs();
+      expect(allIds).toEqual([storageFile1ID]);
+
+      //All files except this one should have been removed
+      let dirFiles = await readDirAsync(device._dataStorage._dirPath);
+
+      expect(dirFiles).toEqual([`${storageFile1ID}.data`]);
+
+      //file content should not have been changed
+      let fileContent = await device._dataStorage.getData(storageFile1ID);
+      expect(fileContent).toEqual(storageFile1Content);
     });
 
     it("should return true but send all data from storage and DataStorage cleared - if there are no files", async () => {
@@ -1907,8 +1935,8 @@ describe("AgentDevice", () => {
       expect(sendDataMockFunc).toHaveBeenCalledTimes(2);
 
       //Send data should have been called with data from storage
-      expect(sendDataMockFunc.mock.calls[0][0]).toEqual(storageFile1Content);
-      expect(sendDataMockFunc.mock.calls[1][0]).toEqual(storageFile3Content);
+      expect(sendDataMockFunc.mock.calls[0][0]).toEqual(storageFile3Content);
+      expect(sendDataMockFunc.mock.calls[1][0]).toEqual(storageFile1Content);
 
       //storage should have been totally cleared
       let allIds = await device._dataStorage.getAllIDs();
@@ -1936,9 +1964,9 @@ describe("AgentDevice", () => {
       expect(sendDataMockFunc).toHaveBeenCalledTimes(3);
 
       //Send data should have been called with data from storage
-      expect(sendDataMockFunc.mock.calls[0][0]).toEqual(storageFile1Content);
+      expect(sendDataMockFunc.mock.calls[0][0]).toEqual(storageFile3Content);
       expect(sendDataMockFunc.mock.calls[1][0]).toEqual(storageFile2Content);
-      expect(sendDataMockFunc.mock.calls[2][0]).toEqual(storageFile3Content);
+      expect(sendDataMockFunc.mock.calls[2][0]).toEqual(storageFile1Content);
 
       //storage should not be totally cleared
       let allIds = await device._dataStorage.getAllIDs();
@@ -1977,9 +2005,9 @@ describe("AgentDevice", () => {
       expect(sendDataMockFunc).toHaveBeenCalledTimes(3);
 
       //Send data should have been called with data from storage
-      expect(sendDataMockFunc.mock.calls[0][0]).toEqual(storageFile1Content);
+      expect(sendDataMockFunc.mock.calls[0][0]).toEqual(storageFile3Content);
       expect(sendDataMockFunc.mock.calls[1][0]).toEqual(storageFile2Content);
-      expect(sendDataMockFunc.mock.calls[2][0]).toEqual(storageFile3Content);
+      expect(sendDataMockFunc.mock.calls[2][0]).toEqual(storageFile1Content);
 
       //storage should not be cleared
       let allIds = await device._dataStorage.getAllIDs();
@@ -2078,8 +2106,8 @@ describe("AgentDevice", () => {
       expect(sendDataMockFunc).toHaveBeenCalledTimes(2);
 
       //Send data should have been called with data from storage
-      expect(sendDataMockFunc.mock.calls[0][0]).toEqual(storageFile1Content);
-      expect(sendDataMockFunc.mock.calls[1][0]).toEqual(storageFile3Content);
+      expect(sendDataMockFunc.mock.calls[0][0]).toEqual(storageFile3Content);
+      expect(sendDataMockFunc.mock.calls[1][0]).toEqual(storageFile1Content);
 
       //All files except 2nd should have been deleted
       let dirFiles = await readDirAsync(device._dataStorage._dirPath);
@@ -2098,7 +2126,7 @@ describe("AgentDevice", () => {
       expect(logErrorMock.mock.calls[0][0]).toEqual("GetDataError");
     });
 
-    it("should return false a- if clearData throws for this file", async () => {
+    it("should return false - if clearData throws for this file", async () => {
       deleteDataThrows = true;
 
       let result = await exec();
@@ -2109,9 +2137,9 @@ describe("AgentDevice", () => {
       expect(sendDataMockFunc).toHaveBeenCalledTimes(3);
 
       //Send data should have been called with data from storage
-      expect(sendDataMockFunc.mock.calls[0][0]).toEqual(storageFile1Content);
+      expect(sendDataMockFunc.mock.calls[0][0]).toEqual(storageFile3Content);
       expect(sendDataMockFunc.mock.calls[1][0]).toEqual(storageFile2Content);
-      expect(sendDataMockFunc.mock.calls[2][0]).toEqual(storageFile3Content);
+      expect(sendDataMockFunc.mock.calls[2][0]).toEqual(storageFile1Content);
 
       //All files except 2nd should have been deleted
       let dirFiles = await readDirAsync(device._dataStorage._dirPath);

@@ -135,5 +135,3 @@ class FileStorage extends Storage {
 }
 
 module.exports = FileStorage;
-
-//TODO - TEST IF ERRORS THROWS!

@@ -189,7 +189,7 @@ describe("FileStorage", () => {
     });
   });
 
-  describe("_getOldestDataID", () => {
+  describe("getOldestDataID", () => {
     let fileStorage;
     let numberOfIds;
     let fileNames;
@@ -220,7 +220,7 @@ describe("FileStorage", () => {
         dirPath: storageDirPath,
       });
 
-      return fileStorage._getOldestDataID(numberOfIds);
+      return fileStorage.getOldestDataID(numberOfIds);
     };
 
     it("should return last 5 ids after sorting - if numberOfIds is 5 and there are 10 ids", async () => {
@@ -298,6 +298,152 @@ describe("FileStorage", () => {
         "1606330872905-abcdefgh",
         "1606330872903-abcdefgh",
         "1606330872902-abcdefgh",
+      ];
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should return empty array  - if numberOfIds is 0", async () => {
+      numberOfIds = 0;
+
+      let result = await exec();
+
+      let expectedResult = [];
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should return all ids  - if numberOfIds is null", async () => {
+      numberOfIds = null;
+
+      let result = await exec();
+
+      let expectedResult = [
+        "1606330872909-abcdefgh",
+        "1606330872908-abcdefgh",
+        "1606330872907-abcdefgh",
+        "1606330872906-abcdefgh",
+        "1606330872905-abcdefgh",
+        "1606330872904-abcdefgh",
+        "1606330872903-abcdefgh",
+        "1606330872902-abcdefgh",
+        "1606330872901-abcdefgh",
+        "1606330872900-abcdefgh",
+      ];
+
+      expect(result).toEqual(expectedResult);
+    });
+  });
+
+  describe("getNewestDataID", () => {
+    let fileStorage;
+    let numberOfIds;
+    let fileNames;
+
+    beforeEach(() => {
+      fileStorage = new FileStorage();
+      numberOfIds = 5;
+      fileNames = [
+        "1606330872900-abcdefgh.data",
+        "1606330872902-abcdefgh.data",
+        "1606330872904-abcdefgh.data",
+        "1606330872905-abcdefgh.data",
+        "1606330872907-abcdefgh.data",
+        "1606330872909-abcdefgh.data",
+        "1606330872901-abcdefgh.data",
+        "1606330872903-abcdefgh.data",
+        "1606330872908-abcdefgh.data",
+        "1606330872906-abcdefgh.data",
+      ];
+    });
+
+    let exec = async () => {
+      for (let fileName of fileNames)
+        await createFileAsync(path.join(storageDirPath, fileName), fileName);
+
+      await fileStorage.init({
+        bufferLength: 10,
+        dirPath: storageDirPath,
+      });
+
+      return fileStorage.getNewestDataID(numberOfIds);
+    };
+
+    it("should return first 5 ids after sorting - if numberOfIds is 5 and there are 10 ids", async () => {
+      let result = await exec();
+
+      let expectedResult = [
+        "1606330872909-abcdefgh",
+        "1606330872908-abcdefgh",
+        "1606330872907-abcdefgh",
+        "1606330872906-abcdefgh",
+        "1606330872905-abcdefgh",
+      ];
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should return first 1 ids after sorting - if numberOfIds is 1", async () => {
+      numberOfIds = 1;
+
+      let result = await exec();
+
+      let expectedResult = ["1606330872909-abcdefgh"];
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should return first 1 ids after sorting - if numberOfIds is not defined", async () => {
+      numberOfIds = undefined;
+
+      let result = await exec();
+
+      let expectedResult = ["1606330872909-abcdefgh"];
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should return first 3 ids after sorting - if numberOfIds is 5 and there are 3 fileNames", async () => {
+      numberOfIds = 5;
+      fileNames = [
+        "1606330872902-abcdefgh.data",
+        "1606330872903-abcdefgh.data",
+        "1606330872901-abcdefgh.data",
+      ];
+
+      let result = await exec();
+
+      let expectedResult = [
+        "1606330872903-abcdefgh",
+        "1606330872902-abcdefgh",
+        "1606330872901-abcdefgh",
+      ];
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should take into account only files with valid extensions", async () => {
+      numberOfIds = 3;
+
+      fileNames = [
+        "1606330872900-abcdefgh.test",
+        "1606330872902-abcdefgh.data",
+        "1606330872904-abcdefgh.test",
+        "1606330872905-abcdefgh.data",
+        "1606330872907-abcdefgh.test",
+        "1606330872909-abcdefgh.data",
+        "1606330872901-abcdefgh.test",
+        "1606330872903-abcdefgh.data",
+        "1606330872908-abcdefgh.test",
+        "1606330872906-abcdefgh.data",
+      ];
+
+      let result = await exec();
+
+      let expectedResult = [
+        "1606330872909-abcdefgh",
+        "1606330872906-abcdefgh",
+        "1606330872905-abcdefgh",
       ];
 
       expect(result).toEqual(expectedResult);

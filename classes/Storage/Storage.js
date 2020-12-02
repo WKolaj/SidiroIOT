@@ -39,7 +39,7 @@ class Storage {
     if (allIds.length > this.BufferLength) {
       //Calculating how many data should be deleted and delete them
       let numberOdIdsToDelete = allIds.length - this.BufferLength;
-      let idsToDelete = await this._getOldestDataID(numberOdIdsToDelete);
+      let idsToDelete = await this.getOldestDataID(numberOdIdsToDelete);
       for (let idToDelete of idsToDelete) await this.deleteData(idToDelete);
     }
 
@@ -72,6 +72,48 @@ class Storage {
     for (let idToDelete of allIds) await this.deleteData(idToDelete);
   }
 
+  /**
+   * @description Method for getting oldest ids from storage. Returns number of ids in argument. CAN BE OVERRIDEN IN CHILD CLASSES
+   * @param {Number} numberOfIds number of ids to delete. By default only one id should be returned.
+   */
+  async getOldestDataID(numberOfIds = 1) {
+    //if number of ids is 0 - return empty array
+    if (numberOfIds === 0) return [];
+
+    let allData = await this.getAllIDs();
+
+    //Sorting all ids
+    let sortMethod = this._getCreationDateFromId;
+    let sortedData = allData.sort((id1, id2) => {
+      return sortMethod(id2) - sortMethod(id1);
+    });
+
+    //returning number of elements from the last one
+    return sortedData.slice(-numberOfIds);
+  }
+
+  /**
+   * @description Method for getting newest ids from storage. Returns number of ids in argument. CAN BE OVERRIDEN IN CHILD CLASSES
+   * @param {Number} numberOfIds number of ids
+   */
+  async getNewestDataID(numberOfIds = 1) {
+    //if number of ids is 0 - return empty array
+    if (numberOfIds === 0) return [];
+
+    let allData = await this.getAllIDs();
+
+    //Sorting all ids
+    let sortMethod = this._getCreationDateFromId;
+    let sortedData = allData.sort((id1, id2) => {
+      return sortMethod(id2) - sortMethod(id1);
+    });
+
+    if (!exists(numberOfIds)) return sortedData;
+
+    //returning number of elements from the last one
+    return sortedData.slice(0, numberOfIds);
+  }
+
   //#endregion ========= VIRTUAL PUBLIC METHODS =========
 
   //#region ========= VIRTUAL PRIVATE METHODS =========
@@ -98,26 +140,6 @@ class Storage {
     var firstMinusPosition = id.indexOf("-");
     if (firstMinusPosition === -1) return parseInt(id);
     else return parseInt(id.substr(0, firstMinusPosition));
-  }
-
-  /**
-   * @description Method for getting oldest ids from storage. Returns number of ids in argument. CAN BE OVERRIDEN IN CHILD CLASSES
-   * @param {Number} numberOfIds number of ids to delete. By default only one id should be returned.
-   */
-  async _getOldestDataID(numberOfIds = 1) {
-    //if number of ids is 0 - return empty array
-    if (numberOfIds === 0) return [];
-
-    let allData = await this.getAllIDs();
-
-    //Sorting all ids
-    let sortMethod = this._getCreationDateFromId;
-    let sortedData = allData.sort((id1, id2) => {
-      return sortMethod(id2) - sortMethod(id1);
-    });
-
-    //returning number of elements from the last one
-    return sortedData.slice(-numberOfIds);
   }
 
   //#endregion ========= VIRTUAL PRIVATE METHODS =========
@@ -164,5 +186,3 @@ class Storage {
 }
 
 module.exports = Storage;
-
-//TODO - test this class

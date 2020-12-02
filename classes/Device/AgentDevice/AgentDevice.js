@@ -2,6 +2,7 @@ const {
   cloneObject,
   createDirIfNotExists,
   exists,
+  isObjectEmpty,
 } = require("../../../utilities/utilities");
 const { getAgentsDiPath } = require("../../../services/projectService");
 const DataClipboard = require("../../Clipboard/DataClipboard");
@@ -369,7 +370,7 @@ class AgentDevice extends Device {
   async _trySendingDataFromClipboardAndClearItOrMoveThemToStorage() {
     //If data clipboard content is empty - don't proceed with sending or saving data
     let dataClipboardContent = this._dataClipboard.getAllData();
-    if (!exists(dataClipboardContent) || dataClipboardContent === {}) {
+    if (!exists(dataClipboardContent) || isObjectEmpty(dataClipboardContent)) {
       //Clearing data form clipboard
       this._dataClipboard.clearAllData();
       return true;
@@ -396,9 +397,11 @@ class AgentDevice extends Device {
     //Getting number of files to send
     let fileIdsToSend = [];
     try {
-      let allFileIds = await this._dataStorage.getAllIDs();
-      if (!exists(allFileIds)) return false;
-      fileIdsToSend = allFileIds.slice(0, this.NumberOfDataFilesToSend);
+      fileIdsToSend = await this._dataStorage.getNewestDataID(
+        this.NumberOfDataFilesToSend
+      );
+      if (!exists(fileIdsToSend)) return false;
+      if (isObjectEmpty(fileIdsToSend)) return true;
     } catch (err) {
       logger.error(err.message, err);
       return false;
@@ -454,7 +457,11 @@ class AgentDevice extends Device {
   async _trySendingEventsFromClipboardAndClearItOrMoveThemToStorage() {
     //If data clipboard content is empty - don't proceed with sending or saving data
     let eventClipboardContent = this._eventClipboard.getAllData();
-    if (!exists(eventClipboardContent) || eventClipboardContent === []) {
+
+    if (
+      !exists(eventClipboardContent) ||
+      isObjectEmpty(eventClipboardContent)
+    ) {
       //Clearing data form clipboard
       this._eventClipboard.clearAllData();
       //Returning true - if data is empty it does not indicate that there was an error during sending
@@ -462,7 +469,7 @@ class AgentDevice extends Device {
     }
 
     let allEventsSendSuccessfully = true;
-    for (let eventToSend of this.eventClipboardContent) {
+    for (let eventToSend of eventClipboardContent) {
       try {
         let tickId = eventToSend.tickId;
         let elementId = eventToSend.elementId;
@@ -494,9 +501,11 @@ class AgentDevice extends Device {
     let fileIdsToSend = [];
     try {
       //Getting number of files to send
-      let allFileIds = await this._eventStorage.getAllIDs();
-      if (!exists(allFileIds)) return false;
-      fileIdsToSend = allFileIds.slice(0, this.NumberOfEventFilesToSend);
+      fileIdsToSend = await this._eventStorage.getNewestDataID(
+        this.NumberOfEventFilesToSend
+      );
+      if (!exists(fileIdsToSend)) return false;
+      if (isObjectEmpty(fileIdsToSend)) return true;
     } catch (err) {
       logger.error(err.message, err);
       return false;
@@ -514,8 +523,10 @@ class AgentDevice extends Device {
           let elementId = fileContent.elementId;
           let elementValue = fileContent.elementValue;
           await this._sendEvent(tickId, elementId, elementValue);
-          await this._eventStorage.deleteData(fileId);
         }
+
+        //File should have been deleted even if it is empty
+        await this._eventStorage.deleteData(fileId);
       } catch (err) {
         logger.error(err.message, err);
         sendingAtLeastOneFileFails = true;
