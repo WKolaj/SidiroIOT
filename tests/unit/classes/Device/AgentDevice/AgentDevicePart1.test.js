@@ -8,7 +8,7 @@ const {
   checkIfFileExistsAsync,
   exists,
   createFileAsync,
-} = require("../../../../utilities/utilities");
+} = require("../../../../../utilities/utilities");
 const {
   createFakeConnectableVariable,
   createFakeAlert,
@@ -16,9 +16,9 @@ const {
   wrapMethodToInvokeAfter,
   createFakeProtocolRequest,
   createFakeDevice,
-} = require("../../../utilities/testUtilities");
-const logger = require("../../../../logger/logger");
-const AgentDevice = require("../../../../classes/Device/AgentDevice/AgentDevice");
+} = require("../../../../utilities/testUtilities");
+const logger = require("../../../../../logger/logger");
+const AgentDevice = require("../../../../../classes/Device/AgentDevice/AgentDevice");
 const path = require("path");
 
 const AgentDirPath = "__testDir/settings/agentsData";
