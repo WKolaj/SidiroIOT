@@ -3998,16 +3998,1256 @@ describe("AgentDevice", () => {
 
     //#endregion FILLING EVENT CLIPBOARD
 
-    //#region SENDING DATA EXCEPTIONS
+    //#region SENDING DATA CLIPBOARD EXCEPTIONS
+
+    it("should save data to storage and not try to send files from storage - if send data throws, data storage size is enought", async () => {
+      SendDataMockFunc = jest.fn(async () => {
+        throw Error("Sending data error");
+      });
+
+      await exec();
+
+      //#region CHECKING SEND DATA
+
+      //Sending only one time - data files should not be send in case there is a problem with sending clipboard.
+      expect(SendDataMockFunc).toHaveBeenCalledTimes(1);
+
+      //Checking data clipboard sending
+
+      let expectedContent = {
+        [variable1LastValueTick]: {
+          variable1ID: variable1Value,
+        },
+        [variable2LastValueTick]: {
+          variable2ID: variable2Value,
+        },
+        [variable3LastValueTick]: {
+          variable3ID: variable3Value,
+        },
+      };
+
+      expect(SendDataMockFunc.mock.calls[0][0]).toEqual(expectedContent);
+
+      //#endregion CHECKING SEND DATA
+
+      //#region CHECKING SEND EVENT
+
+      //SendEvents should have been invoked 6 times - 3 times  - for every alert variable, 3 times - from files
+      expect(SendEventMockFunc).toHaveBeenCalledTimes(6);
+
+      //Checking event clipboard sending
+
+      expect(SendEventMockFunc.mock.calls[0][0]).toEqual(alert1LastValueTick);
+      expect(SendEventMockFunc.mock.calls[0][1]).toEqual(alert1ID);
+      expect(SendEventMockFunc.mock.calls[0][2]).toEqual(alert1Value);
+
+      expect(SendEventMockFunc.mock.calls[1][0]).toEqual(alert2LastValueTick);
+      expect(SendEventMockFunc.mock.calls[1][1]).toEqual(alert2ID);
+      expect(SendEventMockFunc.mock.calls[1][2]).toEqual(alert2Value);
+
+      expect(SendEventMockFunc.mock.calls[2][0]).toEqual(alert3LastValueTick);
+      expect(SendEventMockFunc.mock.calls[2][1]).toEqual(alert3ID);
+      expect(SendEventMockFunc.mock.calls[2][2]).toEqual(alert3Value);
+
+      //Checking event file sending
+
+      expect(SendEventMockFunc.mock.calls[3][0]).toEqual(
+        eventStorageFile3Content.tickId
+      );
+      expect(SendEventMockFunc.mock.calls[3][1]).toEqual(
+        eventStorageFile3Content.elementId
+      );
+      expect(SendEventMockFunc.mock.calls[3][2]).toEqual(
+        eventStorageFile3Content.value
+      );
+
+      expect(SendEventMockFunc.mock.calls[4][0]).toEqual(
+        eventStorageFile2Content.tickId
+      );
+      expect(SendEventMockFunc.mock.calls[4][1]).toEqual(
+        eventStorageFile2Content.elementId
+      );
+      expect(SendEventMockFunc.mock.calls[4][2]).toEqual(
+        eventStorageFile2Content.value
+      );
+
+      expect(SendEventMockFunc.mock.calls[5][0]).toEqual(
+        eventStorageFile1Content.tickId
+      );
+      expect(SendEventMockFunc.mock.calls[5][1]).toEqual(
+        eventStorageFile1Content.elementId
+      );
+      expect(SendEventMockFunc.mock.calls[5][2]).toEqual(
+        eventStorageFile1Content.value
+      );
+
+      //#endregion CHECKING SEND EVENT
+
+      //#region CHECKING DATA LAST VALUES
+
+      //all last values should have been assigned
+      expect(device._lastDataValues).toEqual({
+        variable1ID: { tickId: variable1LastValueTick, value: variable1Value },
+        variable2ID: { tickId: variable2LastValueTick, value: variable2Value },
+        variable3ID: { tickId: variable3LastValueTick, value: variable3Value },
+      });
+
+      //#endregion CHECKING DATA LAST VALUES
+
+      //#region CHECKING EVENT LAST VALUES
+
+      //all last values should have been assigned
+      expect(device._lastEventValues).toEqual({
+        alert1ID: { tickId: alert1LastValueTick, value: alert1Value },
+        alert2ID: { tickId: alert2LastValueTick, value: alert2Value },
+        alert3ID: { tickId: alert3LastValueTick, value: alert3Value },
+      });
+
+      //#endregion CHECKING EVENT LAST VALUES
+
+      //#region CHECKING DATA CLIPBOARD
+
+      //Clipboard should have been cleared
+      expect(device._dataClipboard.getAllData()).toEqual({});
+
+      //#endregion CHECKING DATA CLIPBOARD
+
+      //#region CHECKING EVENT CLIPBOARD
+
+      expect(device._eventClipboard.getAllData()).toEqual([]);
+
+      //#endregion CHECKING EVENT CLIPBOARD
+
+      //#region CHECKING DATA STORAGE
+
+      let dataStorageIDs = await device._dataStorage.getAllIDs();
+      expect(dataStorageIDs.length).toEqual(4);
+      expect(dataStorageIDs).toContain(dataStorageFile1ID);
+      expect(dataStorageIDs).toContain(dataStorageFile2ID);
+      expect(dataStorageIDs).toContain(dataStorageFile3ID);
+
+      //Check new storage data
+      let newDataID = dataStorageIDs.filter(
+        (element) =>
+          element !== dataStorageFile1ID &&
+          element !== dataStorageFile2ID &&
+          element !== dataStorageFile3ID
+      )[0];
+
+      let newDataContent = await device._dataStorage.getData(newDataID);
+
+      expect(newDataContent).toEqual({
+        [variable1LastValueTick]: {
+          variable1ID: variable1Value,
+        },
+        [variable2LastValueTick]: {
+          variable2ID: variable2Value,
+        },
+        [variable3LastValueTick]: {
+          variable3ID: variable3Value,
+        },
+      });
+
+      //#endregion CHECKING DATA STORAGE
+
+      //#region CHECKING EVENT STORAGE
+
+      //There should be no data in storage - every file is deleted
+      let eventStorageContent = await device._eventStorage.getAllIDs();
+      expect(eventStorageContent).toEqual([]);
+
+      //#endregion CHECKING EVENT STORAGE
+
+      //#region CHECKING BOARDED STATE
+
+      //boarded state should be assigned from checkIfBoarded.
+      expect(device.Boarded).toEqual(true);
+
+      //#endregion CHECKING BOARDED STATE
+    });
+
+    it("should save data to storage and remove oldest stroage file and not try to send files from storage - if send data throws, data storage size is too small", async () => {
+      SendDataMockFunc = jest.fn(async () => {
+        throw Error("Sending data error");
+      });
+
+      payload.dataStorageSize = 3;
+
+      await exec();
+
+      //#region CHECKING SEND DATA
+
+      //Sending only one time - data files should not be send in case there is a problem with sending clipboard.
+      expect(SendDataMockFunc).toHaveBeenCalledTimes(1);
+
+      //Checking data clipboard sending
+
+      let expectedContent = {
+        [variable1LastValueTick]: {
+          variable1ID: variable1Value,
+        },
+        [variable2LastValueTick]: {
+          variable2ID: variable2Value,
+        },
+        [variable3LastValueTick]: {
+          variable3ID: variable3Value,
+        },
+      };
+
+      expect(SendDataMockFunc.mock.calls[0][0]).toEqual(expectedContent);
+
+      //#endregion CHECKING SEND DATA
+
+      //#region CHECKING SEND EVENT
+
+      //SendEvents should have been invoked 6 times - 3 times  - for every alert variable, 3 times - from files
+      expect(SendEventMockFunc).toHaveBeenCalledTimes(6);
+
+      //Checking event clipboard sending
+
+      expect(SendEventMockFunc.mock.calls[0][0]).toEqual(alert1LastValueTick);
+      expect(SendEventMockFunc.mock.calls[0][1]).toEqual(alert1ID);
+      expect(SendEventMockFunc.mock.calls[0][2]).toEqual(alert1Value);
+
+      expect(SendEventMockFunc.mock.calls[1][0]).toEqual(alert2LastValueTick);
+      expect(SendEventMockFunc.mock.calls[1][1]).toEqual(alert2ID);
+      expect(SendEventMockFunc.mock.calls[1][2]).toEqual(alert2Value);
+
+      expect(SendEventMockFunc.mock.calls[2][0]).toEqual(alert3LastValueTick);
+      expect(SendEventMockFunc.mock.calls[2][1]).toEqual(alert3ID);
+      expect(SendEventMockFunc.mock.calls[2][2]).toEqual(alert3Value);
+
+      //Checking event file sending
+
+      expect(SendEventMockFunc.mock.calls[3][0]).toEqual(
+        eventStorageFile3Content.tickId
+      );
+      expect(SendEventMockFunc.mock.calls[3][1]).toEqual(
+        eventStorageFile3Content.elementId
+      );
+      expect(SendEventMockFunc.mock.calls[3][2]).toEqual(
+        eventStorageFile3Content.value
+      );
+
+      expect(SendEventMockFunc.mock.calls[4][0]).toEqual(
+        eventStorageFile2Content.tickId
+      );
+      expect(SendEventMockFunc.mock.calls[4][1]).toEqual(
+        eventStorageFile2Content.elementId
+      );
+      expect(SendEventMockFunc.mock.calls[4][2]).toEqual(
+        eventStorageFile2Content.value
+      );
+
+      expect(SendEventMockFunc.mock.calls[5][0]).toEqual(
+        eventStorageFile1Content.tickId
+      );
+      expect(SendEventMockFunc.mock.calls[5][1]).toEqual(
+        eventStorageFile1Content.elementId
+      );
+      expect(SendEventMockFunc.mock.calls[5][2]).toEqual(
+        eventStorageFile1Content.value
+      );
+
+      //#endregion CHECKING SEND EVENT
+
+      //#region CHECKING DATA LAST VALUES
+
+      //all last values should have been assigned
+      expect(device._lastDataValues).toEqual({
+        variable1ID: { tickId: variable1LastValueTick, value: variable1Value },
+        variable2ID: { tickId: variable2LastValueTick, value: variable2Value },
+        variable3ID: { tickId: variable3LastValueTick, value: variable3Value },
+      });
+
+      //#endregion CHECKING DATA LAST VALUES
+
+      //#region CHECKING EVENT LAST VALUES
+
+      //all last values should have been assigned
+      expect(device._lastEventValues).toEqual({
+        alert1ID: { tickId: alert1LastValueTick, value: alert1Value },
+        alert2ID: { tickId: alert2LastValueTick, value: alert2Value },
+        alert3ID: { tickId: alert3LastValueTick, value: alert3Value },
+      });
+
+      //#endregion CHECKING EVENT LAST VALUES
+
+      //#region CHECKING DATA CLIPBOARD
+
+      //Clipboard should have been cleared
+      expect(device._dataClipboard.getAllData()).toEqual({});
+
+      //#endregion CHECKING DATA CLIPBOARD
+
+      //#region CHECKING EVENT CLIPBOARD
+
+      expect(device._eventClipboard.getAllData()).toEqual([]);
+
+      //#endregion CHECKING EVENT CLIPBOARD
+
+      //#region CHECKING DATA STORAGE
+
+      //dataStorageFile1 should have been deleted
+      let dataStorageIDs = await device._dataStorage.getAllIDs();
+      expect(dataStorageIDs.length).toEqual(3);
+      expect(dataStorageIDs).toContain(dataStorageFile2ID);
+      expect(dataStorageIDs).toContain(dataStorageFile3ID);
+
+      //Check new storage data
+      let newDataID = dataStorageIDs.filter(
+        (element) =>
+          element !== dataStorageFile2ID && element !== dataStorageFile3ID
+      )[0];
+
+      let newDataContent = await device._dataStorage.getData(newDataID);
+
+      expect(newDataContent).toEqual({
+        [variable1LastValueTick]: {
+          variable1ID: variable1Value,
+        },
+        [variable2LastValueTick]: {
+          variable2ID: variable2Value,
+        },
+        [variable3LastValueTick]: {
+          variable3ID: variable3Value,
+        },
+      });
+
+      //#endregion CHECKING DATA STORAGE
+
+      //#region CHECKING EVENT STORAGE
+
+      //There should be no data in storage - every file is deleted
+      let eventStorageContent = await device._eventStorage.getAllIDs();
+      expect(eventStorageContent).toEqual([]);
+
+      //#endregion CHECKING EVENT STORAGE
+
+      //#region CHECKING BOARDED STATE
+
+      //boarded state should be assigned from checkIfBoarded.
+      expect(device.Boarded).toEqual(true);
+
+      //#endregion CHECKING BOARDED STATE
+    });
+
+    it("should save data to storage and not try to send files from storage - if send data throws, data storage is empty", async () => {
+      addDataStorageFile1 = false;
+      addDataStorageFile2 = false;
+      addDataStorageFile3 = false;
+
+      SendDataMockFunc = jest.fn(async () => {
+        throw Error("Sending data error");
+      });
+
+      await exec();
+
+      //#region CHECKING SEND DATA
+
+      //Sending only one time - data files should not be send in case there is a problem with sending clipboard.
+      expect(SendDataMockFunc).toHaveBeenCalledTimes(1);
+
+      //Checking data clipboard sending
+
+      let expectedContent = {
+        [variable1LastValueTick]: {
+          variable1ID: variable1Value,
+        },
+        [variable2LastValueTick]: {
+          variable2ID: variable2Value,
+        },
+        [variable3LastValueTick]: {
+          variable3ID: variable3Value,
+        },
+      };
+
+      expect(SendDataMockFunc.mock.calls[0][0]).toEqual(expectedContent);
+
+      //#endregion CHECKING SEND DATA
+
+      //#region CHECKING SEND EVENT
+
+      //SendEvents should have been invoked 6 times - 3 times  - for every alert variable, 3 times - from files
+      expect(SendEventMockFunc).toHaveBeenCalledTimes(6);
+
+      //Checking event clipboard sending
+
+      expect(SendEventMockFunc.mock.calls[0][0]).toEqual(alert1LastValueTick);
+      expect(SendEventMockFunc.mock.calls[0][1]).toEqual(alert1ID);
+      expect(SendEventMockFunc.mock.calls[0][2]).toEqual(alert1Value);
+
+      expect(SendEventMockFunc.mock.calls[1][0]).toEqual(alert2LastValueTick);
+      expect(SendEventMockFunc.mock.calls[1][1]).toEqual(alert2ID);
+      expect(SendEventMockFunc.mock.calls[1][2]).toEqual(alert2Value);
+
+      expect(SendEventMockFunc.mock.calls[2][0]).toEqual(alert3LastValueTick);
+      expect(SendEventMockFunc.mock.calls[2][1]).toEqual(alert3ID);
+      expect(SendEventMockFunc.mock.calls[2][2]).toEqual(alert3Value);
+
+      //Checking event file sending
+
+      expect(SendEventMockFunc.mock.calls[3][0]).toEqual(
+        eventStorageFile3Content.tickId
+      );
+      expect(SendEventMockFunc.mock.calls[3][1]).toEqual(
+        eventStorageFile3Content.elementId
+      );
+      expect(SendEventMockFunc.mock.calls[3][2]).toEqual(
+        eventStorageFile3Content.value
+      );
+
+      expect(SendEventMockFunc.mock.calls[4][0]).toEqual(
+        eventStorageFile2Content.tickId
+      );
+      expect(SendEventMockFunc.mock.calls[4][1]).toEqual(
+        eventStorageFile2Content.elementId
+      );
+      expect(SendEventMockFunc.mock.calls[4][2]).toEqual(
+        eventStorageFile2Content.value
+      );
+
+      expect(SendEventMockFunc.mock.calls[5][0]).toEqual(
+        eventStorageFile1Content.tickId
+      );
+      expect(SendEventMockFunc.mock.calls[5][1]).toEqual(
+        eventStorageFile1Content.elementId
+      );
+      expect(SendEventMockFunc.mock.calls[5][2]).toEqual(
+        eventStorageFile1Content.value
+      );
+
+      //#endregion CHECKING SEND EVENT
+
+      //#region CHECKING DATA LAST VALUES
+
+      //all last values should have been assigned
+      expect(device._lastDataValues).toEqual({
+        variable1ID: { tickId: variable1LastValueTick, value: variable1Value },
+        variable2ID: { tickId: variable2LastValueTick, value: variable2Value },
+        variable3ID: { tickId: variable3LastValueTick, value: variable3Value },
+      });
+
+      //#endregion CHECKING DATA LAST VALUES
+
+      //#region CHECKING EVENT LAST VALUES
+
+      //all last values should have been assigned
+      expect(device._lastEventValues).toEqual({
+        alert1ID: { tickId: alert1LastValueTick, value: alert1Value },
+        alert2ID: { tickId: alert2LastValueTick, value: alert2Value },
+        alert3ID: { tickId: alert3LastValueTick, value: alert3Value },
+      });
+
+      //#endregion CHECKING EVENT LAST VALUES
+
+      //#region CHECKING DATA CLIPBOARD
+
+      //Clipboard should have been cleared
+      expect(device._dataClipboard.getAllData()).toEqual({});
+
+      //#endregion CHECKING DATA CLIPBOARD
+
+      //#region CHECKING EVENT CLIPBOARD
+
+      expect(device._eventClipboard.getAllData()).toEqual([]);
+
+      //#endregion CHECKING EVENT CLIPBOARD
+
+      //#region CHECKING DATA STORAGE
+
+      let dataStorageIDs = await device._dataStorage.getAllIDs();
+      expect(dataStorageIDs.length).toEqual(1);
+      //Check new storage data
+      let newDataID = dataStorageIDs[0];
+      let newDataContent = await device._dataStorage.getData(newDataID);
+
+      expect(newDataContent).toEqual({
+        [variable1LastValueTick]: {
+          variable1ID: variable1Value,
+        },
+        [variable2LastValueTick]: {
+          variable2ID: variable2Value,
+        },
+        [variable3LastValueTick]: {
+          variable3ID: variable3Value,
+        },
+      });
+
+      //#endregion CHECKING DATA STORAGE
+
+      //#region CHECKING EVENT STORAGE
+
+      //There should be no data in storage - every file is deleted
+      let eventStorageContent = await device._eventStorage.getAllIDs();
+      expect(eventStorageContent).toEqual([]);
+
+      //#endregion CHECKING EVENT STORAGE
+
+      //#region CHECKING BOARDED STATE
+
+      //boarded state should be assigned from checkIfBoarded.
+      expect(device.Boarded).toEqual(true);
+
+      //#endregion CHECKING BOARDED STATE
+    });
+
+    it("should not send data from clipboard and not save it in storage - if clipboard data is empty", async () => {
+      //Setting interval to not fit tick
+      tickId = 1 * 3 * 5 * 7 * 11 * 13 * 17 * 19;
+
+      dataClipboardContent = {};
+
+      //checking whether lasts data values was changed
+      lastDataValues = {
+        variable1ID: { tickId: 11, value: 123 },
+        variable2ID: { tickId: 12, value: 456 },
+        variable3ID: { tickId: 13, value: 789 },
+      };
+
+      //variable1 and variable2 fits
+      payload.dataToSendConfig[variable1ID].sendingInterval = 23;
+      payload.dataToSendConfig[variable2ID].sendingInterval = 23;
+      payload.dataToSendConfig[variable3ID].sendingInterval = 23;
+
+      await exec();
+
+      //#region CHECKING SEND DATA
+
+      expect(SendDataMockFunc).toHaveBeenCalledTimes(3);
+
+      //Checking data files sending
+
+      expect(SendDataMockFunc.mock.calls[0][0]).toEqual(
+        dataStorageFile3Content
+      );
+      expect(SendDataMockFunc.mock.calls[1][0]).toEqual(
+        dataStorageFile2Content
+      );
+      expect(SendDataMockFunc.mock.calls[2][0]).toEqual(
+        dataStorageFile1Content
+      );
+
+      //#endregion CHECKING SEND DATA
+
+      //#region CHECKING SEND EVENT
+
+      //SendEvents should have been invoked 6 times - 3 times  - for every alert variable, 3 times - from files
+      expect(SendEventMockFunc).toHaveBeenCalledTimes(6);
+
+      //Checking event clipboard sending
+
+      expect(SendEventMockFunc.mock.calls[0][0]).toEqual(alert1LastValueTick);
+      expect(SendEventMockFunc.mock.calls[0][1]).toEqual(alert1ID);
+      expect(SendEventMockFunc.mock.calls[0][2]).toEqual(alert1Value);
+
+      expect(SendEventMockFunc.mock.calls[1][0]).toEqual(alert2LastValueTick);
+      expect(SendEventMockFunc.mock.calls[1][1]).toEqual(alert2ID);
+      expect(SendEventMockFunc.mock.calls[1][2]).toEqual(alert2Value);
+
+      expect(SendEventMockFunc.mock.calls[2][0]).toEqual(alert3LastValueTick);
+      expect(SendEventMockFunc.mock.calls[2][1]).toEqual(alert3ID);
+      expect(SendEventMockFunc.mock.calls[2][2]).toEqual(alert3Value);
+
+      //Checking event file sending
+
+      expect(SendEventMockFunc.mock.calls[3][0]).toEqual(
+        eventStorageFile3Content.tickId
+      );
+      expect(SendEventMockFunc.mock.calls[3][1]).toEqual(
+        eventStorageFile3Content.elementId
+      );
+      expect(SendEventMockFunc.mock.calls[3][2]).toEqual(
+        eventStorageFile3Content.value
+      );
+
+      expect(SendEventMockFunc.mock.calls[4][0]).toEqual(
+        eventStorageFile2Content.tickId
+      );
+      expect(SendEventMockFunc.mock.calls[4][1]).toEqual(
+        eventStorageFile2Content.elementId
+      );
+      expect(SendEventMockFunc.mock.calls[4][2]).toEqual(
+        eventStorageFile2Content.value
+      );
+
+      expect(SendEventMockFunc.mock.calls[5][0]).toEqual(
+        eventStorageFile1Content.tickId
+      );
+      expect(SendEventMockFunc.mock.calls[5][1]).toEqual(
+        eventStorageFile1Content.elementId
+      );
+      expect(SendEventMockFunc.mock.calls[5][2]).toEqual(
+        eventStorageFile1Content.value
+      );
+
+      //#endregion CHECKING SEND EVENT
+
+      //#region CHECKING DATA LAST VALUES
+
+      //last data values should not have been changed
+      expect(device._lastDataValues).toEqual({
+        variable1ID: { tickId: 11, value: 123 },
+        variable2ID: { tickId: 12, value: 456 },
+        variable3ID: { tickId: 13, value: 789 },
+      });
+
+      //#endregion CHECKING DATA LAST VALUES
+
+      //#region CHECKING EVENT LAST VALUES
+
+      //all last values should have been assigned
+      expect(device._lastEventValues).toEqual({
+        alert1ID: { tickId: alert1LastValueTick, value: alert1Value },
+        alert2ID: { tickId: alert2LastValueTick, value: alert2Value },
+        alert3ID: { tickId: alert3LastValueTick, value: alert3Value },
+      });
+
+      //#endregion CHECKING EVENT LAST VALUES
+
+      //#region CHECKING DATA CLIPBOARD
+
+      //Clipboard should have been cleared
+      expect(device._dataClipboard.getAllData()).toEqual({});
+
+      //#endregion CHECKING DATA CLIPBOARD
+
+      //#region CHECKING EVENT CLIPBOARD
+
+      expect(device._eventClipboard.getAllData()).toEqual([]);
+
+      //#endregion CHECKING EVENT CLIPBOARD
+
+      //#region CHECKING DATA STORAGE
+
+      //Data file should have been send
+      let dataStorageIDs = await device._dataStorage.getAllIDs();
+      expect(dataStorageIDs).toEqual([]);
+
+      //#endregion CHECKING DATA STORAGE
+
+      //#region CHECKING EVENT STORAGE
+
+      //There should be no data in storage - every file is deleted
+      let eventStorageContent = await device._eventStorage.getAllIDs();
+      expect(eventStorageContent).toEqual([]);
+
+      //#endregion CHECKING EVENT STORAGE
+
+      //#region CHECKING BOARDED STATE
+
+      //boarded state should be assigned from checkIfBoarded.
+      expect(device.Boarded).toEqual(true);
+
+      //#endregion CHECKING BOARDED STATE
+    });
+
+    it("should not send data from clipboard but fill it - if clipboard data is empty and tick id does not fit sendingDataInterval", async () => {
+      tickId = 1 * 3 * 5 * 7 * 11 * 13 * 17 * 19;
+
+      dataClipboardContent = {};
+
+      //checking whether lasts data values was changed
+      lastDataValues = {
+        variable1ID: { tickId: 11, value: 123 },
+        variable2ID: { tickId: 12, value: 456 },
+        variable3ID: { tickId: 13, value: 789 },
+      };
+
+      //variable1 and variable2 fits
+      payload.sendDataFileInterval = 23;
+
+      await exec();
+
+      //#region CHECKING SEND DATA
+
+      //Send data should not have been called - does not fit sendDataInterval
+
+      expect(SendDataMockFunc).not.toHaveBeenCalled();
+
+      //#endregion CHECKING SEND DATA
+
+      //#region CHECKING SEND EVENT
+
+      //SendEvents should have been invoked 6 times - 3 times  - for every alert variable, 3 times - from files
+      expect(SendEventMockFunc).toHaveBeenCalledTimes(6);
+
+      //Checking event clipboard sending
+
+      expect(SendEventMockFunc.mock.calls[0][0]).toEqual(alert1LastValueTick);
+      expect(SendEventMockFunc.mock.calls[0][1]).toEqual(alert1ID);
+      expect(SendEventMockFunc.mock.calls[0][2]).toEqual(alert1Value);
+
+      expect(SendEventMockFunc.mock.calls[1][0]).toEqual(alert2LastValueTick);
+      expect(SendEventMockFunc.mock.calls[1][1]).toEqual(alert2ID);
+      expect(SendEventMockFunc.mock.calls[1][2]).toEqual(alert2Value);
+
+      expect(SendEventMockFunc.mock.calls[2][0]).toEqual(alert3LastValueTick);
+      expect(SendEventMockFunc.mock.calls[2][1]).toEqual(alert3ID);
+      expect(SendEventMockFunc.mock.calls[2][2]).toEqual(alert3Value);
+
+      //Checking event file sending
+
+      expect(SendEventMockFunc.mock.calls[3][0]).toEqual(
+        eventStorageFile3Content.tickId
+      );
+      expect(SendEventMockFunc.mock.calls[3][1]).toEqual(
+        eventStorageFile3Content.elementId
+      );
+      expect(SendEventMockFunc.mock.calls[3][2]).toEqual(
+        eventStorageFile3Content.value
+      );
+
+      expect(SendEventMockFunc.mock.calls[4][0]).toEqual(
+        eventStorageFile2Content.tickId
+      );
+      expect(SendEventMockFunc.mock.calls[4][1]).toEqual(
+        eventStorageFile2Content.elementId
+      );
+      expect(SendEventMockFunc.mock.calls[4][2]).toEqual(
+        eventStorageFile2Content.value
+      );
+
+      expect(SendEventMockFunc.mock.calls[5][0]).toEqual(
+        eventStorageFile1Content.tickId
+      );
+      expect(SendEventMockFunc.mock.calls[5][1]).toEqual(
+        eventStorageFile1Content.elementId
+      );
+      expect(SendEventMockFunc.mock.calls[5][2]).toEqual(
+        eventStorageFile1Content.value
+      );
+
+      //#endregion CHECKING SEND EVENT
+
+      //#region CHECKING DATA LAST VALUES
+
+      //last data values should have been changed
+      expect(device._lastDataValues).toEqual({
+        variable1ID: { tickId: variable1LastValueTick, value: variable1Value },
+        variable2ID: { tickId: variable2LastValueTick, value: variable2Value },
+        variable3ID: { tickId: variable3LastValueTick, value: variable3Value },
+      });
+
+      //#endregion CHECKING DATA LAST VALUES
+
+      //#region CHECKING EVENT LAST VALUES
+
+      //all last values should have been assigned
+      expect(device._lastEventValues).toEqual({
+        alert1ID: { tickId: alert1LastValueTick, value: alert1Value },
+        alert2ID: { tickId: alert2LastValueTick, value: alert2Value },
+        alert3ID: { tickId: alert3LastValueTick, value: alert3Value },
+      });
+
+      //#endregion CHECKING EVENT LAST VALUES
+
+      //#region CHECKING DATA CLIPBOARD
+
+      //Clipboard should have been cleared
+      expect(device._dataClipboard.getAllData()).toEqual({
+        [variable1LastValueTick]: { [variable1ID]: variable1Value },
+        [variable2LastValueTick]: { [variable2ID]: variable2Value },
+        [variable3LastValueTick]: { [variable3ID]: variable3Value },
+      });
+
+      //#endregion CHECKING DATA CLIPBOARD
+
+      //#region CHECKING EVENT CLIPBOARD
+
+      expect(device._eventClipboard.getAllData()).toEqual([]);
+
+      //#endregion CHECKING EVENT CLIPBOARD
+
+      //#region CHECKING DATA STORAGE
+
+      //#region CHECKING DATA STORAGE
+
+      let dataStorageIDs = await device._dataStorage.getAllIDs();
+      expect(dataStorageIDs.length).toEqual(3);
+      expect(dataStorageIDs).toContain(dataStorageFile1ID);
+      expect(dataStorageIDs).toContain(dataStorageFile2ID);
+      expect(dataStorageIDs).toContain(dataStorageFile3ID);
+
+      //#endregion CHECKING DATA STORAGE
+
+      //#region CHECKING EVENT STORAGE
+
+      //There should be no data in storage - every file is deleted
+      let eventStorageContent = await device._eventStorage.getAllIDs();
+      expect(eventStorageContent).toEqual([]);
+
+      //#endregion CHECKING EVENT STORAGE
+
+      //#region CHECKING BOARDED STATE
+
+      //boarded state should be assigned from checkIfBoarded.
+      expect(device.Boarded).toEqual(true);
+
+      //#endregion CHECKING BOARDED STATE
+    });
+
+    it("should not send data from clipboard but extend it - if clipboard data is not empty and tick id does not fit sendingDataInterval", async () => {
+      tickId = 1 * 3 * 5 * 7 * 11 * 13 * 17 * 19;
+
+      //Three examples - the same tick id, the same tickid and  variable id, the same variable tick and values
+      dataClipboardContent = {
+        [variable1LastValueTick]: { [variable2ID]: variable2Value },
+        [variable2LastValueTick]: { [variable2ID]: 1234 },
+        [variable3LastValueTick]: { [variable3ID]: variable3Value },
+      };
+
+      //checking whether lasts data values was changed
+      lastDataValues = {
+        variable1ID: { tickId: 11, value: 123 },
+        variable2ID: { tickId: 12, value: 456 },
+        variable3ID: { tickId: 13, value: 789 },
+      };
+
+      //variable1 and variable2 fits
+      payload.sendDataFileInterval = 23;
+
+      await exec();
+
+      //#region CHECKING SEND DATA
+
+      //Send data should not have been called - does not fit sendDataInterval
+
+      expect(SendDataMockFunc).not.toHaveBeenCalled();
+
+      //#endregion CHECKING SEND DATA
+
+      //#region CHECKING SEND EVENT
+
+      //SendEvents should have been invoked 6 times - 3 times  - for every alert variable, 3 times - from files
+      expect(SendEventMockFunc).toHaveBeenCalledTimes(6);
+
+      //Checking event clipboard sending
+
+      expect(SendEventMockFunc.mock.calls[0][0]).toEqual(alert1LastValueTick);
+      expect(SendEventMockFunc.mock.calls[0][1]).toEqual(alert1ID);
+      expect(SendEventMockFunc.mock.calls[0][2]).toEqual(alert1Value);
+
+      expect(SendEventMockFunc.mock.calls[1][0]).toEqual(alert2LastValueTick);
+      expect(SendEventMockFunc.mock.calls[1][1]).toEqual(alert2ID);
+      expect(SendEventMockFunc.mock.calls[1][2]).toEqual(alert2Value);
+
+      expect(SendEventMockFunc.mock.calls[2][0]).toEqual(alert3LastValueTick);
+      expect(SendEventMockFunc.mock.calls[2][1]).toEqual(alert3ID);
+      expect(SendEventMockFunc.mock.calls[2][2]).toEqual(alert3Value);
+
+      //Checking event file sending
+
+      expect(SendEventMockFunc.mock.calls[3][0]).toEqual(
+        eventStorageFile3Content.tickId
+      );
+      expect(SendEventMockFunc.mock.calls[3][1]).toEqual(
+        eventStorageFile3Content.elementId
+      );
+      expect(SendEventMockFunc.mock.calls[3][2]).toEqual(
+        eventStorageFile3Content.value
+      );
+
+      expect(SendEventMockFunc.mock.calls[4][0]).toEqual(
+        eventStorageFile2Content.tickId
+      );
+      expect(SendEventMockFunc.mock.calls[4][1]).toEqual(
+        eventStorageFile2Content.elementId
+      );
+      expect(SendEventMockFunc.mock.calls[4][2]).toEqual(
+        eventStorageFile2Content.value
+      );
+
+      expect(SendEventMockFunc.mock.calls[5][0]).toEqual(
+        eventStorageFile1Content.tickId
+      );
+      expect(SendEventMockFunc.mock.calls[5][1]).toEqual(
+        eventStorageFile1Content.elementId
+      );
+      expect(SendEventMockFunc.mock.calls[5][2]).toEqual(
+        eventStorageFile1Content.value
+      );
+
+      //#endregion CHECKING SEND EVENT
+
+      //#region CHECKING DATA LAST VALUES
+
+      //last data values should have been changed
+      expect(device._lastDataValues).toEqual({
+        variable1ID: { tickId: variable1LastValueTick, value: variable1Value },
+        variable2ID: { tickId: variable2LastValueTick, value: variable2Value },
+        variable3ID: { tickId: variable3LastValueTick, value: variable3Value },
+      });
+
+      //#endregion CHECKING DATA LAST VALUES
+
+      //#region CHECKING EVENT LAST VALUES
+
+      //all last values should have been assigned
+      expect(device._lastEventValues).toEqual({
+        alert1ID: { tickId: alert1LastValueTick, value: alert1Value },
+        alert2ID: { tickId: alert2LastValueTick, value: alert2Value },
+        alert3ID: { tickId: alert3LastValueTick, value: alert3Value },
+      });
+
+      //#endregion CHECKING EVENT LAST VALUES
+
+      //#region CHECKING DATA CLIPBOARD
+
+      //Clipboard should have been cleared
+      expect(device._dataClipboard.getAllData()).toEqual({
+        [variable1LastValueTick]: {
+          [variable2ID]: variable2Value,
+          [variable1ID]: variable1Value,
+        },
+        [variable2LastValueTick]: { [variable2ID]: variable2Value },
+        [variable3LastValueTick]: { [variable3ID]: variable3Value },
+      });
+
+      //#endregion CHECKING DATA CLIPBOARD
+
+      //#region CHECKING EVENT CLIPBOARD
+
+      expect(device._eventClipboard.getAllData()).toEqual([]);
+
+      //#endregion CHECKING EVENT CLIPBOARD
+
+      //#region CHECKING DATA STORAGE
+
+      //#region CHECKING DATA STORAGE
+
+      let dataStorageIDs = await device._dataStorage.getAllIDs();
+      expect(dataStorageIDs.length).toEqual(3);
+      expect(dataStorageIDs).toContain(dataStorageFile1ID);
+      expect(dataStorageIDs).toContain(dataStorageFile2ID);
+      expect(dataStorageIDs).toContain(dataStorageFile3ID);
+
+      //#endregion CHECKING DATA STORAGE
+
+      //#region CHECKING EVENT STORAGE
+
+      //There should be no data in storage - every file is deleted
+      let eventStorageContent = await device._eventStorage.getAllIDs();
+      expect(eventStorageContent).toEqual([]);
+
+      //#endregion CHECKING EVENT STORAGE
+
+      //#region CHECKING BOARDED STATE
+
+      //boarded state should be assigned from checkIfBoarded.
+      expect(device.Boarded).toEqual(true);
+
+      //#endregion CHECKING BOARDED STATE
+    });
+
+    it("should not save the data to storage - if send data throws, but data storage buffer is 0", async () => {
+      addDataStorageFile1 = false;
+      addDataStorageFile2 = false;
+      addDataStorageFile3 = false;
+
+      SendDataMockFunc = jest.fn(async () => {
+        throw Error("Sending data error");
+      });
+
+      payload.dataStorageSize = 0;
+
+      await exec();
+
+      //#region CHECKING SEND DATA
+
+      //Sending only one time - data files should not be send in case there is a problem with sending clipboard.
+      expect(SendDataMockFunc).toHaveBeenCalledTimes(1);
+
+      //Checking data clipboard sending
+
+      let expectedContent = {
+        [variable1LastValueTick]: {
+          variable1ID: variable1Value,
+        },
+        [variable2LastValueTick]: {
+          variable2ID: variable2Value,
+        },
+        [variable3LastValueTick]: {
+          variable3ID: variable3Value,
+        },
+      };
+
+      expect(SendDataMockFunc.mock.calls[0][0]).toEqual(expectedContent);
+
+      //#endregion CHECKING SEND DATA
+
+      //#region CHECKING SEND EVENT
+
+      //SendEvents should have been invoked 6 times - 3 times  - for every alert variable, 3 times - from files
+      expect(SendEventMockFunc).toHaveBeenCalledTimes(6);
+
+      //Checking event clipboard sending
+
+      expect(SendEventMockFunc.mock.calls[0][0]).toEqual(alert1LastValueTick);
+      expect(SendEventMockFunc.mock.calls[0][1]).toEqual(alert1ID);
+      expect(SendEventMockFunc.mock.calls[0][2]).toEqual(alert1Value);
+
+      expect(SendEventMockFunc.mock.calls[1][0]).toEqual(alert2LastValueTick);
+      expect(SendEventMockFunc.mock.calls[1][1]).toEqual(alert2ID);
+      expect(SendEventMockFunc.mock.calls[1][2]).toEqual(alert2Value);
+
+      expect(SendEventMockFunc.mock.calls[2][0]).toEqual(alert3LastValueTick);
+      expect(SendEventMockFunc.mock.calls[2][1]).toEqual(alert3ID);
+      expect(SendEventMockFunc.mock.calls[2][2]).toEqual(alert3Value);
+
+      //Checking event file sending
+
+      expect(SendEventMockFunc.mock.calls[3][0]).toEqual(
+        eventStorageFile3Content.tickId
+      );
+      expect(SendEventMockFunc.mock.calls[3][1]).toEqual(
+        eventStorageFile3Content.elementId
+      );
+      expect(SendEventMockFunc.mock.calls[3][2]).toEqual(
+        eventStorageFile3Content.value
+      );
+
+      expect(SendEventMockFunc.mock.calls[4][0]).toEqual(
+        eventStorageFile2Content.tickId
+      );
+      expect(SendEventMockFunc.mock.calls[4][1]).toEqual(
+        eventStorageFile2Content.elementId
+      );
+      expect(SendEventMockFunc.mock.calls[4][2]).toEqual(
+        eventStorageFile2Content.value
+      );
+
+      expect(SendEventMockFunc.mock.calls[5][0]).toEqual(
+        eventStorageFile1Content.tickId
+      );
+      expect(SendEventMockFunc.mock.calls[5][1]).toEqual(
+        eventStorageFile1Content.elementId
+      );
+      expect(SendEventMockFunc.mock.calls[5][2]).toEqual(
+        eventStorageFile1Content.value
+      );
+
+      //#endregion CHECKING SEND EVENT
+
+      //#region CHECKING DATA LAST VALUES
+
+      //all last values should have been assigned
+      expect(device._lastDataValues).toEqual({
+        variable1ID: { tickId: variable1LastValueTick, value: variable1Value },
+        variable2ID: { tickId: variable2LastValueTick, value: variable2Value },
+        variable3ID: { tickId: variable3LastValueTick, value: variable3Value },
+      });
+
+      //#endregion CHECKING DATA LAST VALUES
+
+      //#region CHECKING EVENT LAST VALUES
+
+      //all last values should have been assigned
+      expect(device._lastEventValues).toEqual({
+        alert1ID: { tickId: alert1LastValueTick, value: alert1Value },
+        alert2ID: { tickId: alert2LastValueTick, value: alert2Value },
+        alert3ID: { tickId: alert3LastValueTick, value: alert3Value },
+      });
+
+      //#endregion CHECKING EVENT LAST VALUES
+
+      //#region CHECKING DATA CLIPBOARD
+
+      //Clipboard should have been cleared
+      expect(device._dataClipboard.getAllData()).toEqual({});
+
+      //#endregion CHECKING DATA CLIPBOARD
+
+      //#region CHECKING EVENT CLIPBOARD
+
+      expect(device._eventClipboard.getAllData()).toEqual([]);
+
+      //#endregion CHECKING EVENT CLIPBOARD
+
+      //#region CHECKING DATA STORAGE
+
+      let dataStorageIDs = await device._dataStorage.getAllIDs();
+      expect(dataStorageIDs).toEqual([]);
+
+      //#endregion CHECKING DATA STORAGE
+
+      //#region CHECKING EVENT STORAGE
+
+      //There should be no data in storage - every file is deleted
+      let eventStorageContent = await device._eventStorage.getAllIDs();
+      expect(eventStorageContent).toEqual([]);
+
+      //#endregion CHECKING EVENT STORAGE
+
+      //#region CHECKING BOARDED STATE
+
+      //boarded state should be assigned from checkIfBoarded.
+      expect(device.Boarded).toEqual(true);
+
+      //#endregion CHECKING BOARDED STATE
+    });
+
+    it("should send data properly - if data storage buffer is 0 and there are no files", async () => {
+      addDataStorageFile1 = false;
+      addDataStorageFile2 = false;
+      addDataStorageFile3 = false;
+
+      payload.dataStorageSize = 0;
+
+      await exec();
+
+      //#region CHECKING SEND DATA
+
+      //Sending only one time - data files should not be send in case there is a problem with sending clipboard.
+      expect(SendDataMockFunc).toHaveBeenCalledTimes(1);
+
+      //Checking data clipboard sending
+
+      let expectedContent = {
+        [variable1LastValueTick]: {
+          variable1ID: variable1Value,
+        },
+        [variable2LastValueTick]: {
+          variable2ID: variable2Value,
+        },
+        [variable3LastValueTick]: {
+          variable3ID: variable3Value,
+        },
+      };
+
+      expect(SendDataMockFunc.mock.calls[0][0]).toEqual(expectedContent);
+
+      //#endregion CHECKING SEND DATA
+
+      //#region CHECKING SEND EVENT
+
+      //SendEvents should have been invoked 6 times - 3 times  - for every alert variable, 3 times - from files
+      expect(SendEventMockFunc).toHaveBeenCalledTimes(6);
+
+      //Checking event clipboard sending
+
+      expect(SendEventMockFunc.mock.calls[0][0]).toEqual(alert1LastValueTick);
+      expect(SendEventMockFunc.mock.calls[0][1]).toEqual(alert1ID);
+      expect(SendEventMockFunc.mock.calls[0][2]).toEqual(alert1Value);
+
+      expect(SendEventMockFunc.mock.calls[1][0]).toEqual(alert2LastValueTick);
+      expect(SendEventMockFunc.mock.calls[1][1]).toEqual(alert2ID);
+      expect(SendEventMockFunc.mock.calls[1][2]).toEqual(alert2Value);
+
+      expect(SendEventMockFunc.mock.calls[2][0]).toEqual(alert3LastValueTick);
+      expect(SendEventMockFunc.mock.calls[2][1]).toEqual(alert3ID);
+      expect(SendEventMockFunc.mock.calls[2][2]).toEqual(alert3Value);
+
+      //Checking event file sending
+
+      expect(SendEventMockFunc.mock.calls[3][0]).toEqual(
+        eventStorageFile3Content.tickId
+      );
+      expect(SendEventMockFunc.mock.calls[3][1]).toEqual(
+        eventStorageFile3Content.elementId
+      );
+      expect(SendEventMockFunc.mock.calls[3][2]).toEqual(
+        eventStorageFile3Content.value
+      );
+
+      expect(SendEventMockFunc.mock.calls[4][0]).toEqual(
+        eventStorageFile2Content.tickId
+      );
+      expect(SendEventMockFunc.mock.calls[4][1]).toEqual(
+        eventStorageFile2Content.elementId
+      );
+      expect(SendEventMockFunc.mock.calls[4][2]).toEqual(
+        eventStorageFile2Content.value
+      );
+
+      expect(SendEventMockFunc.mock.calls[5][0]).toEqual(
+        eventStorageFile1Content.tickId
+      );
+      expect(SendEventMockFunc.mock.calls[5][1]).toEqual(
+        eventStorageFile1Content.elementId
+      );
+      expect(SendEventMockFunc.mock.calls[5][2]).toEqual(
+        eventStorageFile1Content.value
+      );
+
+      //#endregion CHECKING SEND EVENT
+
+      //#region CHECKING DATA LAST VALUES
+
+      //all last values should have been assigned
+      expect(device._lastDataValues).toEqual({
+        variable1ID: { tickId: variable1LastValueTick, value: variable1Value },
+        variable2ID: { tickId: variable2LastValueTick, value: variable2Value },
+        variable3ID: { tickId: variable3LastValueTick, value: variable3Value },
+      });
+
+      //#endregion CHECKING DATA LAST VALUES
+
+      //#region CHECKING EVENT LAST VALUES
+
+      //all last values should have been assigned
+      expect(device._lastEventValues).toEqual({
+        alert1ID: { tickId: alert1LastValueTick, value: alert1Value },
+        alert2ID: { tickId: alert2LastValueTick, value: alert2Value },
+        alert3ID: { tickId: alert3LastValueTick, value: alert3Value },
+      });
+
+      //#endregion CHECKING EVENT LAST VALUES
+
+      //#region CHECKING DATA CLIPBOARD
+
+      //Clipboard should have been cleared
+      expect(device._dataClipboard.getAllData()).toEqual({});
+
+      //#endregion CHECKING DATA CLIPBOARD
+
+      //#region CHECKING EVENT CLIPBOARD
+
+      expect(device._eventClipboard.getAllData()).toEqual([]);
+
+      //#endregion CHECKING EVENT CLIPBOARD
+
+      //#region CHECKING DATA STORAGE
+
+      let dataStorageIDs = await device._dataStorage.getAllIDs();
+      expect(dataStorageIDs).toEqual([]);
+
+      //#endregion CHECKING DATA STORAGE
+
+      //#region CHECKING EVENT STORAGE
+
+      //There should be no data in storage - every file is deleted
+      let eventStorageContent = await device._eventStorage.getAllIDs();
+      expect(eventStorageContent).toEqual([]);
+
+      //#endregion CHECKING EVENT STORAGE
+
+      //#region CHECKING BOARDED STATE
+
+      //boarded state should be assigned from checkIfBoarded.
+      expect(device.Boarded).toEqual(true);
+
+      //#endregion CHECKING BOARDED STATE
+    });
+
+    //#endregion SENDING DATA CLIPBOARD EXCEPTIONS
+
+    //#region SENDING DATA FILES EXCEPTIONS
 
     //TODO - add these tests
 
-    //#endregion SENDING DATA EXCEPTIONS
+    //#endregion SENDING DATA FILES EXCEPTIONS
 
-    //#region SENDING EVENT EXCEPTIONS
+    //#region SENDING EVENT CLIPBOARD EXCEPTIONS
 
     //TODO - add these tests
 
-    //#endregion SENDING EVENT EXCEPTIONS
+    //#endregion SENDING EVENT CLIPBOARD EXCEPTIONS
+
+    //#region SENDING EVENT FILES EXCEPTIONS
+
+    //TODO - add these tests
+
+    //#endregion SENDING EVENT FILES EXCEPTIONS
   });
 });
