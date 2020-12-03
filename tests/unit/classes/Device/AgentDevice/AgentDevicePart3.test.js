@@ -25,7 +25,7 @@ const AgentDevice = require("../../../../../classes/Device/AgentDevice/AgentDevi
 const path = require("path");
 const { clone } = require("lodash");
 
-const AgentDirPath = "__testDir/settings/agentsData";
+const AgentsDirPath = "__testDir/settings/agentsData";
 
 describe("AgentDevice", () => {
   describe("_getAndSaveElementsEventToClipboardIfFitsSendingInterval", () => {
@@ -51,8 +51,8 @@ describe("AgentDevice", () => {
     let tickId;
 
     beforeEach(async () => {
-      await createDirIfNotExists(AgentDirPath);
-      await clearDirectoryAsync(AgentDirPath);
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
 
       alert1ID = "alert1ID";
       alert1Value = "alert1 - alert text";
@@ -84,7 +84,7 @@ describe("AgentDevice", () => {
       };
 
       project = {
-        AgentDirPath: AgentDirPath,
+        AgentsDirPath: AgentsDirPath,
         getElement: getElementMockFunc,
       };
 
@@ -130,8 +130,8 @@ describe("AgentDevice", () => {
     });
 
     afterEach(async () => {
-      await createDirIfNotExists(AgentDirPath);
-      await clearDirectoryAsync(AgentDirPath);
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
     });
 
     let exec = async () => {
@@ -861,8 +861,8 @@ describe("AgentDevice", () => {
     let tickId;
 
     beforeEach(async () => {
-      await createDirIfNotExists(AgentDirPath);
-      await clearDirectoryAsync(AgentDirPath);
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
 
       alert1ID = "alert1ID";
       alert1Value = "test text 1";
@@ -908,7 +908,7 @@ describe("AgentDevice", () => {
       };
 
       project = {
-        AgentDirPath: AgentDirPath,
+        AgentsDirPath: AgentsDirPath,
         getElement: getElementMockFunc,
       };
 
@@ -953,8 +953,8 @@ describe("AgentDevice", () => {
     });
 
     afterEach(async () => {
-      await createDirIfNotExists(AgentDirPath);
-      await clearDirectoryAsync(AgentDirPath);
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
     });
 
     let exec = async () => {
@@ -1178,11 +1178,11 @@ describe("AgentDevice", () => {
     let tickId;
 
     beforeEach(async () => {
-      await createDirIfNotExists(AgentDirPath);
-      await clearDirectoryAsync(AgentDirPath);
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
 
       project = {
-        AgentDirPath: AgentDirPath,
+        AgentsDirPath: AgentsDirPath,
         getElement: () => null,
       };
 
@@ -1210,8 +1210,8 @@ describe("AgentDevice", () => {
     });
 
     afterEach(async () => {
-      await createDirIfNotExists(AgentDirPath);
-      await clearDirectoryAsync(AgentDirPath);
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
     });
 
     let exec = async () => {
@@ -1293,11 +1293,11 @@ describe("AgentDevice", () => {
         value: "testAlertText3",
       };
 
-      await createDirIfNotExists(AgentDirPath);
-      await clearDirectoryAsync(AgentDirPath);
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
 
       project = {
-        AgentDirPath: AgentDirPath,
+        AgentsDirPath: AgentsDirPath,
         getElement: () => null,
       };
       clipboardContent = [
@@ -1347,8 +1347,8 @@ describe("AgentDevice", () => {
     });
 
     afterEach(async () => {
-      await createDirIfNotExists(AgentDirPath);
-      await clearDirectoryAsync(AgentDirPath);
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
     });
 
     let exec = async () => {
@@ -1574,11 +1574,11 @@ describe("AgentDevice", () => {
         value: "testAlertText3",
       };
 
-      await createDirIfNotExists(AgentDirPath);
-      await clearDirectoryAsync(AgentDirPath);
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
 
       project = {
-        AgentDirPath: AgentDirPath,
+        AgentsDirPath: AgentsDirPath,
         getElement: () => null,
       };
       clipboardContent = [
@@ -1630,8 +1630,8 @@ describe("AgentDevice", () => {
     });
 
     afterEach(async () => {
-      await createDirIfNotExists(AgentDirPath);
-      await clearDirectoryAsync(AgentDirPath);
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
     });
 
     let exec = async () => {
@@ -2177,11 +2177,11 @@ describe("AgentDevice", () => {
         value: "testAlertText3",
       };
 
-      await createDirIfNotExists(AgentDirPath);
-      await clearDirectoryAsync(AgentDirPath);
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
 
       project = {
-        AgentDirPath: AgentDirPath,
+        AgentsDirPath: AgentsDirPath,
         getElement: () => null,
       };
       clipboardContent = [
@@ -2233,8 +2233,8 @@ describe("AgentDevice", () => {
     });
 
     afterEach(async () => {
-      await createDirIfNotExists(AgentDirPath);
-      await clearDirectoryAsync(AgentDirPath);
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
     });
 
     let exec = async () => {

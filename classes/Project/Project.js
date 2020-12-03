@@ -11,6 +11,7 @@ const {
   joiSchema,
   checkIfProjectIdsAreUniq,
 } = require("../../models/Project/Project");
+const MSAgentDevice = require("../Device/AgentDevice/MSAgentDevice");
 
 class Project {
   //#region ========= CONSTRUCTOR =========
@@ -254,8 +255,8 @@ class Project {
       case "InternalDevice": {
         return new InternalDevice(this);
       }
-      case "AgentDevice": {
-        return new AgentDevice();
+      case "MSAgentDevice": {
+        return new MSAgentDevice(this);
       }
       default:
         throw new Error(`Unrecognized Device type: ${type}`);

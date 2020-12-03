@@ -21,7 +21,7 @@ const logger = require("../../../../../logger/logger");
 const AgentDevice = require("../../../../../classes/Device/AgentDevice/AgentDevice");
 const path = require("path");
 
-const AgentDirPath = "__testDir/settings/agentsData";
+const AgentsDirPath = "__testDir/settings/agentsData";
 
 describe("AgentDevice", () => {
   describe("refresh", () => {
@@ -135,8 +135,8 @@ describe("AgentDevice", () => {
     //#endregion MOCK FUNCTIONS
 
     beforeEach(async () => {
-      await createDirIfNotExists(AgentDirPath);
-      await clearDirectoryAsync(AgentDirPath);
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
 
       //#region VARIABLES
 
@@ -315,7 +315,7 @@ describe("AgentDevice", () => {
       };
 
       project = {
-        AgentDirPath: AgentDirPath,
+        AgentsDirPath: AgentsDirPath,
         getElement: getElementMockFunc,
       };
 
@@ -400,8 +400,8 @@ describe("AgentDevice", () => {
     });
 
     afterEach(async () => {
-      await createDirIfNotExists(AgentDirPath);
-      await clearDirectoryAsync(AgentDirPath);
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
     });
 
     let exec = async () => {

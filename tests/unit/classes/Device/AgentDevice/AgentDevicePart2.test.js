@@ -23,7 +23,7 @@ const logger = require("../../../../../logger/logger");
 const AgentDevice = require("../../../../../classes/Device/AgentDevice/AgentDevice");
 const path = require("path");
 
-const AgentDirPath = "__testDir/settings/agentsData";
+const AgentsDirPath = "__testDir/settings/agentsData";
 
 describe("AgentDevice", () => {
   describe("_getAndSaveElementsDataToClipboardIfFitsSendingInterval", () => {
@@ -49,8 +49,8 @@ describe("AgentDevice", () => {
     let tickId;
 
     beforeEach(async () => {
-      await createDirIfNotExists(AgentDirPath);
-      await clearDirectoryAsync(AgentDirPath);
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
 
       variable1ID = "variable1ID";
       variable1Value = 1001;
@@ -82,7 +82,7 @@ describe("AgentDevice", () => {
       };
 
       project = {
-        AgentDirPath: AgentDirPath,
+        AgentsDirPath: AgentsDirPath,
         getElement: getElementMockFunc,
       };
 
@@ -128,8 +128,8 @@ describe("AgentDevice", () => {
     });
 
     afterEach(async () => {
-      await createDirIfNotExists(AgentDirPath);
-      await clearDirectoryAsync(AgentDirPath);
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
     });
 
     let exec = async () => {
@@ -685,8 +685,8 @@ describe("AgentDevice", () => {
     let tickId;
 
     beforeEach(async () => {
-      await createDirIfNotExists(AgentDirPath);
-      await clearDirectoryAsync(AgentDirPath);
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
 
       variable1ID = "variable1ID";
       variable1Value = 1001;
@@ -732,7 +732,7 @@ describe("AgentDevice", () => {
       };
 
       project = {
-        AgentDirPath: AgentDirPath,
+        AgentsDirPath: AgentsDirPath,
         getElement: getElementMockFunc,
       };
 
@@ -777,8 +777,8 @@ describe("AgentDevice", () => {
     });
 
     afterEach(async () => {
-      await createDirIfNotExists(AgentDirPath);
-      await clearDirectoryAsync(AgentDirPath);
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
     });
 
     let exec = async () => {
@@ -943,11 +943,11 @@ describe("AgentDevice", () => {
     let tickId;
 
     beforeEach(async () => {
-      await createDirIfNotExists(AgentDirPath);
-      await clearDirectoryAsync(AgentDirPath);
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
 
       project = {
-        AgentDirPath: AgentDirPath,
+        AgentsDirPath: AgentsDirPath,
         getElement: () => null,
       };
 
@@ -975,8 +975,8 @@ describe("AgentDevice", () => {
     });
 
     afterEach(async () => {
-      await createDirIfNotExists(AgentDirPath);
-      await clearDirectoryAsync(AgentDirPath);
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
     });
 
     let exec = async () => {
@@ -1093,11 +1093,11 @@ describe("AgentDevice", () => {
         },
       };
 
-      await createDirIfNotExists(AgentDirPath);
-      await clearDirectoryAsync(AgentDirPath);
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
 
       project = {
-        AgentDirPath: AgentDirPath,
+        AgentsDirPath: AgentsDirPath,
         getElement: () => null,
       };
 
@@ -1143,8 +1143,8 @@ describe("AgentDevice", () => {
     });
 
     afterEach(async () => {
-      await createDirIfNotExists(AgentDirPath);
-      await clearDirectoryAsync(AgentDirPath);
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
     });
 
     let exec = async () => {
@@ -1395,11 +1395,11 @@ describe("AgentDevice", () => {
         },
       };
 
-      await createDirIfNotExists(AgentDirPath);
-      await clearDirectoryAsync(AgentDirPath);
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
 
       project = {
-        AgentDirPath: AgentDirPath,
+        AgentsDirPath: AgentsDirPath,
         getElement: () => null,
       };
 
@@ -1447,8 +1447,8 @@ describe("AgentDevice", () => {
     });
 
     afterEach(async () => {
-      await createDirIfNotExists(AgentDirPath);
-      await clearDirectoryAsync(AgentDirPath);
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
     });
 
     let exec = async () => {
@@ -1725,11 +1725,11 @@ describe("AgentDevice", () => {
         },
       };
 
-      await createDirIfNotExists(AgentDirPath);
-      await clearDirectoryAsync(AgentDirPath);
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
 
       project = {
-        AgentDirPath: AgentDirPath,
+        AgentsDirPath: AgentsDirPath,
         getElement: () => null,
       };
 
@@ -1777,8 +1777,8 @@ describe("AgentDevice", () => {
     });
 
     afterEach(async () => {
-      await createDirIfNotExists(AgentDirPath);
-      await clearDirectoryAsync(AgentDirPath);
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
     });
 
     let exec = async () => {

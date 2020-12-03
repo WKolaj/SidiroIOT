@@ -1,4 +1,5 @@
 const Joi = require("joi");
+const MSAgentDevice = require("../../classes/Device/AgentDevice/MSAgentDevice");
 const MBDevice = require("../../classes/Device/ConnectableDevice/MBDevice");
 const MBGatewayDevice = require("../../classes/Device/ConnectableDevice/MBGatewayDevice");
 const S7Device = require("../../classes/Device/ConnectableDevice/S7Device");
@@ -86,6 +87,9 @@ const validateAgentDevicesPayload = (devicesPayload, helpers) => {
 
     //TODO - add checking device payload based on type
     switch (deviceType) {
+      case "MSAgentDevice":
+        validationMessage = MSAgentDevice.validatePayload(devicePayload);
+        break;
       default:
         validationMessage = "agent device type not recognized";
     }

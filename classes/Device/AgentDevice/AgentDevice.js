@@ -4,7 +4,6 @@ const {
   exists,
   isObjectEmpty,
 } = require("../../../utilities/utilities");
-const { getAgentsDiPath } = require("../../../services/projectService");
 const DataClipboard = require("../../Clipboard/DataClipboard");
 const EventClipboard = require("../../Clipboard/EventClipboard");
 const FileStorage = require("../../Storage/FileStorage");
@@ -118,7 +117,7 @@ class AgentDevice extends Device {
    */
   async _initializeMainDirectory() {
     //Creating directory for agent
-    let agentsDirPath = this._project.AgentDirPath;
+    let agentsDirPath = this._project.AgentsDirPath;
     let agentDirPath = path.join(agentsDirPath, this.ID);
     await createDirIfNotExists(agentDirPath);
     this._dirPath = agentDirPath;
