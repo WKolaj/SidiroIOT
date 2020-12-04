@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/WKolaj/TEMPLATE_BACKEND_NODEJS#readme",
   "dependencies": {
+    "@mindconnect/mindconnect-nodejs": "^3.11.0",
     "bcrypt": "^5.0.0",
     "config": "^3.3.2",
     "cors": "^2.8.5",
