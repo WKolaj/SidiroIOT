@@ -105,6 +105,7 @@ class MSAgentDevice extends AgentDevice {
    */
   async _sendEvent(tickId, elementId, value) {
     //TODO - adjust later
+    //throw new Error("test");
     let currentDate = Sampler.convertDateToTickNumber(Date.now());
     console.log(`${currentDate} - sending event:`);
     console.log({ tickId, elementId, value });
