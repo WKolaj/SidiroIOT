@@ -32,6 +32,7 @@ describe("AgentDevice", () => {
     let getElementMockFunc;
     let tryBoardOnSendData;
     let tryBoardOnSendEvent;
+    let busy;
 
     //#region VARIABLES
 
@@ -389,6 +390,7 @@ describe("AgentDevice", () => {
       tryBoardOnSendData = true;
       tryBoardOnSendEvent = true;
       initialBoardedState = true;
+      busy = false;
 
       //#endregion DEVICE PROPS
 
@@ -469,6 +471,7 @@ describe("AgentDevice", () => {
       device._sendData = SendDataMockFunc;
       device._sendEvent = SendEventMockFunc;
       device._boarded = initialBoardedState;
+      device._busy = busy;
 
       //#endregion CREATING AND INITIALIZING DEVICE
 
@@ -698,6 +701,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     };
 
     it("should send content of file and event clipboards and content of event and file storages - if tickId fits everything and device is boarded", async () => {
@@ -777,6 +787,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     //#region BOARDING
@@ -1007,6 +1024,13 @@ describe("AgentDevice", () => {
 
       //#endregion CHECKING BOARDED STATE
 
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
+
       //Onboard function should have been called
       expect(OnBoardMockFunc).toHaveBeenCalledTimes(1);
     });
@@ -1159,6 +1183,13 @@ describe("AgentDevice", () => {
 
       //#endregion CHECKING BOARDED STATE
 
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
+
       //Onboard function should have been called
       expect(OnBoardMockFunc).toHaveBeenCalledTimes(1);
     });
@@ -1281,6 +1312,13 @@ describe("AgentDevice", () => {
 
       //#endregion CHECKING BOARDED STATE
 
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
+
       //Onboard function should have been called
       expect(OnBoardMockFunc).not.toHaveBeenCalled();
     });
@@ -1399,9 +1437,17 @@ describe("AgentDevice", () => {
 
       //#region CHECKING BOARDED STATE
 
-      expect(device.Boarded).toEqual(false);
+      //boarding state not refreshed
+      expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
 
       //Onboard function should have been called
       expect(OnBoardMockFunc).not.toHaveBeenCalled();
@@ -1518,6 +1564,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(false);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
 
       //Onboard function should have been called
       expect(OnBoardMockFunc).toHaveBeenCalledTimes(1);
@@ -1640,6 +1693,13 @@ describe("AgentDevice", () => {
 
       //#endregion CHECKING BOARDED STATE
 
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
+
       //Onboard function should have been called
       expect(OnBoardMockFunc).toHaveBeenCalledTimes(1);
 
@@ -1759,6 +1819,13 @@ describe("AgentDevice", () => {
 
       //#endregion CHECKING BOARDED STATE
 
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
+
       //Onboard function should have been called
       expect(OnBoardMockFunc).toHaveBeenCalledTimes(1);
 
@@ -1772,6 +1839,126 @@ describe("AgentDevice", () => {
     });
 
     //#endregion BOARDING
+
+    //#region BUSY
+
+    it("should insert every variable's value and event's value into clipboards, set lastValues but not send clipboards or files - if device is busy", async () => {
+      busy = true;
+
+      await exec();
+
+      //#region CHECKING SEND DATA
+
+      expect(SendDataMockFunc).not.toHaveBeenCalled();
+
+      //#endregion CHECKING SEND DATA
+
+      //#region CHECKING SEND EVENT
+
+      expect(SendEventMockFunc).not.toHaveBeenCalled();
+
+      //#endregion CHECKING SEND EVENT
+
+      //#region CHECKING DATA LAST VALUES
+
+      //all last values should have been assigned
+      expect(device._lastDataValues).toEqual({
+        variable1ID: { tickId: variable1LastValueTick, value: variable1Value },
+        variable2ID: { tickId: variable2LastValueTick, value: variable2Value },
+        variable3ID: { tickId: variable3LastValueTick, value: variable3Value },
+      });
+
+      //#endregion CHECKING DATA LAST VALUES
+
+      //#region CHECKING EVENT LAST VALUES
+
+      //all last values should have been assigned
+      expect(device._lastEventValues).toEqual({
+        alert1ID: { tickId: alert1LastValueTick, value: alert1Value },
+        alert2ID: { tickId: alert2LastValueTick, value: alert2Value },
+        alert3ID: { tickId: alert3LastValueTick, value: alert3Value },
+      });
+
+      //#endregion CHECKING EVENT LAST VALUES
+
+      //#region CHECKING DATA CLIPBOARD
+
+      expect(device._dataClipboard.getAllData()).toEqual({
+        [variable1LastValueTick]: {
+          variable1ID: variable1Value,
+        },
+        [variable2LastValueTick]: {
+          variable2ID: variable2Value,
+        },
+        [variable3LastValueTick]: {
+          variable3ID: variable3Value,
+        },
+      });
+
+      //#endregion CHECKING DATA CLIPBOARD
+
+      //#region CHECKING EVENT CLIPBOARD
+
+      expect(device._eventClipboard.getAllData()).toEqual([
+        {
+          elementId: alert1ID,
+          tickId: alert1LastValueTick,
+          value: alert1Value,
+        },
+        {
+          elementId: alert2ID,
+          tickId: alert2LastValueTick,
+          value: alert2Value,
+        },
+        {
+          elementId: alert3ID,
+          tickId: alert3LastValueTick,
+          value: alert3Value,
+        },
+      ]);
+
+      //#endregion CHECKING EVENT CLIPBOARD
+
+      //#region CHECKING DATA STORAGE
+
+      //There should be no data in storage - every file is deleted
+      let dataStorageContent = await device._dataStorage.getAllIDs();
+      expect(dataStorageContent).toEqual([
+        dataStorageFile1ID,
+        dataStorageFile2ID,
+        dataStorageFile3ID,
+      ]);
+
+      //#endregion CHECKING DATA STORAGE
+
+      //#region CHECKING EVENT STORAGE
+
+      //There should be no data in storage - every file is deleted
+      let eventStorageContent = await device._eventStorage.getAllIDs();
+      expect(eventStorageContent).toEqual([
+        eventStorageFile1ID,
+        eventStorageFile2ID,
+        eventStorageFile3ID,
+      ]);
+
+      //#endregion CHECKING EVENT STORAGE
+
+      //#region CHECKING BOARDED STATE
+
+      //boarded state should be assigned from checkIfBoarded.
+      expect(device.Boarded).toEqual(true);
+
+      //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should should stay as busy
+      expect(device._busy).toEqual(true);
+
+      //#endregion CHECKING BUSY STATE
+    });
+
+    //#endregion BUSY
 
     //#region FILLING DATA CLIPBOARD
 
@@ -1943,6 +2130,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should insert and send only variables that's interval fits tickId", async () => {
@@ -2093,6 +2287,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should not insert any clipboardData - if there are no variables that fits tickId and clipboardData is empty", async () => {
@@ -2229,6 +2430,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should not insert any clipboardData but send clipboards data - if there are no variables that fits tickId but clipboardData is not empty", async () => {
@@ -2379,6 +2587,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should not insert any clipboardData - if there are no elements in config and clipboardData is empty", async () => {
@@ -2512,6 +2727,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should not insert any clipboardData but send clipboards data - if there are no variables in config but clipboardData is not empty", async () => {
@@ -2659,6 +2881,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should insert and send only variables that's interval fits tickId and exists in project", async () => {
@@ -2827,6 +3056,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should insert and send variables that's value did not changed but lastValueTick has changed", async () => {
@@ -3030,6 +3266,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should not insert any alerts's value into clipboard - if alert's value is null", async () => {
@@ -3190,6 +3433,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should insert and send only alerts that's interval fits tickId", async () => {
@@ -3339,6 +3589,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should not insert any clipboardData - if there are no alerts that fits tickId and clipboardData is empty", async () => {
@@ -3477,6 +3734,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should not insert any clipboardData but send clipboards data - if there are no elements that fits tickId but clipboardData is not empty", async () => {
@@ -3663,6 +3927,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should not insert any clipboardData - if there are no alerts in config and clipboardData is empty", async () => {
@@ -3799,6 +4070,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should not insert any clipboardData but send clipboards data - if there are no alerts in config but clipboardData is not empty", async () => {
@@ -3983,6 +4261,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should insert and send only alerts that's interval fits tickId and exists in project", async () => {
@@ -4149,6 +4434,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should insert and send alerts that's value did not changed but lastValueTick has changed", async () => {
@@ -4327,6 +4619,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should not insert new value but set it to lastEventValues - if new value is null and lastValues is empty", async () => {
@@ -4475,6 +4774,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     //#endregion FILLING EVENT CLIPBOARD
@@ -4645,6 +4951,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should save data to storage and remove oldest stroage file and not try to send files from storage - if send data throws, data storage size is too small", async () => {
@@ -4811,6 +5124,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should save data to storage and not try to send files from storage - if send data throws, data storage is empty", async () => {
@@ -4971,6 +5291,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should not send data from clipboard and not save it in storage - if clipboard data is empty", async () => {
@@ -5121,6 +5448,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should not send data from clipboard but fill it - if clipboard data is empty and tick id does not fit sendingDataInterval", async () => {
@@ -5264,6 +5598,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should not send data from clipboard but extend it - if clipboard data is not empty and tick id does not fit sendingDataInterval", async () => {
@@ -5415,6 +5756,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should not save the data to storage - if send data throws, but data storage buffer is 0", async () => {
@@ -5562,6 +5910,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should send data properly - if data storage buffer is 0 and there are no files", async () => {
@@ -5705,6 +6060,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     //#endregion SENDING DATA CLIPBOARD EXCEPTIONS
@@ -5852,6 +6214,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should save events to storage and not try to send files from storage - if send event throws for every event, event storage size is enought", async () => {
@@ -6008,6 +6377,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should save events to storage, delete oldest files and not try to send files from storage - if send event throws for every event, event storage size is too small", async () => {
@@ -6159,6 +6535,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should save events to storage and not try to send files from storage - if send event throws, event storage is empty", async () => {
@@ -6303,6 +6686,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should not send events from clipboard and not save it in storage - if clipboard event is empty", async () => {
@@ -6455,6 +6845,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should not send events from clipboard but fill it - if clipboard event is empty and tick id does not fit sendingEventInterval", async () => {
@@ -6591,6 +6988,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should not send data from clipboard but extend it - if clipboard data is not empty and tick id does not fit sendingEventInterval", async () => {
@@ -6754,6 +7158,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should not send data from clipboard but extend it - if clipboard data is not empty and tick id does not fit sendingEventInterval, some values are null", async () => {
@@ -6915,6 +7326,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should not send events from clipboard and not save it in storage - if send event throws, but event storage buffer is 0", async () => {
@@ -7048,6 +7466,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should send event properly - if event storage buffer is 0 and there are no files", async () => {
@@ -7170,6 +7595,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     //#endregion SENDING EVENT CLIPBOARD EXCEPTIONS
@@ -7314,6 +7746,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should send one data file - if there is only one file", async () => {
@@ -7459,6 +7898,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should not delete file - if sending one file throws", async () => {
@@ -7617,6 +8063,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
 
       //Logger should have been called
       expect(logErrorMock).toHaveBeenCalledTimes(1);
@@ -7783,6 +8236,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
 
       //Logger should have been called
       expect(logErrorMock).toHaveBeenCalledTimes(3);
@@ -7955,6 +8415,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should send all files - if clipboard is empty and not sent", async () => {
@@ -8088,6 +8555,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should send number of data files - if max number of data files exceeds", async () => {
@@ -8224,6 +8698,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should remove oldest files - if max number of data storage files exceeds", async () => {
@@ -8375,6 +8856,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     //#endregion SENDING DATA FILES EXCEPTIONS
@@ -8499,6 +8987,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should send one event file - if there is only one event file", async () => {
@@ -8630,6 +9125,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should not delete file - if sending one file throws", async () => {
@@ -8787,6 +9289,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
 
       //Logger should have been called
       expect(logErrorMock).toHaveBeenCalledTimes(1);
@@ -8953,6 +9462,13 @@ describe("AgentDevice", () => {
 
       //#endregion CHECKING BOARDED STATE
 
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
+
       //Logger should have been called
       expect(logErrorMock).toHaveBeenCalledTimes(3);
       expect(logErrorMock.mock.calls[0][0]).toEqual("Sending event error");
@@ -9109,6 +9625,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should send all files - if clipboard is empty and not sent", async () => {
@@ -9244,6 +9767,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should send number of event files - if max number of event files exceeds", async () => {
@@ -9384,6 +9914,13 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     it("should remove oldest files - if max number of event files exceeds", async () => {
@@ -9533,8 +10070,479 @@ describe("AgentDevice", () => {
       expect(device.Boarded).toEqual(true);
 
       //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
     });
 
     //#endregion SENDING EVENT FILES EXCEPTIONS
+
+    //#region SIMUNTANEUS INVOKE
+
+    it("should act properly when refresh is invoked several times simuntaneusly - first call did not manage to send data", async () => {
+      //adding  delay to SendData and sendEvent
+      SendDataMockFunc = jest.fn(async () => {
+        await snooze(200);
+      });
+      SendEventMockFunc = jest.fn(async () => {
+        await snooze(200);
+      });
+
+      let callPromise1 = new Promise(async (resolve, reject) => {
+        try {
+          await exec();
+          return resolve(true);
+        } catch (err) {
+          return reject(err);
+        }
+      });
+
+      let callPromise2 = new Promise(async (resolve, reject) => {
+        try {
+          //waiting for the first promise to begin, but not end sending data
+          await snooze(100);
+
+          //#region VARIABLES
+
+          variable1.Value = 1201;
+          variable1.LastValueTick = 121;
+
+          variable2.Value = 1202;
+          variable2.LastValueTick = 122;
+
+          variable3.Value = 1203;
+          variable3.LastValueTick = 123;
+
+          //#endregion VARIABLES
+
+          //#region ALERTS
+
+          alert1.Value = "test text 12";
+          alert1.LastValueTick = 121;
+
+          alert2.Value = "test text 22";
+          alert2.LastValueTick = 122;
+
+          alert3.Value = "test text 32";
+          alert3.LastValueTick = 123;
+
+          //#endregion ALERTS
+
+          await device.refresh(tickId);
+          return resolve(true);
+        } catch (err) {
+          return reject(err);
+        }
+      });
+
+      await Promise.all([callPromise1, callPromise2]);
+
+      //#region CHECKING SEND DATA
+
+      expect(SendDataMockFunc).toHaveBeenCalledTimes(4);
+
+      //Checking data clipboard sending
+
+      let expectedContent = {
+        [101]: {
+          variable1ID: 1001,
+        },
+        [102]: {
+          variable2ID: 1002,
+        },
+        [103]: {
+          variable3ID: 1003,
+        },
+      };
+
+      expect(SendDataMockFunc.mock.calls[0][0]).toEqual(expectedContent);
+
+      //Checking data files sending
+
+      expect(SendDataMockFunc.mock.calls[1][0]).toEqual(
+        dataStorageFile3Content
+      );
+      expect(SendDataMockFunc.mock.calls[2][0]).toEqual(
+        dataStorageFile2Content
+      );
+      expect(SendDataMockFunc.mock.calls[3][0]).toEqual(
+        dataStorageFile1Content
+      );
+
+      //#endregion CHECKING SEND DATA
+
+      //#region CHECKING SEND EVENT
+
+      //SendEvents should have been invoked 9 times - 3 times  - for every actual alert variable  - 3 times  - for every alert variable from second call,  3 times - from files
+      expect(SendEventMockFunc).toHaveBeenCalledTimes(9);
+
+      //Checking event clipboard sending
+
+      expect(SendEventMockFunc.mock.calls[0][0]).toEqual(101);
+      expect(SendEventMockFunc.mock.calls[0][1]).toEqual(alert1ID);
+      expect(SendEventMockFunc.mock.calls[0][2]).toEqual("test text 1");
+
+      expect(SendEventMockFunc.mock.calls[1][0]).toEqual(102);
+      expect(SendEventMockFunc.mock.calls[1][1]).toEqual(alert2ID);
+      expect(SendEventMockFunc.mock.calls[1][2]).toEqual("test text 2");
+
+      expect(SendEventMockFunc.mock.calls[2][0]).toEqual(103);
+      expect(SendEventMockFunc.mock.calls[2][1]).toEqual(alert3ID);
+      expect(SendEventMockFunc.mock.calls[2][2]).toEqual("test text 3");
+
+      expect(SendEventMockFunc.mock.calls[3][0]).toEqual(121);
+      expect(SendEventMockFunc.mock.calls[3][1]).toEqual(alert1ID);
+      expect(SendEventMockFunc.mock.calls[3][2]).toEqual("test text 12");
+
+      expect(SendEventMockFunc.mock.calls[4][0]).toEqual(122);
+      expect(SendEventMockFunc.mock.calls[4][1]).toEqual(alert2ID);
+      expect(SendEventMockFunc.mock.calls[4][2]).toEqual("test text 22");
+
+      expect(SendEventMockFunc.mock.calls[5][0]).toEqual(123);
+      expect(SendEventMockFunc.mock.calls[5][1]).toEqual(alert3ID);
+      expect(SendEventMockFunc.mock.calls[5][2]).toEqual("test text 32");
+
+      //Checking event file sending
+
+      expect(SendEventMockFunc.mock.calls[6][0]).toEqual(
+        eventStorageFile3Content.tickId
+      );
+      expect(SendEventMockFunc.mock.calls[6][1]).toEqual(
+        eventStorageFile3Content.elementId
+      );
+      expect(SendEventMockFunc.mock.calls[6][2]).toEqual(
+        eventStorageFile3Content.value
+      );
+
+      expect(SendEventMockFunc.mock.calls[7][0]).toEqual(
+        eventStorageFile2Content.tickId
+      );
+      expect(SendEventMockFunc.mock.calls[7][1]).toEqual(
+        eventStorageFile2Content.elementId
+      );
+      expect(SendEventMockFunc.mock.calls[7][2]).toEqual(
+        eventStorageFile2Content.value
+      );
+
+      expect(SendEventMockFunc.mock.calls[8][0]).toEqual(
+        eventStorageFile1Content.tickId
+      );
+      expect(SendEventMockFunc.mock.calls[8][1]).toEqual(
+        eventStorageFile1Content.elementId
+      );
+      expect(SendEventMockFunc.mock.calls[8][2]).toEqual(
+        eventStorageFile1Content.value
+      );
+
+      //#endregion CHECKING SEND EVENT
+
+      //#region CHECKING DATA LAST VALUES
+
+      //all last values should have been assigned
+      expect(device._lastDataValues).toEqual({
+        variable1ID: { tickId: 121, value: 1201 },
+        variable2ID: { tickId: 122, value: 1202 },
+        variable3ID: { tickId: 123, value: 1203 },
+      });
+
+      //#endregion CHECKING DATA LAST VALUES
+
+      //#region CHECKING EVENT LAST VALUES
+
+      //all last values should have been assigned
+      expect(device._lastEventValues).toEqual({
+        alert1ID: { tickId: 121, value: "test text 12" },
+        alert2ID: { tickId: 122, value: "test text 22" },
+        alert3ID: { tickId: 123, value: "test text 32" },
+      });
+
+      //#endregion CHECKING EVENT LAST VALUES
+
+      //#region CHECKING DATA CLIPBOARD
+
+      //data clipboard should contain not send data
+      expect(device._dataClipboard.getAllData()).toEqual({
+        [121]: {
+          variable1ID: 1201,
+        },
+        [122]: {
+          variable2ID: 1202,
+        },
+        [123]: {
+          variable3ID: 1203,
+        },
+      });
+
+      //#endregion CHECKING DATA CLIPBOARD
+
+      //#region CHECKING EVENT CLIPBOARD
+
+      //all events should have been send
+      expect(device._eventClipboard.getAllData()).toEqual([]);
+
+      //#endregion CHECKING EVENT CLIPBOARD
+
+      //#region CHECKING DATA STORAGE
+
+      //There should be no data in storage - every file is deleted
+      let dataStorageContent = await device._dataStorage.getAllIDs();
+      expect(dataStorageContent).toEqual([]);
+
+      //#endregion CHECKING DATA STORAGE
+
+      //#region CHECKING EVENT STORAGE
+
+      //There should be no data in storage - every file is deleted
+      let eventStorageContent = await device._eventStorage.getAllIDs();
+      expect(eventStorageContent).toEqual([]);
+
+      //#endregion CHECKING EVENT STORAGE
+
+      //#region CHECKING BOARDED STATE
+
+      //boarded state should be assigned from checkIfBoarded.
+      expect(device.Boarded).toEqual(true);
+
+      //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
+    });
+
+    it("should act properly when refresh is invoked several times simuntaneusly - first call managed to send data but not events", async () => {
+      //adding  delay to SendData and sendEvent
+      SendDataMockFunc = jest.fn(async () => {
+        await snooze(200);
+      });
+      SendEventMockFunc = jest.fn(async () => {
+        await snooze(200);
+      });
+
+      let callPromise1 = new Promise(async (resolve, reject) => {
+        try {
+          await exec();
+          return resolve(true);
+        } catch (err) {
+          return reject(err);
+        }
+      });
+
+      let callPromise2 = new Promise(async (resolve, reject) => {
+        try {
+          //waiting for the first promise to send data - 4 times 200 x 4 = 800
+          await snooze(1000);
+
+          //#region VARIABLES
+
+          variable1.Value = 1201;
+          variable1.LastValueTick = 121;
+
+          variable2.Value = 1202;
+          variable2.LastValueTick = 122;
+
+          variable3.Value = 1203;
+          variable3.LastValueTick = 123;
+
+          //#endregion VARIABLES
+
+          //#region ALERTS
+
+          alert1.Value = "test text 12";
+          alert1.LastValueTick = 121;
+
+          alert2.Value = "test text 22";
+          alert2.LastValueTick = 122;
+
+          alert3.Value = "test text 32";
+          alert3.LastValueTick = 123;
+
+          //#endregion ALERTS
+
+          await device.refresh(tickId);
+          return resolve(true);
+        } catch (err) {
+          return reject(err);
+        }
+      });
+
+      await Promise.all([callPromise1, callPromise2]);
+
+      //#region CHECKING SEND DATA
+
+      expect(SendDataMockFunc).toHaveBeenCalledTimes(4);
+
+      //Checking data clipboard sending
+
+      let expectedContent = {
+        [101]: {
+          variable1ID: 1001,
+        },
+        [102]: {
+          variable2ID: 1002,
+        },
+        [103]: {
+          variable3ID: 1003,
+        },
+      };
+
+      expect(SendDataMockFunc.mock.calls[0][0]).toEqual(expectedContent);
+
+      //Checking data files sending
+
+      expect(SendDataMockFunc.mock.calls[1][0]).toEqual(
+        dataStorageFile3Content
+      );
+      expect(SendDataMockFunc.mock.calls[2][0]).toEqual(
+        dataStorageFile2Content
+      );
+      expect(SendDataMockFunc.mock.calls[3][0]).toEqual(
+        dataStorageFile1Content
+      );
+
+      //#endregion CHECKING SEND DATA
+
+      //#region CHECKING SEND EVENT
+
+      //SendEvents should have been invoked 6 times - 3 times  - for every actual alert variable, 3 times - from files
+      expect(SendEventMockFunc).toHaveBeenCalledTimes(6);
+
+      //Checking event clipboard sending
+
+      expect(SendEventMockFunc.mock.calls[0][0]).toEqual(101);
+      expect(SendEventMockFunc.mock.calls[0][1]).toEqual(alert1ID);
+      expect(SendEventMockFunc.mock.calls[0][2]).toEqual("test text 1");
+
+      expect(SendEventMockFunc.mock.calls[1][0]).toEqual(102);
+      expect(SendEventMockFunc.mock.calls[1][1]).toEqual(alert2ID);
+      expect(SendEventMockFunc.mock.calls[1][2]).toEqual("test text 2");
+
+      expect(SendEventMockFunc.mock.calls[2][0]).toEqual(103);
+      expect(SendEventMockFunc.mock.calls[2][1]).toEqual(alert3ID);
+      expect(SendEventMockFunc.mock.calls[2][2]).toEqual("test text 3");
+
+      //Checking event file sending
+
+      expect(SendEventMockFunc.mock.calls[3][0]).toEqual(
+        eventStorageFile3Content.tickId
+      );
+      expect(SendEventMockFunc.mock.calls[3][1]).toEqual(
+        eventStorageFile3Content.elementId
+      );
+      expect(SendEventMockFunc.mock.calls[3][2]).toEqual(
+        eventStorageFile3Content.value
+      );
+
+      expect(SendEventMockFunc.mock.calls[4][0]).toEqual(
+        eventStorageFile2Content.tickId
+      );
+      expect(SendEventMockFunc.mock.calls[4][1]).toEqual(
+        eventStorageFile2Content.elementId
+      );
+      expect(SendEventMockFunc.mock.calls[4][2]).toEqual(
+        eventStorageFile2Content.value
+      );
+
+      expect(SendEventMockFunc.mock.calls[5][0]).toEqual(
+        eventStorageFile1Content.tickId
+      );
+      expect(SendEventMockFunc.mock.calls[5][1]).toEqual(
+        eventStorageFile1Content.elementId
+      );
+      expect(SendEventMockFunc.mock.calls[5][2]).toEqual(
+        eventStorageFile1Content.value
+      );
+
+      //#endregion CHECKING SEND EVENT
+
+      //#region CHECKING DATA LAST VALUES
+
+      //all last values should have been assigned
+      expect(device._lastDataValues).toEqual({
+        variable1ID: { tickId: 121, value: 1201 },
+        variable2ID: { tickId: 122, value: 1202 },
+        variable3ID: { tickId: 123, value: 1203 },
+      });
+
+      //#endregion CHECKING DATA LAST VALUES
+
+      //#region CHECKING EVENT LAST VALUES
+
+      //all last values should have been assigned
+      expect(device._lastEventValues).toEqual({
+        alert1ID: { tickId: 121, value: "test text 12" },
+        alert2ID: { tickId: 122, value: "test text 22" },
+        alert3ID: { tickId: 123, value: "test text 32" },
+      });
+
+      //#endregion CHECKING EVENT LAST VALUES
+
+      //#region CHECKING DATA CLIPBOARD
+
+      //data clipboard should contain not send data
+      expect(device._dataClipboard.getAllData()).toEqual({
+        [121]: {
+          variable1ID: 1201,
+        },
+        [122]: {
+          variable2ID: 1202,
+        },
+        [123]: {
+          variable3ID: 1203,
+        },
+      });
+
+      //#endregion CHECKING DATA CLIPBOARD
+
+      //#region CHECKING EVENT CLIPBOARD
+
+      //event clipboard should contain not send data
+      expect(device._eventClipboard.getAllData()).toEqual([
+        { elementId: alert1ID, tickId: 121, value: "test text 12" },
+        { elementId: alert2ID, tickId: 122, value: "test text 22" },
+        { elementId: alert3ID, tickId: 123, value: "test text 32" },
+      ]);
+
+      //#endregion CHECKING EVENT CLIPBOARD
+
+      //#region CHECKING DATA STORAGE
+
+      //There should be no data in storage - every file is deleted
+      let dataStorageContent = await device._dataStorage.getAllIDs();
+      expect(dataStorageContent).toEqual([]);
+
+      //#endregion CHECKING DATA STORAGE
+
+      //#region CHECKING EVENT STORAGE
+
+      //There should be no data in storage - every file is deleted
+      let eventStorageContent = await device._eventStorage.getAllIDs();
+      expect(eventStorageContent).toEqual([]);
+
+      //#endregion CHECKING EVENT STORAGE
+
+      //#region CHECKING BOARDED STATE
+
+      //boarded state should be assigned from checkIfBoarded.
+      expect(device.Boarded).toEqual(true);
+
+      //#endregion CHECKING BOARDED STATE
+
+      //#region CHECKING BUSY STATE
+
+      //Busy should be set to false
+      expect(device._busy).toEqual(false);
+
+      //#endregion CHECKING BUSY STATE
+    });
+
+    //#endregion SIMUNTANEUS INVOKE
   });
 });

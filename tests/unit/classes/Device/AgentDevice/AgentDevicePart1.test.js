@@ -38,25 +38,6 @@ describe("AgentDevice", () => {
     it("should create new AgentDevice and set all properties to null", () => {
       let device = exec();
 
-      this._dirPath = null;
-      this._dataClipboard = null;
-      this._eventClipboard = null;
-      this._tryBoardOnSendData = null;
-      this._tryBoardOnSendEvent = null;
-      this._lastDataValues = null;
-      this._lastEventValues = null;
-      this._dataStorage = null;
-      this._eventStorage = null;
-      this._sendDataFileInterval = null;
-      this._sendEventFileInterval = null;
-      this._dataStorageSize = null;
-      this._eventStorageSize = null;
-      this._numberOfDataFilesToSend = null;
-      this._numberOfEventFilesToSend = null;
-      this._dataToSendConfig = null;
-      this._eventsToSendConfig = null;
-      this._boarded = null;
-
       expect(device._dirPath).toEqual(null);
       expect(device._dataClipboard).toEqual(null);
       expect(device._eventClipboard).toEqual(null);
@@ -74,6 +55,7 @@ describe("AgentDevice", () => {
       expect(device.DataToSendConfig).toEqual(null);
       expect(device.EventsToSendConfig).toEqual(null);
       expect(device.Boarded).toEqual(null);
+      expect(device._busy).toEqual(null);
     });
 
     it("should assign project to AgentDevice", () => {
@@ -599,6 +581,12 @@ describe("AgentDevice", () => {
       };
 
       expect(device.generatePayload()).toEqual(expectedPayload);
+    });
+
+    it("should set busy to false", async () => {
+      await exec();
+
+      expect(device._busy).toEqual(false);
     });
 
     it("should initialize storages, clipboards and paths", async () => {

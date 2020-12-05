@@ -1,5 +1,7 @@
 const { snooze, existsAndIsNotEmpty } = require("../../utilities/utilities");
 
+let internalDelay = 10;
+
 class MindConnectAgent {
   constructor(credentials) {
     this._validateCredentials(credentials);
@@ -7,9 +9,15 @@ class MindConnectAgent {
     this._onBoarded = false;
     this._hasDataSourceConfig = false;
 
-    this.BulkPostData = jest.fn(async (dataToSend, validation) => {});
+    this.BulkPostData = jest.fn(async (dataToSend, validation) => {
+      await snooze(internalDelay);
+      return;
+    });
 
-    this.PostEvent = jest.fn(async event => {});
+    this.PostEvent = jest.fn(async (event) => {
+      await snooze(internalDelay);
+      return;
+    });
 
     this.IsOnBoarded = jest.fn(() => {
       return this._onBoarded;
@@ -20,12 +28,12 @@ class MindConnectAgent {
     });
 
     this.OnBoard = jest.fn(async () => {
-      await snooze(100);
+      await snooze(internalDelay);
       this._onBoarded = true;
     });
 
     this.GetDataSourceConfiguration = jest.fn(async () => {
-      await snooze(100);
+      await snooze(internalDelay);
       this._hasDataSourceConfig = true;
     });
   }
@@ -70,3 +78,6 @@ let retry = async (count, func) => {
 
 module.exports.MindConnectAgent = MindConnectAgent;
 module.exports.retry = retry;
+module.exports._setDelayInModule = function (delay) {
+  internalDelay = delay;
+};

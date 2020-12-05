@@ -1010,7 +1010,7 @@ describe("AgentDevice", () => {
     });
   });
 
-  describe("_tryMovingDataFromClipboardToStorage", () => {
+  describe("_trySavingDataToStorage", () => {
     let project;
     let payload;
     let device;
@@ -1191,14 +1191,15 @@ describe("AgentDevice", () => {
           throw new Error("testError");
         });
 
-      return device._tryMovingDataFromClipboardToStorage();
+      //METHOD DOES NOT CLEAR CLIPBOARD - PROPER WORK FOR SIMUNTANEUSLY INVOKE - WORK ON DIFFERENT INSTANCES OF CLIPBOARDS
+      return device._trySavingDataToStorage(clipboardData);
     };
 
-    it("should move data from clipboard to fileStorage and clear clipboard", async () => {
+    it("should move data from clipboard to fileStorage and not clear clipboard ", async () => {
       await exec();
 
       //clipboard should be cleared
-      expect(device._dataClipboard.getAllData()).toEqual({});
+      expect(device._dataClipboard.getAllData()).toEqual(clipboardData);
 
       //Storage should contain 4 elements
       let storageIDs = await device._dataStorage.getAllIDs();
@@ -1228,7 +1229,7 @@ describe("AgentDevice", () => {
       await exec();
 
       //clipboard should be cleared
-      expect(device._dataClipboard.getAllData()).toEqual({});
+      expect(device._dataClipboard.getAllData()).toEqual(clipboardData);
 
       //Storage should contain 3 elements
       let storageIDs = await device._dataStorage.getAllIDs();
@@ -1254,7 +1255,7 @@ describe("AgentDevice", () => {
       await exec();
 
       //clipboard should be cleared
-      expect(device._dataClipboard.getAllData()).toEqual({});
+      expect(device._dataClipboard.getAllData()).toEqual(clipboardData);
 
       //Storage should contain 3 elements
       let storageIDs = await device._dataStorage.getAllIDs();
@@ -1285,7 +1286,7 @@ describe("AgentDevice", () => {
       expect(result).toEqual(true);
     });
 
-    it("should not throw and return false and not clear clipboard - if createData throws", async () => {
+    it("should not throw and return false - if createData throws", async () => {
       createDataThrows = true;
 
       let result = null;

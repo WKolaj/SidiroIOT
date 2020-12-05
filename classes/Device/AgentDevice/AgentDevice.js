@@ -39,6 +39,7 @@ class AgentDevice extends Device {
     this._dataToSendConfig = null;
     this._eventsToSendConfig = null;
     this._boarded = null;
+    this._busy = null;
   }
 
   //#endregion ========= CONSTRUCTOR =========
@@ -346,16 +347,12 @@ class AgentDevice extends Device {
   }
 
   /**
-   * @description Method for writing data from data clipboard to data storage and clear data clipboard
+   * @description Method for writing data from data clipboard to data storage. Method does not clear clipboar
+   * @param {JSON} clipboardContent content of clipboard to send
    */
-  async _tryMovingDataFromClipboardToStorage() {
+  async _trySavingDataToStorage(clipboardContent) {
     try {
-      //Getting data from clipboard and saving it into storage
-      let clipboardContent = this._dataClipboard.getAllData();
       await this._dataStorage.createData(clipboardContent);
-
-      //Clearing data form clipboard
-      this._dataClipboard.clearAllData();
       return true;
     } catch (err) {
       logger.error(err.message, err);
@@ -367,24 +364,23 @@ class AgentDevice extends Device {
    * @description Method for sending data from cliboard or write it to storage if sending failed. Throws if data was no send successfully
    */
   async _trySendingDataFromClipboardAndClearItOrMoveThemToStorage() {
-    //If data clipboard content is empty - don't proceed with sending or saving data
+    //Getting clipboard content and clear it right away - to prevent working with the same clipboard when simuntaneusly invoked
     let dataClipboardContent = this._dataClipboard.getAllData();
+    this._dataClipboard.clearAllData();
+
     if (!exists(dataClipboardContent) || isObjectEmpty(dataClipboardContent)) {
       //Clearing data form clipboard
-      this._dataClipboard.clearAllData();
       return true;
     }
 
     try {
       await this._sendData(dataClipboardContent);
 
-      //Send successfully - clear data clipboard
-      this._dataClipboard.clearAllData();
       return true;
     } catch (err) {
       logger.error(err.message, err);
       //If data not send successfully - write it to clipboard storage and do not proceed
-      await this._tryMovingDataFromClipboardToStorage();
+      await this._trySavingDataToStorage(dataClipboardContent);
       return false;
     }
   }
@@ -456,14 +452,14 @@ class AgentDevice extends Device {
    */
   async _trySendingEventsFromClipboardAndClearItOrMoveThemToStorage() {
     //If data clipboard content is empty - don't proceed with sending or saving data
+    //Clearing clipboard right away - to prevent working on the same clipboard object when simuntaneusly invoked
     let eventClipboardContent = this._eventClipboard.getAllData();
+    this._eventClipboard.clearAllData();
 
     if (
       !exists(eventClipboardContent) ||
       isObjectEmpty(eventClipboardContent)
     ) {
-      //Clearing data form clipboard
-      this._eventClipboard.clearAllData();
       //Returning true - if data is empty it does not indicate that there was an error during sending
       return true;
     }
@@ -487,9 +483,6 @@ class AgentDevice extends Device {
         allEventsSendSuccessfully = false;
       }
     }
-
-    //All events not send saved to storage - clear event clipboard
-    this._eventClipboard.clearAllData();
 
     return allEventsSendSuccessfully;
   }
@@ -561,63 +554,82 @@ class AgentDevice extends Device {
 
     //#endregion SAVING DATA AND EVENTS TO CLIPBOARD
 
-    //#region CHECKING BOARDING STATE
-
-    //Refreshing boarded state
-    await this._refreshBoardedState();
-
-    if (!this.Boarded) {
-      //Checking if agent should be boarded
-      let shouldBeBoarded = await this._checkIfShouldBoard(tickNumber);
-
-      //If device is not boarded and should not be boarded in this refresh cycle - no point to continue
-      if (!shouldBeBoarded) return;
-
-      //Trying to board if should be boarded
-      await this._tryBoard();
-
-      //Refreshing boarding state after attempt to board
-      await this._refreshBoardedState();
-
-      //If attemp failed - no point to continue
-      if (!this.Boarded) return;
-    }
-
-    //#endregion CHECKING BOARDING STATE
-
-    //At this poing - device is boarded
-
-    //#region SENDING DATA
+    //#region BOARDING, SENDING DATA AND EVENTS
 
     //Checking if data should be send
     let shouldDataBeSend = this._checkIfDataShouldBeSent(tickNumber);
 
-    if (shouldDataBeSend) {
-      let dataSendSuccessfully = await this._trySendingDataFromClipboardAndClearItOrMoveThemToStorage();
-
-      //If data send successfully - try sending data from files
-      if (dataSendSuccessfully) {
-        await this._trySendingDataFromStorage();
-      }
-    }
-
-    //#endregion SENDING DATA
-
-    //#region SENDING EVENTS
-
     //Checking if events should be send
     let shouldEventsBeSend = this._checkIfEventsShouldBeSent(tickNumber);
 
-    //At this point device should be boarded - no point to board again
-    if (shouldEventsBeSend) {
-      let allEventsSendSuccessfully = await this._trySendingEventsFromClipboardAndClearItOrMoveThemToStorage();
+    if ((shouldDataBeSend || shouldEventsBeSend) && !this._busy) {
+      //Preventing simuntanesly send data
+      this._busy = true;
 
-      if (allEventsSendSuccessfully) {
-        await this._trySendingEventsFromStorage();
+      try {
+        //#region BOARDING
+
+        //Refreshing boarded state
+        await this._refreshBoardedState();
+
+        if (!this.Boarded) {
+          //Checking if agent should be boarded
+          let shouldBeBoarded = await this._checkIfShouldBoard(tickNumber);
+
+          //If device is not boarded and should not be boarded in this refresh cycle - no point to continue
+          if (!shouldBeBoarded) {
+            //clearing busy flag
+            this._busy = false;
+            return;
+          }
+
+          //Trying to board if should be boarded
+          await this._tryBoard();
+
+          //Refreshing boarding state after attempt to board
+          await this._refreshBoardedState();
+
+          //If attemp failed - no point to continue
+          if (!this.Boarded) {
+            //clearing busy flag
+            this._busy = false;
+            return;
+          }
+        }
+
+        //#endregion BOARDING
+
+        //#region SENDING DATA
+
+        //At this poing - device is boarded
+
+        if (shouldDataBeSend) {
+          let dataSendSuccessfully = await this._trySendingDataFromClipboardAndClearItOrMoveThemToStorage();
+
+          //If data send successfully - try sending data from files
+          if (dataSendSuccessfully) await this._trySendingDataFromStorage();
+        }
+
+        //#endregion SENDING DATA
+
+        //#region SENDING EVENTS
+
+        if (shouldEventsBeSend) {
+          let allEventsSendSuccessfully = await this._trySendingEventsFromClipboardAndClearItOrMoveThemToStorage();
+
+          if (allEventsSendSuccessfully)
+            await this._trySendingEventsFromStorage();
+        }
+
+        //#endregion SENDING EVENTS
+      } catch (err) {
+        logger.error(err.message, err);
       }
+
+      this._busy = false;
     }
 
-    //#endregion SENDING EVENTS
+    //#endregion BOARDING, SENDING DATA AND EVENTS
   }
 
   /**
@@ -640,6 +652,7 @@ class AgentDevice extends Device {
     this._dataToSendConfig = payload.dataToSendConfig;
     this._eventsToSendConfig = payload.eventsToSendConfig;
     this._boarded = false;
+    this._busy = false;
 
     await this._initializeMainDirectory();
     await this._initializeClipboards();
