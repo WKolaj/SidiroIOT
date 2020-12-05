@@ -343,7 +343,9 @@ class BandwidthLimitAlert extends Alert {
           let alertContent = Alert.formatAlertTranslationObject(
             this.Texts["highLimit"],
             value,
-            lastTickId
+            lastTickId,
+            this._device.Name,
+            this.Name
           );
           this.setValue(alertContent, lastTickId);
         }
@@ -366,7 +368,9 @@ class BandwidthLimitAlert extends Alert {
           let alertContent = Alert.formatAlertTranslationObject(
             this.Texts["lowLimit"],
             value,
-            lastTickId
+            lastTickId,
+            this._device.Name,
+            this.Name
           );
           this.setValue(alertContent, lastTickId);
         }

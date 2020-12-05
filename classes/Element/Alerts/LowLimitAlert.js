@@ -253,7 +253,9 @@ class LowLimitAlert extends Alert {
           let alertContent = Alert.formatAlertTranslationObject(
             this.Texts,
             value,
-            lastTickId
+            lastTickId,
+            this._device.Name,
+            this.Name
           );
           this.setValue(alertContent, lastTickId);
         }

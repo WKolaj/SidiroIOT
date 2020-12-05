@@ -30,14 +30,18 @@ class Alert extends Element {
    * @param {String} text
    * @param {Object} value
    * @param {Number} tickId
+   * @param {String} deviceName
+   * @param {String} elementName
    */
-  static formatAlertText(text, value, tickId) {
+  static formatAlertText(text, value, tickId, deviceName, elementName) {
     return text
       .replace("$VALUE", value.toString())
       .replace(
         "$TIME",
         new Date(Sampler.convertTickNumberToDate(tickId)).toISOString()
-      );
+      )
+      .replace("$DEVICE", deviceName)
+      .replace("$ELEMENT", elementName);
   }
 
   /**
@@ -45,13 +49,27 @@ class Alert extends Element {
    * @param {Object} transObject
    * @param {Object} value
    * @param {Number} tickId
+   * @param {String} deviceName
+   * @param {String} elementName
    */
-  static formatAlertTranslationObject(transObject, value, tickId) {
+  static formatAlertTranslationObject(
+    transObject,
+    value,
+    tickId,
+    deviceName,
+    elementName
+  ) {
     let objectToReturn = {};
 
     for (let lang of Object.keys(transObject)) {
       let text = transObject[lang];
-      objectToReturn[lang] = Alert.formatAlertText(text, value, tickId);
+      objectToReturn[lang] = Alert.formatAlertText(
+        text,
+        value,
+        tickId,
+        deviceName,
+        elementName
+      );
     }
 
     return objectToReturn;
