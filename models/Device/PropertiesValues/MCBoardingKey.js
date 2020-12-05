@@ -9,7 +9,7 @@ const boardingKeyContentSchema = Joi.object().keys({
 });
 
 const boardingKeySchema = Joi.object().keys({
-  content: boardingKeyContentSchema,
+  content: boardingKeyContentSchema.required(),
   expiration: Joi.string().required(),
 });
 

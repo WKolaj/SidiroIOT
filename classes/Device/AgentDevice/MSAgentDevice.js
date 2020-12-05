@@ -5,7 +5,7 @@ const { joiSchema } = require("../../../models/Device/MSAgentDevice");
 const NumberToStringConverter = require("../../NumberToStringConverter/NumberToStringConverter");
 const Sampler = require("../../Sampler/Sampler");
 const { exist } = require("joi");
-const { exists } = require("../../../utilities/utilities");
+const { exists, isObjectEmpty } = require("../../../utilities/utilities");
 const { isString } = require("lodash");
 
 class MSAgentDevice extends AgentDevice {
@@ -88,10 +88,11 @@ class MSAgentDevice extends AgentDevice {
   }
 
   /**
-   * @description Method for converting payload of data to send from agent to the standard supported by Bulk MindConnect agent
+   * @description Method for converting payload of data to send from agent to the standard supported by Bulk MindConnect agent. Returns null if payload is invalid
    * @param {JSON} payload Standard agent data payload
    */
   _convertAgentDataSendPayloadToMCAgentPayload(payload) {
+    if (!exists(payload) || isObjectEmpty(payload)) return null;
     let payloadToReturn = [];
 
     for (let tickId of Object.keys(payload)) {
@@ -137,7 +138,8 @@ class MSAgentDevice extends AgentDevice {
       }
     }
 
-    return payloadToReturn;
+    if (payloadToReturn.length > 0) return payloadToReturn;
+    else return null;
   }
 
   /**
@@ -148,11 +150,11 @@ class MSAgentDevice extends AgentDevice {
    */
   _convertAgentEventSendPayloadToMCAgentPayload(tickId, elementId, value) {
     //allow to do anything - only if all elements exists
-    if (!exists(tickId) || !exists(elementId) || !exists(value)) return;
+    if (!exists(tickId) || !exists(elementId) || !exists(value)) return null;
 
     let elementConfig = this.EventsToSendConfig[elementId];
 
-    if (!exists(elementConfig)) return;
+    if (!exists(elementConfig)) return null;
 
     //Stringinfing value if is not a string
     if (!isString(value)) value = JSON.stringify(value);
@@ -275,7 +277,7 @@ class MSAgentDevice extends AgentDevice {
 
     if (!exists(payloadToSend)) return;
 
-    await retry(this.NumberOfEventFilesToSend, () =>
+    await retry(this.NumberOfSendEventRetries, () =>
       this._mindConnectAgent.PostEvent(payloadToSend)
     );
   }
@@ -284,5 +286,3 @@ class MSAgentDevice extends AgentDevice {
 }
 
 module.exports = MSAgentDevice;
-
-//TODO - test this class

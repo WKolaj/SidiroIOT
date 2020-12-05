@@ -87,13 +87,14 @@ const schemaContent = {
   ...deviceSchema.schemaContent,
   numberOfSendDataRetries: Joi.number().integer().min(1).required(),
   numberOfSendEventRetries: Joi.number().integer().min(1).required(),
-  boardingKey: boardingKeySchema,
+  boardingKey: boardingKeySchema.required(),
   dataToSendConfig: Joi.any()
     .custom(validateDataToSendConfigPayload, "custom validation")
     .required(),
   eventsToSendConfig: Joi.any()
     .custom(validateEventsToSendConfigPayload, "custom validation")
     .required(),
+  type: Joi.string().valid("MSAgentDevice").required(),
 };
 
 const joiSchema = Joi.object(schemaContent);

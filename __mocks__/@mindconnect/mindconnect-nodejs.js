@@ -62,7 +62,7 @@ class MindConnectAgent {
   }
 }
 
-let retry = async (count, func) => {
+let retry = jest.fn(async (count, func) => {
   let index = 0;
 
   while (index < count) {
@@ -74,7 +74,7 @@ let retry = async (count, func) => {
       if (index >= count) throw err;
     }
   }
-};
+});
 
 module.exports.MindConnectAgent = MindConnectAgent;
 module.exports.retry = retry;
