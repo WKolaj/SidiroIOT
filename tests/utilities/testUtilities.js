@@ -21,6 +21,7 @@ const MBVariable = require("../../classes/Element/Variable/ConnectableVariable/M
 const MBRequest = require("../../classes/Request/MBRequest/MBRequest");
 const InternalDevice = require("../../classes/Device/InternalDevice/InternalDevice");
 const S7Variable = require("../../classes/Element/Variable/ConnectableVariable/S7Variable/S7Variable");
+const S7Request = require("../../classes/Request/S7Request/S7Request");
 
 const testUselessUserID = "uselessUserID";
 const testAdminID = "adminID";
@@ -549,6 +550,28 @@ module.exports.testMBRequest = (
   expect(request.Length).toEqual(length);
   expect(request.UnitID).toEqual(unitID);
   expect(request.FCode).toEqual(fCode);
+  expect(request.WriteRequest).toEqual(writeRequest);
+  expect(request.ReadRequest).toEqual(readRequest);
+  expect(request.Variables).toEqual(variables);
+};
+
+module.exports.testS7Request = (
+  request,
+  sampleTime,
+  memoryType,
+  offset,
+  length,
+  dbNumber,
+  writeRequest,
+  readRequest,
+  variables
+) => {
+  expect(request instanceof S7Request).toEqual(true);
+  expect(request.SampleTime).toEqual(sampleTime);
+  expect(request.Offset).toEqual(offset);
+  expect(request.Length).toEqual(length);
+  expect(request.MemoryType).toEqual(memoryType);
+  expect(request.DBNumber).toEqual(dbNumber);
   expect(request.WriteRequest).toEqual(writeRequest);
   expect(request.ReadRequest).toEqual(readRequest);
   expect(request.Variables).toEqual(variables);
