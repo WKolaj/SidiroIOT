@@ -20,6 +20,7 @@ const Alert = require("../../classes/Element/Alerts/Alert");
 const MBVariable = require("../../classes/Element/Variable/ConnectableVariable/MBVariable/MBVariable");
 const MBRequest = require("../../classes/Request/MBRequest/MBRequest");
 const InternalDevice = require("../../classes/Device/InternalDevice/InternalDevice");
+const S7Variable = require("../../classes/Element/Variable/ConnectableVariable/S7Variable/S7Variable");
 
 const testUselessUserID = "uselessUserID";
 const testAdminID = "adminID";
@@ -446,6 +447,53 @@ module.exports.createFakeMBVariable = (
 
   variable._getReadPossibleFunctionCodes = getReadFunctionCodesMockFunc;
   variable._getWritePossibleFunctionCodes = getWriteFunctionCodesMockFunc;
+
+  return variable;
+};
+
+module.exports.createFakeS7Variable = (
+  project,
+  device,
+  id,
+  name,
+  type,
+  defaultValue,
+  unit,
+  sampleTime,
+  data,
+  offset,
+  length,
+  convertDataToValueMockFunc,
+  convertValueToDataMockFunc,
+  memoryType,
+  dbNumber,
+  read = true,
+  write = false,
+  readAsSingle = false,
+  writeAsSingle = false
+) => {
+  let variable = new S7Variable(project, device);
+
+  variable._id = id;
+  variable._name = name;
+  variable._type = type;
+  variable._defaultValue = defaultValue;
+  variable._unit = unit;
+  variable._sampleTime = sampleTime;
+  variable._data = data;
+  variable._offset = offset;
+  variable._length = length;
+  variable._lastValueTick = 0;
+  variable._convertDataToValue = convertDataToValueMockFunc;
+  variable._convertValueToData = convertValueToDataMockFunc;
+
+  variable._read = read;
+  variable._write = write;
+  variable._readSeperately = readAsSingle;
+  variable._writeSeperately = writeAsSingle;
+
+  variable._memoryType = memoryType;
+  variable._dbNumber = dbNumber;
 
   return variable;
 };
