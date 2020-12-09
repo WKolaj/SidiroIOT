@@ -60,5 +60,3 @@ class S7Variable extends StandardProtocolVariable {
 }
 
 module.exports = S7Variable;
-
-//TODO - test this class

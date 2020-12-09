@@ -152,6 +152,14 @@ class Project {
 
     //Setting duration
     this._lastCycleDuration = stop - start;
+
+    // for (let device of Object.values(this.Devices)) {
+    //   for (let element of Object.values(device.Elements)) {
+    //     console.log(
+    //       `${device.Name} : ${element.Name} : ${element.LastValueTick} - ${element.Value}`
+    //     );
+    //   }
+    // }
   }
 
   /**

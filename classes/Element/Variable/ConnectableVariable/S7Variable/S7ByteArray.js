@@ -1,6 +1,12 @@
 const S7Variable = require("./S7Variable");
+const {
+  checkByteArray,
+} = require("../../../../../models/Elements/ElementsValues/ByteArray");
+const {
+  joiSchema,
+} = require("../../../../../models/Elements/Variable/S7Variable/S7ByteArray");
 
-class S7ByteArray extends S7Variable {
+class S7UInt extends S7Variable {
   //#region ========= CONSTRUCTOR =========
 
   constructor(project, device) {
@@ -29,13 +35,17 @@ class S7ByteArray extends S7Variable {
    * @description Method for converting data (byte array) to value of variable.
    * @param {Array} data
    */
-  _convertDataToValue(data) {}
+  _convertDataToValue(data) {
+    return [...data];
+  }
 
   /**
    * @description Method for converting value to data (byte array) of variable.
-   * @param {Array} data
+   * @param {Number} value
    */
-  _convertValueToData(value) {}
+  _convertValueToData(value) {
+    return [...value];
+  }
 
   //#endregion ========= OVERRIDE PUBLIC METHODS =========
 
@@ -46,6 +56,14 @@ class S7ByteArray extends S7Variable {
    * @param {JSON} payload JSON Payload of element
    */
   async init(payload) {
+    if (payload.type !== "S7ByteArray")
+      throw new Error("Invalid type in payload of S7ByteArray");
+
+    if (payload.defaultValue.length !== payload.length)
+      throw new Error(
+        "Length of default value (bytes) not valid - it should be the length of byte array"
+      );
+
     await super.init(payload);
   }
 
@@ -53,9 +71,11 @@ class S7ByteArray extends S7Variable {
    * @description Method for checking if value can be set to element. Used for checking formatting and also blocking assigning value to read only elements. Returns null if value can be set, or string with message why value cannot be set
    * @param {Object} value value to be set
    */
-  checkIfValueCanBeSet(value) {}
+  checkIfValueCanBeSet(value) {
+    return checkByteArray(value, this.Length);
+  }
 
   //#endregion ========= OVERRIDE PUBLIC METHODS =========
 }
 
-module.exports = S7ByteArray;
+module.exports = S7UInt;
