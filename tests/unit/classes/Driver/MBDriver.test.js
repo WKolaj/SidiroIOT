@@ -4,6 +4,10 @@ const { snooze } = require("../../../../utilities/utilities");
 const { createFakeMBVariable } = require("../../../utilities/testUtilities");
 
 describe("MBDriver", () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
   describe("constructor", () => {
     let exec = () => {
       return new MBDriver();
@@ -873,7 +877,7 @@ describe("MBDriver", () => {
       expect(result).toEqual([2, 3, 4, 5, 6, 7, 8]);
 
       //Busy should be false at the end
-      expect(driver.Client.busy).toEqual(false);
+      expect(driver.Busy).toEqual(false);
     });
 
     it("should not connect - if already connected - and properly call _processRequest  - call setID to set proper unitID and than readHoldingRegisters", async () => {
@@ -901,7 +905,7 @@ describe("MBDriver", () => {
       expect(result).toEqual([2, 3, 4, 5, 6, 7, 8]);
 
       //Busy should be false at the end
-      expect(driver.Client.busy).toEqual(false);
+      expect(driver.Busy).toEqual(false);
     });
 
     it("should reject but not disconnect - if connecting throws", async () => {
@@ -934,7 +938,7 @@ describe("MBDriver", () => {
       expect(driver.Client.readHoldingRegisters).not.toHaveBeenCalled();
 
       //Busy should be false at the end
-      expect(driver.Client.busy).toEqual(false);
+      expect(driver.Busy).toEqual(false);
     });
 
     it("should reject but not disconnect - if connect takes too much time - DUE TO INTERNAL modbus-serial, not driver", async () => {
@@ -967,7 +971,7 @@ describe("MBDriver", () => {
       expect(driver.Client.readHoldingRegisters).not.toHaveBeenCalled();
 
       //Busy should be false at the end
-      expect(driver.Client.busy).toEqual(false);
+      expect(driver.Busy).toEqual(false);
     });
 
     it("should reject but not disconnect - if processing request takes too much time - DUE TO INTERNAL modbus-serial, not driver", async () => {
@@ -994,11 +998,8 @@ describe("MBDriver", () => {
       //Disconnect should not be called
       expect(driver.Client.close).not.toHaveBeenCalled();
 
-      //Busy should be false at the end
-      expect(driver.Client.busy).toEqual(false);
-
       //IsConnect should be set to false - due to including processing request fail in isConnected
-      expect(driver.IsConnected).toEqual(false);
+      expect(driver.Busy).toEqual(false);
     });
 
     it("should reject but not disconnect - if processing (reading data) throws", async () => {
@@ -1041,7 +1042,7 @@ describe("MBDriver", () => {
       expect(driver.Client.close).not.toHaveBeenCalled();
 
       //Busy should be false at the end
-      expect(driver.Client.busy).toEqual(false);
+      expect(driver.Busy).toEqual(false);
 
       //IsConnect should be set to false - due to including processing request fail in isConnected
       expect(driver.IsConnected).toEqual(false);
@@ -1097,7 +1098,7 @@ describe("MBDriver", () => {
       ]);
 
       //Busy should be false at the end
-      expect(driver.Client.busy).toEqual(false);
+      expect(driver.Busy).toEqual(false);
     });
   });
 });

@@ -28,10 +28,11 @@ class S7Request extends StandardProtocolRequest {
 
     //Checking properties
     for (let variable of variables) {
-      if (variable.MemoryType !== memoryType)
+      if (variable.MemoryType !== memoryType) {
         throw new Error(
           "Trying to assing variable with different MemoryType to S7 request"
         );
+      }
 
       if (memoryType === "DB" && variable.DBNumber !== dbNumber)
         throw new Error(

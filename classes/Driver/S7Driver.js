@@ -3,7 +3,7 @@ const { snooze } = require("../../utilities/utilities");
 const S7Request = require("../Request/S7Request/S7Request");
 const Driver = require("./Driver");
 
-class MBDriver extends Driver {
+class S7Driver extends Driver {
   //#region ========= CONSTRUCTOR =========
 
   constructor() {
@@ -186,7 +186,7 @@ class MBDriver extends Driver {
       protocolRequest.Length
     );
 
-    return result;
+    return [...result];
   }
 
   /**
@@ -200,7 +200,7 @@ class MBDriver extends Driver {
       protocolRequest.Length
     );
 
-    return result;
+    return [...result];
   }
 
   /**
@@ -214,7 +214,7 @@ class MBDriver extends Driver {
       protocolRequest.Length
     );
 
-    return result;
+    return [...result];
   }
 
   /**
@@ -228,7 +228,7 @@ class MBDriver extends Driver {
       protocolRequest.Length
     );
 
-    return result;
+    return [...result];
   }
 
   /**
@@ -299,6 +299,4 @@ class MBDriver extends Driver {
   //#endregion ========= PRIVATE METHODS =========
 }
 
-module.exports = MBDriver;
-
-//TODO - test this class
+module.exports = S7Driver;
