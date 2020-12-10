@@ -1,3 +1,4 @@
+const pidusage = require("pidusage");
 const si = require("systeminformation");
 const { roundToPrecision, exists } = require("../utilities/utilities");
 
@@ -58,6 +59,16 @@ const calcDiskUsage = async () => {
   }
 };
 
+const getProcessMemoryUsage = async () => {
+  try {
+    let usageInfo = await pidusage(process.pid);
+    if (exists(usageInfo.memory)) return usageInfo.memory;
+    else return null;
+  } catch (err) {
+    return null;
+  }
+};
+
 module.exports.getDeviceInfo = async () => {
   let cpuUsage = await calcCPULoad();
   let cpuTemperature = await calcCPUTemperature();
@@ -76,3 +87,4 @@ module.exports.calcDiskUsage = calcDiskUsage;
 module.exports.calcAvailableMemory = calcAvailableMemory;
 module.exports.calcCPUTemperature = calcCPUTemperature;
 module.exports.calcCPULoad = calcCPULoad;
+module.exports.getProcessMemoryUsage = getProcessMemoryUsage;

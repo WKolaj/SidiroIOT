@@ -144,5 +144,3 @@ class S7Device extends ConnectableDevice {
 }
 
 module.exports = S7Device;
-
-//TODO - test this class
