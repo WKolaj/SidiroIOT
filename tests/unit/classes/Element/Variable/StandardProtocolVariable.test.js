@@ -1,6 +1,9 @@
 const StandardProtocolVariable = require("../../../../../classes/Element/Variable/ConnectableVariable/StandardProtocolVariable");
 
 describe("StandardProtocolVariable", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let project;
     let device;

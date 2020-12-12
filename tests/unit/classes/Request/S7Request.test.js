@@ -4,6 +4,9 @@ const { snooze } = require("../../../../utilities/utilities");
 const { createFakeS7Variable } = require("../../../utilities/testUtilities");
 
 describe("S7Request", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let variable1;
     let variable1SampleTime;

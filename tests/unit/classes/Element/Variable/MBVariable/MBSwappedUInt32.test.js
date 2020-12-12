@@ -1,6 +1,9 @@
 const MBSwappedUInt32 = require("../../../../../../classes/Element/Variable/ConnectableVariable/MBVariable/MBSwappedUInt32");
 
 describe("MBSwappedUInt32", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let project;
     let device;

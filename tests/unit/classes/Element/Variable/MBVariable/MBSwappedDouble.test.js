@@ -1,6 +1,9 @@
 const MBSwappedDouble = require("../../../../../../classes/Element/Variable/ConnectableVariable/MBVariable/MBSwappedDouble");
 
 describe("MBSwappedDouble", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let project;
     let device;

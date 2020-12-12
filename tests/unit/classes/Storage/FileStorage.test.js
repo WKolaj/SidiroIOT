@@ -16,6 +16,7 @@ const storageDirPath = "__testDir/fileStorage";
 
 describe("FileStorage", () => {
   beforeEach(async () => {
+    jest.setTimeout(30000);
     await createDirIfNotExists(storageDirPath);
     await clearDirectoryAsync(storageDirPath);
   });

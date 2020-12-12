@@ -28,6 +28,9 @@ const { clone } = require("lodash");
 const AgentsDirPath = "__testDir/settings/agentsData";
 
 describe("AgentDevice", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("_getAndSaveElementsEventToClipboardIfFitsSendingInterval", () => {
     let project;
     let payload;

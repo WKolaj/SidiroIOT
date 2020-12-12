@@ -12,6 +12,9 @@ const createFakeDevice = (id, name, requestGroupID, refreshMethod) => {
 };
 
 describe("RefreshGroups", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let devices;
     let device1;

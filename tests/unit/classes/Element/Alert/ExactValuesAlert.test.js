@@ -6,6 +6,9 @@ const {
 } = require("../../../../utilities/testUtilities");
 
 describe("ExactValuesAlert", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let project;
     let device;

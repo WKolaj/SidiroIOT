@@ -2,6 +2,9 @@ const CPUTemperatureVariable = require("../../../../../../classes/Element/Variab
 const si = require("systeminformation");
 
 describe("CPUTemperatureVariable", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let project;
     let device;

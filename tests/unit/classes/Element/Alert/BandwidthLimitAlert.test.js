@@ -7,6 +7,9 @@ const {
 } = require("../../../../utilities/testUtilities");
 
 describe("BandwidthLimitAlert", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let project;
     let device;

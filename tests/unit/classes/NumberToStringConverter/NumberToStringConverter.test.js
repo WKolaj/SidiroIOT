@@ -1,6 +1,9 @@
 const NumberToStringConverter = require("../../../../classes/NumberToStringConverter/NumberToStringConverter");
 
 describe("NumberToStringConverter", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let exec = () => {
       return new NumberToStringConverter();

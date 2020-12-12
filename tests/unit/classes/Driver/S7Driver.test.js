@@ -7,6 +7,9 @@ const {
 } = require("../../../utilities/testUtilities");
 
 describe("S7Driver", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let exec = () => {
       return new S7Driver();

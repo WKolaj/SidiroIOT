@@ -2,6 +2,9 @@ const RAMUsageVariable = require("../../../../../../classes/Element/Variable/Int
 const si = require("systeminformation");
 
 describe("RAMUsageVariable", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let project;
     let device;

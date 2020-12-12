@@ -5,6 +5,9 @@ const {
 } = require("../../../utilities/testUtilities");
 
 describe("S7RequestManager", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("groupS7Variables", () => {
     //#region VARIABLES
 

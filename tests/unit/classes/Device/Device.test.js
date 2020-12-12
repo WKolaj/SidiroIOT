@@ -10,6 +10,9 @@ const {
 const Device = require("../../../../classes/Device/Device");
 
 describe("Device", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("init", () => {
     let project;
     let payload;

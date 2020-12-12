@@ -5,6 +5,9 @@ const {
 } = require("../../../../utilities/testUtilities");
 
 describe("SumCalculator", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let project;
     let device;

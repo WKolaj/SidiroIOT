@@ -2,6 +2,9 @@ const { before } = require("lodash");
 const DataClipboard = require("../../../../classes/Clipboard/DataClipboard");
 
 describe("DataClipboard", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let exec = () => {
       return new DataClipboard();

@@ -1,6 +1,9 @@
 const MBSwappedFloat = require("../../../../../../classes/Element/Variable/ConnectableVariable/MBVariable/MBSwappedFloat");
 
 describe("MBSwappedFloat", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let project;
     let device;

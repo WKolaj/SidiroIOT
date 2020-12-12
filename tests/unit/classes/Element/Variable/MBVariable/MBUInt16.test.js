@@ -1,6 +1,9 @@
 const MBUInt16 = require("../../../../../../classes/Element/Variable/ConnectableVariable/MBVariable/MBUInt16");
 
 describe("MBUInt16", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let project;
     let device;

@@ -1,6 +1,9 @@
 const MBVariable = require("../../../../../../classes/Element/Variable/ConnectableVariable/MBVariable/MBVariable");
 
 describe("MBVariable", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let project;
     let device;

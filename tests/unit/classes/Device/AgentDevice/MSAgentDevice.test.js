@@ -14,6 +14,9 @@ const { MindConnectAgent, retry } = require("@mindconnect/mindconnect-nodejs");
 const AgentsDirPath = "__testDir/settings/agentsData";
 
 describe("MSAgentDevice", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let project;
 

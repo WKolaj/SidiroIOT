@@ -1,6 +1,9 @@
 const S7SInt = require("../../../../../../classes/Element/Variable/ConnectableVariable/S7Variable/S7SInt");
 
 describe("S7SInt", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let project;
     let device;

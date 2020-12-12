@@ -1,6 +1,9 @@
 const MBFloat = require("../../../../../../classes/Element/Variable/ConnectableVariable/MBVariable/MBFloat");
 
 describe("MBFloat", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let project;
     let device;

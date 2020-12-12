@@ -1,6 +1,9 @@
 const RequestManager = require("../../../../classes/Request/RequestManager");
 
 describe("RequestManager", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let exec = () => {
       return new RequestManager();

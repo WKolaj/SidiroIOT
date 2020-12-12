@@ -57,6 +57,7 @@ describe("api/ipConfig", () => {
   let afterAfterTestInit;
 
   beforeEach(async () => {
+    jest.setTimeout(30000);
     jest.resetAllMocks();
 
     //Overwriting logget action method

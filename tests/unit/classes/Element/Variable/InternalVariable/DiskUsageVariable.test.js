@@ -2,6 +2,9 @@ const DiskUsageVariable = require("../../../../../../classes/Element/Variable/In
 const si = require("systeminformation");
 
 describe("DiskUsageVariable", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let project;
     let device;

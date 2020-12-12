@@ -1,6 +1,9 @@
 const MBUInt32 = require("../../../../../../classes/Element/Variable/ConnectableVariable/MBVariable/MBUInt32");
 
 describe("MBUInt32", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let project;
     let device;

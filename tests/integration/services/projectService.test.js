@@ -29,6 +29,7 @@ describe("projectService", () => {
   let initialIPServerContent;
 
   beforeEach(async () => {
+    jest.setTimeout(30000);
     jest.resetAllMocks();
     jest.resetModules();
     ipConfigMockServer = require("../../utilities/fakeIPService");

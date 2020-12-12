@@ -12,6 +12,9 @@ const S7RequestManager = require("../../../../classes/Request/S7Request/S7Reques
 const S7Driver = require("../../../../classes/Driver/S7Driver");
 
 describe("S7Device", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let project;
 

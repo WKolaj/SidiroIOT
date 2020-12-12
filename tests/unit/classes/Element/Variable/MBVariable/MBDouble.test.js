@@ -1,43 +1,47 @@
 const MBDouble = require("../../../../../../classes/Element/Variable/ConnectableVariable/MBVariable/MBDouble");
 
 describe("MBDouble", () => {
-  describe("_convertDataToValue", () => {
-    describe("constructor", () => {
-      let project;
-      let device;
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
 
-      beforeEach(() => {
-        project = "fakeProject";
-        device = "fakeDevice";
-      });
+  describe("constructor", () => {
+    let project;
+    let device;
 
-      let exec = () => {
-        return new MBDouble(project, device);
-      };
-
-      it("should create new ConnectableVariable and set all its properties to null", () => {
-        let result = exec();
-
-        expect(result.ID).toEqual(null);
-        expect(result.Name).toEqual(null);
-        expect(result.Type).toEqual(null);
-
-        //Value should not be checked - method _convertDataToValue is not set
-        //expect(result.Value).toEqual(null);
-        expect(result.DefaultValue).toEqual(null);
-        expect(result.LastValueTick).toEqual(null);
-        expect(result.Unit).toEqual(null);
-        expect(result.SampleTime).toEqual(null);
-      });
-
-      it("should assign project and device", () => {
-        let result = exec();
-
-        expect(result._project).toEqual(project);
-        expect(result._device).toEqual(device);
-      });
+    beforeEach(() => {
+      project = "fakeProject";
+      device = "fakeDevice";
     });
 
+    let exec = () => {
+      return new MBDouble(project, device);
+    };
+
+    it("should create new ConnectableVariable and set all its properties to null", () => {
+      let result = exec();
+
+      expect(result.ID).toEqual(null);
+      expect(result.Name).toEqual(null);
+      expect(result.Type).toEqual(null);
+
+      //Value should not be checked - method _convertDataToValue is not set
+      //expect(result.Value).toEqual(null);
+      expect(result.DefaultValue).toEqual(null);
+      expect(result.LastValueTick).toEqual(null);
+      expect(result.Unit).toEqual(null);
+      expect(result.SampleTime).toEqual(null);
+    });
+
+    it("should assign project and device", () => {
+      let result = exec();
+
+      expect(result._project).toEqual(project);
+      expect(result._device).toEqual(device);
+    });
+  });
+
+  describe("_convertDataToValue", () => {
     let mbVariable;
     let dataToConvert;
 

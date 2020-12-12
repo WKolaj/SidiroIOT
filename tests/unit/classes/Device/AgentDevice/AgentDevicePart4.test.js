@@ -24,6 +24,9 @@ const path = require("path");
 const AgentsDirPath = "__testDir/settings/agentsData";
 
 describe("AgentDevice", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("refresh", () => {
     let project;
     let payload;

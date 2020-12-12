@@ -15,6 +15,9 @@ const createVariable = (id, name, length, data, offset) => {
 };
 
 describe("StandardProtocolRequest", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let variable1;
     let variable2;

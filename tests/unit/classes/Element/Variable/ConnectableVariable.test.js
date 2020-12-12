@@ -1,6 +1,9 @@
 const ConnectableVariable = require("../../../../../classes/Element/Variable/ConnectableVariable/ConnectableVariable");
 
 describe("ConnectableVariable", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let project;
     let device;

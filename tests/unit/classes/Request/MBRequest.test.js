@@ -3,6 +3,9 @@ const { snooze } = require("../../../../utilities/utilities");
 const { createFakeMBVariable } = require("../../../utilities/testUtilities");
 
 describe("MBRequest", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let variable1;
     let variable1SampleTime;

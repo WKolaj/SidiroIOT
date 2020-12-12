@@ -36,6 +36,7 @@ describe("api/element", () => {
   let ipConfigMockServer;
 
   beforeEach(async () => {
+    jest.setTimeout(30000);
     //Clearing project file if exists
     await removeFileIfExistsAsync(projectFilePath);
 

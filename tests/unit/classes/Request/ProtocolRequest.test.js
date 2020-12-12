@@ -1,6 +1,9 @@
 const ProtocolRequest = require("../../../../classes/Request/ProtocolRequest");
 
 describe("ProtocolRequest", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let variables;
     let sampleTime;

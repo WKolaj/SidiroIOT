@@ -2,6 +2,9 @@ const Sampler = require("../../../../classes/Sampler/Sampler");
 const { snooze } = require("../../../../utilities/utilities");
 
 describe("Sampler", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let exec = () => {
       return new Sampler();

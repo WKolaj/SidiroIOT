@@ -1,6 +1,9 @@
 const Project = require("../../../../classes/Project/Project");
 
 describe("Project", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   //TODO - add other Project class tests
   describe("validatePayload", () => {
     let payload;

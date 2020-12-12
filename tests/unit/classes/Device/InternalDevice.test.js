@@ -12,6 +12,9 @@ const logger = require("../../../../logger/logger");
 const InternalDevice = require("../../../../classes/Device/InternalDevice/InternalDevice");
 
 describe("InternalDevice", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let project;
 

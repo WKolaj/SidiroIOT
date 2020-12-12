@@ -1,6 +1,9 @@
 const Element = require("../../../../classes/Element/Element");
 
 describe("Element", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let project;
     let device;

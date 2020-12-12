@@ -6,6 +6,7 @@ const { createFakeMBVariable } = require("../../../utilities/testUtilities");
 describe("MBDriver", () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    jest.setTimeout(30000);
   });
 
   describe("constructor", () => {

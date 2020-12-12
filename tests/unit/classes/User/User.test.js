@@ -20,6 +20,7 @@ const userFilePath = path.join(settingsDirPath, userFileName);
 describe("User", () => {
   beforeEach(async () => {
     await removeFileIfExistsAsync(userFilePath);
+    jest.setTimeout(30000);
   });
 
   afterEach(async () => {

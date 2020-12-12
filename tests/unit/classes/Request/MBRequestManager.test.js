@@ -3,6 +3,9 @@ const MBRequestManager = require("../../../../classes/Request/MBRequest/MBReques
 const { createFakeMBVariable } = require("../../../utilities/testUtilities");
 
 describe("MBRequestManager", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("groupMBVariables", () => {
     let variable1;
     let variable2;

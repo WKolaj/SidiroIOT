@@ -6,6 +6,9 @@ const {
 } = require("../../../../utilities/testUtilities");
 
 describe("AverageCalculator", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let project;
     let device;

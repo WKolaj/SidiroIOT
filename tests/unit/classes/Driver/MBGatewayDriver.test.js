@@ -4,6 +4,9 @@ const { snooze } = require("../../../../utilities/utilities");
 const { createFakeMBVariable } = require("../../../utilities/testUtilities");
 
 describe("MBGatewayDriver", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let exec = () => {
       return new MBGatewayDriver();

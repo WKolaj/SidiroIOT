@@ -14,6 +14,9 @@ const RequestManager = require("../../../../classes/Request/RequestManager");
 const Driver = require("../../../../classes/Driver/Driver");
 
 describe("ConnectableDevice", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let project;
 

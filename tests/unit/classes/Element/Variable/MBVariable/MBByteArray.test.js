@@ -1,6 +1,9 @@
 const MBByteArray = require("../../../../../../classes/Element/Variable/ConnectableVariable/MBVariable/MBByteArray");
 
 describe("MBByteArray", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let project;
     let device;

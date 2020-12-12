@@ -1,6 +1,9 @@
 const AssociatedVariable = require("../../../../../classes/Element/Variable/AssociatedVariable");
 
 describe("AssociatedVariable", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let project;
     let device;

@@ -22,6 +22,9 @@ const MBInt16 = require("../../../../classes/Element/Variable/ConnectableVariabl
 const { snooze } = require("../../../../utilities/utilities");
 
 describe("MBDevice", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let project;
 

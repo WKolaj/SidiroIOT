@@ -2,6 +2,9 @@ const CPULoadVariable = require("../../../../../../classes/Element/Variable/Inte
 const si = require("systeminformation");
 
 describe("CPULoadVariable", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let project;
     let device;

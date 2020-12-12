@@ -3,6 +3,9 @@ const { snooze } = require("../../../../utilities/utilities");
 const { wrapMethodToInvokeAfter } = require("../../../utilities/testUtilities");
 
 describe("Driver", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let exec = () => {
       return new Driver();

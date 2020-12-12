@@ -2,6 +2,9 @@ const DeviceConnectionVariable = require("../../../../../../classes/Element/Vari
 const si = require("systeminformation");
 
 describe("DeviceConnectionVariable", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let project;
     let device;

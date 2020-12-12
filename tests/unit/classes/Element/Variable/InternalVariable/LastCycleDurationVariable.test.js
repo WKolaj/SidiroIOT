@@ -2,6 +2,9 @@ const LastCycleDurationVariable = require("../../../../../../classes/Element/Var
 const si = require("systeminformation");
 
 describe("LastCycleDurationVariable", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let project;
     let device;

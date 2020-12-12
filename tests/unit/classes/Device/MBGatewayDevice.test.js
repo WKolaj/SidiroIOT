@@ -3,6 +3,9 @@ const MBDriver = require("../../../../classes/Driver/MBDriver");
 const MBRequestManager = require("../../../../classes/Request/MBRequest/MBRequestManager");
 
 describe("MBGatewayDevice", () => {
+  beforeEach(() => {
+    jest.setTimeout(30000);
+  });
   describe("constructor", () => {
     let project;
 
