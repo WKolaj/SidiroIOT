@@ -6,7 +6,6 @@ const CPUTemperatureVariable = require("../../classes/Element/Variable/InternalV
 const DiskUsageVariable = require("../../classes/Element/Variable/InternalVariable/DiskUsageVariable");
 const RAMUsageVariable = require("../../classes/Element/Variable/InternalVariable/RAMUsageVariable");
 const LastCycleDurationVariable = require("../../classes/Element/Variable/InternalVariable/LastCycleDurationVariable");
-const SidiroIOTMemoryVariable = require("../../classes/Element/Variable/InternalVariable/SidiroIOTMemoryVariable");
 
 const validateVariablesPayload = (variablesPayload, helpers) => {
   const { message } = helpers;
@@ -39,12 +38,6 @@ const validateVariablesPayload = (variablesPayload, helpers) => {
         break;
       case "LastCycleDurationVariable":
         validationMessage = LastCycleDurationVariable.validatePayload(
-          variablePayload
-        );
-        break;
-      //TODO - remove this variable after testing
-      case "SidiroIOTMemoryVariable":
-        validationMessage = SidiroIOTMemoryVariable.validatePayload(
           variablePayload
         );
         break;

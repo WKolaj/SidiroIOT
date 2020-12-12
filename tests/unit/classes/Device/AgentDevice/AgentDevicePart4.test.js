@@ -136,6 +136,7 @@ describe("AgentDevice", () => {
     //#endregion MOCK FUNCTIONS
 
     beforeEach(async () => {
+      jest.resetAllMocks();
       await createDirIfNotExists(AgentsDirPath);
       await clearDirectoryAsync(AgentsDirPath);
 

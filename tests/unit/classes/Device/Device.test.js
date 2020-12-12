@@ -1515,7 +1515,7 @@ describe("Device", () => {
         0,
         "FakeUnit",
         variable1SampleTime,
-        wrapMethodToInvokeAfter(variable1RefreshMock, 100)
+        wrapMethodToInvokeAfter(variable1RefreshMock, 10)
       );
 
       variable2 = createFakeVariable(
@@ -1527,7 +1527,7 @@ describe("Device", () => {
         0,
         "FakeUnit",
         variable2SampleTime,
-        wrapMethodToInvokeAfter(variable2RefreshMock, 200)
+        wrapMethodToInvokeAfter(variable2RefreshMock, 20)
       );
 
       variable3 = createFakeVariable(
@@ -1539,7 +1539,7 @@ describe("Device", () => {
         0,
         "FakeUnit",
         variable3SampleTime,
-        wrapMethodToInvokeAfter(variable3RefreshMock, 300)
+        wrapMethodToInvokeAfter(variable3RefreshMock, 30)
       );
 
       variables = [];
@@ -1554,7 +1554,7 @@ describe("Device", () => {
         0,
         "FakeUnit",
         calcElement1SampleTime,
-        wrapMethodToInvokeAfter(calcElement1RefreshMock, 100)
+        wrapMethodToInvokeAfter(calcElement1RefreshMock, 10)
       );
 
       calcElement2 = createFakeCalcElement(
@@ -1566,7 +1566,7 @@ describe("Device", () => {
         0,
         "FakeUnit",
         calcElement2SampleTime,
-        wrapMethodToInvokeAfter(calcElement2RefreshMock, 200)
+        wrapMethodToInvokeAfter(calcElement2RefreshMock, 20)
       );
 
       calcElement3 = createFakeCalcElement(
@@ -1578,7 +1578,7 @@ describe("Device", () => {
         0,
         "FakeUnit",
         calcElement3SampleTime,
-        wrapMethodToInvokeAfter(calcElement3RefreshMock, 300)
+        wrapMethodToInvokeAfter(calcElement3RefreshMock, 30)
       );
 
       calcElements = [];
@@ -1594,7 +1594,7 @@ describe("Device", () => {
         0,
         "FakeUnit",
         alert1SampleTime,
-        wrapMethodToInvokeAfter(alert1RefreshMock, 100)
+        wrapMethodToInvokeAfter(alert1RefreshMock, 10)
       );
 
       alert2 = createFakeAlert(
@@ -1606,7 +1606,7 @@ describe("Device", () => {
         0,
         "FakeUnit",
         alert2SampleTime,
-        wrapMethodToInvokeAfter(alert2RefreshMock, 200)
+        wrapMethodToInvokeAfter(alert2RefreshMock, 20)
       );
 
       alert3 = createFakeAlert(
@@ -1618,7 +1618,7 @@ describe("Device", () => {
         0,
         "FakeUnit",
         alert3SampleTime,
-        wrapMethodToInvokeAfter(alert3RefreshMock, 300)
+        wrapMethodToInvokeAfter(alert3RefreshMock, 30)
       );
 
       alerts = [];
