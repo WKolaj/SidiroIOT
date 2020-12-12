@@ -2,6 +2,7 @@
   "dbConnectionString": "mongodb://testUser:testUserPassword@localhost:27017/testDB",
   "jwtPrivateKey": "testPrivateKey",
   "settingsPath": "__testDir/settings",
+  "agentsDirName": "agentsData",
   "userFileName": "userSettings.json",
   "projectFileName": "projectSettings.json",
   "netplanConfigSocketFilePath": "__testDir/netplan/data.socket",

@@ -71,6 +71,7 @@ describe("api/user", () => {
   let initialIPServerContent;
 
   beforeEach(async () => {
+    jest.setTimeout(30000);
     jest.resetAllMocks();
 
     //Clearing project file if exists
@@ -624,6 +625,324 @@ describe("api/user", () => {
               portNumber: 502,
               timeout: 500,
             },
+            connectableDeviceID4: {
+              id: "connectableDeviceID4",
+              name: "connectableDeviceName3",
+              type: "S7Device",
+              variables: {
+                connectableDeviceID4Variable1ID: {
+                  id: "connectableDeviceID4Variable1ID",
+                  name: "connectableDeviceID4Variable1Name",
+                  type: "S7Int",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  offset: 1,
+                  length: 2,
+                  read: true,
+                  write: false,
+                  memoryType: "DB",
+                  dbNumber: 3,
+                  readAsSingle: false,
+                  writeAsSingle: false,
+                },
+                connectableDeviceID4Variable2ID: {
+                  id: "connectableDeviceID4Variable2ID",
+                  name: "connectableDeviceID4Variable2Name",
+                  type: "S7Int",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  offset: 3,
+                  length: 2,
+                  read: true,
+                  write: false,
+                  memoryType: "DB",
+                  dbNumber: 3,
+                  readAsSingle: false,
+                  writeAsSingle: false,
+                },
+                connectableDeviceID4Variable3ID: {
+                  id: "connectableDeviceID4Variable3ID",
+                  name: "connectableDeviceID4Variable3Name",
+                  type: "S7Int",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  offset: 5,
+                  length: 2,
+                  read: true,
+                  write: false,
+                  memoryType: "DB",
+                  dbNumber: 3,
+                  readAsSingle: false,
+                  writeAsSingle: false,
+                },
+                connectableDeviceID4Variable4ID: {
+                  id: "connectableDeviceID4Variable4ID",
+                  name: "connectableDeviceID4Variable4Name",
+                  type: "S7Int",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  offset: 7,
+                  length: 2,
+                  read: true,
+                  write: false,
+                  memoryType: "DB",
+                  dbNumber: 3,
+                  readAsSingle: false,
+                  writeAsSingle: false,
+                },
+              },
+              calcElements: {
+                connectableDeviceID4CalcElement1ID: {
+                  id: "connectableDeviceID4CalcElement1ID",
+                  name: "connectableDeviceID4CalcElement1Name",
+                  type: "FactorCalculator",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  variableID: "connectableDeviceID4Variable1ID",
+                  factor: 10,
+                },
+                connectableDeviceID4CalcElement2ID: {
+                  id: "connectableDeviceID4CalcElement2ID",
+                  name: "connectableDeviceID4CalcElement2Name",
+                  type: "FactorCalculator",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  variableID: "connectableDeviceID4Variable2ID",
+                  factor: 20,
+                },
+                connectableDeviceID4CalcElement3ID: {
+                  id: "connectableDeviceID4CalcElement3ID",
+                  name: "connectableDeviceID4CalcElement3Name",
+                  type: "FactorCalculator",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  variableID: "connectableDeviceID4Variable3ID",
+                  factor: 30,
+                },
+              },
+              alerts: {
+                connectableDeviceID4Alert1ID: {
+                  id: "connectableDeviceID4Alert1ID",
+                  name: "connectableDeviceID4Alert1Name",
+                  type: "HighLimitAlert",
+                  unit: "V",
+                  sampleTime: 1,
+                  severity: 100,
+                  defaultValue: null,
+                  hysteresis: 10,
+                  timeOnDelay: 100,
+                  timeOffDelay: 200,
+                  variableID: "connectableDeviceID4Variable1ID",
+                  highLimit: 100,
+                  texts: { pl: "fakeTextPL", en: "fakeTextEN" },
+                },
+                connectableDeviceID4Alert2ID: {
+                  id: "connectableDeviceID4Alert2ID",
+                  name: "connectableDeviceID4Alert2Name",
+                  type: "LowLimitAlert",
+                  unit: "V",
+                  sampleTime: 1,
+                  severity: 200,
+                  defaultValue: null,
+                  hysteresis: 20,
+                  timeOnDelay: 100,
+                  timeOffDelay: 200,
+                  variableID: "connectableDeviceID4Variable2ID",
+                  lowLimit: 100,
+                  texts: { pl: "fakeTextPL", en: "fakeTextEN" },
+                },
+                connectableDeviceID4Alert3ID: {
+                  id: "connectableDeviceID4Alert3ID",
+                  name: "connectableDeviceID4Alert3Name",
+                  type: "BandwidthLimitAlert",
+                  unit: "V",
+                  sampleTime: 1,
+                  severity: 300,
+                  defaultValue: null,
+                  hysteresis: 30,
+                  timeOnDelay: 100,
+                  timeOffDelay: 200,
+                  variableID: "connectableDeviceID4Variable3ID",
+                  highLimit: 100,
+                  lowLimit: 100,
+                  texts: {
+                    highLimit: { pl: "fakeTextPL", en: "fakeTextEN" },
+                    lowLimit: { pl: "fakeTextPL", en: "fakeTextEN" },
+                  },
+                },
+              },
+              isActive: false,
+              ipAddress: "192.168.0.4",
+              rack: 0,
+              slot: 1,
+              timeout: 500,
+            },
+            connectableDeviceID5: {
+              id: "connectableDeviceID5",
+              name: "connectableDeviceName3",
+              type: "S7Device",
+              variables: {
+                connectableDeviceID5Variable1ID: {
+                  id: "connectableDeviceID5Variable1ID",
+                  name: "connectableDeviceID5Variable1Name",
+                  type: "S7Int",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  offset: 1,
+                  length: 2,
+                  read: true,
+                  write: false,
+                  memoryType: "DB",
+                  dbNumber: 3,
+                  readAsSingle: false,
+                  writeAsSingle: false,
+                },
+                connectableDeviceID5Variable2ID: {
+                  id: "connectableDeviceID5Variable2ID",
+                  name: "connectableDeviceID5Variable2Name",
+                  type: "S7Int",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  offset: 3,
+                  length: 2,
+                  read: true,
+                  write: false,
+                  memoryType: "DB",
+                  dbNumber: 3,
+                  readAsSingle: false,
+                  writeAsSingle: false,
+                },
+                connectableDeviceID5Variable3ID: {
+                  id: "connectableDeviceID5Variable3ID",
+                  name: "connectableDeviceID5Variable3Name",
+                  type: "S7Int",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  offset: 5,
+                  length: 2,
+                  read: true,
+                  write: false,
+                  memoryType: "DB",
+                  dbNumber: 3,
+                  readAsSingle: false,
+                  writeAsSingle: false,
+                },
+                connectableDeviceID5Variable4ID: {
+                  id: "connectableDeviceID5Variable4ID",
+                  name: "connectableDeviceID5Variable4Name",
+                  type: "S7Int",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  offset: 7,
+                  length: 2,
+                  read: true,
+                  write: false,
+                  memoryType: "DB",
+                  dbNumber: 3,
+                  readAsSingle: false,
+                  writeAsSingle: false,
+                },
+              },
+              calcElements: {
+                connectableDeviceID5CalcElement1ID: {
+                  id: "connectableDeviceID5CalcElement1ID",
+                  name: "connectableDeviceID5CalcElement1Name",
+                  type: "FactorCalculator",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  variableID: "connectableDeviceID5Variable1ID",
+                  factor: 10,
+                },
+                connectableDeviceID5CalcElement2ID: {
+                  id: "connectableDeviceID5CalcElement2ID",
+                  name: "connectableDeviceID5CalcElement2Name",
+                  type: "FactorCalculator",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  variableID: "connectableDeviceID5Variable2ID",
+                  factor: 20,
+                },
+                connectableDeviceID5CalcElement3ID: {
+                  id: "connectableDeviceID5CalcElement3ID",
+                  name: "connectableDeviceID5CalcElement3Name",
+                  type: "FactorCalculator",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  variableID: "connectableDeviceID5Variable3ID",
+                  factor: 30,
+                },
+              },
+              alerts: {
+                connectableDeviceID5Alert1ID: {
+                  id: "connectableDeviceID5Alert1ID",
+                  name: "connectableDeviceID5Alert1Name",
+                  type: "HighLimitAlert",
+                  unit: "V",
+                  sampleTime: 1,
+                  severity: 100,
+                  defaultValue: null,
+                  hysteresis: 10,
+                  timeOnDelay: 100,
+                  timeOffDelay: 200,
+                  variableID: "connectableDeviceID5Variable1ID",
+                  highLimit: 100,
+                  texts: { pl: "fakeTextPL", en: "fakeTextEN" },
+                },
+                connectableDeviceID5Alert2ID: {
+                  id: "connectableDeviceID5Alert2ID",
+                  name: "connectableDeviceID5Alert2Name",
+                  type: "LowLimitAlert",
+                  unit: "V",
+                  sampleTime: 1,
+                  severity: 200,
+                  defaultValue: null,
+                  hysteresis: 20,
+                  timeOnDelay: 100,
+                  timeOffDelay: 200,
+                  variableID: "connectableDeviceID5Variable2ID",
+                  lowLimit: 100,
+                  texts: { pl: "fakeTextPL", en: "fakeTextEN" },
+                },
+                connectableDeviceID5Alert3ID: {
+                  id: "connectableDeviceID5Alert3ID",
+                  name: "connectableDeviceID5Alert3Name",
+                  type: "BandwidthLimitAlert",
+                  unit: "V",
+                  sampleTime: 1,
+                  severity: 300,
+                  defaultValue: null,
+                  hysteresis: 30,
+                  timeOnDelay: 100,
+                  timeOffDelay: 200,
+                  variableID: "connectableDeviceID5Variable3ID",
+                  highLimit: 100,
+                  lowLimit: 100,
+                  texts: {
+                    highLimit: { pl: "fakeTextPL", en: "fakeTextEN" },
+                    lowLimit: { pl: "fakeTextPL", en: "fakeTextEN" },
+                  },
+                },
+              },
+              isActive: false,
+              ipAddress: "192.168.0.5",
+              rack: 2,
+              slot: 3,
+              timeout: 500,
+            },
           },
           internalDevices: {
             internalDeviceID1: {
@@ -981,7 +1300,171 @@ describe("api/user", () => {
               isActive: true,
             },
           },
-          agentDevices: {},
+          agentDevices: {
+            agentDeviceID1: {
+              id: "agentDeviceID1",
+              name: "agentDeviceID1Name",
+              type: "MSAgentDevice",
+              variables: {
+                agentDeviceID1Variable1ID: {
+                  id: "agentDeviceID1Variable1ID",
+                  name: "agentDeviceID1Variable1Name",
+                  type: "AssociatedVariable",
+                  unit: "V",
+                  sampleTime: 1,
+                  associatedDeviceID: "connectableDeviceID1",
+                  associatedElementID: "connectableDeviceID1Variable1ID",
+                },
+                agentDeviceID1Variable2ID: {
+                  id: "agentDeviceID1Variable2ID",
+                  name: "agentDeviceID1Variable2Name",
+                  type: "AssociatedVariable",
+                  unit: "V",
+                  sampleTime: 1,
+                  associatedDeviceID: "connectableDeviceID1",
+                  associatedElementID: "connectableDeviceID1Variable2ID",
+                },
+                agentDeviceID1Variable3ID: {
+                  id: "agentDeviceID1Variable3ID",
+                  name: "agentDeviceID1Variable3Name",
+                  type: "AssociatedVariable",
+                  unit: "V",
+                  sampleTime: 1,
+                  associatedDeviceID: "connectableDeviceID1",
+                  associatedElementID: "connectableDeviceID1Variable3ID",
+                },
+              },
+              calcElements: {
+                agentDeviceID1CalcElement1ID: {
+                  id: "agentDeviceID1CalcElement1ID",
+                  name: "agentDeviceID1CalcElement1Name",
+                  type: "FactorCalculator",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  variableID: "agentDeviceID1Variable1ID",
+                  factor: 10,
+                },
+                agentDeviceID1CalcElement2ID: {
+                  id: "agentDeviceID1CalcElement2ID",
+                  name: "agentDeviceID1CalcElement2Name",
+                  type: "FactorCalculator",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  variableID: "agentDeviceID1Variable2ID",
+                  factor: 20,
+                },
+                agentDeviceID1CalcElement3ID: {
+                  id: "agentDeviceID1CalcElement3ID",
+                  name: "agentDeviceID1CalcElement3Name",
+                  type: "FactorCalculator",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  variableID: "agentDeviceID1Variable3ID",
+                  factor: 30,
+                },
+              },
+              alerts: {
+                agentDeviceID1Alert1ID: {
+                  id: "agentDeviceID1Alert1ID",
+                  name: "agentDeviceID1Alert1Name",
+                  type: "HighLimitAlert",
+                  unit: "V",
+                  sampleTime: 1,
+                  severity: 100,
+                  defaultValue: null,
+                  hysteresis: 10,
+                  timeOnDelay: 100,
+                  timeOffDelay: 200,
+                  variableID: "agentDeviceID1Variable1ID",
+                  highLimit: 100,
+                  texts: { pl: "fakeTextPL", en: "fakeTextEN" },
+                },
+                agentDeviceID1Alert2ID: {
+                  id: "agentDeviceID1Alert2ID",
+                  name: "agentDeviceID1Alert2Name",
+                  type: "LowLimitAlert",
+                  unit: "V",
+                  sampleTime: 1,
+                  severity: 200,
+                  defaultValue: null,
+                  hysteresis: 20,
+                  timeOnDelay: 100,
+                  timeOffDelay: 200,
+                  variableID: "agentDeviceID1Variable2ID",
+                  lowLimit: 100,
+                  texts: { pl: "fakeTextPL", en: "fakeTextEN" },
+                },
+                agentDeviceID1Alert3ID: {
+                  id: "agentDeviceID1Alert3ID",
+                  name: "agentDeviceID1Alert3Name",
+                  type: "BandwidthLimitAlert",
+                  unit: "V",
+                  sampleTime: 1,
+                  severity: 300,
+                  defaultValue: null,
+                  hysteresis: 30,
+                  timeOnDelay: 100,
+                  timeOffDelay: 200,
+                  variableID: "agentDeviceID1Variable3ID",
+                  highLimit: 100,
+                  lowLimit: 100,
+                  texts: {
+                    highLimit: { pl: "fakeTextPL", en: "fakeTextEN" },
+                    lowLimit: { pl: "fakeTextPL", en: "fakeTextEN" },
+                  },
+                },
+              },
+              isActive: true,
+              sendDataFileInterval: 60,
+              sendEventFileInterval: 5,
+              dataStorageSize: 100,
+              eventStorageSize: 100,
+              numberOfDataFilesToSend: 3,
+              numberOfEventFilesToSend: 3,
+              dataToSendConfig: {
+                connectableDeviceID1Variable1ID: {
+                  elementId: "connectableDeviceID1Variable1ID",
+                  deviceId: "connectableDeviceID1",
+                  datapointId: "connectableDeviceID1Variable1IDdpID1",
+                  sendingInterval: 60,
+                  qualityCodeEnabled: true,
+                  dataConverter: { conversionType: "fixed", precision: 3 },
+                },
+                connectableDeviceID2Variable1ID: {
+                  elementId: "connectableDeviceID2Variable1ID",
+                  deviceId: "connectableDeviceID2",
+                  datapointId: "connectableDeviceID2Variable1IDdpID1",
+                  sendingInterval: 60,
+                  qualityCodeEnabled: true,
+                  dataConverter: { conversionType: "fixed", precision: 3 },
+                },
+                connectableDeviceID1Variable2ID: {
+                  elementId: "connectableDeviceID1Variable2ID",
+                  deviceId: "connectableDeviceID1",
+                  datapointId: "connectableDeviceID1Variable2IDdpID1",
+                  sendingInterval: 60,
+                  qualityCodeEnabled: true,
+                  dataConverter: { conversionType: "fixed", precision: 3 },
+                },
+              },
+              eventsToSendConfig: {},
+              numberOfSendDataRetries: 3,
+              numberOfSendEventRetries: 3,
+              boardingKey: {
+                content: {
+                  baseUrl: "https://southgate.eu1.mindsphere.io",
+                  iat: "fakeIAT",
+                  clientCredentialProfile: ["SHARED_SECRET"],
+                  clientId: "fakeClientID",
+                  tenant: "fakeTenantName",
+                },
+                expiration: "2020-12-18T11:15:08.000Z",
+              },
+            },
+          },
         },
       })
     );
@@ -1674,6 +2157,324 @@ describe("api/user", () => {
               portNumber: 502,
               timeout: 500,
             },
+            connectableDeviceID7: {
+              id: "connectableDeviceID7",
+              name: "connectableDeviceName3",
+              type: "S7Device",
+              variables: {
+                connectableDeviceID7Variable1ID: {
+                  id: "connectableDeviceID7Variable1ID",
+                  name: "connectableDeviceID7Variable1Name",
+                  type: "S7Int",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  offset: 1,
+                  length: 2,
+                  read: true,
+                  write: false,
+                  memoryType: "DB",
+                  dbNumber: 3,
+                  readAsSingle: false,
+                  writeAsSingle: false,
+                },
+                connectableDeviceID7Variable2ID: {
+                  id: "connectableDeviceID7Variable2ID",
+                  name: "connectableDeviceID7Variable2Name",
+                  type: "S7Int",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  offset: 3,
+                  length: 2,
+                  read: true,
+                  write: false,
+                  memoryType: "DB",
+                  dbNumber: 3,
+                  readAsSingle: false,
+                  writeAsSingle: false,
+                },
+                connectableDeviceID7Variable3ID: {
+                  id: "connectableDeviceID7Variable3ID",
+                  name: "connectableDeviceID7Variable3Name",
+                  type: "S7Int",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  offset: 5,
+                  length: 2,
+                  read: true,
+                  write: false,
+                  memoryType: "DB",
+                  dbNumber: 3,
+                  readAsSingle: false,
+                  writeAsSingle: false,
+                },
+                connectableDeviceID7Variable4ID: {
+                  id: "connectableDeviceID7Variable4ID",
+                  name: "connectableDeviceID7Variable4Name",
+                  type: "S7Int",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  offset: 7,
+                  length: 2,
+                  read: true,
+                  write: false,
+                  memoryType: "DB",
+                  dbNumber: 3,
+                  readAsSingle: false,
+                  writeAsSingle: false,
+                },
+              },
+              calcElements: {
+                connectableDeviceID7CalcElement1ID: {
+                  id: "connectableDeviceID7CalcElement1ID",
+                  name: "connectableDeviceID7CalcElement1Name",
+                  type: "FactorCalculator",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  variableID: "connectableDeviceID7Variable1ID",
+                  factor: 10,
+                },
+                connectableDeviceID7CalcElement2ID: {
+                  id: "connectableDeviceID7CalcElement2ID",
+                  name: "connectableDeviceID7CalcElement2Name",
+                  type: "FactorCalculator",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  variableID: "connectableDeviceID7Variable2ID",
+                  factor: 20,
+                },
+                connectableDeviceID7CalcElement3ID: {
+                  id: "connectableDeviceID7CalcElement3ID",
+                  name: "connectableDeviceID7CalcElement3Name",
+                  type: "FactorCalculator",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  variableID: "connectableDeviceID7Variable3ID",
+                  factor: 30,
+                },
+              },
+              alerts: {
+                connectableDeviceID7Alert1ID: {
+                  id: "connectableDeviceID7Alert1ID",
+                  name: "connectableDeviceID7Alert1Name",
+                  type: "HighLimitAlert",
+                  unit: "V",
+                  sampleTime: 1,
+                  severity: 100,
+                  defaultValue: null,
+                  hysteresis: 10,
+                  timeOnDelay: 100,
+                  timeOffDelay: 200,
+                  variableID: "connectableDeviceID7Variable1ID",
+                  highLimit: 100,
+                  texts: { pl: "fakeTextPL", en: "fakeTextEN" },
+                },
+                connectableDeviceID7Alert2ID: {
+                  id: "connectableDeviceID7Alert2ID",
+                  name: "connectableDeviceID7Alert2Name",
+                  type: "LowLimitAlert",
+                  unit: "V",
+                  sampleTime: 1,
+                  severity: 200,
+                  defaultValue: null,
+                  hysteresis: 20,
+                  timeOnDelay: 100,
+                  timeOffDelay: 200,
+                  variableID: "connectableDeviceID7Variable2ID",
+                  lowLimit: 100,
+                  texts: { pl: "fakeTextPL", en: "fakeTextEN" },
+                },
+                connectableDeviceID7Alert3ID: {
+                  id: "connectableDeviceID7Alert3ID",
+                  name: "connectableDeviceID7Alert3Name",
+                  type: "BandwidthLimitAlert",
+                  unit: "V",
+                  sampleTime: 1,
+                  severity: 300,
+                  defaultValue: null,
+                  hysteresis: 30,
+                  timeOnDelay: 100,
+                  timeOffDelay: 200,
+                  variableID: "connectableDeviceID7Variable3ID",
+                  highLimit: 100,
+                  lowLimit: 100,
+                  texts: {
+                    highLimit: { pl: "fakeTextPL", en: "fakeTextEN" },
+                    lowLimit: { pl: "fakeTextPL", en: "fakeTextEN" },
+                  },
+                },
+              },
+              isActive: false,
+              ipAddress: "192.168.0.4",
+              rack: 0,
+              slot: 1,
+              timeout: 500,
+            },
+            connectableDeviceID8: {
+              id: "connectableDeviceID8",
+              name: "connectableDeviceName3",
+              type: "S7Device",
+              variables: {
+                connectableDeviceID8Variable1ID: {
+                  id: "connectableDeviceID8Variable1ID",
+                  name: "connectableDeviceID8Variable1Name",
+                  type: "S7Int",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  offset: 1,
+                  length: 2,
+                  read: true,
+                  write: false,
+                  memoryType: "DB",
+                  dbNumber: 3,
+                  readAsSingle: false,
+                  writeAsSingle: false,
+                },
+                connectableDeviceID8Variable2ID: {
+                  id: "connectableDeviceID8Variable2ID",
+                  name: "connectableDeviceID8Variable2Name",
+                  type: "S7Int",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  offset: 3,
+                  length: 2,
+                  read: true,
+                  write: false,
+                  memoryType: "DB",
+                  dbNumber: 3,
+                  readAsSingle: false,
+                  writeAsSingle: false,
+                },
+                connectableDeviceID8Variable3ID: {
+                  id: "connectableDeviceID8Variable3ID",
+                  name: "connectableDeviceID8Variable3Name",
+                  type: "S7Int",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  offset: 5,
+                  length: 2,
+                  read: true,
+                  write: false,
+                  memoryType: "DB",
+                  dbNumber: 3,
+                  readAsSingle: false,
+                  writeAsSingle: false,
+                },
+                connectableDeviceID8Variable4ID: {
+                  id: "connectableDeviceID8Variable4ID",
+                  name: "connectableDeviceID8Variable4Name",
+                  type: "S7Int",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  offset: 7,
+                  length: 2,
+                  read: true,
+                  write: false,
+                  memoryType: "DB",
+                  dbNumber: 3,
+                  readAsSingle: false,
+                  writeAsSingle: false,
+                },
+              },
+              calcElements: {
+                connectableDeviceID8CalcElement1ID: {
+                  id: "connectableDeviceID8CalcElement1ID",
+                  name: "connectableDeviceID8CalcElement1Name",
+                  type: "FactorCalculator",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  variableID: "connectableDeviceID8Variable1ID",
+                  factor: 10,
+                },
+                connectableDeviceID8CalcElement2ID: {
+                  id: "connectableDeviceID8CalcElement2ID",
+                  name: "connectableDeviceID8CalcElement2Name",
+                  type: "FactorCalculator",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  variableID: "connectableDeviceID8Variable2ID",
+                  factor: 20,
+                },
+                connectableDeviceID8CalcElement3ID: {
+                  id: "connectableDeviceID8CalcElement3ID",
+                  name: "connectableDeviceID8CalcElement3Name",
+                  type: "FactorCalculator",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  variableID: "connectableDeviceID8Variable3ID",
+                  factor: 30,
+                },
+              },
+              alerts: {
+                connectableDeviceID8Alert1ID: {
+                  id: "connectableDeviceID8Alert1ID",
+                  name: "connectableDeviceID8Alert1Name",
+                  type: "HighLimitAlert",
+                  unit: "V",
+                  sampleTime: 1,
+                  severity: 100,
+                  defaultValue: null,
+                  hysteresis: 10,
+                  timeOnDelay: 100,
+                  timeOffDelay: 200,
+                  variableID: "connectableDeviceID8Variable1ID",
+                  highLimit: 100,
+                  texts: { pl: "fakeTextPL", en: "fakeTextEN" },
+                },
+                connectableDeviceID8Alert2ID: {
+                  id: "connectableDeviceID8Alert2ID",
+                  name: "connectableDeviceID8Alert2Name",
+                  type: "LowLimitAlert",
+                  unit: "V",
+                  sampleTime: 1,
+                  severity: 200,
+                  defaultValue: null,
+                  hysteresis: 20,
+                  timeOnDelay: 100,
+                  timeOffDelay: 200,
+                  variableID: "connectableDeviceID8Variable2ID",
+                  lowLimit: 100,
+                  texts: { pl: "fakeTextPL", en: "fakeTextEN" },
+                },
+                connectableDeviceID8Alert3ID: {
+                  id: "connectableDeviceID8Alert3ID",
+                  name: "connectableDeviceID8Alert3Name",
+                  type: "BandwidthLimitAlert",
+                  unit: "V",
+                  sampleTime: 1,
+                  severity: 300,
+                  defaultValue: null,
+                  hysteresis: 30,
+                  timeOnDelay: 100,
+                  timeOffDelay: 200,
+                  variableID: "connectableDeviceID8Variable3ID",
+                  highLimit: 100,
+                  lowLimit: 100,
+                  texts: {
+                    highLimit: { pl: "fakeTextPL", en: "fakeTextEN" },
+                    lowLimit: { pl: "fakeTextPL", en: "fakeTextEN" },
+                  },
+                },
+              },
+              isActive: false,
+              ipAddress: "192.168.0.5",
+              rack: 2,
+              slot: 3,
+              timeout: 500,
+            },
           },
           internalDevices: {
             internalDeviceID4: {
@@ -2031,7 +2832,171 @@ describe("api/user", () => {
               isActive: true,
             },
           },
-          agentDevices: {},
+          agentDevices: {
+            agentDeviceID2: {
+              id: "agentDeviceID2",
+              name: "agentDeviceID2Name",
+              type: "MSAgentDevice",
+              variables: {
+                agentDeviceID2Variable1ID: {
+                  id: "agentDeviceID2Variable1ID",
+                  name: "agentDeviceID2Variable1Name",
+                  type: "AssociatedVariable",
+                  unit: "V",
+                  sampleTime: 1,
+                  associatedDeviceID: "connectableDeviceID4",
+                  associatedElementID: "connectableDeviceID4Variable1ID",
+                },
+                agentDeviceID2Variable2ID: {
+                  id: "agentDeviceID2Variable2ID",
+                  name: "agentDeviceID2Variable2Name",
+                  type: "AssociatedVariable",
+                  unit: "V",
+                  sampleTime: 1,
+                  associatedDeviceID: "connectableDeviceID4",
+                  associatedElementID: "connectableDeviceID4Variable2ID",
+                },
+                agentDeviceID2Variable3ID: {
+                  id: "agentDeviceID2Variable3ID",
+                  name: "agentDeviceID2Variable3Name",
+                  type: "AssociatedVariable",
+                  unit: "V",
+                  sampleTime: 1,
+                  associatedDeviceID: "connectableDeviceID4",
+                  associatedElementID: "connectableDeviceID4Variable3ID",
+                },
+              },
+              calcElements: {
+                agentDeviceID2CalcElement1ID: {
+                  id: "agentDeviceID2CalcElement1ID",
+                  name: "agentDeviceID2CalcElement1Name",
+                  type: "FactorCalculator",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  variableID: "agentDeviceID2Variable1ID",
+                  factor: 10,
+                },
+                agentDeviceID2CalcElement2ID: {
+                  id: "agentDeviceID2CalcElement2ID",
+                  name: "agentDeviceID2CalcElement2Name",
+                  type: "FactorCalculator",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  variableID: "agentDeviceID2Variable2ID",
+                  factor: 20,
+                },
+                agentDeviceID2CalcElement3ID: {
+                  id: "agentDeviceID2CalcElement3ID",
+                  name: "agentDeviceID2CalcElement3Name",
+                  type: "FactorCalculator",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  variableID: "agentDeviceID2Variable3ID",
+                  factor: 30,
+                },
+              },
+              alerts: {
+                agentDeviceID2Alert1ID: {
+                  id: "agentDeviceID2Alert1ID",
+                  name: "agentDeviceID2Alert1Name",
+                  type: "HighLimitAlert",
+                  unit: "V",
+                  sampleTime: 1,
+                  severity: 100,
+                  defaultValue: null,
+                  hysteresis: 10,
+                  timeOnDelay: 100,
+                  timeOffDelay: 200,
+                  variableID: "agentDeviceID2Variable1ID",
+                  highLimit: 100,
+                  texts: { pl: "fakeTextPL", en: "fakeTextEN" },
+                },
+                agentDeviceID2Alert2ID: {
+                  id: "agentDeviceID2Alert2ID",
+                  name: "agentDeviceID2Alert2Name",
+                  type: "LowLimitAlert",
+                  unit: "V",
+                  sampleTime: 1,
+                  severity: 200,
+                  defaultValue: null,
+                  hysteresis: 20,
+                  timeOnDelay: 100,
+                  timeOffDelay: 200,
+                  variableID: "agentDeviceID2Variable2ID",
+                  lowLimit: 100,
+                  texts: { pl: "fakeTextPL", en: "fakeTextEN" },
+                },
+                agentDeviceID2Alert3ID: {
+                  id: "agentDeviceID2Alert3ID",
+                  name: "agentDeviceID2Alert3Name",
+                  type: "BandwidthLimitAlert",
+                  unit: "V",
+                  sampleTime: 1,
+                  severity: 300,
+                  defaultValue: null,
+                  hysteresis: 30,
+                  timeOnDelay: 100,
+                  timeOffDelay: 200,
+                  variableID: "agentDeviceID2Variable3ID",
+                  highLimit: 100,
+                  lowLimit: 100,
+                  texts: {
+                    highLimit: { pl: "fakeTextPL", en: "fakeTextEN" },
+                    lowLimit: { pl: "fakeTextPL", en: "fakeTextEN" },
+                  },
+                },
+              },
+              isActive: true,
+              sendDataFileInterval: 60,
+              sendEventFileInterval: 5,
+              dataStorageSize: 100,
+              eventStorageSize: 100,
+              numberOfDataFilesToSend: 3,
+              numberOfEventFilesToSend: 3,
+              dataToSendConfig: {
+                connectableDeviceID4Variable1ID: {
+                  elementId: "connectableDeviceID4Variable1ID",
+                  deviceId: "connectableDeviceID4",
+                  datapointId: "connectableDeviceID4Variable1IDdpID1",
+                  sendingInterval: 60,
+                  qualityCodeEnabled: true,
+                  dataConverter: { conversionType: "fixed", precision: 3 },
+                },
+                connectableDeviceID5Variable1ID: {
+                  elementId: "connectableDeviceID5Variable1ID",
+                  deviceId: "connectableDeviceID5",
+                  datapointId: "connectableDeviceID5Variable1IDdpID1",
+                  sendingInterval: 60,
+                  qualityCodeEnabled: true,
+                  dataConverter: { conversionType: "fixed", precision: 3 },
+                },
+                connectableDeviceID4Variable2ID: {
+                  elementId: "connectableDeviceID4Variable2ID",
+                  deviceId: "connectableDeviceID4",
+                  datapointId: "connectableDeviceID4Variable2IDdpID1",
+                  sendingInterval: 60,
+                  qualityCodeEnabled: true,
+                  dataConverter: { conversionType: "fixed", precision: 3 },
+                },
+              },
+              eventsToSendConfig: {},
+              numberOfSendDataRetries: 3,
+              numberOfSendEventRetries: 3,
+              boardingKey: {
+                content: {
+                  baseUrl: "https://southgate.eu1.mindsphere.io",
+                  iat: "fakeIAT",
+                  clientCredentialProfile: ["SHARED_SECRET"],
+                  clientId: "fakeClientID",
+                  tenant: "fakeTenantName",
+                },
+                expiration: "2020-12-18T11:15:08.000Z",
+              },
+            },
+          },
         },
       };
       postProjectFilePath = path.join(settingsDirPath, "test.json");
@@ -2175,6 +3140,46 @@ describe("api/user", () => {
         //Checking device payload
         expect(device.generatePayload()).toEqual(expectedPayload);
       }
+
+      //Checking agent devices
+      for (let device of agentDevices) {
+        //Adjusting payload with every element - appending value and lastValueTicks
+        let expectedPayload = {
+          ...payloadToCheck.data.agentDevices[device.ID],
+          boarded: false,
+        };
+
+        //Boarding key should not have been in payload returned by generatePayload()
+        delete expectedPayload.boardingKey;
+
+        for (let variablePayload of Object.values(expectedPayload.variables)) {
+          //assigning default value - by default is not presented
+          variablePayload.defaultValue =
+            payloadToCheck.data.connectableDevices[
+              variablePayload.associatedDeviceID
+            ].variables[variablePayload.associatedElementID].defaultValue;
+          variablePayload.value = variablePayload.defaultValue;
+          variablePayload.lastValueTick = 0;
+          variablePayload.deviceId = device.ID;
+        }
+
+        for (let calcElementPayload of Object.values(
+          expectedPayload.calcElements
+        )) {
+          calcElementPayload.value = calcElementPayload.defaultValue;
+          calcElementPayload.lastValueTick = 0;
+          calcElementPayload.deviceId = device.ID;
+        }
+
+        for (let alertPayload of Object.values(expectedPayload.alerts)) {
+          alertPayload.value = alertPayload.defaultValue;
+          alertPayload.lastValueTick = 0;
+          alertPayload.deviceId = device.ID;
+        }
+
+        //Checking device payload
+        expect(device.generatePayload()).toEqual(expectedPayload);
+      }
     };
 
     it("should return 200 and set new project file content", async () => {
@@ -2217,8 +3222,8 @@ describe("api/user", () => {
 
       checkProjectWithPayload(postProjectFileContent);
 
-      //All devices should have been disconnected before creating new project - 6 devices
-      expect(deactiveMockFunc).toHaveBeenCalledTimes(6);
+      //All devices should have been disconnected before creating new project - 9 devices
+      expect(deactiveMockFunc).toHaveBeenCalledTimes(9);
 
       //#endregion CHECKING_PROJECT_CONTENT
     });
@@ -2356,8 +3361,8 @@ describe("api/user", () => {
 
       checkProjectWithPayload(postProjectFileContent);
 
-      //All devices should have been disconnected before creating new project - 6 devices
-      expect(deactiveMockFunc).toHaveBeenCalledTimes(6);
+      //All devices should have been disconnected before creating new project - 9 devices
+      expect(deactiveMockFunc).toHaveBeenCalledTimes(9);
 
       //#endregion CHECKING_PROJECT_CONTENT
     });
@@ -2932,6 +3937,47 @@ describe("api/user", () => {
       //#endregion CHECKING_PROJECT_CONTENT
     });
 
+    it("should return 400 and leave project as it is - if project content is invalid - agentDevices payload is invalid", async () => {
+      postProjectFileContent.data.agentDevices["agentDeviceID2"].type =
+        "FakeType";
+
+      let response = await exec();
+
+      //#region CHECKING_RESPONSE
+
+      expect(response).toBeDefined();
+      expect(response.status).toEqual(400);
+      expect(response.text).toEqual(
+        `Invalid project data: agent device type not recognized`
+      );
+
+      //#endregion CHECKING_RESPONSE
+
+      //#region CHECKING_PROJECT_FILE_CONTENT
+
+      let fileContent = JSON.parse(await readFileAsync(projectFilePath));
+
+      expect(fileContent).toEqual(projectFileContent);
+
+      //#endregion CHECKING_PROJECT_FILE_CONTENT
+
+      //#region CHECKING_NETPLAN_INTERFACES
+
+      //Invoking only first time
+      expect(ipConfigMockServer.OnPostMockFn).toHaveBeenCalledTimes(1);
+
+      //#endregion CHECKING_NETPLAN_INTERFACES
+
+      //#region CHECKING_PROJECT_CONTENT
+
+      checkProjectWithPayload(projectFileContent);
+
+      //Disconnect should not have been invoked
+      expect(deactiveMockFunc).not.toHaveBeenCalled();
+
+      //#endregion CHECKING_PROJECT_CONTENT
+    });
+
     it("should return 400 and leave project as it is - if project content is invalid - connectableDevices variable's payload is invalid", async () => {
       postProjectFileContent.data.connectableDevices[
         "connectableDeviceID4"
@@ -2978,6 +4024,48 @@ describe("api/user", () => {
       postProjectFileContent.data.internalDevices[
         "internalDeviceID4"
       ].variables["internalDeviceID4Variable2ID"].type = "FakeType";
+
+      let response = await exec();
+
+      //#region CHECKING_RESPONSE
+
+      expect(response).toBeDefined();
+      expect(response.status).toEqual(400);
+      expect(response.text).toEqual(
+        `Invalid project data: variable type not recognized`
+      );
+
+      //#endregion CHECKING_RESPONSE
+
+      //#region CHECKING_PROJECT_FILE_CONTENT
+
+      let fileContent = JSON.parse(await readFileAsync(projectFilePath));
+
+      expect(fileContent).toEqual(projectFileContent);
+
+      //#endregion CHECKING_PROJECT_FILE_CONTENT
+
+      //#region CHECKING_NETPLAN_INTERFACES
+
+      //Invoking only first time
+      expect(ipConfigMockServer.OnPostMockFn).toHaveBeenCalledTimes(1);
+
+      //#endregion CHECKING_NETPLAN_INTERFACES
+
+      //#region CHECKING_PROJECT_CONTENT
+
+      checkProjectWithPayload(projectFileContent);
+
+      //Disconnect should not have been invoked
+      expect(deactiveMockFunc).not.toHaveBeenCalled();
+
+      //#endregion CHECKING_PROJECT_CONTENT
+    });
+
+    it("should return 400 and leave project as it is - if project content is invalid - agentDevices variable's payload is invalid", async () => {
+      postProjectFileContent.data.agentDevices["agentDeviceID2"].variables[
+        "agentDeviceID2Variable2ID"
+      ].type = "FakeType";
 
       let response = await exec();
 
@@ -3100,6 +4188,48 @@ describe("api/user", () => {
       //#endregion CHECKING_PROJECT_CONTENT
     });
 
+    it("should return 400 and leave project as it is - if project content is invalid - agentDevices calcElement's payload is invalid", async () => {
+      postProjectFileContent.data.agentDevices["agentDeviceID2"].calcElements[
+        "agentDeviceID2CalcElement2ID"
+      ].type = "FakeType";
+
+      let response = await exec();
+
+      //#region CHECKING_RESPONSE
+
+      expect(response).toBeDefined();
+      expect(response.status).toEqual(400);
+      expect(response.text).toEqual(
+        `Invalid project data: calcElement type not recognized`
+      );
+
+      //#endregion CHECKING_RESPONSE
+
+      //#region CHECKING_PROJECT_FILE_CONTENT
+
+      let fileContent = JSON.parse(await readFileAsync(projectFilePath));
+
+      expect(fileContent).toEqual(projectFileContent);
+
+      //#endregion CHECKING_PROJECT_FILE_CONTENT
+
+      //#region CHECKING_NETPLAN_INTERFACES
+
+      //Invoking only first time
+      expect(ipConfigMockServer.OnPostMockFn).toHaveBeenCalledTimes(1);
+
+      //#endregion CHECKING_NETPLAN_INTERFACES
+
+      //#region CHECKING_PROJECT_CONTENT
+
+      checkProjectWithPayload(projectFileContent);
+
+      //Disconnect should not have been invoked
+      expect(deactiveMockFunc).not.toHaveBeenCalled();
+
+      //#endregion CHECKING_PROJECT_CONTENT
+    });
+
     it("should return 400 and leave project as it is - if project content is invalid - connectableDevices alert's payload is invalid", async () => {
       postProjectFileContent.data.connectableDevices[
         "connectableDeviceID4"
@@ -3145,6 +4275,48 @@ describe("api/user", () => {
     it("should return 400 and leave project as it is - if project content is invalid - internalDevices alert's payload is invalid", async () => {
       postProjectFileContent.data.internalDevices["internalDeviceID4"].alerts[
         "internalDeviceID4Alert2ID"
+      ].type = "FakeType";
+
+      let response = await exec();
+
+      //#region CHECKING_RESPONSE
+
+      expect(response).toBeDefined();
+      expect(response.status).toEqual(400);
+      expect(response.text).toEqual(
+        `Invalid project data: alert type not recognized`
+      );
+
+      //#endregion CHECKING_RESPONSE
+
+      //#region CHECKING_PROJECT_FILE_CONTENT
+
+      let fileContent = JSON.parse(await readFileAsync(projectFilePath));
+
+      expect(fileContent).toEqual(projectFileContent);
+
+      //#endregion CHECKING_PROJECT_FILE_CONTENT
+
+      //#region CHECKING_NETPLAN_INTERFACES
+
+      //Invoking only first time
+      expect(ipConfigMockServer.OnPostMockFn).toHaveBeenCalledTimes(1);
+
+      //#endregion CHECKING_NETPLAN_INTERFACES
+
+      //#region CHECKING_PROJECT_CONTENT
+
+      checkProjectWithPayload(projectFileContent);
+
+      //Disconnect should not have been invoked
+      expect(deactiveMockFunc).not.toHaveBeenCalled();
+
+      //#endregion CHECKING_PROJECT_CONTENT
+    });
+
+    it("should return 400 and leave project as it is - if project content is invalid - agentDevices alert's payload is invalid", async () => {
+      postProjectFileContent.data.agentDevices["agentDeviceID2"].alerts[
+        "agentDeviceID2Alert2ID"
       ].type = "FakeType";
 
       let response = await exec();
@@ -3301,7 +4473,7 @@ describe("api/user", () => {
 
       checkProjectWithPayload(projectFileContent);
 
-      //All devices should have been disconnected before creating new project - 6 devices
+      //All devices should have been disconnected before creating new project - 9 devices
       expect(deactiveMockFunc).not.toHaveBeenCalled();
 
       //#endregion CHECKING_PROJECT_CONTENT

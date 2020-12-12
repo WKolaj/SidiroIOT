@@ -4,6 +4,8 @@ const {
   deactivateDevice,
 } = require("../../../services/projectService");
 
+const AgentsDirPath = "__testDir/settings/agentsData";
+
 describe("projectService", () => {
   let _;
   let path;
@@ -568,6 +570,312 @@ describe("projectService", () => {
               portNumber: 502,
               timeout: 500,
             },
+            connectableDeviceID4: {
+              id: "connectableDeviceID4",
+              name: "connectableDeviceName3",
+              type: "S7Device",
+              variables: {
+                connectableDeviceID4Variable1ID: {
+                  id: "connectableDeviceID4Variable1ID",
+                  name: "connectableDeviceID4Variable1Name",
+                  type: "S7Int",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  offset: 1,
+                  length: 2,
+                  read: true,
+                  write: false,
+                  memoryType: "DB",
+                  dbNumber: 3,
+                  readAsSingle: false,
+                  writeAsSingle: false,
+                },
+                connectableDeviceID4Variable2ID: {
+                  id: "connectableDeviceID4Variable2ID",
+                  name: "connectableDeviceID4Variable2Name",
+                  type: "S7Int",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  offset: 3,
+                  length: 2,
+                  read: true,
+                  write: false,
+                  memoryType: "DB",
+                  dbNumber: 3,
+                  readAsSingle: false,
+                  writeAsSingle: false,
+                },
+                connectableDeviceID4Variable3ID: {
+                  id: "connectableDeviceID4Variable3ID",
+                  name: "connectableDeviceID4Variable3Name",
+                  type: "S7Int",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  offset: 5,
+                  length: 2,
+                  read: true,
+                  write: false,
+                  memoryType: "DB",
+                  dbNumber: 3,
+                  readAsSingle: false,
+                  writeAsSingle: false,
+                },
+                connectableDeviceID4Variable4ID: {
+                  id: "connectableDeviceID4Variable4ID",
+                  name: "connectableDeviceID4Variable4Name",
+                  type: "S7Int",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  offset: 7,
+                  length: 2,
+                  read: true,
+                  write: false,
+                  memoryType: "DB",
+                  dbNumber: 3,
+                  readAsSingle: false,
+                  writeAsSingle: false,
+                },
+              },
+              calcElements: {
+                connectableDeviceID4CalcElement1ID: {
+                  id: "connectableDeviceID4CalcElement1ID",
+                  name: "connectableDeviceID4CalcElement1Name",
+                  type: "FactorCalculator",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  variableID: "connectableDeviceID4Variable1ID",
+                  factor: 10,
+                },
+                connectableDeviceID4CalcElement2ID: {
+                  id: "connectableDeviceID4CalcElement2ID",
+                  name: "connectableDeviceID4CalcElement2Name",
+                  type: "FactorCalculator",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  variableID: "connectableDeviceID4Variable2ID",
+                  factor: 20,
+                },
+                connectableDeviceID4CalcElement3ID: {
+                  id: "connectableDeviceID4CalcElement3ID",
+                  name: "connectableDeviceID4CalcElement3Name",
+                  type: "FactorCalculator",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  variableID: "connectableDeviceID4Variable3ID",
+                  factor: 30,
+                },
+              },
+              alerts: {
+                connectableDeviceID4Alert1ID: {
+                  id: "connectableDeviceID4Alert1ID",
+                  name: "connectableDeviceID4Alert1Name",
+                  type: "HighLimitAlert",
+                  unit: "V",
+                  sampleTime: 1,
+                  severity: 100,
+                  defaultValue: null,
+                  hysteresis: 10,
+                  timeOnDelay: 100,
+                  timeOffDelay: 200,
+                  variableID: "connectableDeviceID4Variable1ID",
+                  highLimit: 100,
+                },
+                connectableDeviceID4Alert2ID: {
+                  id: "connectableDeviceID4Alert2ID",
+                  name: "connectableDeviceID4Alert2Name",
+                  type: "LowLimitAlert",
+                  unit: "V",
+                  sampleTime: 1,
+                  severity: 200,
+                  defaultValue: null,
+                  hysteresis: 20,
+                  timeOnDelay: 100,
+                  timeOffDelay: 200,
+                  variableID: "connectableDeviceID4Variable2ID",
+                  lowLimit: 100,
+                },
+                connectableDeviceID4Alert3ID: {
+                  id: "connectableDeviceID4Alert3ID",
+                  name: "connectableDeviceID4Alert3Name",
+                  type: "BandwidthLimitAlert",
+                  unit: "V",
+                  sampleTime: 1,
+                  severity: 300,
+                  defaultValue: null,
+                  hysteresis: 30,
+                  timeOnDelay: 100,
+                  timeOffDelay: 200,
+                  variableID: "connectableDeviceID4Variable3ID",
+                  highLimit: 100,
+                  lowLimit: 100,
+                },
+              },
+              isActive: false,
+              ipAddress: "192.168.0.4",
+              rack: 0,
+              slot: 1,
+              timeout: 500,
+            },
+            connectableDeviceID5: {
+              id: "connectableDeviceID5",
+              name: "connectableDeviceName3",
+              type: "S7Device",
+              variables: {
+                connectableDeviceID5Variable1ID: {
+                  id: "connectableDeviceID5Variable1ID",
+                  name: "connectableDeviceID5Variable1Name",
+                  type: "S7Int",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  offset: 1,
+                  length: 2,
+                  read: true,
+                  write: false,
+                  memoryType: "DB",
+                  dbNumber: 3,
+                  readAsSingle: false,
+                  writeAsSingle: false,
+                },
+                connectableDeviceID5Variable2ID: {
+                  id: "connectableDeviceID5Variable2ID",
+                  name: "connectableDeviceID5Variable2Name",
+                  type: "S7Int",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  offset: 3,
+                  length: 2,
+                  read: true,
+                  write: false,
+                  memoryType: "DB",
+                  dbNumber: 3,
+                  readAsSingle: false,
+                  writeAsSingle: false,
+                },
+                connectableDeviceID5Variable3ID: {
+                  id: "connectableDeviceID5Variable3ID",
+                  name: "connectableDeviceID5Variable3Name",
+                  type: "S7Int",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  offset: 5,
+                  length: 2,
+                  read: true,
+                  write: false,
+                  memoryType: "DB",
+                  dbNumber: 3,
+                  readAsSingle: false,
+                  writeAsSingle: false,
+                },
+                connectableDeviceID5Variable4ID: {
+                  id: "connectableDeviceID5Variable4ID",
+                  name: "connectableDeviceID5Variable4Name",
+                  type: "S7Int",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  offset: 7,
+                  length: 2,
+                  read: true,
+                  write: false,
+                  memoryType: "DB",
+                  dbNumber: 3,
+                  readAsSingle: false,
+                  writeAsSingle: false,
+                },
+              },
+              calcElements: {
+                connectableDeviceID5CalcElement1ID: {
+                  id: "connectableDeviceID5CalcElement1ID",
+                  name: "connectableDeviceID5CalcElement1Name",
+                  type: "FactorCalculator",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  variableID: "connectableDeviceID5Variable1ID",
+                  factor: 10,
+                },
+                connectableDeviceID5CalcElement2ID: {
+                  id: "connectableDeviceID5CalcElement2ID",
+                  name: "connectableDeviceID5CalcElement2Name",
+                  type: "FactorCalculator",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  variableID: "connectableDeviceID5Variable2ID",
+                  factor: 20,
+                },
+                connectableDeviceID5CalcElement3ID: {
+                  id: "connectableDeviceID5CalcElement3ID",
+                  name: "connectableDeviceID5CalcElement3Name",
+                  type: "FactorCalculator",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  variableID: "connectableDeviceID5Variable3ID",
+                  factor: 30,
+                },
+              },
+              alerts: {
+                connectableDeviceID5Alert1ID: {
+                  id: "connectableDeviceID5Alert1ID",
+                  name: "connectableDeviceID5Alert1Name",
+                  type: "HighLimitAlert",
+                  unit: "V",
+                  sampleTime: 1,
+                  severity: 100,
+                  defaultValue: null,
+                  hysteresis: 10,
+                  timeOnDelay: 100,
+                  timeOffDelay: 200,
+                  variableID: "connectableDeviceID5Variable1ID",
+                  highLimit: 100,
+                },
+                connectableDeviceID5Alert2ID: {
+                  id: "connectableDeviceID5Alert2ID",
+                  name: "connectableDeviceID5Alert2Name",
+                  type: "LowLimitAlert",
+                  unit: "V",
+                  sampleTime: 1,
+                  severity: 200,
+                  defaultValue: null,
+                  hysteresis: 20,
+                  timeOnDelay: 100,
+                  timeOffDelay: 200,
+                  variableID: "connectableDeviceID5Variable2ID",
+                  lowLimit: 100,
+                },
+                connectableDeviceID5Alert3ID: {
+                  id: "connectableDeviceID5Alert3ID",
+                  name: "connectableDeviceID5Alert3Name",
+                  type: "BandwidthLimitAlert",
+                  unit: "V",
+                  sampleTime: 1,
+                  severity: 300,
+                  defaultValue: null,
+                  hysteresis: 30,
+                  timeOnDelay: 100,
+                  timeOffDelay: 200,
+                  variableID: "connectableDeviceID5Variable3ID",
+                  highLimit: 100,
+                  lowLimit: 100,
+                },
+              },
+              isActive: false,
+              ipAddress: "192.168.0.5",
+              rack: 2,
+              slot: 3,
+              timeout: 500,
+            },
           },
           internalDevices: {
             internalDeviceID1: {
@@ -907,7 +1215,165 @@ describe("projectService", () => {
               isActive: true,
             },
           },
-          agentDevices: {},
+          agentDevices: {
+            agentDeviceID1: {
+              id: "agentDeviceID1",
+              name: "agentDeviceID1Name",
+              type: "MSAgentDevice",
+              variables: {
+                agentDeviceID1Variable1ID: {
+                  id: "agentDeviceID1Variable1ID",
+                  name: "agentDeviceID1Variable1Name",
+                  type: "AssociatedVariable",
+                  unit: "V",
+                  sampleTime: 1,
+                  associatedDeviceID: "connectableDeviceID1",
+                  associatedElementID: "connectableDeviceID1Variable1ID",
+                },
+                agentDeviceID1Variable2ID: {
+                  id: "agentDeviceID1Variable2ID",
+                  name: "agentDeviceID1Variable2Name",
+                  type: "AssociatedVariable",
+                  unit: "V",
+                  sampleTime: 1,
+                  associatedDeviceID: "connectableDeviceID1",
+                  associatedElementID: "connectableDeviceID1Variable2ID",
+                },
+                agentDeviceID1Variable3ID: {
+                  id: "agentDeviceID1Variable3ID",
+                  name: "agentDeviceID1Variable3Name",
+                  type: "AssociatedVariable",
+                  unit: "V",
+                  sampleTime: 1,
+                  associatedDeviceID: "connectableDeviceID1",
+                  associatedElementID: "connectableDeviceID1Variable3ID",
+                },
+              },
+              calcElements: {
+                agentDeviceID1CalcElement1ID: {
+                  id: "agentDeviceID1CalcElement1ID",
+                  name: "agentDeviceID1CalcElement1Name",
+                  type: "FactorCalculator",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  variableID: "agentDeviceID1Variable1ID",
+                  factor: 10,
+                },
+                agentDeviceID1CalcElement2ID: {
+                  id: "agentDeviceID1CalcElement2ID",
+                  name: "agentDeviceID1CalcElement2Name",
+                  type: "FactorCalculator",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  variableID: "agentDeviceID1Variable2ID",
+                  factor: 20,
+                },
+                agentDeviceID1CalcElement3ID: {
+                  id: "agentDeviceID1CalcElement3ID",
+                  name: "agentDeviceID1CalcElement3Name",
+                  type: "FactorCalculator",
+                  unit: "V",
+                  sampleTime: 1,
+                  defaultValue: 0,
+                  variableID: "agentDeviceID1Variable3ID",
+                  factor: 30,
+                },
+              },
+              alerts: {
+                agentDeviceID1Alert1ID: {
+                  id: "agentDeviceID1Alert1ID",
+                  name: "agentDeviceID1Alert1Name",
+                  type: "HighLimitAlert",
+                  unit: "V",
+                  sampleTime: 1,
+                  severity: 100,
+                  defaultValue: null,
+                  hysteresis: 10,
+                  timeOnDelay: 100,
+                  timeOffDelay: 200,
+                  variableID: "agentDeviceID1Variable1ID",
+                  highLimit: 100,
+                },
+                agentDeviceID1Alert2ID: {
+                  id: "agentDeviceID1Alert2ID",
+                  name: "agentDeviceID1Alert2Name",
+                  type: "LowLimitAlert",
+                  unit: "V",
+                  sampleTime: 1,
+                  severity: 200,
+                  defaultValue: null,
+                  hysteresis: 20,
+                  timeOnDelay: 100,
+                  timeOffDelay: 200,
+                  variableID: "agentDeviceID1Variable2ID",
+                  lowLimit: 100,
+                },
+                agentDeviceID1Alert3ID: {
+                  id: "agentDeviceID1Alert3ID",
+                  name: "agentDeviceID1Alert3Name",
+                  type: "BandwidthLimitAlert",
+                  unit: "V",
+                  sampleTime: 1,
+                  severity: 300,
+                  defaultValue: null,
+                  hysteresis: 30,
+                  timeOnDelay: 100,
+                  timeOffDelay: 200,
+                  variableID: "agentDeviceID1Variable3ID",
+                  highLimit: 100,
+                  lowLimit: 100,
+                },
+              },
+              isActive: true,
+              sendDataFileInterval: 60,
+              sendEventFileInterval: 5,
+              dataStorageSize: 100,
+              eventStorageSize: 100,
+              numberOfDataFilesToSend: 3,
+              numberOfEventFilesToSend: 3,
+              dataToSendConfig: {
+                connectableDeviceID1Variable1ID: {
+                  elementId: "connectableDeviceID1Variable1ID",
+                  deviceId: "connectableDeviceID1",
+                  datapointId: "connectableDeviceID1Variable1IDdpID1",
+                  sendingInterval: 60,
+                  qualityCodeEnabled: true,
+                  dataConverter: { conversionType: "fixed", precision: 3 },
+                },
+                connectableDeviceID2Variable1ID: {
+                  elementId: "connectableDeviceID2Variable1ID",
+                  deviceId: "connectableDeviceID2",
+                  datapointId: "connectableDeviceID2Variable1IDdpID1",
+                  sendingInterval: 60,
+                  qualityCodeEnabled: true,
+                  dataConverter: { conversionType: "fixed", precision: 3 },
+                },
+                connectableDeviceID1Variable2ID: {
+                  elementId: "connectableDeviceID1Variable2ID",
+                  deviceId: "connectableDeviceID1",
+                  datapointId: "connectableDeviceID1Variable2IDdpID1",
+                  sendingInterval: 60,
+                  qualityCodeEnabled: true,
+                  dataConverter: { conversionType: "fixed", precision: 3 },
+                },
+              },
+              eventsToSendConfig: {},
+              numberOfSendDataRetries: 3,
+              numberOfSendEventRetries: 3,
+              boardingKey: {
+                content: {
+                  baseUrl: "https://southgate.eu1.mindsphere.io",
+                  iat: "fakeIAT",
+                  clientCredentialProfile: ["SHARED_SECRET"],
+                  clientId: "fakeClientID",
+                  tenant: "fakeTenantName",
+                },
+                expiration: "2020-12-18T11:15:08.000Z",
+              },
+            },
+          },
         },
       })
     );
@@ -1082,7 +1548,8 @@ describe("projectService", () => {
           "utf8"
         );
 
-      if (initProjectService) await projectService.init(projectFilePath);
+      if (initProjectService)
+        await projectService.init(projectFilePath, AgentsDirPath);
 
       return projectService.getProjectContentFromFile();
     };
@@ -1203,7 +1670,8 @@ describe("projectService", () => {
           "utf8"
         );
 
-      if (initProjectService) await projectService.init(projectFilePath);
+      if (initProjectService)
+        await projectService.init(projectFilePath, AgentsDirPath);
 
       return projectService.saveProjectContentToFile(contentToSaveProjectFile);
     };
@@ -1596,7 +2064,8 @@ describe("projectService", () => {
           "utf8"
         );
 
-      if (initProjectService) await projectService.init(projectFilePath);
+      if (initProjectService)
+        await projectService.init(projectFilePath, AgentsDirPath);
 
       await projectService.createNewProjectFile();
     };
@@ -1755,7 +2224,8 @@ describe("projectService", () => {
           "utf8"
         );
 
-      if (initProjectService) await projectService.init(projectFilePath);
+      if (initProjectService)
+        await projectService.init(projectFilePath, AgentsDirPath);
 
       return projectService.checkIfProjFileExistsAndIsValid();
     };
@@ -1943,7 +2413,8 @@ describe("projectService", () => {
           "utf8"
         );
 
-      if (initProjectService) await projectService.init(projectFilePath);
+      if (initProjectService)
+        await projectService.init(projectFilePath, AgentsDirPath);
 
       return projectService.getIPConfig();
     };
@@ -2062,7 +2533,8 @@ describe("projectService", () => {
           "utf8"
         );
 
-      if (initProjectService) await projectService.init(projectFilePath);
+      if (initProjectService)
+        await projectService.init(projectFilePath, AgentsDirPath);
 
       return projectService.setIPConfig(ipConfigToSetContent);
     };
@@ -2315,7 +2787,8 @@ describe("projectService", () => {
           JSON.stringify(initialProjectFileContent),
           "utf8"
         );
-      if (initProjectService) await projectService.init(projectFilePath);
+      if (initProjectService)
+        await projectService.init(projectFilePath, AgentsDirPath);
       if (setIPContent) await projectService.setIPConfig(ipConfigToSetContent);
       await projectService.setIPConfigFromProjectToNetplan();
     };
@@ -2525,7 +2998,8 @@ describe("projectService", () => {
           "utf8"
         );
 
-      if (initProjectService) await projectService.init(projectFilePath);
+      if (initProjectService)
+        await projectService.init(projectFilePath, AgentsDirPath);
 
       await projectService.setIPConfigFromNetplanToProject();
     };
@@ -2665,7 +3139,7 @@ describe("projectService", () => {
       );
 
       if (initProjectService) {
-        await projectService.init(projectFilePath);
+        await projectService.init(projectFilePath, AgentsDirPath);
         await projectService.loadProjectFile();
       }
 
@@ -2703,7 +3177,16 @@ describe("projectService", () => {
       expect(result).toEqual(project.Devices);
     });
 
-    //TODO - add tests for agent devices after creating them
+    it("should return object with all devices - if there are no agentDevices", async () => {
+      initialProjectFileContent.data.agentDevices = {};
+
+      let result = await exec();
+
+      let project = projectService._getProject();
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(project.Devices);
+    });
 
     it("should return empty object - if there are no devices", async () => {
       initialProjectFileContent.data.connectableDevices = {};
@@ -2759,7 +3242,7 @@ describe("projectService", () => {
       );
 
       if (initProjectService) {
-        await projectService.init(projectFilePath);
+        await projectService.init(projectFilePath, AgentsDirPath);
         await projectService.loadProjectFile();
       }
 
@@ -2790,7 +3273,18 @@ describe("projectService", () => {
       expect(result).toEqual(expectedResult);
     });
 
-    //TODO - add test for agent device
+    it("should return object of device of given id - if device is agentDevice", async () => {
+      deviceId = "agentDeviceID1";
+
+      let result = await exec();
+
+      let project = projectService._getProject();
+
+      let expectedResult = project.AgentDevices["agentDeviceID1"];
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(expectedResult);
+    });
 
     it("should return null - if there is no device of given id", async () => {
       deviceId = "fakeDeviceID";
@@ -2843,7 +3337,7 @@ describe("projectService", () => {
       );
 
       if (initProjectService) {
-        await projectService.init(projectFilePath);
+        await projectService.init(projectFilePath, AgentsDirPath);
         await projectService.loadProjectFile();
       }
 
@@ -2974,7 +3468,7 @@ describe("projectService", () => {
       );
 
       if (initProjectService) {
-        await projectService.init(projectFilePath);
+        await projectService.init(projectFilePath, AgentsDirPath);
         await projectService.loadProjectFile();
       }
 
@@ -3086,6 +3580,60 @@ describe("projectService", () => {
       expect(result).toEqual(expectedResult);
     });
 
+    it("should return element from given device of given id - if element is variable, device is agentDevice", async () => {
+      deviceId = "agentDeviceID1";
+      elementId = "agentDeviceID1Variable2ID";
+
+      let result = await exec();
+
+      let project = projectService._getProject();
+
+      let expectedResult = {
+        ...project.AgentDevices["agentDeviceID1"].Elements[
+          "agentDeviceID1Variable2ID"
+        ],
+      };
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should return element from given device of given id - if element is calcElement, device is agentDevice", async () => {
+      deviceId = "agentDeviceID1";
+      elementId = "agentDeviceID1CalcElement2ID";
+
+      let result = await exec();
+
+      let project = projectService._getProject();
+
+      let expectedResult = {
+        ...project.AgentDevices["agentDeviceID1"].Elements[
+          "agentDeviceID1CalcElement2ID"
+        ],
+      };
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should return element from given device of given id - if element is alert, device is agentDevice", async () => {
+      deviceId = "agentDeviceID1";
+      elementId = "agentDeviceID1Alert2ID";
+
+      let result = await exec();
+
+      let project = projectService._getProject();
+
+      let expectedResult = {
+        ...project.AgentDevices["agentDeviceID1"].Elements[
+          "agentDeviceID1Alert2ID"
+        ],
+      };
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(expectedResult);
+    });
+
     it("should return element even if deviceId is null - searching for all devices, device is connectableDevice", async () => {
       deviceId = null;
       elementId = "connectableDeviceID2Variable2ID";
@@ -3115,6 +3663,24 @@ describe("projectService", () => {
       let expectedResult = {
         ...project.InternalDevices["internalDeviceID2"].Elements[
           "internalDeviceID2Variable2ID"
+        ],
+      };
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should return element even if deviceId is null - searching for all devices, device is agentDevice", async () => {
+      deviceId = null;
+      elementId = "agentDeviceID1Variable2ID";
+
+      let result = await exec();
+
+      let project = projectService._getProject();
+
+      let expectedResult = {
+        ...project.AgentDevices["agentDeviceID1"].Elements[
+          "agentDeviceID1Variable2ID"
         ],
       };
 
@@ -3253,7 +3819,7 @@ describe("projectService", () => {
       );
 
       if (initProjectService) {
-        await projectService.init(projectFilePath);
+        await projectService.init(projectFilePath, AgentsDirPath);
         await projectService.loadProjectFile();
       }
 
@@ -3380,7 +3946,7 @@ describe("projectService", () => {
       );
 
       if (initProjectService) {
-        await projectService.init(projectFilePath);
+        await projectService.init(projectFilePath, AgentsDirPath);
         await projectService.loadProjectFile();
       }
 
@@ -3449,6 +4015,24 @@ describe("projectService", () => {
       let expectedResult = {
         ...project.InternalDevices["internalDeviceID2"].Elements[
           "internalDeviceID2Variable2ID"
+        ],
+      };
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should return variable even if deviceId is null - device is agentDevice", async () => {
+      deviceId = null;
+      variableId = "agentDeviceID1Variable2ID";
+
+      let result = await exec();
+
+      let project = projectService._getProject();
+
+      let expectedResult = {
+        ...project.AgentDevices["agentDeviceID1"].Elements[
+          "agentDeviceID1Variable2ID"
         ],
       };
 
@@ -3551,7 +4135,7 @@ describe("projectService", () => {
       );
 
       if (initProjectService) {
-        await projectService.init(projectFilePath);
+        await projectService.init(projectFilePath, AgentsDirPath);
         await projectService.loadProjectFile();
       }
 
@@ -3678,7 +4262,7 @@ describe("projectService", () => {
       );
 
       if (initProjectService) {
-        await projectService.init(projectFilePath);
+        await projectService.init(projectFilePath, AgentsDirPath);
         await projectService.loadProjectFile();
       }
 
@@ -3718,6 +4302,24 @@ describe("projectService", () => {
       expect(result).toEqual(expectedResult);
     });
 
+    it("should return calcElement from given device of given id - if device is agentDevice", async () => {
+      deviceId = "agentDeviceID1";
+      calcElementId = "agentDeviceID1CalcElement2ID";
+
+      let result = await exec();
+
+      let project = projectService._getProject();
+
+      let expectedResult = {
+        ...project.AgentDevices["agentDeviceID1"].Elements[
+          "agentDeviceID1CalcElement2ID"
+        ],
+      };
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(expectedResult);
+    });
+
     it("should return calcElement even if deviceId is null - device is connectableDevice", async () => {
       deviceId = null;
       calcElementId = "connectableDeviceID2CalcElement2ID";
@@ -3747,6 +4349,24 @@ describe("projectService", () => {
       let expectedResult = {
         ...project.InternalDevices["internalDeviceID2"].Elements[
           "internalDeviceID2CalcElement2ID"
+        ],
+      };
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should return calcElement even if deviceId is null - device is agentDevice", async () => {
+      deviceId = null;
+      calcElementId = "agentDeviceID1CalcElement2ID";
+
+      let result = await exec();
+
+      let project = projectService._getProject();
+
+      let expectedResult = {
+        ...project.AgentDevices["agentDeviceID1"].Elements[
+          "agentDeviceID1CalcElement2ID"
         ],
       };
 
@@ -3849,7 +4469,7 @@ describe("projectService", () => {
       );
 
       if (initProjectService) {
-        await projectService.init(projectFilePath);
+        await projectService.init(projectFilePath, AgentsDirPath);
         await projectService.loadProjectFile();
       }
 
@@ -3976,7 +4596,7 @@ describe("projectService", () => {
       );
 
       if (initProjectService) {
-        await projectService.init(projectFilePath);
+        await projectService.init(projectFilePath, AgentsDirPath);
         await projectService.loadProjectFile();
       }
 
@@ -4016,6 +4636,24 @@ describe("projectService", () => {
       expect(result).toEqual(expectedResult);
     });
 
+    it("should return alert from given device of given id - if device is agentDevice", async () => {
+      deviceId = "agentDeviceID1";
+      alertId = "agentDeviceID1Alert2ID";
+
+      let result = await exec();
+
+      let project = projectService._getProject();
+
+      let expectedResult = {
+        ...project.AgentDevices["agentDeviceID1"].Elements[
+          "agentDeviceID1Alert2ID"
+        ],
+      };
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(expectedResult);
+    });
+
     it("should return alert even if deviceId is null - device is connectableDevice", async () => {
       deviceId = null;
       alertId = "connectableDeviceID2Alert2ID";
@@ -4045,6 +4683,24 @@ describe("projectService", () => {
       let expectedResult = {
         ...project.InternalDevices["internalDeviceID2"].Elements[
           "internalDeviceID2Alert2ID"
+        ],
+      };
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should return alert even if deviceId is null - device is agentDevice", async () => {
+      deviceId = null;
+      alertId = "agentDeviceID1Alert2ID";
+
+      let result = await exec();
+
+      let project = projectService._getProject();
+
+      let expectedResult = {
+        ...project.AgentDevices["agentDeviceID1"].Elements[
+          "agentDeviceID1Alert2ID"
         ],
       };
 
@@ -4146,7 +4802,7 @@ describe("projectService", () => {
       );
 
       if (initProjectService) {
-        await projectService.init(projectFilePath);
+        await projectService.init(projectFilePath, AgentsDirPath);
         await projectService.loadProjectFile();
 
         //Setting last cycle duration
@@ -4194,7 +4850,7 @@ describe("projectService", () => {
       );
 
       if (initProjectService) {
-        await projectService.init(projectFilePath);
+        await projectService.init(projectFilePath, AgentsDirPath);
         await projectService.loadProjectFile();
       }
 
@@ -4280,7 +4936,7 @@ describe("projectService", () => {
       );
 
       if (initProjectService) {
-        await projectService.init(projectFilePath);
+        await projectService.init(projectFilePath, AgentsDirPath);
         await projectService.loadProjectFile();
       }
 
@@ -5183,7 +5839,7 @@ describe("projectService", () => {
       );
 
       if (initProjectService) {
-        await projectService.init(projectFilePath);
+        await projectService.init(projectFilePath, AgentsDirPath);
         await projectService.loadProjectFile();
 
         project = projectService._getProject();
@@ -5344,8 +6000,8 @@ describe("projectService", () => {
     it("should disconnect all devices before loading new project", async () => {
       await exec();
 
-      //6 times - for 6 devices
-      expect(deactiveMockFunc).toHaveBeenCalledTimes(6);
+      //9 times - for 9 devices
+      expect(deactiveMockFunc).toHaveBeenCalledTimes(9);
     });
 
     it("should not throw if netplan service is down", async () => {

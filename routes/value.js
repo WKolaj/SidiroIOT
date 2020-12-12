@@ -79,13 +79,8 @@ router.post(
   async (req, res) => {
     let value = req.body.value;
     let tickId = Sampler.convertDateToTickNumber(Date.now());
-    //null for getting all devices
-    let deviceId = null;
 
-    //Getting device ids to get elements from
-    if (exists(req.query.deviceId)) deviceId = req.query.deviceId;
-
-    let element = getElement(deviceId, req.params.id);
+    let element = getElement(null, req.params.id);
     if (exists(element)) {
       //Checking if value is valid for given element
       let elementValidateMessage = element.checkIfValueCanBeSet(value);
