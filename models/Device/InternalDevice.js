@@ -42,12 +42,12 @@ const validateVariablesPayload = (variablesPayload, helpers) => {
           variablePayload
         );
         break;
-      //TODO - remove this variable after testing - only for testing
-      case "SidiroIOTMemoryVariable":
-        validationMessage = SidiroIOTMemoryVariable.validatePayload(
-          variablePayload
-        );
-        break;
+      //Variable below can be accessible only for testing! Uncomment if you want to access it
+      // case "SidiroIOTMemoryVariable":
+      //   validationMessage = SidiroIOTMemoryVariable.validatePayload(
+      //     variablePayload
+      //   );
+      //   break;
       default:
         validationMessage = "variable type not recognized";
     }

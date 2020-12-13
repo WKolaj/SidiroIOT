@@ -9,8 +9,6 @@ const { exist } = require("joi");
 const mathjs = require("mathjs");
 const logger = require("../../../logger/logger");
 
-//TODO - test this method
-
 class ExpressionCalculator extends CalcElement {
   //#region ========= CONSTRUCTOR =========
 
