@@ -144,7 +144,6 @@ class Project {
    * @description Main method for handling tick of sampler
    */
   async _handleSamplerTick(tickNumber) {
-    //TODO - test LastCycleDuration calculation - mock refresh
     let start = Date.now();
     //Refreshing group manager on every tick
     await this.RefreshGroupManager.refresh(tickNumber);
@@ -152,14 +151,6 @@ class Project {
 
     //Setting duration
     this._lastCycleDuration = stop - start;
-
-    // for (let device of Object.values(this.Devices)) {
-    //   for (let element of Object.values(device.Elements)) {
-    //     console.log(
-    //       `${device.Name} : ${element.Name} : ${element.LastValueTick} - ${element.Value}`
-    //     );
-    //   }
-    // }
   }
 
   /**
@@ -313,7 +304,6 @@ class Project {
    * @description Method for getting all devices. Returns empty object if there are no devices
    */
   getDevices() {
-    //TODO - test this method
     return this.Devices;
   }
 
@@ -322,7 +312,6 @@ class Project {
    * @param {String} deviceID device id
    */
   getDevice(deviceID) {
-    //TODO - test this method
     //Checking seperately in every collection instead of creating new with all devices - performance
     let connectableDevice = this.ConnectableDevices[deviceID];
     let internalDevice = this.InternalDevices[deviceID];
@@ -339,8 +328,6 @@ class Project {
    * @param {Array} deviceIDs device id for getting elements from. NULL for getting elements from all devices
    */
   getElements(deviceIDs = null) {
-    //TODO - test this method
-
     let elementsToReturn = {};
 
     for (let device of Object.values(this.Devices)) {
@@ -359,8 +346,6 @@ class Project {
    * @param {String} elementID element id
    */
   getElement(deviceID, elementID) {
-    //TODO - test this method
-
     //Creating devices to search - [deviceID] if deviceId is set or [..allDevices] if deviceId is null
     let devicesToSearch = [];
 
@@ -394,8 +379,6 @@ class Project {
    * @param {Array} deviceIDs device id for getting variables from. NULL for getting variables from all devices
    */
   getVariables(deviceIDs = null) {
-    //TODO - test this method
-
     let variablesToReturn = {};
 
     for (let device of Object.values(this.Devices)) {
@@ -414,8 +397,6 @@ class Project {
    * @param {String} variableID variable id
    */
   getVariable(deviceID, variableID) {
-    //TODO - test this method
-
     //Creating devices to search - [deviceID] if deviceId is set or [..allDevices] if deviceId is null
     let devicesToSearch = [];
 
@@ -445,8 +426,6 @@ class Project {
    * @param {Array} deviceIDs device id for getting calcElements from. NULL for getting calcElements from all devices
    */
   getCalcElements(deviceIDs = null) {
-    //TODO - test this method
-
     let calcElementsToReturn = {};
 
     for (let device of Object.values(this.Devices)) {
@@ -468,8 +447,6 @@ class Project {
    * @param {String} calcElementID calcElement id
    */
   getCalcElement(deviceID, calcElementID) {
-    //TODO - test this method
-
     //Creating devices to search - [deviceID] if deviceId is set or [..allDevices] if deviceId is null
     let devicesToSearch = [];
 
@@ -499,8 +476,6 @@ class Project {
    * @param {Array} deviceIDs device id for getting alerts from. NULL for getting alerts from all devices
    */
   getAlerts(deviceIDs = null) {
-    //TODO - test this method
-
     let alertsToReturn = {};
 
     for (let device of Object.values(this.Devices)) {
@@ -519,8 +494,6 @@ class Project {
    * @param {String} alertID alert id
    */
   getAlert(deviceID, alertID) {
-    //TODO - test this method
-
     //Creating devices to search - [deviceID] if deviceId is set or [..allDevices] if deviceId is null
     let devicesToSearch = [];
 
@@ -550,8 +523,6 @@ class Project {
    * @param {String} deviceID device id
    */
   async activateDevice(deviceID) {
-    //TODO - test this method
-
     let device = this.Devices[deviceID];
     if (exists(device)) await device.activate();
   }
@@ -561,8 +532,6 @@ class Project {
    * @param {String} deviceID device id
    */
   async deactivateDevice(deviceID) {
-    //TODO - test this method
-
     let device = this.Devices[deviceID];
     if (exists(device)) await device.deactivate();
   }

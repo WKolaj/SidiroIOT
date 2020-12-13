@@ -5,14 +5,18 @@ describe("projectService", () => {
   let config;
   let jsonWebToken;
   let readFileAsync;
+  let createDirAsync;
   let checkIfFileExistsAsync;
   let writeFileAsync;
   let roundToPrecision;
   let removeFileIfExistsAsync;
+  let removeDirectoryIfExists;
+  let checkIfDirectoryExistsAsync;
   let exists;
   let settingsDirFilePath;
   let socketFilePath;
   let projectFilePath;
+  let agentsDirPath;
   let logger;
   let projectService;
   let netplanService;
@@ -20,6 +24,8 @@ describe("projectService", () => {
   let ipConfigMockServer;
   let initialIPServerContent;
   let initNetplanService;
+  let logActionMock;
+  let logErrorMock;
 
   beforeEach(async () => {
     jest.setTimeout(30000);
@@ -40,11 +46,15 @@ describe("projectService", () => {
     checkIfFileExistsAsync = utilities.checkIfFileExistsAsync;
     roundToPrecision = utilities.roundToPrecision;
     removeFileIfExistsAsync = utilities.removeFileIfExistsAsync;
+    createDirAsync = utilities.createDirAsync;
+    checkIfDirectoryExistsAsync = utilities.checkIfDirectoryExistsAsync;
     exists = utilities.exists;
+    removeDirectoryIfExists = utilities.removeDirectoryIfExists;
     settingsDirFilePath = config.get("settingsPath");
     let projectFileName = (projectFilePath = config.get("projectFileName"));
     socketFilePath = config.get("netplanConfigSocketFilePath");
     projectFilePath = path.join(settingsDirFilePath, projectFileName);
+    agentsDirPath = path.join(settingsDirFilePath, config.get("agentsDirName"));
 
     //Clearing socket file if exists
     await removeFileIfExistsAsync(socketFilePath);
@@ -52,9 +62,17 @@ describe("projectService", () => {
     //Clearing project file if exists
     await removeFileIfExistsAsync(projectFilePath);
 
+    //Clearing agetnsDirPath if exists
+    await removeDirectoryIfExists(agentsDirPath);
+
     //Overwriting logger action method
     logActionMock = jest.fn();
     logger.action = logActionMock;
+
+    //Overwriting logger error method
+    logErrorMock = jest.fn();
+    logger.error = logErrorMock;
+
     runIPConfigServer = true;
 
     initNetplanService = true;
@@ -92,6 +110,9 @@ describe("projectService", () => {
     //Clearing project file if exists
     await removeFileIfExistsAsync(projectFilePath);
 
+    //Clearing agetnsDirPath if exists
+    await removeDirectoryIfExists(agentsDirPath);
+
     if (ipConfigMockServer) {
       await ipConfigMockServer.Stop();
       ipConfigMockServer = null;
@@ -110,9 +131,11 @@ describe("projectService", () => {
   describe("startup - project", () => {
     let initialProjectFileContent;
     let createInitialProjectFile;
+    let createInitialAgentsDir;
 
     beforeEach(async () => {
       createInitialProjectFile = true;
+      createInitialAgentsDir = true;
       initialProjectFileContent = {
         ipConfig: {
           eth1: {
@@ -923,6 +946,8 @@ describe("projectService", () => {
           "utf8"
         );
 
+      if (createInitialAgentsDir) await createDirAsync(agentsDirPath);
+
       await require("../../../startup/project")();
     };
 
@@ -1076,6 +1101,15 @@ describe("projectService", () => {
       let netplanIPConfig = await netplanService.getInterfaces();
 
       expect(netplanIPConfig).toEqual(expectedPayload);
+    });
+
+    it("should create new agentDir - if not exists", async () => {
+      createInitialAgentsDir = false;
+
+      await exec();
+
+      let agentsDirExists = await checkIfDirectoryExistsAsync(agentsDirPath);
+      expect(agentsDirExists).toEqual(true);
     });
 
     it("should not call post on netplanService - if ipConfig in project and in netplan are the same", async () => {

@@ -6,6 +6,7 @@ const CPUTemperatureVariable = require("../../Element/Variable/InternalVariable/
 const DiskUsageVariable = require("../../Element/Variable/InternalVariable/DiskUsageVariable");
 const RAMUsageVariable = require("../../Element/Variable/InternalVariable/RAMUsageVariable");
 const LastCycleDurationVariable = require("../../Element/Variable/InternalVariable/LastCycleDurationVariable");
+const SidiroIOTMemoryVariable = require("../../Element/Variable/InternalVariable/SidiroIOTMemoryVariable");
 
 class InternalDevice extends Device {
   //#region ========= CONSTRUCTOR =========
@@ -62,6 +63,8 @@ class InternalDevice extends Device {
         return new RAMUsageVariable(this._project, this);
       case "LastCycleDurationVariable":
         return new LastCycleDurationVariable(this._project, this);
+      case "SidiroIOTMemoryVariable":
+        return new SidiroIOTMemoryVariable(this._project, this);
       default:
         throw new Error(`Unrecognized Variable type: ${type}`);
     }

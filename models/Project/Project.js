@@ -85,7 +85,6 @@ const validateAgentDevicesPayload = (devicesPayload, helpers) => {
     let deviceType = devicePayload.type;
     let validationMessage = null;
 
-    //TODO - add checking device payload based on type
     switch (deviceType) {
       case "MSAgentDevice":
         validationMessage = MSAgentDevice.validatePayload(devicePayload);

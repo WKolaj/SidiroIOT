@@ -27,6 +27,8 @@ describe("projectService", () => {
   let runIPConfigServer;
   let ipConfigMockServer;
   let initialIPServerContent;
+  let logActionMock;
+  let logErrorMock;
 
   beforeEach(async () => {
     jest.setTimeout(30000);
@@ -65,6 +67,11 @@ describe("projectService", () => {
     //Overwriting logger action method
     logActionMock = jest.fn();
     logger.action = logActionMock;
+
+    //Overwriting logger error method
+    logErrorMock = jest.fn();
+    logger.error = logErrorMock;
+
     runIPConfigServer = true;
 
     initialIPServerContent = [
@@ -5923,6 +5930,46 @@ describe("projectService", () => {
         let expectedPayload = {
           ...payloadToCheck.data.internalDevices[device.ID],
         };
+        for (let variablePayload of Object.values(expectedPayload.variables)) {
+          //assigning default value - by default is not presented
+          variablePayload.defaultValue =
+            payloadToCheck.data.connectableDevices[
+              variablePayload.associatedDeviceID
+            ].variables[variablePayload.associatedElementID].defaultValue;
+          variablePayload.value = variablePayload.defaultValue;
+          variablePayload.lastValueTick = 0;
+          variablePayload.deviceId = device.ID;
+        }
+
+        for (let calcElementPayload of Object.values(
+          expectedPayload.calcElements
+        )) {
+          calcElementPayload.value = calcElementPayload.defaultValue;
+          calcElementPayload.lastValueTick = 0;
+          calcElementPayload.deviceId = device.ID;
+        }
+
+        for (let alertPayload of Object.values(expectedPayload.alerts)) {
+          alertPayload.value = alertPayload.defaultValue;
+          alertPayload.lastValueTick = 0;
+          alertPayload.deviceId = device.ID;
+        }
+
+        //Checking device payload
+        expect(device.generatePayload()).toEqual(expectedPayload);
+      }
+
+      //Checking agent devices
+      for (let device of agentDevices) {
+        //Adjusting payload with every element - appending value and lastValueTicks
+        let expectedPayload = {
+          ...payloadToCheck.data.agentDevices[device.ID],
+          boarded: false,
+        };
+
+        //Boarding key should not have been in payload returned by generatePayload()
+        delete expectedPayload.boardingKey;
+
         for (let variablePayload of Object.values(expectedPayload.variables)) {
           //assigning default value - by default is not presented
           variablePayload.defaultValue =

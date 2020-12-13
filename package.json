@@ -37,6 +37,7 @@
     "lodash": "^4.17.20",
     "modbus-serial": "^8.0.1",
     "node-snap7": "^1.0.5",
+    "pidusage": "^2.0.21",
     "systeminformation": "^4.27.5",
     "uniqid": "^5.2.0",
     "winston": "^3.3.3"
