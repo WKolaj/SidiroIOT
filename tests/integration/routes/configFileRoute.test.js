@@ -3,6 +3,7 @@ const {
   writeFileAsync,
   readFileAsync,
   removeFileIfExistsAsync,
+  removeDirectoryIfExists,
 } = require("../../../utilities/utilities");
 const _ = require("lodash");
 const path = require("path");
@@ -55,10 +56,11 @@ let logger = require("../../../logger/logger");
 const netplan = require("../../../startup/netplan");
 const projectFileName = config.get("projectFileName");
 const projectFilePath = path.join(settingsDirPath, projectFileName);
+const AgentsDirPath = "__testDir/settings/agentsData";
 
 const socketFilePath = config.get("netplanConfigSocketFilePath");
 
-describe("api/user", () => {
+describe("api/configFile", () => {
   let uselessUser;
   let testAdmin;
   let testUser;
@@ -79,6 +81,8 @@ describe("api/user", () => {
 
     //Clearing socket file path if exists
     await removeFileIfExistsAsync(socketFilePath);
+
+    await removeDirectoryIfExists(AgentsDirPath);
 
     initialIPServerContent = [
       {

@@ -13,6 +13,7 @@ const BandwidthLimitAlert = require("../Element/Alerts/BandwidthLimitAlert");
 const ExactValuesAlert = require("../Element/Alerts/ExactValuesAlert");
 const HighLimitAlert = require("../Element/Alerts/HighLimitAlert");
 const LowLimitAlert = require("../Element/Alerts/LowLimitAlert");
+const ExpressionCalculator = require("../Element/CalcElement/ExpressionCalculator");
 
 class Device {
   //#region ========= CONSTRUCTOR =========
@@ -331,6 +332,8 @@ class Device {
         return new IncreaseCalculator(this._project, this);
       case "AverageCalculator":
         return new AverageCalculator(this._project, this);
+      case "ExpressionCalculator":
+        return new ExpressionCalculator(this._project, this);
       default:
         throw new Error(`Unrecognized CalcElement type: ${type}`);
     }

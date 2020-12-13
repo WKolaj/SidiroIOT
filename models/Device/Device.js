@@ -4,6 +4,7 @@ const ExactValuesAlert = require("../../classes/Element/Alerts/ExactValuesAlert"
 const HighLimitAlert = require("../../classes/Element/Alerts/HighLimitAlert");
 const LowLimitAlert = require("../../classes/Element/Alerts/LowLimitAlert");
 const AverageCalculator = require("../../classes/Element/CalcElement/AverageCalculator");
+const ExpressionCalculator = require("../../classes/Element/CalcElement/ExpressionCalculator");
 const FactorCalculator = require("../../classes/Element/CalcElement/FactorCalculator");
 const IncreaseCalculator = require("../../classes/Element/CalcElement/IncreaseCalculator");
 const SumCalculator = require("../../classes/Element/CalcElement/SumCalculator");
@@ -73,6 +74,11 @@ const validateCalcElementsPayload = (calcElementsPayload, helpers) => {
         break;
       case "AverageCalculator":
         calcElementMessage = AverageCalculator.validatePayload(
+          calcElementPayload
+        );
+        break;
+      case "ExpressionCalculator":
+        calcElementMessage = ExpressionCalculator.validatePayload(
           calcElementPayload
         );
         break;

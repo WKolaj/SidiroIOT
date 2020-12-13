@@ -51,7 +51,7 @@ describe("projectService", () => {
     removeFileIfExistsAsync = utilities.removeFileIfExistsAsync;
     exists = utilities.exists;
     settingsDirFilePath = config.get("settingsPath");
-    let projectFileName = (projectFilePath = config.get("projectFileName"));
+    let projectFileName = config.get("projectFileName");
     socketFilePath = config.get("netplanConfigSocketFilePath");
     projectFilePath = path.join(settingsDirFilePath, projectFileName);
 

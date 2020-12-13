@@ -164,6 +164,20 @@ describe("InternalDevice", () => {
             byteNumber: 3,
             length: 2,
           },
+          expessionCalculatorID: {
+            id: "expessionCalculatorID",
+            name: "expessionCalculatorName",
+            type: "ExpressionCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 15,
+            expression: "p1+p2+p3",
+            parameters: {
+              p1: { type: "static", value: 100 },
+              p2: { type: "dynamic", elementId: "associatedVariableID" },
+              p3: { type: "dynamic", elementId: "cpuLoadVariableID" },
+            },
+          },
         },
         alerts: {
           bandwidthLimitAlertID: {
@@ -426,6 +440,23 @@ describe("InternalDevice", () => {
             lastValueTick: 0,
             deviceId: "deviceID",
             value: 15,
+          },
+          expessionCalculatorID: {
+            id: "expessionCalculatorID",
+            name: "expessionCalculatorName",
+            type: "ExpressionCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 15,
+            expression: "p1+p2+p3",
+            parameters: {
+              p1: { type: "static", value: 100 },
+              p2: { type: "dynamic", elementId: "associatedVariableID" },
+              p3: { type: "dynamic", elementId: "cpuLoadVariableID" },
+            },
+            deviceId: "deviceID",
+            value: 15,
+            lastValueTick: 0,
           },
         },
         alerts: {
@@ -1977,6 +2008,20 @@ describe("InternalDevice", () => {
             byteNumber: 3,
             length: 2,
           },
+          expessionCalculatorID: {
+            id: "expessionCalculatorID",
+            name: "expessionCalculatorName",
+            type: "ExpressionCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 15,
+            expression: "p1+p2+p3",
+            parameters: {
+              p1: { type: "static", value: 100 },
+              p2: { type: "dynamic", elementId: "associatedVariableID" },
+              p3: { type: "dynamic", elementId: "cpuLoadVariableID" },
+            },
+          },
         },
         alerts: {
           bandwidthLimitAlertID: {
@@ -2318,6 +2363,15 @@ describe("InternalDevice", () => {
       let result = exec();
 
       expect(result).toEqual(`"variableIDs" must be an array`);
+    });
+
+    it("should return message if one of calcElement payload is invalid - ExpressionCalculator", () => {
+      //Invalid expression
+      payload.calcElements.expessionCalculatorID.expression = null;
+
+      let result = exec();
+
+      expect(result).toEqual(`"expression" must be a string`);
     });
 
     it("should return message if one of calcElement types is not recognized", () => {
