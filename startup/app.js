@@ -52,6 +52,13 @@ module.exports = async function (workingDirName) {
 
   //#endregion ========== INITIALIZING PROJECT ==========
 
+  //#region ========== INITIALIZING USB ==========
+
+  //USB service has to be initialized after project! - in order to load project content
+  await require("./usb")();
+
+  //#endregion ========== INITIALIZING USB ==========
+
   //#region ========== INITIALIZING ROUTES ==========
 
   //Initializing proccess of automatically calling next when error occurs while request handling - in order to go to last middlware of logging error

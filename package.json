@@ -1,6 +1,6 @@
 {
   "name": "template_backend_nodejs",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Back-end for NodeJS server",
   "main": "server.js",
   "scripts": {
@@ -25,12 +25,12 @@
   "dependencies": {
     "@mindconnect/mindconnect-nodejs": "^3.11.0",
     "bcrypt": "^5.0.0",
-    "config": "^3.3.2",
+    "config": "^3.3.3",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "express-async-errors": "^3.1.1",
     "formidable": "^1.2.2",
-    "helmet": "^4.1.1",
+    "helmet": "^4.2.0",
     "joi": "^17.3.0",
     "joi-objectid": "^3.0.1",
     "jsonwebtoken": "^8.5.1",
@@ -39,14 +39,15 @@
     "modbus-serial": "^8.0.1",
     "node-snap7": "^1.0.5",
     "pidusage": "^2.0.21",
-    "systeminformation": "^4.27.5",
+    "systeminformation": "^4.32.0",
     "uniqid": "^5.2.0",
+    "usb": "^1.6.3",
     "winston": "^3.3.3"
   },
   "devDependencies": {
-    "jest": "^26.4.2",
+    "jest": "^26.6.3",
     "jest-extended": "^0.11.5",
-    "supertest": "^5.0.0"
+    "supertest": "^6.0.1"
   },
   "jest": {
     "setupFilesAfterEnv": [

@@ -8,6 +8,16 @@
   "netplanConfigSocketFilePath": "__testDir/netplan/data.socket",
   "netplanConfigAuthToken": "testNetplanSocketAuth",
   "port": 5000,
+  "usbLoader": {
+    "dirPaths": [
+      "__testDir/usb/usb1",
+      "__testDir/usb/usb2",
+      "__testDir/usb/usb3"
+    ],
+    "numberOfRetries": 3,
+    "timeDelay": 100,
+    "projectFileName": "projectSettings.json"
+  },
   "logging": {
     "logActions": true,
     "info": {

@@ -7,6 +7,12 @@
   "userFileName": "userSettings.json",
   "projectFileName": "projectSettings.json",
   "netplanConfigSocketFilePath": "settings/netplanConfigSocket.socket",
+  "usbLoader": {
+    "dirPaths": ["/media/wk/DATA"],
+    "numberOfRetries": 3,
+    "timeDelay": 2000,
+    "projectFileName": "projectSettings.json"
+  },
   "logging": {
     "logActions": true,
     "info": {

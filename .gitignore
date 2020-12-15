@@ -44,6 +44,9 @@ jspm_packages/
 # Directory with settings files
 settings/
 
+# Directory with USB content
+usb/
+
 # TypeScript v1 declaration files
 typings/
 
