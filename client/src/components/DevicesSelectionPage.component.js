@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
@@ -12,11 +12,18 @@ import CollapsibleTable from './CollapsibleTable.component';
 import DeviceService from '../services/device.service';
 import ActivateService from '../services/activate.service';
 import worker from 'workerize-loader!../workers/devices.worker'; //eslint-disable-line import/no-webpack-loader-syntax
+import { converter } from '../utilities/deviceTablesConverter.utility';
 
 const useStyles = makeStyles((theme) => ({
   title: {
     marginBottom: theme.spacing(3)
   },
+  onboarded: {
+    color: 'green'
+  },
+  offboarded: {
+    color: 'red'
+  }
 }));
 
 let instance;
@@ -24,6 +31,7 @@ let instance;
 function DevicesSelectionPage(props) {
   const classes = useStyles();
   const { t } = useTranslation();
+  const [tables, setTables] = useState({})
   const { setAllDevices, allDevices, selectedDevice, authenticated, refreshDeviceParams } = props;
 
   const reformatDeviceDataToReducer = (data) => {
@@ -37,7 +45,9 @@ function DevicesSelectionPage(props) {
   //initial fetch all devices
   useEffect(() => {
     DeviceService.getDevices().then(res => {
-      setAllDevices(reformatDeviceDataToReducer(res.data))
+      if (res.status === 200) {
+        setAllDevices(reformatDeviceDataToReducer(res.data))
+      }
     })
   }, [setAllDevices])
 
@@ -59,7 +69,6 @@ function DevicesSelectionPage(props) {
     }
   }, [refreshDeviceParams])
 
-
   //check if authenticated, if not - stop fetching
   useEffect(() => {
     if (instance !== null) {
@@ -74,6 +83,7 @@ function DevicesSelectionPage(props) {
   }, [authenticated, selectedDevice])
 
   const createTabs = (devices, selectedDevice) => {
+    console.log(Object.entries(devices[0]))
     let columns = []
     let rows = []
     let tabs = []
@@ -87,7 +97,10 @@ function DevicesSelectionPage(props) {
               //INFO tab
               columns.push(t(`DevicesSelectionPage.Properties.${column}`))
               //columns.push(column)
-              rows.push(cell)
+              rows.push({
+                value: cell,
+                belongsToColumn: t(`DevicesSelectionPage.Tabs.info`)
+              })
             }
             else {
               const tab = createTab(cell)
@@ -113,32 +126,80 @@ function DevicesSelectionPage(props) {
   }
 
   const createTab = (obj) => {
+    let tables = {}
     let columns = []
     let rows = []
     const entries = Object.entries(obj)
+    let type;
     for (const [, properties] of entries) {
+      //console.log(properties)
       let row = []
+      type = properties.type
       const propertiesEntries = Object.entries(properties)
+      if(tables[type]=== undefined) {
+        tables = {
+          ...tables,
+          [type]: {
+            rows: [],
+            cols: []
+          }
+        }
+      }
       for (const [column, cell] of propertiesEntries) {
+
         if (!columns.includes(t(`DevicesSelectionPage.Properties.${column}`))) {
           columns.push(t(`DevicesSelectionPage.Properties.${column}`))
         }
+     
+        if(tables[type]!==undefined && !tables[type].cols.includes(t(`DevicesSelectionPage.Properties.${column}`))) {
+          
+          tables = {
+            ...tables,
+            [type]: {
+              ...tables[type],
+              cols: [...tables[type].cols, t(`DevicesSelectionPage.Properties.${column}`)]
+            }
+          }
+        }
+
         //if is numeric and with decimal place, set precision to 2
         if (!isNaN(cell) && cell % 1 !== 0 && cell !== false && cell !== true) {
-          row.push(parseFloat(cell).toFixed(2))
+          row.push({
+            value: parseFloat(cell).toFixed(2),
+            type: type,
+            belongsToColumn: t(`DevicesSelectionPage.Properties.${column}`)
+          })
         }
         else {
           if (column === 'lastValueTick') {
-
-            row.push(formatDateTime(new Date(cell * 1000)))
+            row.push({
+              value: formatDateTime(new Date(cell * 1000)),
+              type: type,
+              belongsToColumn: t(`DevicesSelectionPage.Properties.${column}`)
+            })
           }
           else {
-            row.push(cell)
+
+            row.push({
+              value: cell,
+              type: type,
+              belongsToColumn: t(`DevicesSelectionPage.Properties.${column}`)
+            })
+            
           }
+        }
+      }
+      tables = {
+        ...tables,
+        [type]: {
+          ...tables[type], 
+          rows: [...tables[type].rows, row],
+          cols: [...tables[type].cols]
         }
       }
       rows.push(row)
     }
+    converter(tables)
     return { rows, columns }
   }
 
@@ -149,14 +210,13 @@ function DevicesSelectionPage(props) {
     return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}, ${hours}:${minutes}:${seconds}`;
   }
 
-  //const isActive = selectedDevice.selectedDeviceID !== '' && allDevices[selectedDevice.selectedDeviceIndex] !== undefined && allDevices[selectedDevice.selectedDeviceIndex][selectedDevice.selectedDeviceID].isActive ? true : false;
   const isActive = () => {
     if (selectedDevice.selectedDeviceID !== '' && allDevices[selectedDevice.selectedDeviceIndex] !== undefined) {
-      if (selectedDevice.selectedDeviceType === 'InternalDevice') {
-        return allDevices[selectedDevice.selectedDeviceIndex][selectedDevice.selectedDeviceID].isActive ? true : false
+      if (allDevices[selectedDevice.selectedDeviceIndex][selectedDevice.selectedDeviceID].isConnected !== undefined) {
+        return allDevices[selectedDevice.selectedDeviceIndex][selectedDevice.selectedDeviceID].isActive && allDevices[selectedDevice.selectedDeviceIndex][selectedDevice.selectedDeviceID].isConnected
       }
       else {
-        return allDevices[selectedDevice.selectedDeviceIndex][selectedDevice.selectedDeviceID].isActive && allDevices[selectedDevice.selectedDeviceIndex][selectedDevice.selectedDeviceID].isConnected ? true : false
+        return allDevices[selectedDevice.selectedDeviceIndex][selectedDevice.selectedDeviceID].isActive
       }
     }
     else {
@@ -164,9 +224,13 @@ function DevicesSelectionPage(props) {
     }
   }
 
+  const isBoarded = () => {
+    return selectedDevice.selectedDeviceType === 'MSAgentDevice' ? allDevices[selectedDevice.selectedDeviceIndex][selectedDevice.selectedDeviceID].boarded : null
+  }
+
   const activateDevice = (activate, device) => {
     ActivateService.activateDevice(activate, device).then(res => {
-      if(res.status === 200) {
+      if (res.status === 200) {
         refreshDeviceParams(res.data)
       }
     })
@@ -175,11 +239,11 @@ function DevicesSelectionPage(props) {
   return (
     <React.Fragment>
       <Grid container spacing={2}>
-        <Grid item xs={12} sm={12} md={3}>
+        <Grid item xs={12} sm={12} md={3} xl={2}>
           <Typography variant="h4" className={classes.title}>{t('DevicesSelectionPage.DevicesTitle')}</Typography>
           <DevicesList />
         </Grid>
-        <Grid container item xs={12} sm={12} md={9} spacing={0}>
+        <Grid container item xs={12} sm={12} md={9} xl={10} spacing={0}>
           <Grid item xs={12}>
             <Typography variant="h4" className={classes.title}>{selectedDevice.selectedDeviceID}</Typography>
             <React.Fragment>
@@ -189,6 +253,9 @@ function DevicesSelectionPage(props) {
           <Grid container item xs={12} spacing={2}>
             <Grid item xs={12} sm={6}>
               <Typography variant="h5">{t('DevicesSelectionPage.Status')}: {isActive() ? t('DevicesSelectionPage.StatusConnected') : t('DevicesSelectionPage.StatusDisconnected')}</Typography>
+              {selectedDevice.selectedDeviceType === 'MSAgentDevice' ?
+                <Typography variant="h6" className={isBoarded() ? classes.onboarded : classes.offboarded}>{isBoarded() ? t('DevicesSelectionPage.StatusOnboarded') : t('DevicesSelectionPage.StatusOffboarded')}</Typography>
+                : null}
             </Grid>
             <Grid item xs={6} sm={3}>
               <Button

@@ -43,6 +43,7 @@ import { setAuthenticated } from '../actions/Authentication.action';
 import { setCreateAccountDialogOpen } from '../actions/CreateAccountDialog.action';
 import { isAdmin } from '../services/isAuthenticated.service';
 import CircularProgressWithLabel from './CircularProgress.component';
+import { setLoginFormUsername, setLoginFormPassword } from '../actions/LoginPage.action';
 
 const drawerWidth = 240;
 
@@ -209,12 +210,16 @@ function MiniDrawer(props) {
     setAuthenticated(false)
     AuthService.logout()
     handleMenuClose()
+    props.setLoginFormUsername("")
+    props.setLoginFormPassword("")
     history.push('/login')
   }
 
   useEffect(() => {
     if (matches) {
+      //small viewport
       setOpen(false)
+      setAnchorEl(null)
     }
   }, [matches])
 
@@ -235,8 +240,8 @@ function MiniDrawer(props) {
   };
 
   const handleMenuClose = () => {
-    setAnchorEl(null);
     handleMobileMenuClose();
+    setAnchorEl(null);
   };
 
   const handleMobileMenuOpen = (event) => {
@@ -271,7 +276,7 @@ function MiniDrawer(props) {
   );
 
   const toFixed = (num) => {
-    if(num!==null) {
+    if (num !== null) {
       return num.toFixed()
     }
     else {
@@ -474,7 +479,9 @@ const mapDispatchToProps = {
   setLanguageDialogOpen,
   setHardwareUsage,
   setAuthenticated,
-  setCreateAccountDialogOpen
+  setCreateAccountDialogOpen,
+  setLoginFormUsername, 
+  setLoginFormPassword
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(MiniDrawer);

@@ -10,11 +10,11 @@ import LanguageIcon from "@material-ui/icons/Language";
 import Zoom from '@material-ui/core/Zoom';
 import { connect } from 'react-redux';
 import { setLanguageDialogOpen } from '../actions/LanguageDialog.action';
-import { setFormUsername, setFormPassword } from '../actions/LoginPage.action';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import AuthService from "../services/auth.service";
 import { useHistory } from "react-router-dom";
-import { setFormUsernameError, setFormPasswordError } from '../actions/LoginPage.action';
+import { setLoginFormUsernameError, setLoginFormPasswordError, setLoginFormUsername, setLoginFormPassword } from '../actions/LoginPage.action';
+import { setSnackbarText, setSnackbarShown } from '../actions/Snackbar.action';
 
 const useStyles = makeStyles((theme) => ({
   contentDesktop: {
@@ -55,13 +55,16 @@ function LoginPage(props) {
     AuthService.login(props.login, props.password).then(() => {
       history.push("/");
     }).catch(() => {
-      props.setFormUsernameError(true)
-      props.setFormPasswordError(true)
+      props.setLoginFormUsernameError(true)
+      props.setLoginFormPasswordError(true)
+      props.setLoginFormPassword("")
+      props.setSnackbarText(t('Snackbar.LoginFailed'), 'error')
+      props.setSnackbarShown(true)
     })
   }
 
   const handleKeyDown = (event) => {
-    if (event.key === 'Enter' && props.login.length >= 3 && props.password.length >= 8) {
+    if (event.key === 'Enter' && props.login.length >= 1 && props.password.length >= 1) {
       tryLogin()
     }
   }
@@ -71,13 +74,13 @@ function LoginPage(props) {
   }
 
   const controlFormFields = (field, value) => {
-    props.setFormUsernameError(false)
-    props.setFormPasswordError(false)
+    props.setLoginFormUsernameError(false)
+    props.setLoginFormPasswordError(false)
     if (field === 'username') {
-      props.setFormUsername(value)
+      props.setLoginFormUsername(value)
     }
     else {
-      props.setFormPassword(value)
+      props.setLoginFormPassword(value)
     }
   }
 
@@ -120,14 +123,14 @@ function LoginPage(props) {
               error={props.loginError}
               value={props.login}
               onChange={(e) => controlFormFields('username', e.target.value)}
-              id="login" label={t('LoginPage.FormLoginTextField')} fullWidth variant="standard" autoComplete="username" onKeyDown={handleKeyDown} helperText={props.loginError ? t('LoginPage.InvalidLoginPassword') : t('LoginPage.FormLoginTextFieldHelperText')} />
+              id="login" label={t('LoginPage.FormLoginTextField')} fullWidth variant="standard" autoComplete="username" onKeyDown={handleKeyDown} />
             <TextField
               error={props.passwordError}
               value={props.password}
               onChange={(e) => controlFormFields('password', e.target.value)}
-              id="password" type="password" label={t('LoginPage.FormPasswordTextField')} fullWidth variant="standard" autoComplete="password" onKeyDown={handleKeyDown} helperText={props.loginError ? t('LoginPage.InvalidLoginPassword') : t('LoginPage.FormPasswordTextFieldHelperText')} />
+              id="password" type="password" label={t('LoginPage.FormPasswordTextField')} fullWidth variant="standard" autoComplete="password" onKeyDown={handleKeyDown} />
           </form>
-          <Button onClick={() => buttonLogin()} className={classes.loginButton} color="secondary" variant="contained" fullWidth disabled={props.login.length < 3 || props.password.length < 8}>{t('LoginPage.LoginButton')}</Button>
+          <Button onClick={() => buttonLogin()} className={classes.loginButton} color="primary" variant="contained" fullWidth disabled={props.login.length < 1 || props.password.length < 1}>{t('LoginPage.LoginButton')}</Button>
         </Grid>
       </Grid>
     </React.Fragment>
@@ -145,10 +148,12 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = {
   setLanguageDialogOpen,
-  setFormPassword,
-  setFormUsername,
-  setFormUsernameError,
-  setFormPasswordError
+  setLoginFormPassword,
+  setLoginFormUsername,
+  setLoginFormUsernameError,
+  setLoginFormPasswordError,
+  setSnackbarText,
+  setSnackbarShown
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(LoginPage);

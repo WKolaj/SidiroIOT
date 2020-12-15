@@ -93,8 +93,8 @@ function UserAccountsPage({ setUserAccountsList,
         {accountsList.length > 0 ?
           <Grid item xs={12}>
             <UniversalTable noPagination
-              columns={[t('UserAccountsPage.IdColumn'), t('UserAccountsPage.NameColumn'), t('UserAccountsPage.PermissionsColumn'), t('UserAccountsPage.ActionColumn')]}
-              rows={accountsList.map(acc => [acc._id, acc.name, acc.permissions === 1 ? 'User' : acc.permissions === 3 ? 'Admin' : 'SuperAdmin', checkPermissions(acc.permissions) ?
+              columns={[t('UserAccountsPage.NameColumn'), t('UserAccountsPage.PermissionsColumn'), t('UserAccountsPage.ActionColumn')]}
+              rows={accountsList.map(acc => [acc.name, acc.permissions === 1 ? 'User' : acc.permissions === 3 ? 'Admin' : 'SuperAdmin', checkPermissions(acc.permissions) ?
                 <div>
                   <Tooltip title={t('UserAccountsPage.TooltipEdit')} placement="top">
                     <IconButton onClick={() => editAcc(acc._id, acc.name, acc.permissions)} className={classes.icons} aria-label="edit">
@@ -117,7 +117,7 @@ function UserAccountsPage({ setUserAccountsList,
             onClick={() => setCreateAccountDialogOpen(true, 'create')}
             fullWidth
             variant="contained"
-            color="secondary"
+            color="primary"
             startIcon={<AddIcon />}
           >
             {t('UserAccountsPage.CreateUser')}

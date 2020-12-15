@@ -17,9 +17,9 @@ const store = createStore(rootReducer);
 const theme = createMuiTheme({
   palette: {
     primary: {
-      light: '#33a095',
-      main: '#00897b',
-      dark: '#005f56',
+      light: '#41aaaa',
+      main: '#009999',
+      dark: '#00646e',
       contrastText: '#fff',
     },
     secondary: {

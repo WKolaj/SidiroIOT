@@ -16,6 +16,9 @@ const useStyles = makeStyles({
   avatar: {
     backgroundColor: blue[100],
     color: blue[600],
+  },
+  title: {
+    textAlign: 'center'
   }
 });
 
@@ -28,8 +31,8 @@ const useStyles = makeStyles({
   }
 
   return (
-    <Dialog onClose={()=>props.setLanguageDialogOpen(false)} aria-labelledby="simple-dialog-title" open={props.open}>
-      <DialogTitle id="simple-dialog-title">{t('LanguageSelection.Label')}</DialogTitle>
+    <Dialog onClose={()=>props.setLanguageDialogOpen(false)} aria-labelledby="simple-dialog-title" open={props.open} fullWidth={true} maxWidth="sm">
+      <DialogTitle className={classes.title} id="simple-dialog-title">{t('LanguageSelection.Label')}</DialogTitle>
       <List>
         <ListItem button onClick={()=>chooseLanguage('pl')}>
           <ListItemAvatar>

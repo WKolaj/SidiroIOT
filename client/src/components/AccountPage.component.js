@@ -108,12 +108,14 @@ function AccountPage({ currentPassword, newPassword, setAccountFormCurrentPasswo
         <Grid item xs={12}>
           <Typography variant="h4">{t('AccountPage.Title')}</Typography>
         </Grid>
+        <Typography variant="body1">{t('AccountPage.Permissions')}</Typography>
         <Grid container
           justify="center"
-          alignItems="center"
+          alignItems="flex-start"
           alignContent="center"
           item xs={12}>
-          <Grid item xs={12} sm={12} md={6} lg={4} xl={3}>
+            
+          <Grid item xs={12} sm={6} md={6} lg={4} xl={3}>
             {accountDetails.permissions >= 1 ? <Chip avatar={<Avatar>U</Avatar>} label="User" /> : null}
             {accountDetails.permissions >= 3 ? <Chip color="primary" avatar={<Avatar>A</Avatar>} label="Admin" /> : null}
             {accountDetails.permissions === 7 ? <Chip color="secondary" avatar={<Avatar>S</Avatar>} label="SuperAdmin" /> : null}
@@ -126,7 +128,6 @@ function AccountPage({ currentPassword, newPassword, setAccountFormCurrentPasswo
           item xs={12}>
           <Grid item xs={12} sm={12} md={6} lg={4} xl={3}>
             <form className={classes.form} noValidate autoComplete="off">
-              {accountDetails._id ? <TextField fullWidth disabled label="ID" defaultValue={accountDetails._id} /> : null}
               {accountDetails.name ? <TextField fullWidth disabled label={t('AccountPage.NameTextField')} autoComplete="username" defaultValue={accountDetails.name} /> : null}
               <TextField
                 type="password"
@@ -135,8 +136,7 @@ function AccountPage({ currentPassword, newPassword, setAccountFormCurrentPasswo
                 onChange={(e) => setAccountFormCurrentPassword(e.target.value)}
                 fullWidth
                 label={t('AccountPage.CurrentPasswordTextField')}
-                helperText={verify('currentPassword').text}
-                error={verify('currentPassword').error} />
+                />
               <TextField
                 type="password"
                 autoComplete="new-password"
@@ -151,7 +151,7 @@ function AccountPage({ currentPassword, newPassword, setAccountFormCurrentPasswo
         </Grid>
         <Grid item xs={12} sm={12} md={6} lg={4} xl={3}>
           <Button onClick={() => changePassword()}
-            className={classes.loginButton} fullWidth color="secondary" variant="contained" disabled={currentPassword.length === 0 || newPassword.length === 0 || verify('newPassword').error || verify('currentPassword').error}>{t('AccountPage.ChangePasswordButton')}</Button>
+            className={classes.loginButton} fullWidth color="primary" variant="contained" disabled={currentPassword.length === 0 || newPassword.length === 0 || verify('newPassword').error || verify('currentPassword').error}>{t('AccountPage.ChangePasswordButton')}</Button>
         </Grid>
       </Grid>
     </div>

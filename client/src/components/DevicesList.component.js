@@ -14,6 +14,9 @@ import AssessmentIcon from '@material-ui/icons/Assessment';
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
+    position: 'relative',
+    overflow: 'auto',
+    maxHeight: '80vh',
     //backgroundColor: theme.palette.background.paper,
   },
   active: {
@@ -39,7 +42,7 @@ function SimpleList(props) {
 
   return (
     <div className={classes.root}>
-      <List component="nav" aria-label="device selection">
+      <List component="nav" aria-label="device selection" >
         {allDevices.map((dev, index) => {
           const entries = Object.entries(dev)
           for (const [, properties] of entries) {

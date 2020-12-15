@@ -13,6 +13,7 @@ import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
+import { useTranslation } from 'react-i18next';
 
 const useRowStyles = makeStyles({
   root: {
@@ -23,10 +24,15 @@ const useRowStyles = makeStyles({
 });
 
 const isNotObject = (data) => typeof data !== 'object' || data === null;
+const test = (data) => typeof data.value !== 'object' || data.value === null;
 const isObject = (data) => typeof data === 'object' && data !== null;
+
+//for array of arrays
+const notObject = (element) => element.every(test);
 
 function Row(props) {
   // props.row === ['item1', 'item2', 'item3', ...]
+  const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
   const [objects, setObjects] = React.useState(null)
   const classes = useRowStyles();
@@ -35,7 +41,7 @@ function Row(props) {
   React.useEffect(() => {
     let obj = []
     row.map((cell, index) => {
-      return isObject(cell) ? obj.push({ cell: cell, index: index }) : null
+      return isObject(cell.value) ? obj.push({ cell: cell.value, index: index }) : null
     })
     setObjects(obj)
   }, [row])
@@ -57,19 +63,21 @@ function Row(props) {
     <React.Fragment>
       <TableRow className={classes.root}>
         <TableCell>
-          <IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)}>
+          {/* if expand needed - first cell for arrow */}
+          {objects !== null && objects.length > 0 ? <IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)}>
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-          </IconButton>
+          </IconButton> : null}
         </TableCell>
+
         {row.map((cell, index) => {
-          return <TableCell key={index}>{typeof cell === "boolean" ? cell.toString() : typeof cell === "object" ?
+          return <TableCell key={index}>{typeof cell.value === "boolean" ? cell.value.toString() : typeof cell.value === "object" ?
             (<IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)}>
               {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-            </IconButton>) : cell}</TableCell>
+            </IconButton>) : cell.value}</TableCell>
         })}
       </TableRow>
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={row.length+1}>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={row.length + 1}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box margin={1}>
               {objects !== null ? objects.map((obj, index) => {
@@ -110,10 +118,11 @@ function SimpleRow(props) {
   const classes = useRowStyles();
   return (
     <TableRow className={classes.root}>
-      {props.row.map((cell, index) => <TableCell key={index}>{typeof cell === "boolean" ? cell.toString() : typeof cell === "object" ? JSON.stringify(cell) : cell}</TableCell>)}
+      {props.row.map((cell, index) => <TableCell key={index}>{typeof cell.value === "boolean" ? cell.value.toString() : typeof cell.value === "object" ? JSON.stringify(cell.value) : cell.value}</TableCell>)}
     </TableRow>
   )
 }
+
 
 export default function CollapsibleTable(props) {
   return (
@@ -121,12 +130,13 @@ export default function CollapsibleTable(props) {
       <Table aria-label="collapsible table">
         <TableHead>
           <TableRow>
-            {props.rows.map((row, index) => {
-              if (!row.every(isNotObject)) {
-                return <TableCell key={index} />
-              }
-              return null
-            })}
+            {/* {props.rows.length>0 && !props.rows[0].every(isNotObject)?
+            <TableCell/>:null}
+            {props.columns.map((column, index) => {
+              return <TableCell key={index}>{column}</TableCell>
+            })} */}
+            {props.rows.length > 0 && props.rows.filter(notObject).length < props.rows.length ?
+              <TableCell /> : null}
             {props.columns.map((column, index) => {
               return <TableCell key={index}>{column}</TableCell>
             })}
@@ -134,13 +144,12 @@ export default function CollapsibleTable(props) {
         </TableHead>
         <TableBody>
           {props.rows.map((row, index) => {
-            if (row.every(isNotObject)) {
-              return <SimpleRow row={row} key={index} />
-            }
-            else {
-              return <Row key={index} row={row} columns={props.columns} />
-            }
-          })}
+
+            return props.rows.filter(notObject).length < props.rows.length ?
+              <Row key={index} row={row} columns={props.columns} />
+              : <SimpleRow row={row} key={index} />
+          }
+          )}
         </TableBody>
       </Table>
     </TableContainer>

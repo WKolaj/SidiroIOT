@@ -21,6 +21,8 @@ export const resources = {
         "Status": "Status",
         "Connect": "Connect",
         "Disconnect": "Disconnect",
+        "StatusOnboarded": "Onboarded",
+        "StatusOffboarded": "Offboarded",
         "Properties": {
           "id": "ID",
           "name": "Name",
@@ -62,7 +64,7 @@ export const resources = {
           "inverseLogic": "Inverse logic",
           "AssociatedDeviceId": "Associated device ID",
           "AssociatedElementId": "Associated element ID",
-          "variableIds": "Variable IDs",
+          "variableIDs": "Variable IDs",
           "alertValues": "Alert values",
           "datapoint": "Datapoint",
           "valueConverterObject": "Value converter object",
@@ -72,14 +74,37 @@ export const resources = {
           "sendingInterval": "Sending interval",
           "numberOfSendRetries": "Number of send retries",
           "boarded": "Boarded",
-          "lastValueTick": "Last value tick"
+          "lastValueTick": "Last value tick",
+          "elementId": "Element ID",
+          "qualityCodeEnabled": "Quality code enabled",
+          "datapointId": "Datapoint ID",
+          "dataConverter": "Data converter",
+          "entityId": "Entity ID",
+          "sourceType": "Source type",
+          "sourceId": "Source ID",
+          "source": "Source",
+          "sendDataFileInterval": "Send data file interval",
+          "sendEventFileInterval": "Send event file interval",
+          "dataStorageSize": "Data storage size",
+          "eventStorageSize": "Event storage size",
+          "numberOfDataFilesToSend": "Number of data files to send",
+          "numberOfEventFilesToSend": "Number of event files to send",
+          "numberOfSendDataRetries": "Number of send data retries",
+          "numberOfSendEventRetries": "Number of send event retries",
+          "memoryType": "Memory type",
+          "bitNumber": "Bit number",
+          "byteNumber": "Byte number",
+          "expression": "Expression",
+          "parameters": "Parameters"
         },
         "Tabs": {
           "calcElements": "Edge computing",
           "variables": "Variables",
           "alerts": "Alerts",
           "info": "Info",
-          "datapoints": "Datapoints"
+          "datapoints": "Datapoints",
+          "dataToSendConfig": "Data to send",
+          "eventsToSendConfig": "Events to send"
         }
       },
       "UniversalTable": {
@@ -88,17 +113,21 @@ export const resources = {
       },
       "SettingsPage": {
         "Title": "Settings",
-        "LoadButton": "Download settings",
-        "DropzoneText": "Drag & drop or click to upload a file"
+        "LoadButton": "Download settings file",
+        "DropzoneText": "Drag & drop or click to upload a file",
+        "UploadFile": "Load file",
+        "RemoveFile": "Remove file",
+        "FileName": "Name",
+        "FileSize": "Size"
       },
       "LoginPage": {
         "LoginTitle": "Please log in",
         "LoginButton": "Login",
         "FormLoginTextField": "Login",
         "FormPasswordTextField": "Password",
+        "InvalidLoginPassword": "Invalid login/password combination",
         "FormLoginTextFieldHelperText": "At least 3 characters",
-        "FormPasswordTextFieldHelperText": "At least 8 characters",
-        "InvalidLoginPassword": "Invalid login/password combination"
+        "FormPasswordTextFieldHelperText": "At least 8 characters"
       },
       "AccountMenu": {
         "MyAccount": "My Account",
@@ -113,7 +142,8 @@ export const resources = {
         "NewPasswordTextField": "New password",
         "ChangePasswordButton": "Change password",
         "PasswordHelperError8characters": "Password must consist of at least 8 characters",
-        "PasswordHelperErrorSamePasswords": "Current password and new password can't be the same"
+        "PasswordHelperErrorSamePasswords": "Current password and new password can't be the same",
+        "Permissions": "Permissions"
       },
       "CreateAccountDialog": {
         "TitleCreate": "Create new account",
@@ -127,11 +157,10 @@ export const resources = {
         "PermissionsSelect": "Permissions",
         "HelperTextName": "At least 3 characters",
         "HelperTextPassword": "At least 8 characters",
-        "AccountBeingEditedSubtitle": "You are editing an account with ID: "
+        "AccountBeingEditedSubtitle": "You are editing the following account: "
       },
       "UserAccountsPage": {
         "CreateUser": "Create user",
-        "IdColumn": "ID",
         "NameColumn": "Name",
         "PermissionsColumn": "Permissions",
         "ActionColumn": "Actions",
@@ -149,7 +178,8 @@ export const resources = {
         "UnsuccessfulFileUpload403": "Only admin type accounts have permission to send configuration file",
         "UnsuccessfulFileUpload400": "Invalid file contents",
         "UnknownError": "Unknown error occured. Try again.",
-        "Generic403": "Access forbidden"
+        "Generic403": "Access forbidden",
+        "LoginFailed": "Login/password combination is invalid"
       },
       "ConfirmDeleteUserDialog": {
         "Title": "Please confirm deletion. The process is irreversible.",
@@ -186,8 +216,10 @@ export const resources = {
           "variables": "Zmienne",
           "alerts": "Zdarzenia",
           "info": "Informacje",
-          "datapoints": "Datapointy"
-        }
+          "datapoints": "Datapointy",
+          "dataToSendConfig": "Konfiguracja danych",
+          "eventsToSendConfig": "Konfiguracja zdarzeń"
+        },
       },
       "UniversalTable": {
         "RowsPerPage": "Wierszy na stronę",
@@ -195,17 +227,21 @@ export const resources = {
       },
       "SettingsPage": {
         "Title": "Ustawienia",
-        "LoadButton": "Pobierz ustawienia",
-        "DropzoneText": "Przeciągnij i upuść tutaj lub kliknij, aby wczytać plik"
+        "LoadButton": "Pobierz plik ustawień",
+        "DropzoneText": "Przeciągnij i upuść tutaj lub kliknij, aby wczytać plik",
+        "UploadFile": "Wczytaj plik",
+        "RemoveFile": "Usuń plik",
+        "FileName": "Nazwa",
+        "FileSize": "Rozmiar"
       },
       "LoginPage": {
         "LoginTitle": "Zaloguj się",
         "LoginButton": "Zaloguj",
         "FormLoginTextField": "Login",
         "FormPasswordTextField": "Hasło",
+        "InvalidLoginPassword": "Nieprawidłowa nazwa lub hasło",
         "FormLoginTextFieldHelperText": "Co najmniej 3 znaki",
-        "FormPasswordTextFieldHelperText": "Co najmniej 8 znaków",
-        "InvalidLoginPassword": "Nieprawidłowa nazwa lub hasło"
+        "FormPasswordTextFieldHelperText": "Co najmniej 8 znaków"
       },
       "AccountMenu": {
         "MyAccount": "Moje konto",
@@ -220,7 +256,8 @@ export const resources = {
         "NewPasswordTextField": "Nowe hasło",
         "ChangePasswordButton": "Zmień hasło",
         "PasswordHelperError8characters": "Hasło musi się składać z co najmniej 8 znaków",
-        "PasswordHelperErrorSamePasswords": "Nowe hasło nie może być takie same jak aktualne"
+        "PasswordHelperErrorSamePasswords": "Nowe hasło nie może być takie same jak aktualne",
+        "Permissions": "Uprawnienia"
       },
       "CreateAccountDialog": {
         "TitleCreate": "Utwórz nowe konto",
@@ -234,11 +271,10 @@ export const resources = {
         "PermissionsSelect": "Uprawnienia",
         "HelperTextName": "Co najmniej 3 znaki",
         "HelperTextPassword": "Co najmniej 8 znaków",
-        "AccountBeingEditedSubtitle": "Edytujesz konto o następującym ID: "
+        "AccountBeingEditedSubtitle": "Edytujesz następujące konto: "
       },
       "UserAccountsPage": {
         "CreateUser": "Utwórz użytkownika",
-        "IdColumn": "ID",
         "NameColumn": "Nazwa",
         "PermissionsColumn": "Uprawnienia",
         "ActionColumn": "Akcje",
@@ -256,7 +292,8 @@ export const resources = {
         "UnsuccessfulFileUpload403": "Tylko konta admina mają uprawnienia do wysyłania pliku konfiguracyjnego",
         "UnsuccessfulFileUpload400": "Nieprawidłowa zawartość pliku",
         "UnknownError": "Wystąpił nieznany błąd. Spróbuj ponownie.",
-        "Generic403": "Brak uprawnień"
+        "Generic403": "Brak uprawnień",
+        "LoginFailed": "Podany login i/lub hasło są nieprawidłowe"
       },
       "ConfirmDeleteUserDialog": {
         "Title": "Proszę potwierdzić usunięcie. Ten proces jest nieodwracalny.",

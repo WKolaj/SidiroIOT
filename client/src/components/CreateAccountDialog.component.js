@@ -153,16 +153,21 @@ function CreateAccountDialog({ open,
     })
   }
 
+  const cancel = () => {
+    setCreateAccountDialogOpen(false)
+    setCreateAccountDialogPasswordTextfield('')
+    setCreateAccountDialogNameTextfield('')
+  }
+
   return (
     <Dialog open={open} onClose={() => setCreateAccountDialogOpen(false)} aria-labelledby="form-dialog-title">
       <DialogTitle id="form-dialog-title">{type === 'create' ? t('CreateAccountDialog.TitleCreate') : t('CreateAccountDialog.TitleEdit')}</DialogTitle>
       <DialogContent>
         {type === 'edit' ?
           <DialogContentText>
-            {t('CreateAccountDialog.AccountBeingEditedSubtitle')}<strong>{editAccountId}</strong>
+            {t('CreateAccountDialog.AccountBeingEditedSubtitle')}<strong>{name}</strong>
           </DialogContentText>
           : null}
-
         <form className={classes.form}>
           {AuthService.getCurrentUser() !== null ?
             <div>
@@ -210,11 +215,10 @@ function CreateAccountDialog({ open,
               </FormControl>
             </div>
             : null}
-
         </form>
       </DialogContent>
       <DialogActions>
-        <Button onClick={() => setCreateAccountDialogOpen(false)} color="primary">
+        <Button onClick={() => cancel()} color="primary">
           {t('CreateAccountDialog.Cancel')}
         </Button>
         <Button disabled={disableButton()} onClick={() => type === 'edit' ? edit() : register()} color="primary">
