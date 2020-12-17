@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
@@ -12,7 +12,9 @@ import CollapsibleTable from './CollapsibleTable.component';
 import DeviceService from '../services/device.service';
 import ActivateService from '../services/activate.service';
 import worker from 'workerize-loader!../workers/devices.worker'; //eslint-disable-line import/no-webpack-loader-syntax
-import { converter } from '../utilities/deviceTablesConverter.utility';
+import RefreshIcon from '@material-ui/icons/Refresh';
+import IconButton from '@material-ui/core/IconButton';
+import Tooltip from '@material-ui/core/Tooltip';
 
 const useStyles = makeStyles((theme) => ({
   title: {
@@ -23,7 +25,18 @@ const useStyles = makeStyles((theme) => ({
   },
   offboarded: {
     color: 'red'
+  },
+  alignTop: {
+    verticalAlign: 'top'
+  },
+  devicesTitleInline: {
+    marginBottom: theme.spacing(3),
+    display: 'inline-block'
+  },
+  marginTopTable: {
+    marginTop: theme.spacing(4)
   }
+
 }));
 
 let instance;
@@ -31,7 +44,6 @@ let instance;
 function DevicesSelectionPage(props) {
   const classes = useStyles();
   const { t } = useTranslation();
-  const [tables, setTables] = useState({})
   const { setAllDevices, allDevices, selectedDevice, authenticated, refreshDeviceParams } = props;
 
   const reformatDeviceDataToReducer = (data) => {
@@ -42,14 +54,18 @@ function DevicesSelectionPage(props) {
     return arr
   }
 
-  //initial fetch all devices
-  useEffect(() => {
+  const fetchDevices = useCallback(() => {
     DeviceService.getDevices().then(res => {
       if (res.status === 200) {
         setAllDevices(reformatDeviceDataToReducer(res.data))
       }
     })
-  }, [setAllDevices])
+  }, [setAllDevices]);
+
+  //initial fetch all devices
+  useEffect(() => {
+    fetchDevices()
+  }, [setAllDevices, fetchDevices])
 
   //setup web worker for fetching periodically
   useEffect(() => {
@@ -82,41 +98,197 @@ function DevicesSelectionPage(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authenticated, selectedDevice])
 
+  const converter = (data) => {
+    let tables = {}
+    data.forEach(obj => {
+      if (Array.isArray(obj)) {
+        //if array of arrays, access properties only
+        obj = obj[1]
+      }
+      if (tables[obj.type] === undefined) {
+        tables = {
+          ...tables,
+          [obj.type]: {
+            type: obj.type,
+            rows: [],
+            cols: templates(obj.type, data).cols
+          }
+        }
+      }
+      tables = {
+        ...tables,
+        [obj.type]: {
+          ...tables[obj.type],
+          rows: [...tables[obj.type].rows, templates(obj.type, obj).rows]
+        }
+      }
+    })
+    return tables
+  }
+
+  const templates = (type, data) => {
+    switch (type) {
+      //devices
+      case 'MBDevice':
+        return {
+          cols: [t('DevicesSelectionPage.Properties.ipAddress'), t('DevicesSelectionPage.Properties.isActive'), t('DevicesSelectionPage.Properties.isConnected'), t('DevicesSelectionPage.Properties.name'), t('DevicesSelectionPage.Properties.portNumber'), t('DevicesSelectionPage.Properties.timeout'), t('DevicesSelectionPage.Properties.type')],
+          rows: [data.ipAddress, data.isActive, data.isConnected, data.name, data.portNumber, data.timeout, data.type]
+        }
+      case 'InternalDevice':
+        return {
+          cols: [t('DevicesSelectionPage.Properties.isActive'), t('DevicesSelectionPage.Properties.name'), t('DevicesSelectionPage.Properties.type')],
+          rows: [data.isActive, data.name, data.type]
+        }
+      case 'MSAgentDevice':
+        return {
+          cols: ['boarded', 'dataStorageSize', 'eventStorageSize', t('DevicesSelectionPage.Properties.isActive'), t('DevicesSelectionPage.Properties.name'), 'numberOfDataFilesToSend', 'numberOfEventFilesToSend', 'numberOfSendDataRetries', 'numberOfSendEventRetries', 'sendDataFileInterval', 'sendEventFileInterval', 'MSAgentDevice'],
+          rows: [data.boarded, data.dataStorageSize, data.eventStorageSize, data.isActive, data.name, data.numberOfDataFilesToSend, data.numberOfEventFilesToSend, data.numberOfSendDataRetries, data.numberOfSendEventRetries, data.sendDataFileInterval, data.sendEventFileInterval, data.MSAgentDevice]
+        }
+      case 'S7Device':
+        return {
+          cols: ['ipAddress', 'isActive', 'isConnected', 'name', 'rack', 'slot', 'timeout', 'type'],
+          rows: [data.ipAddress, data.isActive, data.isConnected, data.name, data.rack, data.slot, data.timeout, data.type]
+        }
+
+      //edge computing
+      case 'AverageCalculator':
+        return {
+          cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'factor', 'sampleTime', 'calculationInterval', 'lastValueTick'],
+          rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.factor, data.sampleTime, data.calculationInterval, data.lastValueTick]
+        }
+      case 'IncreaseCalculator':
+        return {
+          cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'factor', 'sampleTime', 'overflow', 'calculationInterval', 'lastValueTick'],
+          rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.factor, data.sampleTime, data.overflow, data.calculationInterval, data.lastValueTick]
+        }
+      case 'FactorCalculator':
+        return {
+          cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'factor', 'sampleTime', 'lastValueTick'],
+          rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.factor, data.sampleTime, data.lastValueTick]
+        }
+      case 'SumCalculator':
+        return {
+          cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'sampleTime', 'lastValueTick'],
+          rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.sampleTime, data.lastValueTick]
+        }
+      case 'ValueFromByteArrayCalculator':
+        return {
+          cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'bitNumber', 'byteNumber', 'length', 'sampleTime', 'lastValueTick'],
+          rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.bitNumber, data.byteNumber, data.length, data.sampleTime, data.lastValueTick]
+        }
+      case 'ExpressionCalculator':
+        return {
+          cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'expression', 'parameters', 'sampleTime', 'lastValueTick'],
+          rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.expression, data.parameters, data.sampleTime, data.lastValueTick]
+        }
+
+      //variables
+      case 'MBBoolean':
+      case 'MBByteArray':
+      case 'MBFloat':
+      case 'MBDouble':
+      case 'MBUInt32':
+      case 'MBUInt16':
+      case 'MBInt32':
+      case 'MBInt16':
+      case 'MBSwappedInt32':
+      case 'MBSwappedUInt32':
+      case 'MBSwappedFloat':
+      case 'MBSwappedDouble':
+        return {
+          cols: [t('DevicesSelectionPage.Properties.defaultValue'), t('DevicesSelectionPage.Properties.lastValueTick'), t('DevicesSelectionPage.Properties.length'), t('DevicesSelectionPage.Properties.name'), t('DevicesSelectionPage.Properties.offset'), t('DevicesSelectionPage.Properties.offset'), t('DevicesSelectionPage.Properties.readAsSingle'), t('DevicesSelectionPage.Properties.readFCode'), t('DevicesSelectionPage.Properties.sampleTime'), t('DevicesSelectionPage.Properties.type'), t('DevicesSelectionPage.Properties.unit'), t('DevicesSelectionPage.Properties.value'), t('DevicesSelectionPage.Properties.write'), t('DevicesSelectionPage.Properties.writeAsSingle'), t('DevicesSelectionPage.Properties.writeFCode')],
+          rows: [data.defaultValue, formatDateTime(new Date(data.lastValueTick * 1000)), data.length, data.name, data.offset, data.read, data.readAsSingle, data.readFCode, data.sampleTime, data.type, data.unit, parseFloat(data.value).toFixed(2), data.write, data.writeAsSingle, data.writeFCode]
+        }
+      case 'LastCycleDurationVariable':
+      case 'CPULoadVariable':
+        return {
+          cols: [t('DevicesSelectionPage.Properties.defaultValue'), t('DevicesSelectionPage.Properties.lastValueTick'), t('DevicesSelectionPage.Properties.name'), t('DevicesSelectionPage.Properties.sampleTime'), t('DevicesSelectionPage.Properties.type'), t('DevicesSelectionPage.Properties.unit'), t('DevicesSelectionPage.Properties.value')],
+          rows: [data.defaultValue, formatDateTime(new Date(data.lastValueTick * 1000)), data.name, data.sampleTime, data.type, data.unit, parseFloat(data.value).toFixed(2)]
+        }
+      case 'S7Real':
+        return {
+          cols: ['name', 'type', 'value', 'unit', 'dbNumber', 'defaultValue', 'lastValueTick', 'length', 'memoryType', 'offset', 'read', 'readAsSingle', 'sampleTime', 'write', 'writeAsSingle'],
+          rows: [data.name, data.type, data.value, data.unit, data.dbNumber, data.defaultValue, data.lastValueTick, data.length, data.memoryType, data.offset, data.read, data.readAsSingle, data.sampleTime, data.write, data.writeAsSingle]
+        }
+      // case 'AssociatedVariable':
+      //   return {
+      //     cols: [],
+      //     rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.sampleTime, data.associatedDeviceId, ]
+      //   }
+
+      //alerts
+      case 'HighLimitAlert':
+        return {
+          cols: [t('DevicesSelectionPage.Properties.defaultValue'), t('DevicesSelectionPage.Properties.highLimit'), t('DevicesSelectionPage.Properties.hysteresis'), t('DevicesSelectionPage.Properties.lastValueTick'), t('DevicesSelectionPage.Properties.name'), t('DevicesSelectionPage.Properties.sampleTime'), 'severity', 'texts', 'timeOffDelay', 'timeOnDelay', t('DevicesSelectionPage.Properties.type'), t('DevicesSelectionPage.Properties.unit'), t('DevicesSelectionPage.Properties.value')],
+          rows: [data.defaultValue, data.highLimit, data.hysteresis, formatDateTime(new Date(data.lastValueTick * 1000)), data.name, data.sampleTime, data.severity, data.texts, data.timeOffDelay, data.timeOnDelay, data.type, data.unit, parseFloat(data.value).toFixed(2)]
+        }
+      case 'BandwidthLimitAlert':
+        return {
+          cols: [t('DevicesSelectionPage.Properties.defaultValue'), t('DevicesSelectionPage.Properties.highLimit'), t('DevicesSelectionPage.Properties.hysteresis'), t('DevicesSelectionPage.Properties.lastValueTick'), 'lowLimit', t('DevicesSelectionPage.Properties.name'), t('DevicesSelectionPage.Properties.sampleTime'), 'severity', 'texts', 'timeOffDelay', 'timeOnDelay', t('DevicesSelectionPage.Properties.type'), t('DevicesSelectionPage.Properties.unit'), t('DevicesSelectionPage.Properties.value')],
+          rows: [data.defaultValue, data.highLimit, data.hysteresis, formatDateTime(new Date(data.lastValueTick * 1000)), data.lowLimit, data.name, data.sampleTime, data.severity, data.texts, data.timeOffDelay, data.timeOnDelay, data.type, data.unit, parseFloat(data.value).toFixed(2)]
+        }
+      case 'LowLimitAlert':
+        return {
+          cols: [t('DevicesSelectionPage.Properties.defaultValue'), t('DevicesSelectionPage.Properties.hysteresis'), t('DevicesSelectionPage.Properties.lastValueTick'), 'lowLimit', t('DevicesSelectionPage.Properties.name'), t('DevicesSelectionPage.Properties.sampleTime'), 'severity', 'texts', 'timeOffDelay', 'timeOnDelay', t('DevicesSelectionPage.Properties.type'), t('DevicesSelectionPage.Properties.unit'), t('DevicesSelectionPage.Properties.value')],
+          rows: [data.defaultValue, data.hysteresis, data.lastValueTick, data.lowLimit, data.name, data.sampleTime, data.severity, data.texts, data.timeOffDelay, data.timeOnDelay, data.type, data.unit, data.value]
+        }
+      case 'ExactValuesAlert':
+        return {
+          cols: [t('DevicesSelectionPage.Properties.defaultValue'), t('DevicesSelectionPage.Properties.lastValueTick'), t('DevicesSelectionPage.Properties.name'), t('DevicesSelectionPage.Properties.sampleTime'), t('DevicesSelectionPage.Properties.severity'), t('DevicesSelectionPage.Properties.texts'), t('DevicesSelectionPage.Properties.timeOffDelay'), t('DevicesSelectionPage.Properties.timeOnDelay'), t('DevicesSelectionPage.Properties.type'), t('DevicesSelectionPage.Properties.unit'), t('DevicesSelectionPage.Properties.value')],
+          rows: [data.defaultValue, data.lastValueTick, data.name, data.sampleTime, data.severity, data.texts, data.timeOffDelay, data.timeOnDelay, data.type, data.unit, data.value]
+        }
+
+      //custom made - without 'type' property - eventsToSendConfig, dataToSendConfig
+      case 'eventsToSendConfig':
+        return {
+          cols: ['sendingInterval', 'entityId', 'sourceType', 'sourceId', 'source', 'severity'],
+          rows: [data.sendingInterval, data.entityId, data.sourceType, data.sourceId, data.source, data.severity]
+        }
+      case 'dataToSendConfig':
+        return {
+          cols: ['sendingInterval', 'qualityCodeEnabled', 'datapointId', 'dataConverter'],
+          rows: [data.sendingInterval, data.qualityCodeEnabled, data.datapointId, data.dataConverter]
+        }
+
+      default:
+        return {
+          cols: [],
+          rows: []
+        }
+    }
+  }
+
   const createTabs = (devices, selectedDevice) => {
-    console.log(Object.entries(devices[0]))
-    let columns = []
-    let rows = []
     let tabs = []
-    devices.map((device, index) => {
+    devices.forEach((device, index) => {
       const entries = Object.entries(device)
       for (const [, properties] of entries) {
         if (properties.id === selectedDevice.selectedDeviceID) {
+          const converted = converter([properties])
+          //generate tables for each device type
+          const firstLevelTables = traverseObject(converted)
+          //info tab
+          tabs.push({
+            label: t(`DevicesSelectionPage.Tabs.info`),
+            content: firstLevelTables.map((table, i) => (<React.Fragment key={i}><Typography variant="h6" className={classes.marginTopTable}>{table.type}</Typography><CollapsibleTable columns={table.cols} rows={table.rows} /></React.Fragment>))
+          })
+
           const propertiesEntries = Object.entries(properties)
-          for (const [column, cell] of propertiesEntries) {
-            if (typeof cell !== 'object' && cell !== null) {
-              //INFO tab
-              columns.push(t(`DevicesSelectionPage.Properties.${column}`))
-              //columns.push(column)
-              rows.push({
-                value: cell,
-                belongsToColumn: t(`DevicesSelectionPage.Tabs.info`)
-              })
-            }
-            else {
-              const tab = createTab(cell)
+          //other tabs, traversing through object
+          for (let [column, cell] of propertiesEntries) {
+            if (typeof cell === 'object') {
+              const traverse = traverseObject(cell, column)
+              const converted = converter(traverse)
+              const secondLevelTable = traverseObject(converted)
               tabs.push({
                 label: t(`DevicesSelectionPage.Tabs.${column}`),
-                content: <CollapsibleTable columns={tab.columns} rows={tab.rows} />
+                content: secondLevelTable.map((table, i) => (<React.Fragment key={i}><Typography variant="h6" className={classes.marginTopTable}>{table.type}</Typography><CollapsibleTable columns={table.cols} rows={table.rows} /></React.Fragment>))
               })
             }
           }
         }
       }
       return null
-    })
-    tabs.push({
-      label: t(`DevicesSelectionPage.Tabs.info`),
-      content: <CollapsibleTable columns={columns} rows={[rows]} />
     })
 
     return <DeviceSelectionTabs
@@ -125,83 +297,21 @@ function DevicesSelectionPage(props) {
     />
   }
 
-  const createTab = (obj) => {
-    let tables = {}
-    let columns = []
-    let rows = []
+  const traverseObject = (obj, column = null) => {
+    //console.log(column)
+    let tables = []
     const entries = Object.entries(obj)
-    let type;
-    for (const [, properties] of entries) {
-      //console.log(properties)
-      let row = []
-      type = properties.type
-      const propertiesEntries = Object.entries(properties)
-      if(tables[type]=== undefined) {
-        tables = {
-          ...tables,
-          [type]: {
-            rows: [],
-            cols: []
-          }
-        }
+    for (const [, tableProperties] of entries) {
+      if (column === 'dataToSendConfig' || column === 'eventsToSendConfig') {
+        tables.push({ ...tableProperties, type: column })
       }
-      for (const [column, cell] of propertiesEntries) {
-
-        if (!columns.includes(t(`DevicesSelectionPage.Properties.${column}`))) {
-          columns.push(t(`DevicesSelectionPage.Properties.${column}`))
-        }
-     
-        if(tables[type]!==undefined && !tables[type].cols.includes(t(`DevicesSelectionPage.Properties.${column}`))) {
-          
-          tables = {
-            ...tables,
-            [type]: {
-              ...tables[type],
-              cols: [...tables[type].cols, t(`DevicesSelectionPage.Properties.${column}`)]
-            }
-          }
-        }
-
-        //if is numeric and with decimal place, set precision to 2
-        if (!isNaN(cell) && cell % 1 !== 0 && cell !== false && cell !== true) {
-          row.push({
-            value: parseFloat(cell).toFixed(2),
-            type: type,
-            belongsToColumn: t(`DevicesSelectionPage.Properties.${column}`)
-          })
-        }
-        else {
-          if (column === 'lastValueTick') {
-            row.push({
-              value: formatDateTime(new Date(cell * 1000)),
-              type: type,
-              belongsToColumn: t(`DevicesSelectionPage.Properties.${column}`)
-            })
-          }
-          else {
-
-            row.push({
-              value: cell,
-              type: type,
-              belongsToColumn: t(`DevicesSelectionPage.Properties.${column}`)
-            })
-            
-          }
-        }
+      else {
+        tables.push(tableProperties)
       }
-      tables = {
-        ...tables,
-        [type]: {
-          ...tables[type], 
-          rows: [...tables[type].rows, row],
-          cols: [...tables[type].cols]
-        }
-      }
-      rows.push(row)
     }
-    converter(tables)
-    return { rows, columns }
+    return tables
   }
+
 
   const formatDateTime = (date) => {
     const hours = date.getHours() < 10 ? `0${date.getHours()}` : date.getHours()
@@ -238,13 +348,19 @@ function DevicesSelectionPage(props) {
 
   return (
     <React.Fragment>
-      <Grid container spacing={2}>
+      <Grid container spacing={2} justify="flex-start"
+        alignItems="flex-start">
         <Grid item xs={12} sm={12} md={3} xl={2}>
-          <Typography variant="h4" className={classes.title}>{t('DevicesSelectionPage.DevicesTitle')}</Typography>
+          <Typography variant="h4" className={classes.devicesTitleInline}>{t('DevicesSelectionPage.DevicesTitle')}</Typography>
+          <Tooltip title={t('DevicesSelectionPage.RefreshAllDevices')} placement="bottom">
+            <IconButton aria-label="delete" className={classes.alignTop} onClick={() => fetchDevices()} >
+              <RefreshIcon />
+            </IconButton>
+          </Tooltip>
           <DevicesList />
         </Grid>
         <Grid container item xs={12} sm={12} md={9} xl={10} spacing={0}>
-          <Grid item xs={12}>
+          <Grid item xs={12} >
             <Typography variant="h4" className={classes.title}>{selectedDevice.selectedDeviceID}</Typography>
             <React.Fragment>
               {createTabs(allDevices, selectedDevice)}

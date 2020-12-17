@@ -48,9 +48,6 @@ export function a11yProps(index) {
 export const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
-    //width: `calc(100% + 16px)`,
-    //backgroundColor: theme.palette.background.paper,
-    //margin: '-8px',
     marginBottom: '20px'
   },
   defaultRoot: {
@@ -60,6 +57,10 @@ export const useStyles = makeStyles((theme) => ({
   },
   noElevation: {
     boxShadow: 'unset'
+  },
+  tabpanel: {
+    maxHeight: '80vh',
+    overflow: 'auto'
   }
 }));
 
@@ -84,7 +85,7 @@ function ScrollableTabsButtonForce(props) {
         </Tabs>
       </AppBar>
       {props.tabs.map((tab, i) => {
-        return <TabPanel key={`tabpanel-${i}`} value={props.tabsInstance[props.name] || 0} index={i}>
+        return <TabPanel key={`tabpanel-${i}`} value={props.tabsInstance[props.name] || 0} index={i} className={classes.tabpanel}>
           {tab.content}
         </TabPanel>
       })}

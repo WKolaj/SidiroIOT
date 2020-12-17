@@ -10,6 +10,7 @@ import { connect } from 'react-redux';
 import Divider from '@material-ui/core/Divider';
 import { makeStyles } from '@material-ui/core/styles';
 import { setConfigFile } from '../actions/Settings.action';
+import { setBackdropOpen, setBackdropClosed } from '../actions/Backdrop.action';
 
 const useStyles = makeStyles((theme) => ({
   divider: {
@@ -21,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-function Settings({ setSnackbarText, setSnackbarShown, file, setConfigFile }) {
+function Settings({ setSnackbarText, setSnackbarShown, file, setConfigFile, setBackdropOpen, setBackdropClosed }) {
   const classes = useStyles();
   const { t } = useTranslation()
 
@@ -42,7 +43,12 @@ function Settings({ setSnackbarText, setSnackbarShown, file, setConfigFile }) {
   }
 
   const uploadFile = () => {
+    setBackdropOpen()
     FileService.uploadConfigFile(file).then(res => {
+      setBackdropClosed()
+      //reset file after upload try
+      setConfigFile(null)
+
       if (res.status === 200) {
         setSnackbarText(t('Snackbar.SuccessfulFileUpload'), 'success')
         setSnackbarShown(true)
@@ -60,8 +66,6 @@ function Settings({ setSnackbarText, setSnackbarShown, file, setConfigFile }) {
         setSnackbarShown(true)
       }
     })
-    //reset file after upload try
-    setConfigFile(null)
   }
 
   return (
@@ -125,7 +129,9 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = {
   setSnackbarText,
   setSnackbarShown,
-  setConfigFile
+  setConfigFile,
+  setBackdropOpen,
+  setBackdropClosed
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Settings);

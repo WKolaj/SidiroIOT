@@ -15,6 +15,7 @@ import AuthService from "../services/auth.service";
 import { useHistory } from "react-router-dom";
 import { setLoginFormUsernameError, setLoginFormPasswordError, setLoginFormUsername, setLoginFormPassword } from '../actions/LoginPage.action';
 import { setSnackbarText, setSnackbarShown } from '../actions/Snackbar.action';
+import Tooltip from '@material-ui/core/Tooltip';
 
 const useStyles = makeStyles((theme) => ({
   contentDesktop: {
@@ -99,9 +100,11 @@ function LoginPage(props) {
         }}
         unmountOnExit
       >
-        <Fab aria-label="choose langauge" className={classes.fab} color="primary" onClick={() => props.setLanguageDialogOpen(true)}>
-          <LanguageIcon />
-        </Fab>
+        <Tooltip title={t('LoginPage.Language')} placement="bottom">
+          <Fab aria-label="choose langauge" className={classes.fab} color="primary" onClick={() => props.setLanguageDialogOpen(true)}>
+            <LanguageIcon />
+          </Fab>
+        </Tooltip>
       </Zoom>
 
       <Grid className={matches ? classes.contentMobile : classes.contentDesktop}
@@ -112,7 +115,7 @@ function LoginPage(props) {
         alignItems="center"
         alignContent="center">
         <Grid item xs={12} >
-          <Typography align="center" variant="h2" gutterBottom>Sidiro IoT</Typography>
+          <Typography align="center" variant="h2" gutterBottom>SidiroIOT</Typography>
         </Grid>
         <Grid item xs={12} >
           <Typography align="center" variant="h4" gutterBottom>{t('LoginPage.LoginTitle')}</Typography>

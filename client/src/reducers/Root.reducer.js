@@ -12,6 +12,7 @@ import { SnackbarReducer } from './Snackbar.reducer';
 import { ConfirmDeleteUserDialogReducer } from './ConfirmDeleteUserDialog.reducer';
 import { DevicesSelectionPageReducer } from './DevicesSelectionPage.reducer';
 import { SettingsReducer } from './Settings.reducer';
+import { BackdropReducer } from './Backdrop.reducer';
 
 export default combineReducers({
   LanguageDialogReducer,
@@ -26,5 +27,6 @@ export default combineReducers({
   SnackbarReducer,
   ConfirmDeleteUserDialogReducer,
   DevicesSelectionPageReducer,
-  SettingsReducer
+  SettingsReducer,
+  BackdropReducer
 })

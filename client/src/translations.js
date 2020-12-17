@@ -23,6 +23,7 @@ export const resources = {
         "Disconnect": "Disconnect",
         "StatusOnboarded": "Onboarded",
         "StatusOffboarded": "Offboarded",
+        "RefreshAllDevices": "Refresh all devices",
         "Properties": {
           "id": "ID",
           "name": "Name",
@@ -127,7 +128,8 @@ export const resources = {
         "FormPasswordTextField": "Password",
         "InvalidLoginPassword": "Invalid login/password combination",
         "FormLoginTextFieldHelperText": "At least 3 characters",
-        "FormPasswordTextFieldHelperText": "At least 8 characters"
+        "FormPasswordTextFieldHelperText": "At least 8 characters",
+        "Language": "Language"
       },
       "AccountMenu": {
         "MyAccount": "My Account",
@@ -211,6 +213,7 @@ export const resources = {
         "Status": "Stan",
         "Connect": "Połącz",
         "Disconnect": "Rozłącz",
+        "RefreshAllDevices": "Odśwież wszystkie urządzenia",
         "Tabs": {
           "calcElements": "Edge computing",
           "variables": "Zmienne",
@@ -241,7 +244,8 @@ export const resources = {
         "FormPasswordTextField": "Hasło",
         "InvalidLoginPassword": "Nieprawidłowa nazwa lub hasło",
         "FormLoginTextFieldHelperText": "Co najmniej 3 znaki",
-        "FormPasswordTextFieldHelperText": "Co najmniej 8 znaków"
+        "FormPasswordTextFieldHelperText": "Co najmniej 8 znaków",
+        "Language": "Język"
       },
       "AccountMenu": {
         "MyAccount": "Moje konto",

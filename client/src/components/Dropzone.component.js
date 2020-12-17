@@ -3,8 +3,6 @@ import { useDropzone } from 'react-dropzone';
 import Typography from '@material-ui/core/Typography';
 import { useTranslation } from 'react-i18next';
 import { makeStyles } from '@material-ui/core/styles';
-import FileService from '../services/file.service';
-import { setSnackbarText, setSnackbarShown } from '../actions/Snackbar.action';
 import { connect } from 'react-redux';
 import { setConfigFile } from '../actions/Settings.action';
 
@@ -14,32 +12,15 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function Dropzone({ setSnackbarText, setSnackbarShown, setConfigFile }) {
+function Dropzone({ setConfigFile }) {
   const classes = useStyles();
   const { t } = useTranslation();
 
   const onDrop = useCallback(acceptedFiles => {
     // Do something with the files
     setConfigFile(acceptedFiles[0])
-    // FileService.uploadConfigFile(acceptedFiles[0]).then(res => {
-    //   if (res.status === 200) {
-    //     setSnackbarText(t('Snackbar.SuccessfulFileUpload'), 'success')
-    //     setSnackbarShown(true)
-    //   }
-    //   else if (res.status === 403) {
-    //     setSnackbarText(t('Snackbar.UnsuccessfulFileUpload403'), 'error')
-    //     setSnackbarShown(true)
-    //   }
-    //   else if (res.status === 400) {
-    //     setSnackbarText(t('Snackbar.UnsuccessfulFileUpload400'), 'error')
-    //     setSnackbarShown(true)
-    //   }
-    //   else {
-    //     setSnackbarText(t('Snackbar.UnknownError'), 'error')
-    //     setSnackbarShown(true)
-    //   }
-    // })
-  }, [setSnackbarShown, setSnackbarText, t])
+  }, [setConfigFile])
+
   const { getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject } = useDropzone({ onDrop, accept: 'application/JSON' });
 
 
@@ -95,8 +76,6 @@ function Dropzone({ setSnackbarText, setSnackbarShown, setConfigFile }) {
 }
 
 const mapDispatchToProps = {
-  setSnackbarText,
-  setSnackbarShown,
   setConfigFile
 }
 

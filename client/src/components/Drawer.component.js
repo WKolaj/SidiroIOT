@@ -369,7 +369,7 @@ function MiniDrawer(props) {
                   <MenuIcon />
                 </IconButton>
                 <Typography variant="h6" noWrap className={classes.title}>
-                  Sidiro IoT
+                  SidiroIOT
                 </Typography>
                 <div className={classes.sectionDesktop}>
                   <Typography variant="body1">CPU</Typography>

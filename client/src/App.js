@@ -11,6 +11,7 @@ import LanguageDialog from './components/LanguageSelectionDialog.component';
 import CreateAccountDialog from './components/CreateAccountDialog.component';
 import Snackbar from './components/Snackbar.component';
 import ConfirmDeleteUserDialog from './components/ConfirmDeleteUserDialog.component';
+import Backdrop from './components/Backdrop.component';
 
 const store = createStore(rootReducer);
 
@@ -38,11 +39,12 @@ function App() {
         <Provider store={store}>
           <Router>
             <Drawer />
-            <CreateAccountDialog/>
-            <ConfirmDeleteUserDialog/>
           </Router>
-          <LanguageDialog/>
-          <Snackbar/>
+          <CreateAccountDialog />
+          <ConfirmDeleteUserDialog />
+          <LanguageDialog />
+          <Snackbar />
+          <Backdrop />
         </Provider>
       </ThemeProvider>
     </React.Fragment>

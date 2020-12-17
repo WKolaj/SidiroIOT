@@ -13,26 +13,24 @@ import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
-import { useTranslation } from 'react-i18next';
 
-const useRowStyles = makeStyles({
+const useRowStyles = makeStyles((theme) => ({
   root: {
     '& > *': {
       borderBottom: 'unset',
     },
-  },
-});
+  }
+})
+)
 
 const isNotObject = (data) => typeof data !== 'object' || data === null;
-const test = (data) => typeof data.value !== 'object' || data.value === null;
 const isObject = (data) => typeof data === 'object' && data !== null;
 
 //for array of arrays
-const notObject = (element) => element.every(test);
+const notObject = (element) => element.every(isNotObject);
 
 function Row(props) {
   // props.row === ['item1', 'item2', 'item3', ...]
-  const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
   const [objects, setObjects] = React.useState(null)
   const classes = useRowStyles();
@@ -40,8 +38,10 @@ function Row(props) {
 
   React.useEffect(() => {
     let obj = []
-    row.map((cell, index) => {
-      return isObject(cell.value) ? obj.push({ cell: cell.value, index: index }) : null
+    row.forEach((cell, index) => {
+      if(isObject(cell)) {
+        obj.push({ cell: cell, index: index })
+      }
     })
     setObjects(obj)
   }, [row])
@@ -60,7 +60,7 @@ function Row(props) {
   }
 
   return (
-    <React.Fragment>
+    <React.Fragment >
       <TableRow className={classes.root}>
         <TableCell>
           {/* if expand needed - first cell for arrow */}
@@ -70,10 +70,10 @@ function Row(props) {
         </TableCell>
 
         {row.map((cell, index) => {
-          return <TableCell key={index}>{typeof cell.value === "boolean" ? cell.value.toString() : typeof cell.value === "object" ?
+          return <TableCell key={index}>{typeof cell === "boolean" || cell === null ? `${cell}` : typeof cell === "object" ?
             (<IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)}>
               {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-            </IconButton>) : cell.value}</TableCell>
+            </IconButton>) : cell}</TableCell>
         })}
       </TableRow>
       <TableRow>
@@ -103,7 +103,6 @@ function Row(props) {
                       </TableBody>
                     </Table>
                   </React.Fragment>
-
                 )
               }) : null}
             </Box>
@@ -118,11 +117,10 @@ function SimpleRow(props) {
   const classes = useRowStyles();
   return (
     <TableRow className={classes.root}>
-      {props.row.map((cell, index) => <TableCell key={index}>{typeof cell.value === "boolean" ? cell.value.toString() : typeof cell.value === "object" ? JSON.stringify(cell.value) : cell.value}</TableCell>)}
+      {props.row.map((cell, index) => <TableCell key={index}>{typeof cell === "boolean" ? cell.toString() : typeof cell === "object" ? JSON.stringify(cell) : cell}</TableCell>)}
     </TableRow>
   )
 }
-
 
 export default function CollapsibleTable(props) {
   return (
@@ -130,11 +128,6 @@ export default function CollapsibleTable(props) {
       <Table aria-label="collapsible table">
         <TableHead>
           <TableRow>
-            {/* {props.rows.length>0 && !props.rows[0].every(isNotObject)?
-            <TableCell/>:null}
-            {props.columns.map((column, index) => {
-              return <TableCell key={index}>{column}</TableCell>
-            })} */}
             {props.rows.length > 0 && props.rows.filter(notObject).length < props.rows.length ?
               <TableCell /> : null}
             {props.columns.map((column, index) => {
