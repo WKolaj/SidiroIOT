@@ -1,5 +1,6 @@
-const User = require("./classes/User/User");
-const { exists } = require("./utilities/utilities");
+const { exists, writeFileAsync, hashString } = require("./utilities/utilities");
+const config = require("config");
+const path = require("path");
 
 const superAdminID = "superAdminID";
 const superAdminName = "superAdmin";
@@ -21,47 +22,33 @@ const createInitialUsers = async () => {
     if (!exists(superAdminPassword))
       throw new Error("Password of test admin should be passed as argument");
 
-    let superAdmin = await User.GetUserFromFileById(superAdminID);
-    if (!exists(superAdmin)) {
-      superAdmin = await User.CreateFromPayload(
-        {
-          _id: superAdminID,
-          name: superAdminName,
-          password: superAdminPassword,
-          permissions: 7,
-        },
-        true
-      );
-      await superAdmin.Save();
-    }
+    let usersFilePath = path.join(
+      config.get("settingsPath"),
+      config.get("userFileName")
+    );
 
-    let admin = await User.GetUserFromFileById(adminID);
-    if (!exists(admin)) {
-      admin = await User.CreateFromPayload(
-        {
-          _id: adminID,
-          name: adminName,
-          password: adminPassword,
-          permissions: 3,
-        },
-        true
-      );
-      await admin.Save();
-    }
+    let usersPayload = {
+      [superAdminID]: {
+        _id: superAdminID,
+        name: superAdminName,
+        password: await hashString(superAdminPassword),
+        permissions: 7,
+      },
+      [adminID]: {
+        _id: adminID,
+        name: adminName,
+        password: await hashString(adminPassword),
+        permissions: 3,
+      },
+      [userID]: {
+        _id: userID,
+        name: userName,
+        password: await hashString(userPassword),
+        permissions: 1,
+      },
+    };
 
-    let user = await User.GetUserFromFileById(userID);
-    if (!exists(user)) {
-      user = await User.CreateFromPayload(
-        {
-          _id: userID,
-          name: userName,
-          password: userPassword,
-          permissions: 1,
-        },
-        true
-      );
-      await user.Save();
-    }
+    await writeFileAsync(usersFilePath, JSON.stringify(usersPayload), "utf8");
 
     process.exit(0);
   } catch (err) {
