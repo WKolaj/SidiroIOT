@@ -1,7 +1,10 @@
 import React from 'react';
 import './App.scss';
 import { BrowserRouter as Router } from "react-router-dom";
-import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
+import {
+  createMuiTheme,
+  ThemeProvider
+} from '@material-ui/core/styles';
 import Drawer from './components/Drawer.component';
 import { Provider } from "react-redux";
 import { createStore } from "redux";
@@ -12,6 +15,7 @@ import CreateAccountDialog from './components/CreateAccountDialog.component';
 import Snackbar from './components/Snackbar.component';
 import ConfirmDeleteUserDialog from './components/ConfirmDeleteUserDialog.component';
 import Backdrop from './components/Backdrop.component';
+import IPConfigDialog from './components/IPConfigDialog.component';
 
 const store = createStore(rootReducer);
 
@@ -43,6 +47,7 @@ function App() {
           <CreateAccountDialog />
           <ConfirmDeleteUserDialog />
           <LanguageDialog />
+          <IPConfigDialog />
           <Snackbar />
           <Backdrop />
         </Provider>

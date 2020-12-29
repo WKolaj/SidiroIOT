@@ -59,7 +59,7 @@ export const useStyles = makeStyles((theme) => ({
     boxShadow: 'unset'
   },
   tabpanel: {
-    maxHeight: '80vh',
+    maxHeight: '78vh',
     overflow: 'auto'
   }
 }));

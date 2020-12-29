@@ -7,10 +7,11 @@ import { makeStyles } from '@material-ui/core/styles';
 import Avatar from '@material-ui/core/Avatar';
 import Chip from '@material-ui/core/Chip';
 import { connect } from 'react-redux';
-import { setAccountFormCurrentPassword, setAccountFormNewPassword } from '../actions/AccountPage.action';
+import { setAccountFormCurrentPassword, setAccountFormNewPassword, setAccountFormRepeatedNewPassword } from '../actions/AccountPage.action';
 import { useTranslation } from 'react-i18next';
 import UserService from '../services/user.service';
 import { setSnackbarText, setSnackbarShown } from '../actions/Snackbar.action';
+import Grow from '@material-ui/core/Grow';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -28,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-function AccountPage({ currentPassword, newPassword, setAccountFormCurrentPassword, setAccountFormNewPassword, setSnackbarText, setSnackbarShown }) {
+function AccountPage({ currentPassword, newPassword, setAccountFormCurrentPassword, setAccountFormNewPassword, setSnackbarText, setSnackbarShown, repeatedNewPassword, setAccountFormRepeatedNewPassword }) {
   const classes = useStyles();
   const { t } = useTranslation();
   const [accountDetails, setAccountDetails] = useState({})
@@ -51,27 +52,29 @@ function AccountPage({ currentPassword, newPassword, setAccountFormCurrentPasswo
 
   const verify = (textfield) => {
     const lengthErrorText = t('AccountPage.PasswordHelperError8characters');
-    const similarityErrorText = t('AccountPage.PasswordHelperErrorSamePasswords');
-    if (textfield === 'currentPassword') {
-      if (currentPassword.length > 0 && currentPassword.length < 8) {
-        return {
-          error: true,
-          text: lengthErrorText
-        }
-      }
-    }
-    else {
+    const noMatchErrorText = t('AccountPage.PasswordHelperErrorNewPasswordsMatch');
+
+    if (textfield === 'newPassword') {
       if (newPassword.length > 0 && newPassword.length < 8) {
         return {
           error: true,
           text: lengthErrorText
         }
       }
+
     }
-    if (newPassword.length > 0 && currentPassword.length > 0 && newPassword === currentPassword) {
+    else if (textfield === 'repeatNewPassword') {
+      if (repeatedNewPassword.length > 0 && repeatedNewPassword.length < 8) {
+        return {
+          error: true,
+          text: lengthErrorText
+        }
+      }
+    }
+    if (newPassword !== repeatedNewPassword && newPassword.length >= 8 && repeatedNewPassword.length >= 8) {
       return {
         error: true,
-        text: similarityErrorText
+        text: noMatchErrorText
       }
     }
     return {
@@ -114,11 +117,10 @@ function AccountPage({ currentPassword, newPassword, setAccountFormCurrentPasswo
           alignItems="flex-start"
           alignContent="center"
           item xs={12}>
-            
           <Grid item xs={12} sm={6} md={6} lg={4} xl={3}>
-            {accountDetails.permissions >= 1 ? <Chip avatar={<Avatar>U</Avatar>} label="User" /> : null}
-            {accountDetails.permissions >= 3 ? <Chip color="primary" avatar={<Avatar>A</Avatar>} label="Admin" /> : null}
-            {accountDetails.permissions === 7 ? <Chip color="secondary" avatar={<Avatar>S</Avatar>} label="SuperAdmin" /> : null}
+            {accountDetails.permissions >= 1 ? <Grow in={true} style={{ transformOrigin: '0 0 0' }} timeout={500}><Chip avatar={<Avatar>U</Avatar>} label="User" /></Grow> : null}
+            {accountDetails.permissions >= 3 ? <Grow in={true} style={{ transformOrigin: '0 0 0' }} timeout={1000}><Chip color="primary" avatar={<Avatar>A</Avatar>} label="Admin" /></Grow> : null}
+            {accountDetails.permissions === 7 ? <Grow in={true} style={{ transformOrigin: '0 0 0' }} timeout={1500}><Chip color="secondary" avatar={<Avatar>S</Avatar>} label="SuperAdmin" /></Grow> : null}
           </Grid>
         </Grid>
         <Grid container
@@ -136,7 +138,7 @@ function AccountPage({ currentPassword, newPassword, setAccountFormCurrentPasswo
                 onChange={(e) => setAccountFormCurrentPassword(e.target.value)}
                 fullWidth
                 label={t('AccountPage.CurrentPasswordTextField')}
-                />
+              />
               <TextField
                 type="password"
                 autoComplete="new-password"
@@ -146,6 +148,16 @@ function AccountPage({ currentPassword, newPassword, setAccountFormCurrentPasswo
                 label={t('AccountPage.NewPasswordTextField')}
                 helperText={verify('newPassword').text}
                 error={verify('newPassword').error} />
+              <TextField
+                type="password"
+                autoComplete="repeat-new-password"
+                value={repeatedNewPassword}
+                onChange={(e) => setAccountFormRepeatedNewPassword(e.target.value)}
+                fullWidth
+                label={t('AccountPage.RepeatNewPasswordTextField')}
+                helperText={verify('repeatNewPassword').text}
+                error={verify('repeatNewPassword').error}
+              />
             </form>
           </Grid>
         </Grid>
@@ -161,7 +173,8 @@ function AccountPage({ currentPassword, newPassword, setAccountFormCurrentPasswo
 const mapStateToProps = (state) => {
   return {
     currentPassword: state.AccountPageReducer.currentPassword,
-    newPassword: state.AccountPageReducer.newPassword
+    newPassword: state.AccountPageReducer.newPassword,
+    repeatedNewPassword: state.AccountPageReducer.repeatedNewPassword
   }
 }
 
@@ -169,7 +182,8 @@ const mapDispatchToProps = {
   setAccountFormCurrentPassword,
   setAccountFormNewPassword,
   setSnackbarText,
-  setSnackbarShown
+  setSnackbarShown,
+  setAccountFormRepeatedNewPassword
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(AccountPage);

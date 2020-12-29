@@ -110,7 +110,8 @@ function UserAccountsPage({ setUserAccountsList,
                 :
                 null])}
             />
-          </Grid> : null
+          </Grid> :
+          null
         }
         <Grid item xs={6} sm={4} md={3} lg={2}>
           <Button

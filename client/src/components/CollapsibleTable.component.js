@@ -13,6 +13,7 @@ import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
+import { useTranslation } from 'react-i18next';
 
 const useRowStyles = makeStyles((theme) => ({
   root: {
@@ -34,12 +35,13 @@ function Row(props) {
   const [open, setOpen] = React.useState(false);
   const [objects, setObjects] = React.useState(null)
   const classes = useRowStyles();
+  const { t } = useTranslation();
   const { row, columns } = props;
 
   React.useEffect(() => {
     let obj = []
     row.forEach((cell, index) => {
-      if(isObject(cell)) {
+      if (isObject(cell)) {
         obj.push({ cell: cell, index: index })
       }
     })
@@ -62,7 +64,7 @@ function Row(props) {
   return (
     <React.Fragment >
       <TableRow className={classes.root}>
-        <TableCell>
+        <TableCell >
           {/* if expand needed - first cell for arrow */}
           {objects !== null && objects.length > 0 ? <IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)}>
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
@@ -84,7 +86,7 @@ function Row(props) {
                 return (
                   <React.Fragment key={index}>
                     <Typography variant="h6" gutterBottom component="div" style={{ marginTop: '20px' }}>
-                      {columns[obj.index]}
+                      {t(`DevicesSelectionPage.Properties.${columns[obj.index]}`)}
                     </Typography>
                     <Table size="small" aria-label="purchases">
                       <TableHead>
@@ -96,8 +98,8 @@ function Row(props) {
                       </TableHead>
                       <TableBody>
                         <TableRow>
-                          {createCollapsedTable(Object.entries(objects[index].cell)).rows.map((row) => {
-                            return <TableCell key={row}>{row}</TableCell>
+                          {createCollapsedTable(Object.entries(objects[index].cell)).rows.map((row, index) => {
+                            return <TableCell key={index}>{row}</TableCell>
                           })}
                         </TableRow>
                       </TableBody>
@@ -123,15 +125,17 @@ function SimpleRow(props) {
 }
 
 export default function CollapsibleTable(props) {
+  const { t } = useTranslation();
   return (
     <TableContainer component={Paper}>
       <Table aria-label="collapsible table">
         <TableHead>
           <TableRow>
+            {/* 1 empty cell in table head if row is to be expanded (contains object) */}
             {props.rows.length > 0 && props.rows.filter(notObject).length < props.rows.length ?
               <TableCell /> : null}
             {props.columns.map((column, index) => {
-              return <TableCell key={index}>{column}</TableCell>
+              return <TableCell style={{width: `${100 / props.columns.length}%`}} key={index}>{t(`DevicesSelectionPage.Properties.${column}`)}</TableCell>
             })}
           </TableRow>
         </TableHead>

@@ -37,7 +37,7 @@ import SettingsIcon from '@material-ui/icons/Settings';
 import LoginPage from './LoginPage.component';
 import { setHardwareUsage } from '../actions/HardwareUsage.action';
 import worker from 'workerize-loader!../workers/hwinfo.worker'; //eslint-disable-line import/no-webpack-loader-syntax
-import PrivateRoute from '../routes/protected.routes';
+import PrivateRoute from '../routes/ProtectedUser.routes';
 import AuthService from "../services/auth.service";
 import { setAuthenticated } from '../actions/Authentication.action';
 import { setCreateAccountDialogOpen } from '../actions/CreateAccountDialog.action';
@@ -110,7 +110,7 @@ const useStyles = makeStyles((theme) => ({
   content: {
     flexGrow: 1,
     width: `calc(100% - 57px)`,
-    padding: theme.spacing(1),
+    padding: theme.spacing(3),
     [`${theme.breakpoints.down('sm')} and (orientation: portrait)`]: {
       paddingBottom: theme.spacing(10),
       paddingTop: theme.spacing(1),
@@ -183,13 +183,21 @@ function MiniDrawer(props) {
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
   useEffect(() => {
-    instance = worker()
-    instance.addEventListener("message", message => {
+    const setHardwareStats = (message) => {
       const { data } = message;
       if (data.cpuUsage !== undefined) {
         setHardwareUsage(message.data.cpuUsage, message.data.cpuTemperature, message.data.ramUsage, message.data.diskUsage)
       }
-    });
+    }
+    if (instance === undefined) {
+      instance = worker()
+    }
+    instance.addEventListener("message", message => setHardwareStats(message))
+    return () => {
+      instance.postMessage({ token: null, text: 'stop' })
+      instance.removeEventListener("message", message => setHardwareStats(message))
+      instance.terminate()
+    }
   }, [setHardwareUsage])
 
   useEffect(() => {
@@ -433,12 +441,14 @@ function MiniDrawer(props) {
                   </ListItemIcon>
                   <ListItemText primary={t('Drawer.Devices')} />
                 </ListItem>
-                <ListItem button component={Link} to="/settings" selected={location.pathname === "/settings" ? true : false} >
-                  <ListItemIcon>
-                    <SettingsIcon />
-                  </ListItemIcon>
-                  <ListItemText primary={t('Drawer.Settings')} />
-                </ListItem>
+                {isAdmin() ?
+                  <ListItem button component={Link} to="/settings" selected={location.pathname === "/settings" ? true : false} >
+                    <ListItemIcon>
+                      <SettingsIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={t('Drawer.Settings')} />
+                  </ListItem>
+                  : null}
                 <Divider />
                 <ListItem button onClick={() => props.setLanguageDialogOpen(true)}>
                   <ListItemIcon>
@@ -458,7 +468,7 @@ function MiniDrawer(props) {
               value={bottomNaviValue}
             >
               <BottomNavigationAction value="/" label={t('Drawer.Devices')} icon={<DeviceHubIcon />} component={Link} to="/" />
-              <BottomNavigationAction value="/settings" label={t('Drawer.Settings')} icon={<ViewArrayIcon />} component={Link} to="/settings" />
+              {isAdmin() ? <BottomNavigationAction value="/settings" label={t('Drawer.Settings')} icon={<ViewArrayIcon />} component={Link} to="/settings" /> : null}
               <BottomNavigationAction label={t('Drawer.Language')} icon={<LanguageIcon />} onClick={() => props.setLanguageDialogOpen(true)} />
             </BottomNavigation>
           </React.Fragment>
@@ -480,7 +490,7 @@ const mapDispatchToProps = {
   setHardwareUsage,
   setAuthenticated,
   setCreateAccountDialogOpen,
-  setLoginFormUsername, 
+  setLoginFormUsername,
   setLoginFormPassword
 }
 

@@ -13,6 +13,7 @@ import { ConfirmDeleteUserDialogReducer } from './ConfirmDeleteUserDialog.reduce
 import { DevicesSelectionPageReducer } from './DevicesSelectionPage.reducer';
 import { SettingsReducer } from './Settings.reducer';
 import { BackdropReducer } from './Backdrop.reducer';
+import { IPConfigReducer } from './IPConfig.reducer';
 
 export default combineReducers({
   LanguageDialogReducer,
@@ -28,5 +29,6 @@ export default combineReducers({
   ConfirmDeleteUserDialogReducer,
   DevicesSelectionPageReducer,
   SettingsReducer,
-  BackdropReducer
+  BackdropReducer,
+  IPConfigReducer
 })

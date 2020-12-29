@@ -7,7 +7,7 @@ import DeviceSelectionTabs from './UniversalTabs.component';
 import { connect } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
-import { setAllDevices, refreshDeviceParams } from '../actions/DevicesSelectionPage.action';
+import { setAllDevices, refreshDeviceParams, toggleTableView } from '../actions/DevicesSelectionPage.action';
 import CollapsibleTable from './CollapsibleTable.component';
 import DeviceService from '../services/device.service';
 import ActivateService from '../services/activate.service';
@@ -15,6 +15,8 @@ import worker from 'workerize-loader!../workers/devices.worker'; //eslint-disabl
 import RefreshIcon from '@material-ui/icons/Refresh';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
+import ShortTextIcon from '@material-ui/icons/ShortText';
+import Zoom from '@material-ui/core/Zoom';
 
 const useStyles = makeStyles((theme) => ({
   title: {
@@ -35,8 +37,11 @@ const useStyles = makeStyles((theme) => ({
   },
   marginTopTable: {
     marginTop: theme.spacing(4)
+  },
+  advancedViewTables: {
+    float: 'right',
+    verticalAlign: 'top'
   }
-
 }));
 
 let instance;
@@ -44,7 +49,7 @@ let instance;
 function DevicesSelectionPage(props) {
   const classes = useStyles();
   const { t } = useTranslation();
-  const { setAllDevices, allDevices, selectedDevice, authenticated, refreshDeviceParams } = props;
+  const { setAllDevices, allDevices, selectedDevice, authenticated, refreshDeviceParams, toggleTableView, tableView } = props;
 
   const reformatDeviceDataToReducer = (data) => {
     let arr = []
@@ -111,7 +116,7 @@ function DevicesSelectionPage(props) {
           [obj.type]: {
             type: obj.type,
             rows: [],
-            cols: templates(obj.type, data).cols
+            cols: templates(obj.type, data, tableView).cols
           }
         }
       }
@@ -119,67 +124,172 @@ function DevicesSelectionPage(props) {
         ...tables,
         [obj.type]: {
           ...tables[obj.type],
-          rows: [...tables[obj.type].rows, templates(obj.type, obj).rows]
+          rows: [...tables[obj.type].rows, templates(obj.type, obj, tableView).rows]
         }
       }
     })
     return tables
   }
 
-  const templates = (type, data) => {
+  const templates = (type, data, tableView) => {
+    if (data.value !== undefined && !isNaN(data.value) && data.value !== null && data.value !== false && data.value !== true) {
+      data = {
+        ...data,
+        value: parseFloat(data.value).toFixed(2)
+      }
+    }
+    if (data.lastValueTick !== undefined) {
+      data = {
+        ...data,
+        lastValueTick: formatDateTime(new Date(parseFloat(data.lastValueTick) * 1000))
+      }
+    }
     switch (type) {
       //devices
       case 'MBDevice':
-        return {
-          cols: [t('DevicesSelectionPage.Properties.ipAddress'), t('DevicesSelectionPage.Properties.isActive'), t('DevicesSelectionPage.Properties.isConnected'), t('DevicesSelectionPage.Properties.name'), t('DevicesSelectionPage.Properties.portNumber'), t('DevicesSelectionPage.Properties.timeout'), t('DevicesSelectionPage.Properties.type')],
-          rows: [data.ipAddress, data.isActive, data.isConnected, data.name, data.portNumber, data.timeout, data.type]
+        if (tableView === 'simple') {
+          return {
+            cols: ['name', 'isActive', 'isConnected'],
+            rows: [data.name, data.isActive, data.isConnected]
+          }
+        }
+        else {
+          return {
+            cols: ['name', 'type', 'ipAddress', 'portNumber', 'isActive', 'isConnected', 'timeout'],
+            rows: [data.name, data.type, data.ipAddress, data.portNumber, data.isActive, data.isConnected, data.timeout]
+          }
         }
       case 'InternalDevice':
-        return {
-          cols: [t('DevicesSelectionPage.Properties.isActive'), t('DevicesSelectionPage.Properties.name'), t('DevicesSelectionPage.Properties.type')],
-          rows: [data.isActive, data.name, data.type]
+        if (tableView === 'simple') {
+          return {
+            cols: ['name', 'isActive'],
+            rows: [data.name, data.isActive]
+          }
         }
+        else {
+          return {
+            cols: ['name', 'type', 'isActive'],
+            rows: [data.name, data.type, data.isActive]
+          }
+        }
+
       case 'MSAgentDevice':
-        return {
-          cols: ['boarded', 'dataStorageSize', 'eventStorageSize', t('DevicesSelectionPage.Properties.isActive'), t('DevicesSelectionPage.Properties.name'), 'numberOfDataFilesToSend', 'numberOfEventFilesToSend', 'numberOfSendDataRetries', 'numberOfSendEventRetries', 'sendDataFileInterval', 'sendEventFileInterval', 'MSAgentDevice'],
-          rows: [data.boarded, data.dataStorageSize, data.eventStorageSize, data.isActive, data.name, data.numberOfDataFilesToSend, data.numberOfEventFilesToSend, data.numberOfSendDataRetries, data.numberOfSendEventRetries, data.sendDataFileInterval, data.sendEventFileInterval, data.MSAgentDevice]
+        if (tableView === 'simple') {
+          return {
+            cols: ['name', 'boarded', 'isActive'],
+            rows: [data.name, data.boarded, data.isActive]
+          }
         }
+        else {
+          return {
+            cols: ['name', 'type', 'boarded', 'isActive', 'dataStorageSize', 'eventStorageSize', 'numberOfDataFilesToSend', 'numberOfEventFilesToSend', 'numberOfSendDataRetries', 'numberOfSendEventRetries', 'sendDataFileInterval', 'sendEventFileInterval'],
+            rows: [data.name, data.type, data.boarded, data.isActive, data.dataStorageSize, data.eventStorageSize, data.numberOfDataFilesToSend, data.numberOfEventFilesToSend, data.numberOfSendDataRetries, data.numberOfSendEventRetries, data.sendDataFileInterval, data.sendEventFileInterval]
+          }
+        }
+
       case 'S7Device':
-        return {
-          cols: ['ipAddress', 'isActive', 'isConnected', 'name', 'rack', 'slot', 'timeout', 'type'],
-          rows: [data.ipAddress, data.isActive, data.isConnected, data.name, data.rack, data.slot, data.timeout, data.type]
+        if (tableView === 'simple') {
+          return {
+            cols: ['name', 'isActive', 'isConnected'],
+            rows: [data.name, data.isActive, data.isConnected]
+          }
+        }
+        else {
+          return {
+            cols: ['name', 'type', 'ipAddress', 'isActive', 'isConnected', 'rack', 'slot', 'timeout'],
+            rows: [data.name, data.type, data.ipAddress, data.isActive, data.isConnected, data.rack, data.slot, data.timeout]
+          }
+        }
+      case 'MBGatewayDevice':
+        if (tableView === 'simple') {
+          return {
+            cols: ['name', 'isActive', 'isConnected'],
+            rows: [data.name, data.isActive, data.isConnected]
+          }
+        }
+        else {
+          return {
+            cols: ['name', 'type', 'ipAddress', 'portNumber', 'isActive', 'isConnected', 'timeout'],
+            rows: [data.name, data.type, data.ipAddress, data.portNumber, data.isActive, data.isConnected, data.timeout]
+          }
         }
 
       //edge computing
       case 'AverageCalculator':
-        return {
-          cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'factor', 'sampleTime', 'calculationInterval', 'lastValueTick'],
-          rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.factor, data.sampleTime, data.calculationInterval, data.lastValueTick]
+        if (tableView === 'simple') {
+          return {
+            cols: ['name', 'value', 'unit', 'lastValueTick'],
+            rows: [data.name, data.value, data.unit, data.lastValueTick]
+          }
+        }
+        else {
+          return {
+            cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'factor', 'sampleTime', 'calculationInterval', 'lastValueTick'],
+            rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.factor, data.sampleTime, data.calculationInterval, data.lastValueTick]
+          }
         }
       case 'IncreaseCalculator':
-        return {
-          cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'factor', 'sampleTime', 'overflow', 'calculationInterval', 'lastValueTick'],
-          rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.factor, data.sampleTime, data.overflow, data.calculationInterval, data.lastValueTick]
+        if (tableView === 'simple') {
+          return {
+            cols: ['name', 'value', 'unit', 'lastValueTick'],
+            rows: [data.name, data.value, data.unit, data.lastValueTick]
+          }
+        }
+        else {
+          return {
+            cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'factor', 'sampleTime', 'overflow', 'calculationInterval', 'lastValueTick'],
+            rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.factor, data.sampleTime, data.overflow, data.calculationInterval, data.lastValueTick]
+          }
         }
       case 'FactorCalculator':
+        if (tableView === 'simple') {
+          return {
+            cols: ['name', 'value', 'unit', 'lastValueTick'],
+            rows: [data.name, data.value, data.unit, data.lastValueTick]
+          }
+        }
         return {
           cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'factor', 'sampleTime', 'lastValueTick'],
           rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.factor, data.sampleTime, data.lastValueTick]
         }
       case 'SumCalculator':
-        return {
-          cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'sampleTime', 'lastValueTick'],
-          rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.sampleTime, data.lastValueTick]
+        if (tableView === 'simple') {
+          return {
+            cols: ['name', 'value', 'unit', 'lastValueTick'],
+            rows: [data.name, data.value, data.unit, data.lastValueTick]
+          }
+        }
+        else {
+          return {
+            cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'sampleTime', 'lastValueTick'],
+            rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.sampleTime, data.lastValueTick]
+          }
         }
       case 'ValueFromByteArrayCalculator':
-        return {
-          cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'bitNumber', 'byteNumber', 'length', 'sampleTime', 'lastValueTick'],
-          rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.bitNumber, data.byteNumber, data.length, data.sampleTime, data.lastValueTick]
+        if (tableView === 'simple') {
+          return {
+            cols: ['name', 'value', 'unit', 'lastValueTick'],
+            rows: [data.name, data.value, data.unit, data.lastValueTick]
+          }
+        }
+        else {
+          return {
+            cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'bitNumber', 'byteNumber', 'length', 'sampleTime', 'lastValueTick'],
+            rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.bitNumber, data.byteNumber, data.length, data.sampleTime, data.lastValueTick]
+          }
         }
       case 'ExpressionCalculator':
-        return {
-          cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'expression', 'parameters', 'sampleTime', 'lastValueTick'],
-          rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.expression, data.parameters, data.sampleTime, data.lastValueTick]
+        if (tableView === 'simple') {
+          return {
+            cols: ['name', 'value', 'unit', 'lastValueTick'],
+            rows: [data.name, data.value, data.unit, data.lastValueTick]
+          }
+        }
+        else {
+          return {
+            cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'expression', 'parameters', 'sampleTime', 'lastValueTick'],
+            rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.expression, data.parameters, data.sampleTime, data.lastValueTick]
+          }
         }
 
       //variables
@@ -195,61 +305,168 @@ function DevicesSelectionPage(props) {
       case 'MBSwappedUInt32':
       case 'MBSwappedFloat':
       case 'MBSwappedDouble':
-        return {
-          cols: [t('DevicesSelectionPage.Properties.defaultValue'), t('DevicesSelectionPage.Properties.lastValueTick'), t('DevicesSelectionPage.Properties.length'), t('DevicesSelectionPage.Properties.name'), t('DevicesSelectionPage.Properties.offset'), t('DevicesSelectionPage.Properties.offset'), t('DevicesSelectionPage.Properties.readAsSingle'), t('DevicesSelectionPage.Properties.readFCode'), t('DevicesSelectionPage.Properties.sampleTime'), t('DevicesSelectionPage.Properties.type'), t('DevicesSelectionPage.Properties.unit'), t('DevicesSelectionPage.Properties.value'), t('DevicesSelectionPage.Properties.write'), t('DevicesSelectionPage.Properties.writeAsSingle'), t('DevicesSelectionPage.Properties.writeFCode')],
-          rows: [data.defaultValue, formatDateTime(new Date(data.lastValueTick * 1000)), data.length, data.name, data.offset, data.read, data.readAsSingle, data.readFCode, data.sampleTime, data.type, data.unit, parseFloat(data.value).toFixed(2), data.write, data.writeAsSingle, data.writeFCode]
+        if (tableView === 'simple') {
+          return {
+            cols: ['name', 'value', 'unit', 'lastValueTick'],
+            rows: [data.name, data.value, data.unit, data.lastValueTick]
+          }
         }
+        else {
+          return {
+            cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'length', 'offset', 'read', 'write', 'readAsSingle', 'writeAsSingle', 'readFCode', 'writeFCode', 'sampleTime', 'lastValueTick'],
+            rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.length, data.offset, data.read, data.write, data.readAsSingle, data.writeAsSingle, data.readFCode, data.writeFCode, data.sampleTime, data.lastValueTick]
+          }
+        }
+
       case 'LastCycleDurationVariable':
       case 'CPULoadVariable':
-        return {
-          cols: [t('DevicesSelectionPage.Properties.defaultValue'), t('DevicesSelectionPage.Properties.lastValueTick'), t('DevicesSelectionPage.Properties.name'), t('DevicesSelectionPage.Properties.sampleTime'), t('DevicesSelectionPage.Properties.type'), t('DevicesSelectionPage.Properties.unit'), t('DevicesSelectionPage.Properties.value')],
-          rows: [data.defaultValue, formatDateTime(new Date(data.lastValueTick * 1000)), data.name, data.sampleTime, data.type, data.unit, parseFloat(data.value).toFixed(2)]
+      case 'CPUTemperatureVariable':
+      case 'DiskUsageVariable':
+      case 'RAMUsageVariable':
+        if (tableView === 'simple') {
+          return {
+            cols: ['name', 'value', 'unit', 'lastValueTick'],
+            rows: [data.name, data.value, data.unit, data.lastValueTick]
+          }
         }
+        else {
+          return {
+            cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'sampleTime', 'lastValueTick'],
+            rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.sampleTime, data.lastValueTick]
+          }
+        }
+
+      case 'AssociatedVariable':
+        if (tableView === 'simple') {
+          return {
+            cols: ['name', 'value', 'unit', 'lastValueTick'],
+            rows: [data.name, data.value, data.unit, data.lastValueTick]
+          }
+        }
+        else {
+          return {
+            cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'sampleTime', 'associatedDeviceID', 'associatedElementID','lastValueTick'],
+            rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.sampleTime, data.associatedDeviceID, data.associatedElementID, data.lastValueTick]
+          }
+        }
+
+      case 'S7Int':
+      case 'S7DInt':
+      case 'S7SInt':
+      case 'S7UInt':
+      case 'S7UDInt':
+      case 'S7USInt':
       case 'S7Real':
-        return {
-          cols: ['name', 'type', 'value', 'unit', 'dbNumber', 'defaultValue', 'lastValueTick', 'length', 'memoryType', 'offset', 'read', 'readAsSingle', 'sampleTime', 'write', 'writeAsSingle'],
-          rows: [data.name, data.type, data.value, data.unit, data.dbNumber, data.defaultValue, data.lastValueTick, data.length, data.memoryType, data.offset, data.read, data.readAsSingle, data.sampleTime, data.write, data.writeAsSingle]
+      case 'S7DTL':
+      case 'S7ByteArray':
+        if (tableView === 'simple') {
+          return {
+            cols: ['name', 'value', 'unit', 'lastValueTick'],
+            rows: [data.name, data.value, data.unit, data.lastValueTick]
+          }
         }
-      // case 'AssociatedVariable':
-      //   return {
-      //     cols: [],
-      //     rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.sampleTime, data.associatedDeviceId, ]
-      //   }
+        else {
+          return {
+            cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'dbNumber', 'length', 'memoryType', 'offset', 'read', 'readAsSingle', 'sampleTime', 'write', 'writeAsSingle', 'lastValueTick'],
+            rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.dbNumber, data.length, data.memoryType, data.offset, data.read, data.readAsSingle, data.sampleTime, data.write, data.writeAsSingle, data.lastValueTick]
+          }
+        }
+
+      case 'DeviceConnectionVariable':
+        if (tableView === 'simple') {
+          return {
+            cols: ['name', 'value', 'unit', 'lastValueTick'],
+            rows: [data.name, data.value, data.unit, data.lastValueTick]
+          }
+        }
+        else {
+          return {
+            cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'sampleTime', 'lastValueTick'],
+            rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.sampleTime, data.lastValueTick]
+          }
+        }
 
       //alerts
       case 'HighLimitAlert':
-        return {
-          cols: [t('DevicesSelectionPage.Properties.defaultValue'), t('DevicesSelectionPage.Properties.highLimit'), t('DevicesSelectionPage.Properties.hysteresis'), t('DevicesSelectionPage.Properties.lastValueTick'), t('DevicesSelectionPage.Properties.name'), t('DevicesSelectionPage.Properties.sampleTime'), 'severity', 'texts', 'timeOffDelay', 'timeOnDelay', t('DevicesSelectionPage.Properties.type'), t('DevicesSelectionPage.Properties.unit'), t('DevicesSelectionPage.Properties.value')],
-          rows: [data.defaultValue, data.highLimit, data.hysteresis, formatDateTime(new Date(data.lastValueTick * 1000)), data.name, data.sampleTime, data.severity, data.texts, data.timeOffDelay, data.timeOnDelay, data.type, data.unit, parseFloat(data.value).toFixed(2)]
+        if (tableView === 'simple') {
+          return {
+            cols: ['name', 'value', 'unit', 'lastValueTick', 'lastValueTick'],
+            rows: [data.name, data.value, data.unit, data.lastValueTick, data.lastValueTick]
+          }
+        }
+        else {
+          return {
+            cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'highLimit', 'hysteresis', 'severity', 'sampleTime', 'texts', 'timeOffDelay', 'timeOnDelay', 'lastValueTick'],
+            rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.highLimit, data.hysteresis, data.severity, data.sampleTime, data.texts, data.timeOffDelay, data.timeOnDelay, data.lastValueTick]
+          }
         }
       case 'BandwidthLimitAlert':
-        return {
-          cols: [t('DevicesSelectionPage.Properties.defaultValue'), t('DevicesSelectionPage.Properties.highLimit'), t('DevicesSelectionPage.Properties.hysteresis'), t('DevicesSelectionPage.Properties.lastValueTick'), 'lowLimit', t('DevicesSelectionPage.Properties.name'), t('DevicesSelectionPage.Properties.sampleTime'), 'severity', 'texts', 'timeOffDelay', 'timeOnDelay', t('DevicesSelectionPage.Properties.type'), t('DevicesSelectionPage.Properties.unit'), t('DevicesSelectionPage.Properties.value')],
-          rows: [data.defaultValue, data.highLimit, data.hysteresis, formatDateTime(new Date(data.lastValueTick * 1000)), data.lowLimit, data.name, data.sampleTime, data.severity, data.texts, data.timeOffDelay, data.timeOnDelay, data.type, data.unit, parseFloat(data.value).toFixed(2)]
+        if (tableView === 'simple') {
+          return {
+            cols: ['name', 'value', 'unit', 'lastValueTick', 'lastValueTick'],
+            rows: [data.name, data.value, data.unit, data.lastValueTick]
+          }
+        }
+        else {
+          return {
+            cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'highLimit', 'lowLimit', 'hysteresis', 'severity', 'sampleTime', 'texts', 'timeOffDelay', 'timeOnDelay', 'lastValueTick'],
+            rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.highLimit, data.lowLimit, data.hysteresis, data.severity, data.sampleTime, data.texts, data.timeOffDelay, data.timeOnDelay, data.lastValueTick]
+          }
         }
       case 'LowLimitAlert':
-        return {
-          cols: [t('DevicesSelectionPage.Properties.defaultValue'), t('DevicesSelectionPage.Properties.hysteresis'), t('DevicesSelectionPage.Properties.lastValueTick'), 'lowLimit', t('DevicesSelectionPage.Properties.name'), t('DevicesSelectionPage.Properties.sampleTime'), 'severity', 'texts', 'timeOffDelay', 'timeOnDelay', t('DevicesSelectionPage.Properties.type'), t('DevicesSelectionPage.Properties.unit'), t('DevicesSelectionPage.Properties.value')],
-          rows: [data.defaultValue, data.hysteresis, data.lastValueTick, data.lowLimit, data.name, data.sampleTime, data.severity, data.texts, data.timeOffDelay, data.timeOnDelay, data.type, data.unit, data.value]
+        if (tableView === 'simple') {
+          return {
+            cols: ['name', 'value', 'unit', 'lastValueTick', 'lastValueTick'],
+            rows: [data.name, data.value, data.unit, data.lastValueTick]
+          }
+        }
+        else {
+          return {
+            cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'lowLimit', 'hysteresis', 'severity', 'sampleTime', 'texts', 'timeOffDelay', 'timeOnDelay', 'lastValueTick'],
+            rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.lowLimit, data.hysteresis, data.severity, data.sampleTime, data.texts, data.timeOffDelay, data.timeOnDelay, data.lastValueTick]
+          }
         }
       case 'ExactValuesAlert':
-        return {
-          cols: [t('DevicesSelectionPage.Properties.defaultValue'), t('DevicesSelectionPage.Properties.lastValueTick'), t('DevicesSelectionPage.Properties.name'), t('DevicesSelectionPage.Properties.sampleTime'), t('DevicesSelectionPage.Properties.severity'), t('DevicesSelectionPage.Properties.texts'), t('DevicesSelectionPage.Properties.timeOffDelay'), t('DevicesSelectionPage.Properties.timeOnDelay'), t('DevicesSelectionPage.Properties.type'), t('DevicesSelectionPage.Properties.unit'), t('DevicesSelectionPage.Properties.value')],
-          rows: [data.defaultValue, data.lastValueTick, data.name, data.sampleTime, data.severity, data.texts, data.timeOffDelay, data.timeOnDelay, data.type, data.unit, data.value]
+        if (tableView === 'simple') {
+          return {
+            cols: ['name', 'value', 'unit', 'lastValueTick', 'lastValueTick'],
+            rows: [data.name, data.value, data.unit, data.lastValueTick]
+          }
         }
-
+        else {
+          return {
+            cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'severity', 'sampleTime', 'texts', 'timeOffDelay', 'timeOnDelay', 'lastValueTick'],
+            rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.severity, data.sampleTime, data.texts, data.timeOffDelay, data.timeOnDelay, data.lastValueTick]
+          }
+        }
       //custom made - without 'type' property - eventsToSendConfig, dataToSendConfig
       case 'eventsToSendConfig':
-        return {
-          cols: ['sendingInterval', 'entityId', 'sourceType', 'sourceId', 'source', 'severity'],
-          rows: [data.sendingInterval, data.entityId, data.sourceType, data.sourceId, data.source, data.severity]
+        if (tableView === 'simple') {
+          return {
+            cols: ['entityId', 'sourceType', 'severity'],
+            rows: [data.entityId, data.sourceType, data.severity]
+          }
         }
-      case 'dataToSendConfig':
-        return {
-          cols: ['sendingInterval', 'qualityCodeEnabled', 'datapointId', 'dataConverter'],
-          rows: [data.sendingInterval, data.qualityCodeEnabled, data.datapointId, data.dataConverter]
+        else {
+          return {
+            cols: ['entityId', 'sourceId', 'source', 'sourceType', 'severity', 'sendingInterval'],
+            rows: [data.entityId, data.sourceId, data.source, data.sourceType, data.severity, data.sendingInterval]
+          }
         }
 
+      case 'dataToSendConfig':
+        if (tableView === 'simple') {
+          return {
+            cols: ['datapointId', 'dataConverter'],
+            rows: [data.datapointId, data.dataConverter]
+          }
+        }
+        else {
+          return {
+            cols: ['datapointId', 'dataConverter', 'qualityCodeEnabled', 'sendingInterval'],
+            rows: [data.datapointId, data.dataConverter, data.qualityCodeEnabled, data.sendingInterval]
+          }
+        }
       default:
         return {
           cols: [],
@@ -270,7 +487,7 @@ function DevicesSelectionPage(props) {
           //info tab
           tabs.push({
             label: t(`DevicesSelectionPage.Tabs.info`),
-            content: firstLevelTables.map((table, i) => (<React.Fragment key={i}><Typography variant="h6" className={classes.marginTopTable}>{table.type}</Typography><CollapsibleTable columns={table.cols} rows={table.rows} /></React.Fragment>))
+            content: firstLevelTables.map((table, i) => (<React.Fragment key={i}><Typography variant="h6" className={classes.marginTopTable}>{t(`DevicesSelectionPage.Properties.${table.type}`)}</Typography><CollapsibleTable columns={table.cols} rows={table.rows} /></React.Fragment>))
           })
 
           const propertiesEntries = Object.entries(properties)
@@ -279,10 +496,10 @@ function DevicesSelectionPage(props) {
             if (typeof cell === 'object') {
               const traverse = traverseObject(cell, column)
               const converted = converter(traverse)
-              const secondLevelTable = traverseObject(converted)
+              const secondLevelTables = traverseObject(converted)
               tabs.push({
                 label: t(`DevicesSelectionPage.Tabs.${column}`),
-                content: secondLevelTable.map((table, i) => (<React.Fragment key={i}><Typography variant="h6" className={classes.marginTopTable}>{table.type}</Typography><CollapsibleTable columns={table.cols} rows={table.rows} /></React.Fragment>))
+                content: secondLevelTables.map((table, i) => (<React.Fragment key={i}><Typography variant="h6" className={classes.marginTopTable}>{t(`DevicesSelectionPage.Properties.${table.type}`)}</Typography><CollapsibleTable columns={table.cols} rows={table.rows} /></React.Fragment>))
               })
             }
           }
@@ -312,11 +529,11 @@ function DevicesSelectionPage(props) {
     return tables
   }
 
-
   const formatDateTime = (date) => {
     const hours = date.getHours() < 10 ? `0${date.getHours()}` : date.getHours()
     const minutes = date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes()
     const seconds = date.getSeconds() < 10 ? `0${date.getSeconds()}` : date.getSeconds()
+
     return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}, ${hours}:${minutes}:${seconds}`;
   }
 
@@ -352,49 +569,60 @@ function DevicesSelectionPage(props) {
         alignItems="flex-start">
         <Grid item xs={12} sm={12} md={3} xl={2}>
           <Typography variant="h4" className={classes.devicesTitleInline}>{t('DevicesSelectionPage.DevicesTitle')}</Typography>
-          <Tooltip title={t('DevicesSelectionPage.RefreshAllDevices')} placement="bottom">
-            <IconButton aria-label="delete" className={classes.alignTop} onClick={() => fetchDevices()} >
-              <RefreshIcon />
-            </IconButton>
-          </Tooltip>
+          <Zoom in={true} style={{ transitionDelay: '500ms' }}>
+            <Tooltip title={t('DevicesSelectionPage.RefreshAllDevices')} placement="bottom">
+              <IconButton aria-label="refresh" className={classes.alignTop} onClick={() => fetchDevices()} >
+                <RefreshIcon />
+              </IconButton>
+            </Tooltip>
+          </Zoom>
           <DevicesList />
         </Grid>
-        <Grid container item xs={12} sm={12} md={9} xl={10} spacing={0}>
-          <Grid item xs={12} >
-            <Typography variant="h4" className={classes.title}>{selectedDevice.selectedDeviceID}</Typography>
-            <React.Fragment>
-              {createTabs(allDevices, selectedDevice)}
-            </React.Fragment>
+        {allDevices.length > 0 ?
+          <Grid container item xs={12} sm={12} md={9} xl={10} spacing={0}>
+            <Grid item xs={12} >
+              <Typography variant="h4" className={classes.devicesTitleInline}>{selectedDevice.selectedDeviceID}</Typography>
+              <Zoom in={true} style={{ transitionDelay: '1000ms' }}>
+                <Tooltip title={t('DevicesSelectionPage.ToggleTableView')} placement="bottom">
+                  <IconButton aria-label="toggle-advanced-view" className={classes.advancedViewTables} onClick={toggleTableView} >
+                    <ShortTextIcon />
+                  </IconButton>
+                </Tooltip>
+              </Zoom>
+              <React.Fragment>
+                {createTabs(allDevices, selectedDevice)}
+              </React.Fragment>
+            </Grid>
+            <Grid container item xs={12} spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="h5">{t('DevicesSelectionPage.Status')}: {isActive() ? t('DevicesSelectionPage.StatusConnected') : t('DevicesSelectionPage.StatusDisconnected')}</Typography>
+                {selectedDevice.selectedDeviceType === 'MSAgentDevice' ?
+                  <Typography variant="h6" className={isBoarded() ? classes.onboarded : classes.offboarded}>{isBoarded() ? t('DevicesSelectionPage.StatusOnboarded') : t('DevicesSelectionPage.StatusOffboarded')}</Typography>
+                  : null}
+              </Grid>
+              <Grid item xs={6} sm={3}>
+                <Button
+                  onClick={() => activateDevice(true, selectedDevice.selectedDeviceID)}
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  disabled={isActive() ? true : false}>
+                  {t('DevicesSelectionPage.Connect')}
+                </Button>
+              </Grid>
+              <Grid item xs={6} sm={3}>
+                <Button
+                  onClick={() => activateDevice(false, selectedDevice.selectedDeviceID)}
+                  fullWidth
+                  variant="contained"
+                  color="secondary"
+                  disabled={isActive() ? false : true}>
+                  {t('DevicesSelectionPage.Disconnect')}
+                </Button>
+              </Grid>
+            </Grid>
           </Grid>
-          <Grid container item xs={12} spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <Typography variant="h5">{t('DevicesSelectionPage.Status')}: {isActive() ? t('DevicesSelectionPage.StatusConnected') : t('DevicesSelectionPage.StatusDisconnected')}</Typography>
-              {selectedDevice.selectedDeviceType === 'MSAgentDevice' ?
-                <Typography variant="h6" className={isBoarded() ? classes.onboarded : classes.offboarded}>{isBoarded() ? t('DevicesSelectionPage.StatusOnboarded') : t('DevicesSelectionPage.StatusOffboarded')}</Typography>
-                : null}
-            </Grid>
-            <Grid item xs={6} sm={3}>
-              <Button
-                onClick={() => activateDevice(true, selectedDevice.selectedDeviceID)}
-                fullWidth
-                variant="contained"
-                color="primary"
-                disabled={isActive() ? true : false}>
-                {t('DevicesSelectionPage.Connect')}
-              </Button>
-            </Grid>
-            <Grid item xs={6} sm={3}>
-              <Button
-                onClick={() => activateDevice(false, selectedDevice.selectedDeviceID)}
-                fullWidth
-                variant="contained"
-                color="secondary"
-                disabled={isActive() ? false : true}>
-                {t('DevicesSelectionPage.Disconnect')}
-              </Button>
-            </Grid>
-          </Grid>
-        </Grid>
+          : <Typography variant="h4" className={classes.devicesTitleInline}>{t('DevicesSelectionPage.NoDevicesHeader')}</Typography>}
       </Grid>
     </React.Fragment>
   )
@@ -404,13 +632,15 @@ const mapStateToProps = (state) => {
   return {
     selectedDevice: state.DevicesListReducer,
     allDevices: state.DevicesSelectionPageReducer.devices,
-    authenticated: state.AuthenticationReducer.authed
+    authenticated: state.AuthenticationReducer.authed,
+    tableView: state.DevicesSelectionPageReducer.tableView
   }
 }
 
 const mapDispatchToProps = {
   setAllDevices,
-  refreshDeviceParams
+  refreshDeviceParams,
+  toggleTableView
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(DevicesSelectionPage)

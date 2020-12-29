@@ -10,6 +10,8 @@ import { selectDevice } from '../actions/DevicesList.action';
 import StorageIcon from '@material-ui/icons/Storage';
 import MemoryIcon from '@material-ui/icons/Memory';
 import AssessmentIcon from '@material-ui/icons/Assessment';
+import OnlineCircleIcon from '@material-ui/icons/FiberManualRecord';
+import RouterIcon from '@material-ui/icons/Router';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -20,10 +22,20 @@ const useStyles = makeStyles((theme) => ({
     //backgroundColor: theme.palette.background.paper,
   },
   active: {
-    color: 'green'
+    color: 'green',
+    height: '15px',
+    marginTop: 'auto',
+    marginBottom: 'auto'
   },
   inactive: {
-    color: 'red'
+    color: 'red',
+    height: '15px',
+    marginTop: 'auto',
+    marginBottom: 'auto'
+  },
+  iconMarginHorizontal: {
+    marginLeft: theme.spacing(1),
+    marginRight: theme.spacing(1)
   }
 }));
 
@@ -32,13 +44,11 @@ function SimpleList(props) {
   const { allDevices, selectedDevice, selectDevice } = props;
 
   useEffect(() => {
-    if(selectedDevice.selectedDeviceID === '' && allDevices.length>0) {
+    if (selectedDevice.selectedDeviceID === '' && allDevices.length > 0) {
       const firstEntry = Object.entries(allDevices[0])
       selectDevice(0, firstEntry[0][1].id, firstEntry[0][1].type)
     }
   }, [allDevices, selectDevice, selectedDevice.selectedDeviceID])
-
-  
 
   return (
     <div className={classes.root}>
@@ -46,15 +56,17 @@ function SimpleList(props) {
         {allDevices.map((dev, index) => {
           const entries = Object.entries(dev)
           for (const [, properties] of entries) {
-            const isActive = properties.isConnected !==undefined? properties.isConnected && properties.isActive : properties.isActive;
+            const isActive = properties.isConnected !== undefined ? properties.isConnected && properties.isActive : properties.isActive;
             return (<ListItem key={index} button
               selected={selectedDevice.selectedDeviceIndex === index ? true : false}
               onClick={() => props.selectDevice(index, properties.id, properties.type)}>
               <ListItemIcon>
-                {properties.type === 'MBDevice' ? <AssessmentIcon className={isActive ? classes.active : classes.inactive} />
-                  : properties.type === 'S7Device' ? <MemoryIcon className={isActive ? classes.active : classes.inactive} />
-                    : properties.type === 'InternalDevice' ? <StorageIcon className={isActive ? classes.active : classes.inactive} />
-                      : <CloudIcon className={isActive ? classes.active : classes.inactive} />}
+                <OnlineCircleIcon className={isActive ? classes.active : classes.inactive} />
+                {properties.type === 'MBDevice' ? <AssessmentIcon className={classes.iconMarginHorizontal} />
+                  : properties.type === 'S7Device' ? <MemoryIcon className={classes.iconMarginHorizontal} />
+                    : properties.type === 'InternalDevice' ? <StorageIcon className={classes.iconMarginHorizontal} />
+                      : properties.type === 'MBGatewayDevice' ? <RouterIcon className={classes.iconMarginHorizontal} />
+                        : <CloudIcon className={classes.iconMarginHorizontal} />}
               </ListItemIcon>
               <ListItemText primary={properties.id} />
             </ListItem>)

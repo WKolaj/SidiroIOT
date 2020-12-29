@@ -1,7 +1,8 @@
-import { SET_ALL_DEVICES, REFRESH_DEVICE_PARAMS } from '../actions/DevicesSelectionPage.action';
+import { SET_ALL_DEVICES, REFRESH_DEVICE_PARAMS, TOGGLE_TABLE_VIEW } from '../actions/DevicesSelectionPage.action';
 
 const initialState = {
-  devices: []
+  devices: [],
+  tableView: 'simple'
 }
 
 export const DevicesSelectionPageReducer = (state = initialState, action) => {
@@ -22,6 +23,11 @@ export const DevicesSelectionPageReducer = (state = initialState, action) => {
             return dev
           }
         })
+      }
+    case TOGGLE_TABLE_VIEW:
+      return {
+        ...state,
+        tableView: state.tableView === 'simple' ? 'advanced' : 'simple'
       }
     default:
       return state

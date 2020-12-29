@@ -9,10 +9,10 @@ import AdminRoute from '../routes/ProtectedAdmin.routes';
 export default function DrawerRoutes() {
   return (
     <Switch>
-      <Route path="/settings" render={()=><Settings/>} />
-      <Route path="/myaccount" render={()=><AccountPage/>} />
-      <AdminRoute path="/useraccounts"><UserAccountsPage/></AdminRoute>
-      <Route path="/" render={()=><DevicesSelectionPage/>} />
+      <AdminRoute path="/settings"><Settings /></AdminRoute>
+      <Route path="/myaccount" render={() => <AccountPage />} />
+      <AdminRoute path="/useraccounts"><UserAccountsPage /></AdminRoute>
+      <Route path="/" render={() => <DevicesSelectionPage />} />
     </Switch>
   )
 }
