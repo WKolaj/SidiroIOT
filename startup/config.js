@@ -17,11 +17,6 @@ module.exports = async function () {
   throwIfConfigDoesNotExist("maxProjectFileSize");
   throwIfConfigDoesNotExist("agentsDirName");
 
-  throwIfConfigDoesNotExist("netplanConfigSocketFilePath");
-  throwIfConfigDoesNotExist("netplanConfigAuthToken");
-  throwIfConfigDoesNotExist("maxProjectFileSize");
-  throwIfConfigDoesNotExist("agentsDirName");
-
   throwIfConfigDoesNotExist("usbLoader.projectFileName");
   throwIfConfigDoesNotExist("usbLoader.dirPaths");
   throwIfConfigDoesNotExist("usbLoader.numberOfRetries");

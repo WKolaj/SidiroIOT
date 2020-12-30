@@ -59,6 +59,12 @@ module.exports = async function (workingDirName) {
 
   //#endregion ========== INITIALIZING USB ==========
 
+  //#region ========== INITIALIZING LOG SERVICE ==========
+
+  await require("./logService")();
+
+  //#endregion ========== INITIALIZING LOG SERVICE ==========
+
   //#region ========== INITIALIZING ROUTES ==========
 
   //Initializing proccess of automatically calling next when error occurs while request handling - in order to go to last middlware of logging error

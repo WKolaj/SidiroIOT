@@ -21,17 +21,17 @@
   "logging": {
     "logActions": true,
     "info": {
-      "path": "__testDir/logs/info/info.log",
+      "path": "__testDir/logs/info.log",
       "maxsize": 10485760,
       "maxFiles": 10
     },
     "warning": {
-      "path": "__testDir/logs/info/warning.log",
+      "path": "__testDir/logs/warning.log",
       "maxsize": 10485760,
       "maxFiles": 10
     },
     "error": {
-      "path": "__testDir/logs/info/error.log",
+      "path": "__testDir/logs/error.log",
       "maxsize": 10485760,
       "maxFiles": 10
     }

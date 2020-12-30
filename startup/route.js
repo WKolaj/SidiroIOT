@@ -12,6 +12,7 @@ const alertRouter = require("../routes/alert");
 const elementRouter = require("../routes/element");
 const valueRouter = require("../routes/value");
 const activateRouter = require("../routes/activate");
+const logRouter = require("../routes/log");
 
 //Method for initializing routes
 module.exports = async function (app) {
@@ -45,6 +46,9 @@ module.exports = async function (app) {
 
   app.use("/api/activate", activateRouter);
   logger.info("Device activate route initialized");
+
+  app.use("/api/log", logRouter);
+  logger.info("Log route initialized");
 
   //#endregion ========== CUSTOM ROUTES ==========
 
