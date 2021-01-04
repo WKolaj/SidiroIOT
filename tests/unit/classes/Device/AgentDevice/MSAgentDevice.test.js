@@ -7,16 +7,24 @@ const {
   writeFileAsync,
   checkIfFileExistsAsync,
   exists,
+  generateRandomString,
 } = require("../../../../../utilities/utilities");
 const path = require("path");
 const { MindConnectAgent, retry } = require("@mindconnect/mindconnect-nodejs");
+const logger = require("../../../../../logger/logger");
 
 const AgentsDirPath = "__testDir/settings/agentsData";
 
 describe("MSAgentDevice", () => {
+  let loggerWarnMock;
+
   beforeEach(() => {
     jest.setTimeout(30000);
+    jest.clearAllMocks();
+    loggerWarnMock = jest.fn();
+    logger.warn = loggerWarnMock;
   });
+
   describe("constructor", () => {
     let project;
 
@@ -319,30 +327,33 @@ describe("MSAgentDevice", () => {
             deviceId: "testDevice1ID",
             sendingInterval: 100,
             entityId: "aaaa0000",
-            sourceType: "Event",
-            sourceId: "application",
-            source: "SidiroIOT",
             severity: 20,
+            source: "source1234",
+            correlationId: "corelation123",
+            code: "1234",
+            acknowledged: false,
           },
           testElement2ID: {
             elementId: "testElement2ID",
             deviceId: "testDevice2ID",
             sendingInterval: 200,
             entityId: "bbbb1111",
-            sourceType: "Event",
-            sourceId: "application",
-            source: "SidiroIOT",
             severity: 30,
+            source: "source1244",
+            correlationId: "corelation124",
+            code: "1244",
+            acknowledged: false,
           },
           testElement3ID: {
             elementId: "testElement3ID",
             deviceId: "testDevice3ID",
             sendingInterval: 300,
             entityId: "cccc2222",
-            sourceType: "Event",
-            sourceId: "application",
-            source: "SidiroIOT",
             severity: 40,
+            source: "source1255",
+            correlationId: "corelation125",
+            code: "1254",
+            acknowledged: false,
           },
         },
         numberOfSendDataRetries: 5,
@@ -652,19 +663,330 @@ describe("MSAgentDevice", () => {
             deviceId: "testDevice1ID",
             sendingInterval: 100,
             entityId: "aaaa0000",
-            sourceType: "Event",
-            sourceId: "application",
-            source: "SidiroIOT",
             severity: 20,
+            source: "source1234",
+            correlationId: "corelation123",
+            code: "1234",
+            acknowledged: false,
           },
           testElement2ID: {
             elementId: "testElement2ID",
             deviceId: "testDevice2ID",
             sendingInterval: 200,
             entityId: "bbbb1111",
-            sourceType: "Event",
-            sourceId: "application",
-            source: "SidiroIOT",
+            severity: 30,
+            source: "source1244",
+            correlationId: "corelation124",
+            code: "1244",
+            acknowledged: false,
+          },
+          testElement3ID: {
+            elementId: "testElement3ID",
+            deviceId: "testDevice3ID",
+            sendingInterval: 300,
+            entityId: "cccc2222",
+            severity: 40,
+            source: "source1255",
+            correlationId: "corelation125",
+            code: "1254",
+            acknowledged: false,
+          },
+        },
+        numberOfSendDataRetries: 5,
+        numberOfSendEventRetries: 3,
+        boarded: false,
+      };
+
+      expect(device.generatePayload()).toEqual(expectedPayload);
+    });
+
+    it("should initialize device based on given payload - if one of event config does not have requried properties", async () => {
+      payload.eventsToSendConfig.testElement2ID = {
+        elementId: "testElement2ID",
+        deviceId: "testDevice2ID",
+        sendingInterval: 200,
+        entityId: "bbbb1111",
+        severity: 30,
+      };
+
+      await exec();
+      let expectedPayload = {
+        id: "deviceID",
+        name: "deviceName",
+        type: "MSAgentDevice",
+        variables: {
+          associatedVariableID: {
+            id: "associatedVariableID",
+            deviceId: "deviceID",
+            lastValueTick: 0,
+            name: "associatedVariableName",
+            type: "AssociatedVariable",
+            unit: "A",
+            sampleTime: 1,
+            associatedElementID: "fakeDeviceID",
+            associatedDeviceID: "fakeVariableID",
+            value: 987.321,
+            defaultValue: 987.321,
+          },
+        },
+        calcElements: {
+          averageCalculatorID: {
+            id: "averageCalculatorID",
+            name: "averageCalculatorName",
+            type: "AverageCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            calculationInterval: 15,
+            deviceId: "deviceID",
+            lastValueTick: 0,
+            value: 123456.654321,
+          },
+          factorCalculatorID: {
+            id: "factorCalculatorID",
+            name: "factorCalculatorName",
+            type: "FactorCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            deviceId: "deviceID",
+            lastValueTick: 0,
+            value: 123456.654321,
+          },
+          increaseCalculatorID: {
+            id: "increaseCalculatorID",
+            name: "increaseCalculatorName",
+            type: "IncreaseCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            calculationInterval: 15,
+            overflow: 1234,
+            deviceId: "deviceID",
+            lastValueTick: 0,
+            value: 123456.654321,
+          },
+          sumCalculatorID: {
+            id: "sumCalculatorID",
+            name: "sumCalculatorName",
+            type: "SumCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableIDs: [
+              { variableID: "fakeVariableID1", factor: 1 },
+              { variableID: "fakeVariableID2", factor: 2 },
+              { variableID: "fakeVariableID3", factor: 3 },
+            ],
+            deviceId: "deviceID",
+            lastValueTick: 0,
+            value: 123456.654321,
+          },
+          valueFromByteArrayCalculatorID: {
+            id: "valueFromByteArrayCalculatorID",
+            name: "valueFromByteArrayCalculatorName",
+            type: "ValueFromByteArrayCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 15,
+            variableID: "fakeVariableID",
+            bitNumber: 4,
+            byteNumber: 3,
+            length: 2,
+            deviceId: "deviceID",
+            lastValueTick: 0,
+            value: 15,
+          },
+          expessionCalculatorID: {
+            id: "expessionCalculatorID",
+            name: "expessionCalculatorName",
+            type: "ExpressionCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 15,
+            expression: "p1+p2+p3",
+            parameters: {
+              p1: { type: "static", value: 100 },
+              p2: { type: "dynamic", elementId: "associatedVariableID" },
+              p3: { type: "dynamic", elementId: "cpuLoadVariableID" },
+            },
+            deviceId: "deviceID",
+            value: 15,
+            lastValueTick: 0,
+          },
+        },
+        alerts: {
+          bandwidthLimitAlertID: {
+            id: "bandwidthLimitAlertID",
+            name: "bandwidthLimitAlertName",
+            type: "BandwidthLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            highLimit: 100,
+            lowLimit: -50,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              highLimit: {
+                pl: "fakeHighLimitTextPL",
+                en: "fakeHighLimitTextEN",
+              },
+              lowLimit: {
+                pl: "fakeLowLimitTextPL",
+                en: "fakeLowLimitTextEN",
+              },
+            },
+            deviceId: "deviceID",
+            lastValueTick: 0,
+            value: null,
+          },
+          exactValuesAlertID: {
+            id: "exactValuesAlertID",
+            name: "exactValuesAlertName",
+            type: "ExactValuesAlert",
+            unit: "A",
+            sampleTime: 1,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            alertValues: [10, 20, 30, 40, 50],
+            severity: 10,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              10: {
+                en: "step 1: $VALUE",
+                pl: "próg 1: $VALUE",
+              },
+              20: {
+                en: "step 2: $VALUE",
+                pl: "próg 2: $VALUE",
+              },
+              30: {
+                en: "step 3: $VALUE",
+                pl: "próg 3: $VALUE",
+              },
+              40: {
+                en: "step 4: $VALUE",
+                pl: "próg 4: $VALUE",
+              },
+              50: {
+                en: "step 5: $VALUE",
+                pl: "próg 5: $VALUE",
+              },
+            },
+            deviceId: "deviceID",
+            lastValueTick: 0,
+            value: null,
+          },
+          highLimitAlertID: {
+            id: "highLimitAlertID",
+            name: "highLimitAlertName",
+            type: "HighLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            highLimit: 100,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              pl: "fakeTextPL",
+              en: "fakeTextEN",
+            },
+            deviceId: "deviceID",
+            lastValueTick: 0,
+            value: null,
+          },
+          lowLimitAlertID: {
+            id: "lowLimitAlertID",
+            name: "lowLimitAlertName",
+            type: "LowLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            lowLimit: 100,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              pl: "fakeTextPL",
+              en: "fakeTextEN",
+            },
+            deviceId: "deviceID",
+            lastValueTick: 0,
+            value: null,
+          },
+        },
+        isActive: true,
+        sendDataFileInterval: 10,
+        sendEventFileInterval: 5,
+        dataStorageSize: 20,
+        eventStorageSize: 30,
+        numberOfDataFilesToSend: 3,
+        numberOfEventFilesToSend: 6,
+        dataToSendConfig: {
+          testElement1ID: {
+            elementId: "testElement1ID",
+            deviceId: "testDevice1ID",
+            sendingInterval: 100,
+            qualityCodeEnabled: true,
+            datapointId: "aaaa0000",
+            dataConverter: {
+              conversionType: "fixed",
+              precision: 3,
+            },
+          },
+          testElement2ID: {
+            elementId: "testElement2ID",
+            deviceId: "testDevice2ID",
+            sendingInterval: 200,
+            qualityCodeEnabled: true,
+            datapointId: "bbbb1111",
+            dataConverter: {
+              conversionType: "precision",
+              precision: 3,
+            },
+          },
+          testElement3ID: {
+            elementId: "testElement3ID",
+            deviceId: "testDevice3ID",
+            sendingInterval: 300,
+            qualityCodeEnabled: true,
+            datapointId: "cccc2222",
+            dataConverter: null,
+          },
+        },
+        eventsToSendConfig: {
+          testElement1ID: {
+            elementId: "testElement1ID",
+            deviceId: "testDevice1ID",
+            sendingInterval: 100,
+            entityId: "aaaa0000",
+            severity: 20,
+            source: "source1234",
+            correlationId: "corelation123",
+            code: "1234",
+            acknowledged: false,
+          },
+          testElement2ID: {
+            elementId: "testElement2ID",
+            deviceId: "testDevice2ID",
+            sendingInterval: 200,
+            entityId: "bbbb1111",
             severity: 30,
           },
           testElement3ID: {
@@ -672,10 +994,11 @@ describe("MSAgentDevice", () => {
             deviceId: "testDevice3ID",
             sendingInterval: 300,
             entityId: "cccc2222",
-            sourceType: "Event",
-            sourceId: "application",
-            source: "SidiroIOT",
             severity: 40,
+            source: "source1255",
+            correlationId: "corelation125",
+            code: "1254",
+            acknowledged: false,
           },
         },
         numberOfSendDataRetries: 5,
@@ -1304,19 +1627,17 @@ describe("MSAgentDevice", () => {
             deviceId: "testDevice1ID",
             sendingInterval: 100,
             entityId: "aaaa0000",
-            sourceType: "Event",
-            sourceId: "application",
-            source: "SidiroIOT",
             severity: 20,
+            source: "source1234",
+            correlationId: "corelation123",
+            code: "1234",
+            acknowledged: false,
           },
           testElement2ID: {
             elementId: "testElement2ID",
             deviceId: "testDevice2ID",
             sendingInterval: 200,
             entityId: "bbbb1111",
-            sourceType: "Event",
-            sourceId: "application",
-            source: "SidiroIOT",
             severity: 30,
           },
           testElement3ID: {
@@ -1324,10 +1645,11 @@ describe("MSAgentDevice", () => {
             deviceId: "testDevice3ID",
             sendingInterval: 300,
             entityId: "cccc2222",
-            sourceType: "Event",
-            sourceId: "application",
-            source: "SidiroIOT",
             severity: 40,
+            source: "source1255",
+            correlationId: "corelation125",
+            code: "1254",
+            acknowledged: false,
           },
         },
         numberOfSendDataRetries: 5,
@@ -1622,19 +1944,17 @@ describe("MSAgentDevice", () => {
             deviceId: "testDevice1ID",
             sendingInterval: 100,
             entityId: "aaaa0000",
-            sourceType: "Event",
-            sourceId: "application",
-            source: "SidiroIOT",
             severity: 20,
+            source: "source1234",
+            correlationId: "corelation123",
+            code: "1234",
+            acknowledged: false,
           },
           testElement2ID: {
             elementId: "testElement2ID",
             deviceId: "testDevice2ID",
             sendingInterval: 200,
             entityId: "bbbb1111",
-            sourceType: "Event",
-            sourceId: "application",
-            source: "SidiroIOT",
             severity: 30,
           },
           testElement3ID: {
@@ -1642,10 +1962,11 @@ describe("MSAgentDevice", () => {
             deviceId: "testDevice3ID",
             sendingInterval: 300,
             entityId: "cccc2222",
-            sourceType: "Event",
-            sourceId: "application",
-            source: "SidiroIOT",
             severity: 40,
+            source: "source1255",
+            correlationId: "corelation125",
+            code: "1254",
+            acknowledged: false,
           },
         },
         numberOfSendDataRetries: 5,
@@ -1894,30 +2215,33 @@ describe("MSAgentDevice", () => {
             deviceId: "testDevice1ID",
             sendingInterval: 100,
             entityId: "aaaa0000",
-            sourceType: "Event",
-            sourceId: "application",
-            source: "SidiroIOT",
             severity: 20,
+            source: "source1234",
+            correlationId: "corelation123",
+            code: "1234",
+            acknowledged: false,
           },
           testElement2ID: {
             elementId: "testElement2ID",
             deviceId: "testDevice2ID",
             sendingInterval: 200,
             entityId: "bbbb1111",
-            sourceType: "Event",
-            sourceId: "application",
-            source: "SidiroIOT",
             severity: 30,
+            source: "source1244",
+            correlationId: "corelation124",
+            code: "1244",
+            acknowledged: false,
           },
           testElement3ID: {
             elementId: "testElement3ID",
             deviceId: "testDevice3ID",
             sendingInterval: 300,
             entityId: "cccc2222",
-            sourceType: "Event",
-            sourceId: "application",
-            source: "SidiroIOT",
             severity: 40,
+            source: "source1255",
+            correlationId: "corelation125",
+            code: "1254",
+            acknowledged: false,
           },
         },
         numberOfSendDataRetries: 5,
@@ -2926,30 +3250,33 @@ describe("MSAgentDevice", () => {
           deviceId: "testDevice1ID",
           sendingInterval: 100,
           entityId: "aaaa0000",
-          sourceType: "Event",
-          sourceId: "application",
-          source: "SidiroIOT",
           severity: 20,
+          source: "source1234",
+          correlationId: "corelation123",
+          code: "1234",
+          acknowledged: false,
         },
         testElement2ID: {
           elementId: "testElement2ID",
           deviceId: "testDevice2ID",
           sendingInterval: 200,
           entityId: "bbbb1111",
-          sourceType: "Event",
-          sourceId: "application",
-          source: "SidiroIOT",
           severity: 30,
+          source: "source1244",
+          correlationId: "corelation124",
+          code: "1244",
+          acknowledged: false,
         },
         testElement3ID: {
           elementId: "testElement3ID",
           deviceId: "testDevice3ID",
           sendingInterval: 300,
           entityId: "cccc2222",
-          sourceType: "Event",
-          sourceId: "application",
-          source: "SidiroIOT",
           severity: 40,
+          source: "source1255",
+          correlationId: "corelation125",
+          code: "1254",
+          acknowledged: false,
         },
       };
 
@@ -3100,124 +3427,6 @@ describe("MSAgentDevice", () => {
       );
     });
 
-    it("should return message if one of eventsToSendConfigs has invalid sourceType - undefined", () => {
-      delete payload.eventsToSendConfig.testElement2ID.sourceType;
-
-      let result = exec();
-
-      expect(result).toEqual(
-        `eventsToSendConfig error: "sourceType" is required`
-      );
-    });
-
-    it("should return message if one of eventsToSendConfigs has invalid sourceType - null", () => {
-      payload.eventsToSendConfig.testElement2ID.sourceType = null;
-
-      let result = exec();
-
-      expect(result).toEqual(
-        `eventsToSendConfig error: "sourceType" must be [Event]`
-      );
-    });
-
-    it("should return message if one of eventsToSendConfigs has invalid sourceType - not a string", () => {
-      payload.eventsToSendConfig.testElement2ID.sourceType = 1234;
-
-      let result = exec();
-
-      expect(result).toEqual(
-        `eventsToSendConfig error: "sourceType" must be [Event]`
-      );
-    });
-
-    it("should return message if one of eventsToSendConfigs has invalid sourceType - invalid string", () => {
-      payload.eventsToSendConfig.testElement2ID.sourceType = "fakeSourceType";
-
-      let result = exec();
-
-      expect(result).toEqual(
-        `eventsToSendConfig error: "sourceType" must be [Event]`
-      );
-    });
-
-    it("should return message if one of eventsToSendConfigs has invalid sourceId - undefined", () => {
-      delete payload.eventsToSendConfig.testElement2ID.sourceId;
-
-      let result = exec();
-
-      expect(result).toEqual(
-        `eventsToSendConfig error: "sourceId" is required`
-      );
-    });
-
-    it("should return message if one of eventsToSendConfigs has invalid sourceId - null", () => {
-      payload.eventsToSendConfig.testElement2ID.sourceId = null;
-
-      let result = exec();
-
-      expect(result).toEqual(
-        `eventsToSendConfig error: "sourceId" must be [application]`
-      );
-    });
-
-    it("should return message if one of eventsToSendConfigs has invalid sourceId - not a string", () => {
-      payload.eventsToSendConfig.testElement2ID.sourceId = 1234;
-
-      let result = exec();
-
-      expect(result).toEqual(
-        `eventsToSendConfig error: "sourceId" must be [application]`
-      );
-    });
-
-    it("should return message if one of eventsToSendConfigs has invalid sourceId - invalid string", () => {
-      payload.eventsToSendConfig.testElement2ID.sourceId = "fakeSourceType";
-
-      let result = exec();
-
-      expect(result).toEqual(
-        `eventsToSendConfig error: "sourceId" must be [application]`
-      );
-    });
-
-    it("should return message if one of eventsToSendConfigs has invalid source - undefined", () => {
-      delete payload.eventsToSendConfig.testElement2ID.source;
-
-      let result = exec();
-
-      expect(result).toEqual(`eventsToSendConfig error: "source" is required`);
-    });
-
-    it("should return message if one of eventsToSendConfigs has invalid source - null", () => {
-      payload.eventsToSendConfig.testElement2ID.source = null;
-
-      let result = exec();
-
-      expect(result).toEqual(
-        `eventsToSendConfig error: "source" must be [SidiroIOT]`
-      );
-    });
-
-    it("should return message if one of eventsToSendConfigs has invalid source - not a string", () => {
-      payload.eventsToSendConfig.testElement2ID.source = 1234;
-
-      let result = exec();
-
-      expect(result).toEqual(
-        `eventsToSendConfig error: "source" must be [SidiroIOT]`
-      );
-    });
-
-    it("should return message if one of eventsToSendConfigs has invalid source - invalid string", () => {
-      payload.eventsToSendConfig.testElement2ID.source = "fakeSourceType";
-
-      let result = exec();
-
-      expect(result).toEqual(
-        `eventsToSendConfig error: "source" must be [SidiroIOT]`
-      );
-    });
-
     it("should return message if one of eventsToSendConfigs has invalid severity - undefined", () => {
       delete payload.eventsToSendConfig.testElement2ID.severity;
 
@@ -3258,13 +3467,13 @@ describe("MSAgentDevice", () => {
       );
     });
 
-    it("should return message if one of eventsToSendConfigs has invalid severity - smaller than 0", () => {
-      payload.eventsToSendConfig.testElement2ID.severity = -1;
+    it("should return message if one of eventsToSendConfigs has invalid severity - smaller than 1", () => {
+      payload.eventsToSendConfig.testElement2ID.severity = 0;
 
       let result = exec();
 
       expect(result).toEqual(
-        `eventsToSendConfig error: "severity" must be greater than or equal to 0`
+        `eventsToSendConfig error: "severity" must be greater than or equal to 1`
       );
     });
 
@@ -3275,6 +3484,182 @@ describe("MSAgentDevice", () => {
 
       expect(result).toEqual(
         `eventsToSendConfig error: "severity" must be less than or equal to 99`
+      );
+    });
+
+    it("should return null if one of eventsToSendConfigs has no source", () => {
+      delete payload.eventsToSendConfig.testElement2ID.source;
+
+      let result = exec();
+
+      expect(result).toEqual(null);
+    });
+
+    it("should return message if one of eventsToSendConfigs has invalid source - null", () => {
+      payload.eventsToSendConfig.testElement2ID.source = null;
+
+      let result = exec();
+
+      expect(result).toEqual(
+        `eventsToSendConfig error: "source" must be a string`
+      );
+    });
+
+    it("should return message if one of eventsToSendConfigs has invalid source - not a string", () => {
+      payload.eventsToSendConfig.testElement2ID.source = 1234;
+
+      let result = exec();
+
+      expect(result).toEqual(
+        `eventsToSendConfig error: "source" must be a string`
+      );
+    });
+
+    it("should return message if one of eventsToSendConfigs has invalid source - shorter than 1", () => {
+      payload.eventsToSendConfig.testElement2ID.source = "";
+
+      let result = exec();
+
+      expect(result).toEqual(
+        `eventsToSendConfig error: "source" is not allowed to be empty`
+      );
+    });
+
+    it("should return message if one of eventsToSendConfigs has invalid source - longer than 255", () => {
+      payload.eventsToSendConfig.testElement2ID.source = generateRandomString(
+        256
+      );
+
+      let result = exec();
+
+      expect(result).toEqual(
+        `eventsToSendConfig error: "source" length must be less than or equal to 255 characters long`
+      );
+    });
+
+    it("should return null if one of eventsToSendConfigs has no correlationId", () => {
+      delete payload.eventsToSendConfig.testElement2ID.correlationId;
+
+      let result = exec();
+
+      expect(result).toEqual(null);
+    });
+
+    it("should return message if one of eventsToSendConfigs has invalid correlationId - null", () => {
+      payload.eventsToSendConfig.testElement2ID.correlationId = null;
+
+      let result = exec();
+
+      expect(result).toEqual(
+        `eventsToSendConfig error: "correlationId" must be a string`
+      );
+    });
+
+    it("should return message if one of eventsToSendConfigs has invalid correlationId - not a string", () => {
+      payload.eventsToSendConfig.testElement2ID.correlationId = 1234;
+
+      let result = exec();
+
+      expect(result).toEqual(
+        `eventsToSendConfig error: "correlationId" must be a string`
+      );
+    });
+
+    it("should return message if one of eventsToSendConfigs has invalid correlationId - shorter than 1", () => {
+      payload.eventsToSendConfig.testElement2ID.correlationId = "";
+
+      let result = exec();
+
+      expect(result).toEqual(
+        `eventsToSendConfig error: "correlationId" is not allowed to be empty`
+      );
+    });
+
+    it("should return message if one of eventsToSendConfigs has invalid correlationId - longer than 36", () => {
+      payload.eventsToSendConfig.testElement2ID.correlationId = generateRandomString(
+        37
+      );
+
+      let result = exec();
+
+      expect(result).toEqual(
+        `eventsToSendConfig error: "correlationId" length must be less than or equal to 36 characters long`
+      );
+    });
+
+    it("should return null if one of eventsToSendConfigs has no code", () => {
+      delete payload.eventsToSendConfig.testElement2ID.code;
+
+      let result = exec();
+
+      expect(result).toEqual(null);
+    });
+
+    it("should return message if one of eventsToSendConfigs has invalid code - null", () => {
+      payload.eventsToSendConfig.testElement2ID.code = null;
+
+      let result = exec();
+
+      expect(result).toEqual(
+        `eventsToSendConfig error: "code" must be a string`
+      );
+    });
+
+    it("should return message if one of eventsToSendConfigs has invalid code - not a string", () => {
+      payload.eventsToSendConfig.testElement2ID.code = 1234;
+
+      let result = exec();
+
+      expect(result).toEqual(
+        `eventsToSendConfig error: "code" must be a string`
+      );
+    });
+
+    it("should return message if one of eventsToSendConfigs has invalid code - shorter than 1", () => {
+      payload.eventsToSendConfig.testElement2ID.code = "";
+
+      let result = exec();
+
+      expect(result).toEqual(
+        `eventsToSendConfig error: "code" is not allowed to be empty`
+      );
+    });
+
+    it("should return message if one of eventsToSendConfigs has invalid code - longer than 16", () => {
+      payload.eventsToSendConfig.testElement2ID.code = generateRandomString(17);
+
+      let result = exec();
+
+      expect(result).toEqual(
+        `eventsToSendConfig error: "code" length must be less than or equal to 16 characters long`
+      );
+    });
+
+    it("should return null if one of eventsToSendConfigs has no acknowledged", () => {
+      delete payload.eventsToSendConfig.testElement2ID.acknowledged;
+
+      let result = exec();
+
+      expect(result).toEqual(null);
+    });
+
+    it("should return message if one of eventsToSendConfigs has invalid acknowledged - null", () => {
+      payload.eventsToSendConfig.testElement2ID.acknowledged = null;
+
+      let result = exec();
+
+      expect(result).toEqual(
+        `eventsToSendConfig error: "acknowledged" must be a boolean`
+      );
+    });
+
+    it("should return message if one of eventsToSendConfigs has invalid acknowledged - not a boolean", () => {
+      payload.eventsToSendConfig.testElement2ID.acknowledged = 1234;
+
+      let result = exec();
+
+      expect(result).toEqual(
+        `eventsToSendConfig error: "acknowledged" must be a boolean`
       );
     });
 
@@ -4173,30 +4558,33 @@ describe("MSAgentDevice", () => {
             deviceId: "testDevice1ID",
             sendingInterval: 100,
             entityId: "aaaa0000",
-            sourceType: "Event",
-            sourceId: "application",
-            source: "SidiroIOT",
             severity: 20,
+            source: "source1234",
+            correlationId: "corelation123",
+            code: "1234",
+            acknowledged: false,
           },
           testElement2ID: {
             elementId: "testElement2ID",
             deviceId: "testDevice2ID",
             sendingInterval: 200,
             entityId: "bbbb1111",
-            sourceType: "Event",
-            sourceId: "application",
-            source: "SidiroIOT",
             severity: 30,
+            source: "source1244",
+            correlationId: "corelation124",
+            code: "1244",
+            acknowledged: false,
           },
           testElement3ID: {
             elementId: "testElement3ID",
             deviceId: "testDevice3ID",
             sendingInterval: 300,
             entityId: "cccc2222",
-            sourceType: "Event",
-            sourceId: "application",
-            source: "SidiroIOT",
             severity: 40,
+            source: "source1255",
+            correlationId: "corelation125",
+            code: "1254",
+            acknowledged: false,
           },
         },
         numberOfSendDataRetries: 5,
@@ -4243,10 +4631,11 @@ describe("MSAgentDevice", () => {
 
       let expectedResult = {
         entityId: "bbbb1111",
-        sourceType: "Event",
-        sourceId: "application",
-        source: "SidiroIOT",
         severity: 30,
+        source: "source1244",
+        correlationId: "corelation124",
+        code: "1244",
+        acknowledged: false,
         timestamp: "2020-12-04T16:40:00.000Z",
         description: JSON.stringify({
           pl: "fakeTestTextPL",
@@ -4271,6 +4660,18 @@ describe("MSAgentDevice", () => {
       let result = await exec();
 
       expect(result).toEqual(null);
+    });
+
+    it("should return null and call logger warn - if value is longer than 255 signs", async () => {
+      value = generateRandomString(256);
+
+      let result = await exec();
+
+      expect(result).toEqual(null);
+      expect(loggerWarnMock).toHaveBeenCalledTimes(1);
+      expect(loggerWarnMock.mock.calls[0][0]).toContain(
+        "Cannot send description of event longer than 255 signs"
+      );
     });
 
     it("should return null - if tickId is undefined", async () => {
@@ -4319,10 +4720,11 @@ describe("MSAgentDevice", () => {
 
       let expectedResult = {
         entityId: "bbbb1111",
-        sourceType: "Event",
-        sourceId: "application",
-        source: "SidiroIOT",
         severity: 30,
+        source: "source1244",
+        correlationId: "corelation124",
+        code: "1244",
+        acknowledged: false,
         timestamp: "2020-12-04T16:40:00.000Z",
         description: "testString",
       };
@@ -4336,12 +4738,133 @@ describe("MSAgentDevice", () => {
 
       let expectedResult = {
         entityId: "bbbb1111",
-        sourceType: "Event",
-        sourceId: "application",
-        source: "SidiroIOT",
         severity: 30,
+        source: "source1244",
+        correlationId: "corelation124",
+        code: "1244",
+        acknowledged: false,
         timestamp: "2020-12-04T16:40:00.000Z",
         description: `{"value1":"testString"}`,
+      };
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should not include source in payload if source is not defined in payload", async () => {
+      initPayload.eventsToSendConfig.testElement2ID = {
+        elementId: "testElement2ID",
+        deviceId: "testDevice2ID",
+        sendingInterval: 200,
+        entityId: "bbbb1111",
+        severity: 30,
+        correlationId: "corelation124",
+        code: "1244",
+        acknowledged: false,
+      };
+
+      let result = await exec();
+
+      let expectedResult = {
+        entityId: "bbbb1111",
+        severity: 30,
+        correlationId: "corelation124",
+        code: "1244",
+        acknowledged: false,
+        timestamp: "2020-12-04T16:40:00.000Z",
+        description: JSON.stringify({
+          pl: "fakeTestTextPL",
+          en: "fakeTestTextEN",
+        }),
+      };
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should not include correlationId in payload if source is not defined in payload", async () => {
+      initPayload.eventsToSendConfig.testElement2ID = {
+        elementId: "testElement2ID",
+        deviceId: "testDevice2ID",
+        sendingInterval: 200,
+        entityId: "bbbb1111",
+        severity: 30,
+        source: "source1244",
+        code: "1244",
+        acknowledged: false,
+      };
+
+      let result = await exec();
+
+      let expectedResult = {
+        entityId: "bbbb1111",
+        severity: 30,
+        source: "source1244",
+        code: "1244",
+        acknowledged: false,
+        timestamp: "2020-12-04T16:40:00.000Z",
+        description: JSON.stringify({
+          pl: "fakeTestTextPL",
+          en: "fakeTestTextEN",
+        }),
+      };
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should not include code in payload if source is not defined in payload", async () => {
+      initPayload.eventsToSendConfig.testElement2ID = {
+        elementId: "testElement2ID",
+        deviceId: "testDevice2ID",
+        sendingInterval: 200,
+        entityId: "bbbb1111",
+        severity: 30,
+        source: "source1244",
+        correlationId: "corelation124",
+        acknowledged: false,
+      };
+
+      let result = await exec();
+
+      let expectedResult = {
+        entityId: "bbbb1111",
+        severity: 30,
+        source: "source1244",
+        correlationId: "corelation124",
+        acknowledged: false,
+        timestamp: "2020-12-04T16:40:00.000Z",
+        description: JSON.stringify({
+          pl: "fakeTestTextPL",
+          en: "fakeTestTextEN",
+        }),
+      };
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should not include acknowledged in payload if source is not defined in payload", async () => {
+      initPayload.eventsToSendConfig.testElement2ID = {
+        elementId: "testElement2ID",
+        deviceId: "testDevice2ID",
+        sendingInterval: 200,
+        entityId: "bbbb1111",
+        severity: 30,
+        source: "source1244",
+        correlationId: "corelation124",
+        code: "1244",
+      };
+
+      let result = await exec();
+
+      let expectedResult = {
+        entityId: "bbbb1111",
+        severity: 30,
+        source: "source1244",
+        correlationId: "corelation124",
+        code: "1244",
+        timestamp: "2020-12-04T16:40:00.000Z",
+        description: JSON.stringify({
+          pl: "fakeTestTextPL",
+          en: "fakeTestTextEN",
+        }),
       };
 
       expect(result).toEqual(expectedResult);
@@ -4388,30 +4911,33 @@ describe("MSAgentDevice", () => {
             deviceId: "testDevice1ID",
             sendingInterval: 100,
             entityId: "aaaa0000",
-            sourceType: "Event",
-            sourceId: "application",
-            source: "SidiroIOT",
             severity: 20,
+            source: "source1234",
+            correlationId: "corelation123",
+            code: "1234",
+            acknowledged: false,
           },
           testElement2ID: {
             elementId: "testElement2ID",
             deviceId: "testDevice2ID",
             sendingInterval: 200,
             entityId: "bbbb1111",
-            sourceType: "Event",
-            sourceId: "application",
-            source: "SidiroIOT",
             severity: 30,
+            source: "source1244",
+            correlationId: "corelation124",
+            code: "1244",
+            acknowledged: false,
           },
           testElement3ID: {
             elementId: "testElement3ID",
             deviceId: "testDevice3ID",
             sendingInterval: 300,
             entityId: "cccc2222",
-            sourceType: "Event",
-            sourceId: "application",
-            source: "SidiroIOT",
             severity: 40,
+            source: "source1255",
+            correlationId: "corelation125",
+            code: "1254",
+            acknowledged: false,
           },
         },
         numberOfSendDataRetries: 5,
@@ -4541,30 +5067,33 @@ describe("MSAgentDevice", () => {
             deviceId: "testDevice1ID",
             sendingInterval: 100,
             entityId: "aaaa0000",
-            sourceType: "Event",
-            sourceId: "application",
-            source: "SidiroIOT",
             severity: 20,
+            source: "source1234",
+            correlationId: "corelation123",
+            code: "1234",
+            acknowledged: false,
           },
           testElement2ID: {
             elementId: "testElement2ID",
             deviceId: "testDevice2ID",
             sendingInterval: 200,
             entityId: "bbbb1111",
-            sourceType: "Event",
-            sourceId: "application",
-            source: "SidiroIOT",
             severity: 30,
+            source: "source1244",
+            correlationId: "corelation124",
+            code: "1244",
+            acknowledged: false,
           },
           testElement3ID: {
             elementId: "testElement3ID",
             deviceId: "testDevice3ID",
             sendingInterval: 300,
             entityId: "cccc2222",
-            sourceType: "Event",
-            sourceId: "application",
-            source: "SidiroIOT",
             severity: 40,
+            source: "source1255",
+            correlationId: "corelation125",
+            code: "1254",
+            acknowledged: false,
           },
         },
         numberOfSendDataRetries: 5,
@@ -5066,30 +5595,33 @@ describe("MSAgentDevice", () => {
             deviceId: "testDevice1ID",
             sendingInterval: 100,
             entityId: "aaaa0000",
-            sourceType: "Event",
-            sourceId: "application",
-            source: "SidiroIOT",
             severity: 20,
+            source: "source1234",
+            correlationId: "corelation123",
+            code: "1234",
+            acknowledged: false,
           },
           testElement2ID: {
             elementId: "testElement2ID",
             deviceId: "testDevice2ID",
             sendingInterval: 200,
             entityId: "bbbb1111",
-            sourceType: "Event",
-            sourceId: "application",
-            source: "SidiroIOT",
             severity: 30,
+            source: "source1244",
+            correlationId: "corelation124",
+            code: "1244",
+            acknowledged: false,
           },
           testElement3ID: {
             elementId: "testElement3ID",
             deviceId: "testDevice3ID",
             sendingInterval: 300,
             entityId: "cccc2222",
-            sourceType: "Event",
-            sourceId: "application",
-            source: "SidiroIOT",
             severity: 40,
+            source: "source1255",
+            correlationId: "corelation125",
+            code: "1254",
+            acknowledged: false,
           },
         },
         numberOfSendDataRetries: 5,
@@ -5146,10 +5678,11 @@ describe("MSAgentDevice", () => {
 
       let expectedResult = {
         entityId: "bbbb1111",
-        sourceType: "Event",
-        sourceId: "application",
-        source: "SidiroIOT",
         severity: 30,
+        source: "source1244",
+        correlationId: "corelation124",
+        code: "1244",
+        acknowledged: false,
         timestamp: "2020-12-04T16:40:00.000Z",
         description: JSON.stringify({
           pl: "fakeTestTextPL",
@@ -5177,10 +5710,11 @@ describe("MSAgentDevice", () => {
 
       let expectedResult = {
         entityId: "bbbb1111",
-        sourceType: "Event",
-        sourceId: "application",
-        source: "SidiroIOT",
         severity: 30,
+        source: "source1244",
+        correlationId: "corelation124",
+        code: "1244",
+        acknowledged: false,
         timestamp: "2020-12-04T16:40:00.000Z",
         description: JSON.stringify({
           pl: "fakeTestTextPL",
@@ -5229,10 +5763,11 @@ describe("MSAgentDevice", () => {
 
       let expectedResult = {
         entityId: "bbbb1111",
-        sourceType: "Event",
-        sourceId: "application",
-        source: "SidiroIOT",
         severity: 30,
+        source: "source1244",
+        correlationId: "corelation124",
+        code: "1244",
+        acknowledged: false,
         timestamp: "2020-12-04T16:40:00.000Z",
         description: JSON.stringify({
           pl: "fakeTestTextPL",
@@ -5318,6 +5853,166 @@ describe("MSAgentDevice", () => {
       expect(retry).not.toHaveBeenCalled();
 
       expect(agent._mindConnectAgent.PostEvent).not.toHaveBeenCalled();
+    });
+
+    it("should create event payload from tickId, value and elementId and then send it by PostEvent - if source in event is not defined", async () => {
+      initPayload.eventsToSendConfig.testElement2ID = {
+        elementId: "testElement2ID",
+        deviceId: "testDevice2ID",
+        sendingInterval: 200,
+        entityId: "bbbb1111",
+        severity: 30,
+        correlationId: "corelation124",
+        code: "1244",
+        acknowledged: false,
+      };
+
+      await exec();
+
+      expect(retry).toHaveBeenCalledTimes(1);
+
+      expect(retry.mock.calls[0][0]).toEqual(
+        initPayload.numberOfSendEventRetries
+      );
+
+      expect(agent._mindConnectAgent.PostEvent).toHaveBeenCalledTimes(1);
+
+      let expectedResult = {
+        entityId: "bbbb1111",
+        severity: 30,
+        correlationId: "corelation124",
+        code: "1244",
+        acknowledged: false,
+        timestamp: "2020-12-04T16:40:00.000Z",
+        description: JSON.stringify({
+          pl: "fakeTestTextPL",
+          en: "fakeTestTextEN",
+        }),
+      };
+
+      expect(agent._mindConnectAgent.PostEvent.mock.calls[0][0]).toEqual(
+        expectedResult
+      );
+    });
+
+    it("should create event payload from tickId, value and elementId and then send it by PostEvent - if correlationId in event is not defined", async () => {
+      initPayload.eventsToSendConfig.testElement2ID = {
+        elementId: "testElement2ID",
+        deviceId: "testDevice2ID",
+        sendingInterval: 200,
+        entityId: "bbbb1111",
+        source: "source1244",
+        severity: 30,
+        code: "1244",
+        acknowledged: false,
+      };
+
+      await exec();
+
+      expect(retry).toHaveBeenCalledTimes(1);
+
+      expect(retry.mock.calls[0][0]).toEqual(
+        initPayload.numberOfSendEventRetries
+      );
+
+      expect(agent._mindConnectAgent.PostEvent).toHaveBeenCalledTimes(1);
+
+      let expectedResult = {
+        entityId: "bbbb1111",
+        severity: 30,
+        source: "source1244",
+        code: "1244",
+        acknowledged: false,
+        timestamp: "2020-12-04T16:40:00.000Z",
+        description: JSON.stringify({
+          pl: "fakeTestTextPL",
+          en: "fakeTestTextEN",
+        }),
+      };
+
+      expect(agent._mindConnectAgent.PostEvent.mock.calls[0][0]).toEqual(
+        expectedResult
+      );
+    });
+
+    it("should create event payload from tickId, value and elementId and then send it by PostEvent - if code in event is not defined", async () => {
+      initPayload.eventsToSendConfig.testElement2ID = {
+        elementId: "testElement2ID",
+        deviceId: "testDevice2ID",
+        sendingInterval: 200,
+        entityId: "bbbb1111",
+        source: "source1244",
+        severity: 30,
+        correlationId: "corelation124",
+        acknowledged: false,
+      };
+
+      await exec();
+
+      expect(retry).toHaveBeenCalledTimes(1);
+
+      expect(retry.mock.calls[0][0]).toEqual(
+        initPayload.numberOfSendEventRetries
+      );
+
+      expect(agent._mindConnectAgent.PostEvent).toHaveBeenCalledTimes(1);
+
+      let expectedResult = {
+        entityId: "bbbb1111",
+        severity: 30,
+        source: "source1244",
+        correlationId: "corelation124",
+        acknowledged: false,
+        timestamp: "2020-12-04T16:40:00.000Z",
+        description: JSON.stringify({
+          pl: "fakeTestTextPL",
+          en: "fakeTestTextEN",
+        }),
+      };
+
+      expect(agent._mindConnectAgent.PostEvent.mock.calls[0][0]).toEqual(
+        expectedResult
+      );
+    });
+
+    it("should create event payload from tickId, value and elementId and then send it by PostEvent - if acknowledged in event is not defined", async () => {
+      initPayload.eventsToSendConfig.testElement2ID = {
+        elementId: "testElement2ID",
+        deviceId: "testDevice2ID",
+        sendingInterval: 200,
+        entityId: "bbbb1111",
+        source: "source1244",
+        severity: 30,
+        correlationId: "corelation124",
+        code: "1244",
+      };
+
+      await exec();
+
+      expect(retry).toHaveBeenCalledTimes(1);
+
+      expect(retry.mock.calls[0][0]).toEqual(
+        initPayload.numberOfSendEventRetries
+      );
+
+      expect(agent._mindConnectAgent.PostEvent).toHaveBeenCalledTimes(1);
+
+      let expectedResult = {
+        entityId: "bbbb1111",
+        severity: 30,
+        source: "source1244",
+        correlationId: "corelation124",
+        code: "1244",
+        timestamp: "2020-12-04T16:40:00.000Z",
+        description: JSON.stringify({
+          pl: "fakeTestTextPL",
+          en: "fakeTestTextEN",
+        }),
+      };
+
+      expect(agent._mindConnectAgent.PostEvent.mock.calls[0][0]).toEqual(
+        expectedResult
+      );
     });
   });
 });

@@ -20,11 +20,12 @@ const eventsToSendConfigSchemaContent = {
   elementId: Joi.string().min(1).required(),
   deviceId: Joi.string().min(1).required(),
   sendingInterval: Joi.number().integer().min(1).required(),
+  correlationId: Joi.string().min(1).max(36).optional(),
   entityId: Joi.string().required(),
-  sourceType: Joi.string().valid("Event").required(),
-  sourceId: Joi.string().valid("application").required(),
-  source: Joi.string().valid("SidiroIOT").required(),
-  severity: Joi.number().integer().min(0).max(99).required(),
+  severity: Joi.number().integer().min(1).max(99).required(),
+  code: Joi.string().min(1).max(16).optional(),
+  source: Joi.string().min(1).max(255).optional(),
+  acknowledged: Joi.boolean().optional(),
 };
 
 const eventsToSendConfigSchema = Joi.object({

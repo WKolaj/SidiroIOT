@@ -7,6 +7,7 @@ const Sampler = require("../../Sampler/Sampler");
 const { exist } = require("joi");
 const { exists, isObjectEmpty } = require("../../../utilities/utilities");
 const { isString } = require("lodash");
+const logger = require("../../../logger/logger");
 
 class MSAgentDevice extends AgentDevice {
   //#region ========= CONSTRUCTOR =========
@@ -159,15 +160,32 @@ class MSAgentDevice extends AgentDevice {
     //Stringinfing value if is not a string
     if (!isString(value)) value = JSON.stringify(value);
 
+    //Cannot send description longer than 255 signs
+    if (value.length > 255) {
+      //logging inability to send description
+      logger.warn(
+        `Cannot send description of event longer than 255 signs [${tickId}]:${value}`
+      );
+      return null;
+    }
+
     let eventPayload = {
       entityId: elementConfig.entityId,
-      sourceType: elementConfig.sourceType,
-      sourceId: elementConfig.sourceId,
-      source: elementConfig.source,
       severity: elementConfig.severity,
       timestamp: this._convertTickIdToMCTimestamp(tickId),
       description: value,
     };
+
+    if (exists(elementConfig.correlationId))
+      eventPayload.correlationId = elementConfig.correlationId;
+
+    if (exists(elementConfig.code)) eventPayload.code = elementConfig.code;
+
+    if (exists(elementConfig.source))
+      eventPayload.source = elementConfig.source;
+
+    if (exists(elementConfig.acknowledged))
+      eventPayload.acknowledged = elementConfig.acknowledged;
 
     return eventPayload;
   }
