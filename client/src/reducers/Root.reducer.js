@@ -14,6 +14,7 @@ import { DevicesSelectionPageReducer } from './DevicesSelectionPage.reducer';
 import { SettingsReducer } from './Settings.reducer';
 import { BackdropReducer } from './Backdrop.reducer';
 import { IPConfigReducer } from './IPConfig.reducer';
+import { LogsReducer } from './Logs.reducer';
 
 export default combineReducers({
   LanguageDialogReducer,
@@ -30,5 +31,6 @@ export default combineReducers({
   DevicesSelectionPageReducer,
   SettingsReducer,
   BackdropReducer,
-  IPConfigReducer
+  IPConfigReducer,
+  LogsReducer
 })

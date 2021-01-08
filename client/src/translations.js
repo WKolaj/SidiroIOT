@@ -4,7 +4,8 @@ export const resources = {
       "Drawer": {
         "Devices": "Devices",
         "Settings": "Settings",
-        "Language": "Language"
+        "Language": "Language",
+        "Logs": "Logs"
       },
       "LanguageSelection": {
         "Label": "Choose application language",
@@ -145,7 +146,22 @@ export const resources = {
           "RAMUsageVariable": "Ram Usage",
           "AssociatedVariable": "Associated Variable",
           "associatedDeviceID": "Associated Device ID",
-          "associatedElementID": "Associated Element ID"
+          "associatedElementID": "Associated Element ID",
+          "MBVariablesGroup": "Modbus",
+          "group": "Group",
+          "read/write": "Read / Write",
+          "S7VariablesGroup": "S7 Variables",
+          "function": "Function",
+          "genericParameterTableHeader": "Parameter",
+          "genericValueTableHeader": "Value",
+          "conversionType": "Conversion type",
+          "precision": "Precision",
+          "en": "EN",
+          "pl": "PL",
+          "inactive": "Inactive",
+          "correlationId": "Correlation ID",
+          "code": "Code",
+          "acknowledged": "Acknowledged"
         },
         "Tabs": {
           "calcElements": "Edge computing",
@@ -153,8 +169,8 @@ export const resources = {
           "alerts": "Alerts",
           "info": "Info",
           "datapoints": "Datapoints",
-          "dataToSendConfig": "Data to send",
-          "eventsToSendConfig": "Events to send"
+          "dataToSendConfig": "Data sent",
+          "eventsToSendConfig": "Events sent"
         }
       },
       "UniversalTable": {
@@ -257,6 +273,14 @@ export const resources = {
         "ConfirmButton": "Confirm",
         "CancelButton": "Cancel",
         "ChangeConfiguration": "Change configuration"
+      },
+      "LogsPage": {
+        "Title": "Logs",
+        "DeviceLogsLabel": "Device logs",
+        "ShowingLogsSubtitle1": "Showing last",
+        "ShowingLogsSubtitle2": "logs",
+        "RefreshLastLogs": "Refresh last logs",
+        "DownloadAllLogs": "Download all logs"
       }
     }
   },
@@ -265,7 +289,8 @@ export const resources = {
       "Drawer": {
         "Devices": "Urządzenia",
         "Settings": "Ustawienia",
-        "Language": "Język"
+        "Language": "Język",
+        "Logs": "Logi"
       },
       "LanguageSelection": {
         "Label": "Wybierz język aplikacji",
@@ -285,14 +310,15 @@ export const resources = {
         "RefreshAllDevices": "Odśwież wszystkie urządzenia",
         "ToggleTableView": "Przełącz widok tabel",
         "NoDevicesHeader": "Brak urządzeń",
+        
         "Tabs": {
           "calcElements": "Edge computing",
           "variables": "Zmienne",
           "alerts": "Zdarzenia",
           "info": "Informacje",
           "datapoints": "Datapointy",
-          "dataToSendConfig": "Konfiguracja danych",
-          "eventsToSendConfig": "Konfiguracja zdarzeń"
+          "dataToSendConfig": "Wysyłane dane",
+          "eventsToSendConfig": "Wysyłane zdarzenia"
         },
       },
       "UniversalTable": {
@@ -395,6 +421,14 @@ export const resources = {
         "ConfirmButton": "Potwierdź",
         "CancelButton": "Anuluj",
         "ChangeConfiguration": "Zmień konfigurację"
+      },
+      "LogsPage": {
+        "Title": "Logi",
+        "DeviceLogsLabel": "Logi urządzenia",
+        "ShowingLogsSubtitle1": "Wyświetlanych jest",
+        "ShowingLogsSubtitle2": "ostatnich logów",
+        "RefreshLastLogs": "Odśwież ostatnie logi",
+        "DownloadAllLogs": "Pobierz wszystkie logi"
       }
     }
   }

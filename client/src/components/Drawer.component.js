@@ -44,6 +44,7 @@ import { setCreateAccountDialogOpen } from '../actions/CreateAccountDialog.actio
 import { isAdmin } from '../services/isAuthenticated.service';
 import CircularProgressWithLabel from './CircularProgress.component';
 import { setLoginFormUsername, setLoginFormPassword } from '../actions/LoginPage.action';
+import CodeIcon from '@material-ui/icons/Code';
 
 const drawerWidth = 240;
 
@@ -442,13 +443,22 @@ function MiniDrawer(props) {
                   <ListItemText primary={t('Drawer.Devices')} />
                 </ListItem>
                 {isAdmin() ?
+                <React.Fragment>
                   <ListItem button component={Link} to="/settings" selected={location.pathname === "/settings" ? true : false} >
                     <ListItemIcon>
                       <SettingsIcon />
                     </ListItemIcon>
                     <ListItemText primary={t('Drawer.Settings')} />
                   </ListItem>
+                  <ListItem button component={Link} to="/logs" selected={location.pathname === "/logs" ? true : false} >
+                    <ListItemIcon>
+                      <CodeIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={t('Drawer.Logs')} />
+                  </ListItem>
+                  </React.Fragment>
                   : null}
+
                 <Divider />
                 <ListItem button onClick={() => props.setLanguageDialogOpen(true)}>
                   <ListItemIcon>
@@ -469,6 +479,7 @@ function MiniDrawer(props) {
             >
               <BottomNavigationAction value="/" label={t('Drawer.Devices')} icon={<DeviceHubIcon />} component={Link} to="/" />
               {isAdmin() ? <BottomNavigationAction value="/settings" label={t('Drawer.Settings')} icon={<ViewArrayIcon />} component={Link} to="/settings" /> : null}
+              {isAdmin() ? <BottomNavigationAction value="/logs" label={t('Drawer.Logs')} icon={<CodeIcon />} component={Link} to="/logs" /> : null}
               <BottomNavigationAction label={t('Drawer.Language')} icon={<LanguageIcon />} onClick={() => props.setLanguageDialogOpen(true)} />
             </BottomNavigation>
           </React.Fragment>

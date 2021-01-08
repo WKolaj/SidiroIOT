@@ -15,6 +15,8 @@ import IPConfigService from '../services/ipconfig.service';
 import Card from '../components/Card.component';
 import { setIpConfigDialogOpen } from '../actions/IPconfigDialog.action';
 import Grow from '@material-ui/core/Grow';
+import { setAllDevices } from '../actions/DevicesSelectionPage.action';
+import { selectDevice } from '../actions/DevicesList.action';
 
 const useStyles = makeStyles((theme) => ({
   divider: {
@@ -29,7 +31,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-function Settings({ setSnackbarText, setSnackbarShown, file, setConfigFile, setBackdropOpen, setBackdropClosed, setIPConfiguration, ipconfig, setIpConfigDialogOpen }) {
+function Settings({ setSnackbarText, setSnackbarShown, file, setConfigFile, setBackdropOpen, setBackdropClosed, setIPConfiguration, ipconfig, setIpConfigDialogOpen, setAllDevices, selectDevice }) {
   const classes = useStyles();
   const { t } = useTranslation()
 
@@ -67,6 +69,9 @@ function Settings({ setSnackbarText, setSnackbarShown, file, setConfigFile, setB
       if (res.status === 200) {
         setSnackbarText(t('Snackbar.SuccessfulFileUpload'), 'success')
         setSnackbarShown(true)
+        //reset devices and selected device so they are refreshed on route open
+        setAllDevices([])
+        selectDevice(0, '', '')
       }
       else if (res.status === 403) {
         setSnackbarText(t('Snackbar.UnsuccessfulFileUpload403'), 'error')
@@ -179,7 +184,9 @@ const mapDispatchToProps = {
   setBackdropOpen,
   setBackdropClosed,
   setIPConfiguration,
-  setIpConfigDialogOpen
+  setIpConfigDialogOpen,
+  setAllDevices,
+  selectDevice
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Settings);

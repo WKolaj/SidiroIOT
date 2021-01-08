@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
     //backgroundColor: theme.palette.background.paper,
   },
   active: {
-    color: 'green',
+    color: '#2fcc2f',
     height: '15px',
     marginTop: 'auto',
     marginBottom: 'auto'

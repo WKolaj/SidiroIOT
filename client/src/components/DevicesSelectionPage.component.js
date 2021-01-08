@@ -41,6 +41,18 @@ const useStyles = makeStyles((theme) => ({
   advancedViewTables: {
     float: 'right',
     verticalAlign: 'top'
+  },
+  noDevicesContainer: {
+    height: '80vh',
+    position: 'relative',
+    width: '100%'
+  },
+  noDevicesText: {
+    margin: 0,
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)'
   }
 }));
 
@@ -52,8 +64,11 @@ function DevicesSelectionPage(props) {
   const { setAllDevices, allDevices, selectedDevice, authenticated, refreshDeviceParams, toggleTableView, tableView } = props;
 
   const reformatDeviceDataToReducer = (data) => {
+    //sort json first
+    const sorted = Object.entries(data).sort().reduce((o, [k, v]) => { o[k] = v; return o }, {})
+
     let arr = []
-    for (const [key, value] of Object.entries(data)) {
+    for (const [key, value] of Object.entries(sorted)) {
       arr.push({ [key]: value })
     }
     return arr
@@ -141,7 +156,50 @@ function DevicesSelectionPage(props) {
     if (data.lastValueTick !== undefined) {
       data = {
         ...data,
-        lastValueTick: formatDateTime(new Date(parseFloat(data.lastValueTick) * 1000))
+        lastValueTick: data.lastValueTick !== 0 ? formatDateTime(new Date(parseFloat(data.lastValueTick) * 1000)) : ""
+      }
+    }
+    if (data.read !== undefined && data.write !== undefined && data.readAsSingle !== undefined && data.writeAsSingle !== undefined) {
+      data = {
+        ...data,
+        readWrite: data.read ? 'Read' : 'Write',
+        readWriteAsSingle: data.read ? 'readAsSingle' : 'writeAsSingle',
+        readWriteFCode: data.read ? 'readFCode' : 'writeFCode'
+      }
+    }
+    if ((type === 'HighLimitAlert' || type === 'BandwidthLimitAlert' || type === 'LowLimitAlert' || type === 'ExactValuesAlert') && data.value !== undefined && data.defaultValue !== undefined) {
+      data = {
+        ...data,
+        value: data.value === null ? t('DevicesSelectionPage.Properties.inactive') : data.value,
+        defaultValue: data.defaultValue === null ? t('DevicesSelectionPage.Properties.inactive') : data.value
+      }
+    }
+    if (type === 'SumCalculator' && data.variableIDs !== undefined && data.variableIDs.length > 0) {
+      let newData = {
+        ...data,
+        variableIDs: {}
+      }
+      data.variableIDs.forEach(variable => {
+        newData = {
+          ...data,
+          variableIDs: {
+            ...newData.variableIDs,
+            [variable.variableID]: variable.factor
+          }
+        }
+      })
+    }
+    if (type === 'MBByteArray' || type === 'S7ByteArray') {
+      data = {
+        ...data,
+        value: `[${data.value}]`,
+        defaultValue: `[${data.defaultValue}]`
+      }
+    }
+    if (type === 'ExactValuesAlert') {
+      data = {
+        ...data,
+        alertValues: `[${data.alertValues}]`
       }
     }
     switch (type) {
@@ -224,8 +282,8 @@ function DevicesSelectionPage(props) {
         }
         else {
           return {
-            cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'factor', 'sampleTime', 'calculationInterval', 'lastValueTick'],
-            rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.factor, data.sampleTime, data.calculationInterval, data.lastValueTick]
+            cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'factor', 'sampleTime', 'calculationInterval', 'variableID', 'lastValueTick'],
+            rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.factor, data.sampleTime, data.calculationInterval, data.variableID, data.lastValueTick]
           }
         }
       case 'IncreaseCalculator':
@@ -237,8 +295,8 @@ function DevicesSelectionPage(props) {
         }
         else {
           return {
-            cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'factor', 'sampleTime', 'overflow', 'calculationInterval', 'lastValueTick'],
-            rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.factor, data.sampleTime, data.overflow, data.calculationInterval, data.lastValueTick]
+            cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'factor', 'sampleTime', 'overflow', 'calculationInterval', 'variableID', 'lastValueTick'],
+            rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.factor, data.sampleTime, data.overflow, data.calculationInterval, data.variableID, data.lastValueTick]
           }
         }
       case 'FactorCalculator':
@@ -249,8 +307,8 @@ function DevicesSelectionPage(props) {
           }
         }
         return {
-          cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'factor', 'sampleTime', 'lastValueTick'],
-          rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.factor, data.sampleTime, data.lastValueTick]
+          cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'factor', 'sampleTime', 'variableID', 'lastValueTick'],
+          rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.factor, data.sampleTime, data.variableID, data.lastValueTick]
         }
       case 'SumCalculator':
         if (tableView === 'simple') {
@@ -261,8 +319,8 @@ function DevicesSelectionPage(props) {
         }
         else {
           return {
-            cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'sampleTime', 'lastValueTick'],
-            rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.sampleTime, data.lastValueTick]
+            cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'sampleTime', 'variableIDs', 'lastValueTick'],
+            rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.sampleTime, data.variableIDs, data.lastValueTick]
           }
         }
       case 'ValueFromByteArrayCalculator':
@@ -274,8 +332,8 @@ function DevicesSelectionPage(props) {
         }
         else {
           return {
-            cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'bitNumber', 'byteNumber', 'length', 'sampleTime', 'lastValueTick'],
-            rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.bitNumber, data.byteNumber, data.length, data.sampleTime, data.lastValueTick]
+            cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'bitNumber', 'byteNumber', 'length', 'sampleTime', 'variableID', 'lastValueTick'],
+            rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.bitNumber, data.byteNumber, data.length, data.sampleTime, data.variableID, data.lastValueTick]
           }
         }
       case 'ExpressionCalculator':
@@ -313,8 +371,8 @@ function DevicesSelectionPage(props) {
         }
         else {
           return {
-            cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'length', 'offset', 'read', 'write', 'readAsSingle', 'writeAsSingle', 'readFCode', 'writeFCode', 'sampleTime', 'lastValueTick'],
-            rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.length, data.offset, data.read, data.write, data.readAsSingle, data.writeAsSingle, data.readFCode, data.writeFCode, data.sampleTime, data.lastValueTick]
+            cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'length', 'offset', 'read/write', 'group', 'function', 'sampleTime', 'unitID', 'lastValueTick'],
+            rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.length, data.offset, data.readWrite, data[data.readWriteAsSingle], data[data.readWriteFCode], data.sampleTime, data.unitID, data.lastValueTick]
           }
         }
 
@@ -345,7 +403,7 @@ function DevicesSelectionPage(props) {
         }
         else {
           return {
-            cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'sampleTime', 'associatedDeviceID', 'associatedElementID','lastValueTick'],
+            cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'sampleTime', 'associatedDeviceID', 'associatedElementID', 'lastValueTick'],
             rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.sampleTime, data.associatedDeviceID, data.associatedElementID, data.lastValueTick]
           }
         }
@@ -390,8 +448,8 @@ function DevicesSelectionPage(props) {
       case 'HighLimitAlert':
         if (tableView === 'simple') {
           return {
-            cols: ['name', 'value', 'unit', 'lastValueTick', 'lastValueTick'],
-            rows: [data.name, data.value, data.unit, data.lastValueTick, data.lastValueTick]
+            cols: ['name', 'value', 'unit', 'lastValueTick'],
+            rows: [data.name, data.value, data.unit, data.lastValueTick]
           }
         }
         else {
@@ -403,7 +461,7 @@ function DevicesSelectionPage(props) {
       case 'BandwidthLimitAlert':
         if (tableView === 'simple') {
           return {
-            cols: ['name', 'value', 'unit', 'lastValueTick', 'lastValueTick'],
+            cols: ['name', 'value', 'unit', 'lastValueTick'],
             rows: [data.name, data.value, data.unit, data.lastValueTick]
           }
         }
@@ -416,7 +474,7 @@ function DevicesSelectionPage(props) {
       case 'LowLimitAlert':
         if (tableView === 'simple') {
           return {
-            cols: ['name', 'value', 'unit', 'lastValueTick', 'lastValueTick'],
+            cols: ['name', 'value', 'unit', 'lastValueTick'],
             rows: [data.name, data.value, data.unit, data.lastValueTick]
           }
         }
@@ -429,42 +487,42 @@ function DevicesSelectionPage(props) {
       case 'ExactValuesAlert':
         if (tableView === 'simple') {
           return {
-            cols: ['name', 'value', 'unit', 'lastValueTick', 'lastValueTick'],
+            cols: ['name', 'value', 'unit', 'lastValueTick'],
             rows: [data.name, data.value, data.unit, data.lastValueTick]
           }
         }
         else {
           return {
-            cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'severity', 'sampleTime', 'texts', 'timeOffDelay', 'timeOnDelay', 'lastValueTick'],
-            rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.severity, data.sampleTime, data.texts, data.timeOffDelay, data.timeOnDelay, data.lastValueTick]
+            cols: ['name', 'type', 'value', 'unit', 'defaultValue', 'severity', 'sampleTime', 'texts', 'timeOffDelay', 'timeOnDelay', 'alertValues', 'lastValueTick'],
+            rows: [data.name, data.type, data.value, data.unit, data.defaultValue, data.severity, data.sampleTime, data.texts, data.timeOffDelay, data.timeOnDelay, data.alertValues, data.lastValueTick]
           }
         }
       //custom made - without 'type' property - eventsToSendConfig, dataToSendConfig
       case 'eventsToSendConfig':
         if (tableView === 'simple') {
           return {
-            cols: ['entityId', 'sourceType', 'severity'],
-            rows: [data.entityId, data.sourceType, data.severity]
+            cols: ['elementId', 'deviceId', 'sendingInterval'],
+            rows: [data.elementId, data.deviceId, data.sendingInterval]
           }
         }
         else {
           return {
-            cols: ['entityId', 'sourceId', 'source', 'sourceType', 'severity', 'sendingInterval'],
-            rows: [data.entityId, data.sourceId, data.source, data.sourceType, data.severity, data.sendingInterval]
+            cols: ['elementId', 'deviceId', 'sendingInterval', 'source', 'severity', 'entityId', 'correlationId', 'code', 'acknowledged'],
+            rows: [data.elementId, data.deviceId, data.sendingInterval, data.source, data.severity, data.entityId, data.correlationId, data.code, data.acknowledged]
           }
         }
 
       case 'dataToSendConfig':
         if (tableView === 'simple') {
           return {
-            cols: ['datapointId', 'dataConverter'],
-            rows: [data.datapointId, data.dataConverter]
+            cols: ['elementId', 'deviceId', 'dataConverter'],
+            rows: [data.elementId, data.deviceId, data.dataConverter]
           }
         }
         else {
           return {
-            cols: ['datapointId', 'dataConverter', 'qualityCodeEnabled', 'sendingInterval'],
-            rows: [data.datapointId, data.dataConverter, data.qualityCodeEnabled, data.sendingInterval]
+            cols: ['elementId', 'deviceId', 'qualityCodeEnabled', 'sendingInterval', 'datapointId', 'dataConverter'],
+            rows: [data.elementId, data.deviceId, data.qualityCodeEnabled, data.sendingInterval, data.datapointId, data.dataConverter]
           }
         }
       default:
@@ -475,6 +533,38 @@ function DevicesSelectionPage(props) {
     }
   }
 
+  const sortRows = (arr, cols, variableSetType = null) => {
+    //variableSetType === 'MB' || 'S7', sorting levels depend on it
+    const MBUnitIDIndex = cols.findIndex(col => col === 'unitID');
+    const MBFunctionIndex = cols.findIndex(col => col === 'function');
+    const S7MemoryTypeIndex = cols.findIndex(col => col === 'memoryType');
+    const S7DBNumberIndex = cols.findIndex(col => col === 'dbNumber');
+    const nameIndex = cols.findIndex(col => col === 'name');
+    const offsetIndex = cols.findIndex(col => col === 'offset');
+
+    if (variableSetType === 'MB') {
+      //expanded table
+      if (MBUnitIDIndex !== -1 && MBFunctionIndex !== -1 && offsetIndex !== -1) {
+        arr.sort((a, b) => a[MBUnitIDIndex] - b[MBUnitIDIndex] || a[MBFunctionIndex] - b[MBFunctionIndex] || a[offsetIndex] - b[offsetIndex])
+      }
+      //simple view
+      else {
+        arr.sort((a, b) => a[nameIndex].localeCompare(b[nameIndex]))
+      }
+    }
+    else if (variableSetType === 'S7') {
+      //expanded table, memoryType === 'DB'
+      if (S7MemoryTypeIndex !== -1 && S7DBNumberIndex !== -1 && offsetIndex !== -1) {
+        arr.sort((a, b) => a[S7MemoryTypeIndex].localeCompare(b[S7MemoryTypeIndex]) || a[S7DBNumberIndex] - b[S7DBNumberIndex] || a[offsetIndex] - b[offsetIndex])
+      }
+      //simple view
+      else {
+        arr.sort((a, b) => a[nameIndex] - b[nameIndex])
+      }
+    }
+    return arr;
+  };
+
   const createTabs = (devices, selectedDevice) => {
     let tabs = []
     devices.forEach((device, index) => {
@@ -484,10 +574,16 @@ function DevicesSelectionPage(props) {
           const converted = converter([properties])
           //generate tables for each device type
           const firstLevelTables = traverseObject(converted)
+          //transpose table
+          let transposedInfoRows = []
+          firstLevelTables[0].cols.forEach((col, index) => {
+            transposedInfoRows.push([t(`DevicesSelectionPage.Properties.${col}`), firstLevelTables[0].rows[0][index]])
+          })
+
           //info tab
           tabs.push({
             label: t(`DevicesSelectionPage.Tabs.info`),
-            content: firstLevelTables.map((table, i) => (<React.Fragment key={i}><Typography variant="h6" className={classes.marginTopTable}>{t(`DevicesSelectionPage.Properties.${table.type}`)}</Typography><CollapsibleTable columns={table.cols} rows={table.rows} /></React.Fragment>))
+            content: <CollapsibleTable columns={['genericParameterTableHeader', 'genericValueTableHeader']} rows={transposedInfoRows} />
           })
 
           const propertiesEntries = Object.entries(properties)
@@ -497,9 +593,63 @@ function DevicesSelectionPage(props) {
               const traverse = traverseObject(cell, column)
               const converted = converter(traverse)
               const secondLevelTables = traverseObject(converted)
+              //group MB variables so they are in one table
+              let groupedMBVariables = { type: 'MBVariablesGroup', rows: [], cols: [] }
+              let groupedS7Variables = { type: 'S7VariablesGroup', rows: [], cols: [] }
+              let tablesWithGroupedVariables = []
+
+              secondLevelTables.forEach((variables) => {
+                switch (variables.type) {
+                  case 'MBSwappedFloat':
+                  case 'MBInt16':
+                  case 'MBSwappedInt32':
+                  case 'MBUInt16':
+                  case 'MBSwappedUInt32':
+                  case 'MBByteArray':
+                    groupedMBVariables = {
+                      ...groupedMBVariables,
+                      rows: [...groupedMBVariables.rows, ...variables.rows],
+                      cols: variables.cols
+                    }
+                    break;
+                  case 'S7Int':
+                  case 'S7DInt':
+                  case 'S7SInt':
+                  case 'S7UInt':
+                  case 'S7UDInt':
+                  case 'S7USInt':
+                  case 'S7Real':
+                  case 'S7DTL':
+                  case 'S7ByteArray':
+                    groupedS7Variables = {
+                      ...groupedS7Variables,
+                      rows: [...groupedS7Variables.rows, ...variables.rows],
+                      cols: variables.cols
+                    }
+                    break;
+                  default:
+                    tablesWithGroupedVariables.push(variables)
+                    break;
+                }
+              })
+              if (groupedMBVariables.rows.length > 0) {
+                groupedMBVariables = {
+                  ...groupedMBVariables,
+                  rows: sortRows(groupedMBVariables.rows, groupedMBVariables.cols, 'MB')
+                }
+                tablesWithGroupedVariables.push(groupedMBVariables)
+              }
+              if (groupedS7Variables.rows.length > 0) {
+                groupedS7Variables = {
+                  ...groupedS7Variables,
+                  rows: sortRows(groupedS7Variables.rows, groupedS7Variables.cols, 'S7')
+                }
+                tablesWithGroupedVariables.push(groupedS7Variables)
+              }
+
               tabs.push({
                 label: t(`DevicesSelectionPage.Tabs.${column}`),
-                content: secondLevelTables.map((table, i) => (<React.Fragment key={i}><Typography variant="h6" className={classes.marginTopTable}>{t(`DevicesSelectionPage.Properties.${table.type}`)}</Typography><CollapsibleTable columns={table.cols} rows={table.rows} /></React.Fragment>))
+                content: tablesWithGroupedVariables.map((table, i) => (<React.Fragment key={i}><Typography variant="h6" className={classes.marginTopTable}>{t(`DevicesSelectionPage.Properties.${table.type}`)}</Typography><CollapsibleTable columns={table.cols} rows={table.rows} /></React.Fragment>))
               })
             }
           }
@@ -515,10 +665,10 @@ function DevicesSelectionPage(props) {
   }
 
   const traverseObject = (obj, column = null) => {
-    //console.log(column)
     let tables = []
     const entries = Object.entries(obj)
     for (const [, tableProperties] of entries) {
+
       if (column === 'dataToSendConfig' || column === 'eventsToSendConfig') {
         tables.push({ ...tableProperties, type: column })
       }
@@ -539,12 +689,7 @@ function DevicesSelectionPage(props) {
 
   const isActive = () => {
     if (selectedDevice.selectedDeviceID !== '' && allDevices[selectedDevice.selectedDeviceIndex] !== undefined) {
-      if (allDevices[selectedDevice.selectedDeviceIndex][selectedDevice.selectedDeviceID].isConnected !== undefined) {
-        return allDevices[selectedDevice.selectedDeviceIndex][selectedDevice.selectedDeviceID].isActive && allDevices[selectedDevice.selectedDeviceIndex][selectedDevice.selectedDeviceID].isConnected
-      }
-      else {
-        return allDevices[selectedDevice.selectedDeviceIndex][selectedDevice.selectedDeviceID].isActive
-      }
+      return allDevices[selectedDevice.selectedDeviceIndex][selectedDevice.selectedDeviceID].isActive
     }
     else {
       return null
@@ -593,12 +738,11 @@ function DevicesSelectionPage(props) {
                 {createTabs(allDevices, selectedDevice)}
               </React.Fragment>
             </Grid>
-            <Grid container item xs={12} spacing={2}>
+            <Grid container item xs={12} spacing={2} direction="column">
               <Grid item xs={12} sm={6}>
-                <Typography variant="h5">{t('DevicesSelectionPage.Status')}: {isActive() ? t('DevicesSelectionPage.StatusConnected') : t('DevicesSelectionPage.StatusDisconnected')}</Typography>
-                {selectedDevice.selectedDeviceType === 'MSAgentDevice' ?
-                  <Typography variant="h6" className={isBoarded() ? classes.onboarded : classes.offboarded}>{isBoarded() ? t('DevicesSelectionPage.StatusOnboarded') : t('DevicesSelectionPage.StatusOffboarded')}</Typography>
-                  : null}
+                <Typography variant="h5">
+                  {t('DevicesSelectionPage.Status')}: {isActive() ? t('DevicesSelectionPage.StatusConnected') : t('DevicesSelectionPage.StatusDisconnected')}{selectedDevice.selectedDeviceType === 'MSAgentDevice' ? <span className={isBoarded() ? classes.onboarded : classes.offboarded}> {isBoarded() ? t('DevicesSelectionPage.StatusOnboarded') : t('DevicesSelectionPage.StatusOffboarded')}</span> : null}
+                </Typography>
               </Grid>
               <Grid item xs={6} sm={3}>
                 <Button
@@ -622,7 +766,11 @@ function DevicesSelectionPage(props) {
               </Grid>
             </Grid>
           </Grid>
-          : <Typography variant="h4" className={classes.devicesTitleInline}>{t('DevicesSelectionPage.NoDevicesHeader')}</Typography>}
+          :
+          <div className={classes.noDevicesContainer}>
+            <Typography variant="h4" className={classes.noDevicesText}>{t('DevicesSelectionPage.NoDevicesHeader')}</Typography>
+          </div>
+        }
       </Grid>
     </React.Fragment>
   )

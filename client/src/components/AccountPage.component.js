@@ -50,6 +50,15 @@ function AccountPage({ currentPassword, newPassword, setAccountFormCurrentPasswo
     getMyAccountDetails()
   }, [getMyAccountDetails])
 
+  useEffect(()=>{
+    //reset textfields on route exit
+    return () => {
+      setAccountFormCurrentPassword('')
+      setAccountFormNewPassword('')
+      setAccountFormRepeatedNewPassword('')
+    }
+  },[setAccountFormCurrentPassword, setAccountFormNewPassword, setAccountFormRepeatedNewPassword])
+
   const verify = (textfield) => {
     const lengthErrorText = t('AccountPage.PasswordHelperError8characters');
     const noMatchErrorText = t('AccountPage.PasswordHelperErrorNewPasswordsMatch');
@@ -63,13 +72,14 @@ function AccountPage({ currentPassword, newPassword, setAccountFormCurrentPasswo
       }
 
     }
-    else if (textfield === 'repeatNewPassword') {
+    if (textfield === 'repeatNewPassword') {
       if (repeatedNewPassword.length > 0 && repeatedNewPassword.length < 8) {
         return {
           error: true,
           text: lengthErrorText
         }
       }
+      
     }
     if (newPassword !== repeatedNewPassword && newPassword.length >= 8 && repeatedNewPassword.length >= 8) {
       return {
@@ -163,7 +173,14 @@ function AccountPage({ currentPassword, newPassword, setAccountFormCurrentPasswo
         </Grid>
         <Grid item xs={12} sm={12} md={6} lg={4} xl={3}>
           <Button onClick={() => changePassword()}
-            className={classes.loginButton} fullWidth color="primary" variant="contained" disabled={currentPassword.length === 0 || newPassword.length === 0 || verify('newPassword').error || verify('currentPassword').error}>{t('AccountPage.ChangePasswordButton')}</Button>
+            className={classes.loginButton} fullWidth color="primary" variant="contained" disabled={currentPassword.length === 0 
+            || newPassword.length === 0 
+            || repeatedNewPassword.length === 0
+            || verify('newPassword').error 
+            || verify('currentPassword').error
+            || verify('repeatNewPassword').error}>
+              {t('AccountPage.ChangePasswordButton')}
+              </Button>
         </Grid>
       </Grid>
     </div>
