@@ -19,6 +19,9 @@ import ShortTextIcon from '@material-ui/icons/ShortText';
 import Zoom from '@material-ui/core/Zoom';
 
 const useStyles = makeStyles((theme) => ({
+  root: {
+    height: 'calc(100% - 70px)'
+  },
   title: {
     marginBottom: theme.spacing(3)
   },
@@ -53,6 +56,14 @@ const useStyles = makeStyles((theme) => ({
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)'
+  },
+  fullHeight: {
+    height: '100%'
+  },
+  controlButtons: {
+    [`${theme.breakpoints.down('sm')} and (orientation: portrait)`]: {
+      paddingBottom: theme.spacing(8)
+    },
   }
 }));
 
@@ -710,8 +721,7 @@ function DevicesSelectionPage(props) {
 
   return (
     <React.Fragment>
-      <Grid container spacing={2} justify="flex-start"
-        alignItems="flex-start">
+      <Grid container spacing={2} justify="flex-start" alignItems="flex-start" className={classes.root}>
         <Grid item xs={12} sm={12} md={3} xl={2}>
           <Typography variant="h4" className={classes.devicesTitleInline}>{t('DevicesSelectionPage.DevicesTitle')}</Typography>
           <Zoom in={true} style={{ transitionDelay: '500ms' }}>
@@ -724,7 +734,7 @@ function DevicesSelectionPage(props) {
           <DevicesList />
         </Grid>
         {allDevices.length > 0 ?
-          <Grid container item xs={12} sm={12} md={9} xl={10} spacing={0}>
+          <Grid container item xs={12} sm={12} md={9} xl={10} spacing={0} className={classes.fullHeight} justify="space-between">
             <Grid item xs={12} >
               <Typography variant="h4" className={classes.devicesTitleInline}>{selectedDevice.selectedDeviceID}</Typography>
               <Zoom in={true} style={{ transitionDelay: '1000ms' }}>
@@ -738,7 +748,7 @@ function DevicesSelectionPage(props) {
                 {createTabs(allDevices, selectedDevice)}
               </React.Fragment>
             </Grid>
-            <Grid container item xs={12} spacing={2} direction="column">
+            <Grid container item xs={12} spacing={2} alignItems="flex-end" className={classes.controlButtons}>
               <Grid item xs={12} sm={6}>
                 <Typography variant="h5">
                   {t('DevicesSelectionPage.Status')}: {isActive() ? t('DevicesSelectionPage.StatusConnected') : t('DevicesSelectionPage.StatusDisconnected')}{selectedDevice.selectedDeviceType === 'MSAgentDevice' ? <span className={isBoarded() ? classes.onboarded : classes.offboarded}> {isBoarded() ? t('DevicesSelectionPage.StatusOnboarded') : t('DevicesSelectionPage.StatusOffboarded')}</span> : null}

@@ -52,6 +52,7 @@ const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
     flexGrow: 1,
+    height: '100%'
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
@@ -121,6 +122,7 @@ const useStyles = makeStyles((theme) => ({
   },
   bottomNavi: {
     position: 'fixed',
+    marginTop: '50px',
     bottom: 0,
     width: '100%',
     borderTop: '1px solid rgba(0, 0, 0, 0.12)',
