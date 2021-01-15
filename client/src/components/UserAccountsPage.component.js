@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback } from 'react';
-import UniversalTable from './UniversalTable.component';
+import { UniversalTable } from './UniversalTable.component';
 import { connect } from 'react-redux';
 import { setUserAccountsList } from '../actions/UserAccountsPage.action';
 import UserService from '../services/user.service';
@@ -86,13 +86,13 @@ function UserAccountsPage({ setUserAccountsList,
 
   return (
     <React.Fragment>
-      <Grid container spacing={2}>
+      <Grid container spacing={2} key={console.log(accountsList)}>
         <Grid item xs={12}>
           <Typography variant="h4">{t('AccountMenu.UserAccounts')}</Typography>
         </Grid>
         {accountsList.length > 0 ?
           <Grid item xs={12}>
-            <UniversalTable noPagination
+            <UniversalTable
               columns={[t('UserAccountsPage.NameColumn'), t('UserAccountsPage.PermissionsColumn'), t('UserAccountsPage.ActionColumn')]}
               rows={accountsList.map(acc => [acc.name, acc.permissions === 1 ? 'User' : acc.permissions === 3 ? 'Admin' : 'SuperAdmin', checkPermissions(acc.permissions) ?
                 <div>

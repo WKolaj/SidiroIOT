@@ -12,15 +12,9 @@ import MemoryIcon from '@material-ui/icons/Memory';
 import AssessmentIcon from '@material-ui/icons/Assessment';
 import OnlineCircleIcon from '@material-ui/icons/FiberManualRecord';
 import RouterIcon from '@material-ui/icons/Router';
+import DeviceUnknownIcon from '@material-ui/icons/DeviceUnknown';
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    width: '100%',
-    position: 'relative',
-    overflow: 'auto',
-    maxHeight: '80vh',
-    //backgroundColor: theme.palette.background.paper,
-  },
   active: {
     color: '#2fcc2f',
     height: '15px',
@@ -44,37 +38,49 @@ function SimpleList(props) {
   const { allDevices, selectedDevice, selectDevice } = props;
 
   useEffect(() => {
-    if (selectedDevice.selectedDeviceID === '' && allDevices.length > 0) {
-      const firstEntry = Object.entries(allDevices[0])
-      selectDevice(0, firstEntry[0][1].id, firstEntry[0][1].type)
+    if (selectedDevice.selectedDeviceID === '' && Object.keys(allDevices).length>0) {
+      const firstEntry = Object.entries(allDevices)[0]
+      selectDevice(0, firstEntry[1].id, firstEntry[1].type)
     }
-  }, [allDevices, selectDevice, selectedDevice.selectedDeviceID])
+  }, [allDevices, selectDevice, selectedDevice])
+
+  const deviceTypeIcon = (type) => {
+    switch (type) {
+      case 'MBDevice':
+        return <AssessmentIcon className={classes.iconMarginHorizontal} />
+      case 'S7Device':
+        return <MemoryIcon className={classes.iconMarginHorizontal} />
+      case 'InternalDevice':
+        return <StorageIcon className={classes.iconMarginHorizontal} />
+      case 'MBGatewayDevice':
+        return <RouterIcon className={classes.iconMarginHorizontal} />
+      case 'MSAgentDevice':
+        return <CloudIcon className={classes.iconMarginHorizontal} />
+      default:
+        return <DeviceUnknownIcon className={classes.iconMarginHorizontal} />
+    }
+  }
 
   return (
-    <div className={classes.root}>
-      <List component="nav" aria-label="device selection">
-        {allDevices.map((dev, index) => {
-          const entries = Object.entries(dev)
-          for (const [, properties] of entries) {
-            const isActive = properties.isConnected !== undefined ? properties.isConnected && properties.isActive : properties.isActive;
-            return (<ListItem key={index} button
+    <React.Fragment>
+      <List component="nav" aria-label="device-selection">
+        {Object.values(allDevices).map((device, index) => {
+          const isActive = device.isConnected !== undefined ? device.isConnected && device.isActive : device.isActive;
+          return (
+            <ListItem key={index}
+              button
               selected={selectedDevice.selectedDeviceIndex === index ? true : false}
-              onClick={() => props.selectDevice(index, properties.id, properties.type)}>
+              onClick={() => props.selectDevice(index, device.id, device.type)}>
               <ListItemIcon>
                 <OnlineCircleIcon className={isActive ? classes.active : classes.inactive} />
-                {properties.type === 'MBDevice' ? <AssessmentIcon className={classes.iconMarginHorizontal} />
-                  : properties.type === 'S7Device' ? <MemoryIcon className={classes.iconMarginHorizontal} />
-                    : properties.type === 'InternalDevice' ? <StorageIcon className={classes.iconMarginHorizontal} />
-                      : properties.type === 'MBGatewayDevice' ? <RouterIcon className={classes.iconMarginHorizontal} />
-                        : <CloudIcon className={classes.iconMarginHorizontal} />}
+                {deviceTypeIcon(device.type)}
               </ListItemIcon>
-              <ListItemText primary={properties.id} />
-            </ListItem>)
-          }
-          return null
+              <ListItemText primary={device.name} />
+            </ListItem>
+          )
         })}
       </List>
-    </div>
+    </React.Fragment>
   );
 }
 
