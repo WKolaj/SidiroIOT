@@ -2969,5 +2969,38 @@ describe("BandwidthLimitAlert", () => {
       expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
       expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
     });
+
+    it("should set text with fixed values - if value is a number with more than 3 digits", async () => {
+      lowAlertActive = false;
+      highAlertActive = false;
+      tickIdOfStartingOnTimeDelay = 99;
+      tickIdOfStartingOffTimeDelay = null;
+      onDelayTimeStarted = true;
+      offDelayTimeStarted = false;
+      variable2Value = 501.12345;
+      variable2LastValueTick = 105;
+      value = null;
+      lastValueTick = 0;
+
+      await exec();
+
+      const expectedValue = {
+        pl:
+          "fakeTextHighLimitPL, value: 501.123, time: 1970-01-01T00:01:45.000Z",
+        en:
+          "fakeTextHighLimitEN, value: 501.123, time: 1970-01-01T00:01:45.000Z",
+      };
+
+      expect(alert.Value).toEqual(expectedValue);
+      expect(alert.LastValueTick).toEqual(105);
+
+      expect(alert.AlertActive).toEqual(true);
+      expect(alert.HighAlertActive).toEqual(true);
+      expect(alert.LowAlertActive).toEqual(false);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+    });
   });
 });

@@ -17,5 +17,3 @@ module.exports = async function () {
 
   logger.info("log service for routes initialized");
 };
-
-//TODO - test this initialization

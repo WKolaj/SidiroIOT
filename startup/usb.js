@@ -25,5 +25,3 @@ module.exports = async function () {
 
   logger.info("usb service initialized");
 };
-
-//TODO - add tests for this startup

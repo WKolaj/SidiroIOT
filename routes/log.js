@@ -19,5 +19,3 @@ router.get("/", [hasUser, isAdmin], async (req, res) => {
 //#endregion ========== GET ==========
 
 module.exports = router;
-
-//TODO - test this route

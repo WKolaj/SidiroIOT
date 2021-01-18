@@ -1,3 +1,4 @@
+const { exists } = require("../../../utilities/utilities");
 const Sampler = require("../../Sampler/Sampler");
 const Element = require("../Element");
 
@@ -26,6 +27,20 @@ class Alert extends Element {
   //#region ========= PUBLIC STATIC METHODS =========
 
   /**
+   * @description Method for converting value to display in alert text
+   * @param {Object} value Value to convert to string
+   */
+  static formatValueToDisplay(value) {
+    if (!exists(value)) return "";
+    if (typeof value === "number") {
+      if (Number.isInteger(value)) return value.toString();
+      else return value.toFixed(3);
+    }
+
+    return value.toString();
+  }
+
+  /**
    * @description Method for fromatting alert text - replacing $VALUE with real value and $TIME with real time formatted to data
    * @param {String} text
    * @param {Object} value
@@ -35,7 +50,7 @@ class Alert extends Element {
    */
   static formatAlertText(text, value, tickId, deviceName, elementName) {
     return text
-      .replace("$VALUE", value.toString())
+      .replace("$VALUE", Alert.formatValueToDisplay(value))
       .replace(
         "$TIME",
         new Date(Sampler.convertTickNumberToDate(tickId)).toISOString()

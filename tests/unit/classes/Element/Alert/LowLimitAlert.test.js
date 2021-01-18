@@ -1784,5 +1784,36 @@ describe("LowLimitAlert", () => {
       expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
       expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
     });
+
+    it("should set value with 3 digits after comma in text if value has 4 digits after comma", async () => {
+      alertActive = false;
+      tickIdOfStartingOnTimeDelay = 100;
+      tickIdOfStartingOffTimeDelay = null;
+      onDelayTimeStarted = true;
+      offDelayTimeStarted = false;
+      variable2Value = 499.1234;
+      variable2LastValueTick = 111;
+      payload.timeOnDelay = 10;
+
+      await exec();
+
+      const expectedTexts = {
+        en: payload.texts.en
+          .replace("$VALUE", "499.123")
+          .replace("$TIME", new Date(111000).toISOString()),
+        pl: payload.texts.pl
+          .replace("$VALUE", "499.123")
+          .replace("$TIME", new Date(111000).toISOString()),
+      };
+
+      expect(alert.Value).toEqual(expectedTexts);
+      expect(alert.LastValueTick).toEqual(variable2LastValueTick);
+
+      expect(alert.AlertActive).toEqual(true);
+      expect(alert._onDelayTimeStarted).toEqual(false);
+      expect(alert._offDelayTimeStarted).toEqual(false);
+      expect(alert._tickIdOfStartingOffTimeDelay).toEqual(null);
+      expect(alert._tickIdOfStartingOnTimeDelay).toEqual(null);
+    });
   });
 });
