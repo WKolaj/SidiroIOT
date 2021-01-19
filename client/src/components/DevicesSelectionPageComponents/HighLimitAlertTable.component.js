@@ -55,7 +55,7 @@ export function HighLimitAlertTable({ highLimitAlertArray, tableView }) {
         highLimitAlertElement.sampleTime,
         highLimitAlertElement.timeOffDelay,
         highLimitAlertElement.timeOnDelay,
-        highLimitAlertElement.variableID,
+        highLimitAlertElement.variableName,
         highLimitAlertElement.lastValueTick])
     }
   })

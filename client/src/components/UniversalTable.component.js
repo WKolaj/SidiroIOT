@@ -8,7 +8,6 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 
 export function UniversalTable({ rows, columns, small = false, noElevation = false }) {
-
   return (
     <TableContainer component={noElevation ? "div" : Paper}>
       <Table aria-label="simple table" size={small ? "small" : "medium"}>
@@ -22,7 +21,7 @@ export function UniversalTable({ rows, columns, small = false, noElevation = fal
           {rows.map((row, i) => {
             return (
               <TableRow key={i}>
-                {row.map((cell, index) => <TableCell key={index}>{cell !== undefined ? `${cell}` : ''}</TableCell>
+                {row.map((cell, index) => <TableCell key={index}>{cell !== undefined ? cell : ''}</TableCell>
                 )}
               </TableRow>
             )

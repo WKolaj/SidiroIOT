@@ -58,7 +58,7 @@ export function BandwidthLimitAlertTable({ bandwidthLimitAlertArray, tableView }
         bandwidthLimitAlertElement.sampleTime,
         bandwidthLimitAlertElement.timeOffDelay,
         bandwidthLimitAlertElement.timeOnDelay,
-        bandwidthLimitAlertElement.variableID,
+        bandwidthLimitAlertElement.variableName,
         bandwidthLimitAlertElement.lastValueTick])
     }
   })
