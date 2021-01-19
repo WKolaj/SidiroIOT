@@ -17,9 +17,8 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(2)
   },
   controlButtons: {
-    [`${theme.breakpoints.down('sm')} and (orientation: portrait)`]: {
-      marginBottom: theme.spacing(8)
-    },
+    marginBottom: theme.spacing(2),
+    marginTop: theme.spacing(2)
   }
 }));
 
@@ -105,6 +104,12 @@ function InternalDeviceDisplay({ selectedDevice, allDevices, tableView }) {
       ]
     }
     variables.forEach(variable => {
+      //override toFixed(3) to toFixed(2) for HW usage
+      variable = {
+        ...variable,
+        value: parseFloat(variable.value).toFixed(2),
+      }
+
       if (tableView === 'simple') {
         rows.push([variable.name, variable.value, variable.unit, variable.lastValueTick])
       }
@@ -124,6 +129,7 @@ function InternalDeviceDisplay({ selectedDevice, allDevices, tableView }) {
     const variables = Object.values(device.variables).map(variable => {
       return {
         ...variable,
+        value: !isNaN(variable.value) ? parseFloat(variable.value).toFixed(3) : `${variable.value}`,
         lastValueTick: variable.lastValueTick === 0 ? '' : formatDateTime(new Date(parseFloat(variable.lastValueTick) * 1000))
       }
     })
@@ -155,6 +161,9 @@ function InternalDeviceDisplay({ selectedDevice, allDevices, tableView }) {
         <Grid item xs={12}>
           <DeviceDetailsTitle />
         </Grid>
+        <Grid container item xs={12} spacing={1} className={classes.controlButtons}>
+          <StandardBottomToolbar />
+        </Grid>
         <Grid item xs={12}>
           <UniversalTabs
             name="InternalDevice"
@@ -176,9 +185,6 @@ function InternalDeviceDisplay({ selectedDevice, allDevices, tableView }) {
                 content: <AlertsTabContent alertElementsObject={device.alerts} />
               }
             ]} />
-        </Grid>
-        <Grid container item xs={12} spacing={1} className={classes.controlButtons}>
-          <StandardBottomToolbar />
         </Grid>
       </Grid>
     </React.Fragment>

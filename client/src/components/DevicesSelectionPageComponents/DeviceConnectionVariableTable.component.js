@@ -3,7 +3,7 @@ import { UniversalTable } from '../UniversalTable.component';
 import { useTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
 
-export function DeviceConnectionVariableTable({ deviceConnectionVariablesArray, selectedDevice, allDevices, tableView }) {
+export function DeviceConnectionVariableTable({ deviceConnectionVariablesArray, tableView }) {
   const { t } = useTranslation();
 
   let rows = []
@@ -34,8 +34,6 @@ export function DeviceConnectionVariableTable({ deviceConnectionVariablesArray, 
 
 const mapStateToProps = (state) => {
   return {
-    selectedDevice: state.DevicesListReducer,
-    allDevices: state.DevicesSelectionPageReducer.devices,
     tableView: state.DevicesSelectionPageReducer.tableView
   }
 }

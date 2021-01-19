@@ -1,6 +1,6 @@
 import React from 'react';
 import { UniversalTable } from '../UniversalTable.component';
-import CollapsibleTable from '../CollapsibleTable.component';
+import {CollapsibleTable} from '../CollapsibleTable.component';
 import { useTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
 
@@ -61,6 +61,7 @@ export function ExpressionCalculatorTable({ expressionCalcElementsArray, selecte
       columns={cols}
       rows={rows}
       collapsedRows={rowToBeCollapsed}
+      name='ExpressionCalculatorTable'
     />
 }
 

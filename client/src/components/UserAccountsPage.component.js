@@ -86,7 +86,7 @@ function UserAccountsPage({ setUserAccountsList,
 
   return (
     <React.Fragment>
-      <Grid container spacing={2} key={console.log(accountsList)}>
+      <Grid container spacing={2}>
         <Grid item xs={12}>
           <Typography variant="h4">{t('AccountMenu.UserAccounts')}</Typography>
         </Grid>

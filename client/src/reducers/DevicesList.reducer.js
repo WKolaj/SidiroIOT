@@ -1,10 +1,8 @@
 import { SELECT_DEVICE } from '../actions/DevicesList.action';
 
 const initialState = {
-    selectedDeviceIndex: 0,
     selectedDeviceID: '',
     selectedDeviceType: '',
-    
 }
 
 export const DevicesListReducer = (state = initialState, action) => {
@@ -12,7 +10,6 @@ export const DevicesListReducer = (state = initialState, action) => {
         case SELECT_DEVICE:
             return {
                 ...state,
-                selectedDeviceIndex: action.deviceIndex,
                 selectedDeviceID: action.deviceID,
                 selectedDeviceType: action.deviceType
             }

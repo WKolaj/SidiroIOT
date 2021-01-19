@@ -13,15 +13,15 @@ import DeviceConnectionVariableTable from './DeviceConnectionVariableTable.compo
 import EdgeComputingTabContent from './EdgeComputingTabContent.component';
 import AlertsTabContent from './AlertsTabContent.component';
 import StandardBottomToolbar from './StandardBottomToolbar.component';
+import { mbVariableConverter } from '../../utilities/mbVariableConverter.utility';
 
 const useStyles = makeStyles((theme) => ({
   topMargin: {
     marginTop: theme.spacing(2)
   },
   controlButtons: {
-    [`${theme.breakpoints.down('sm')} and (orientation: portrait)`]: {
-      marginBottom: theme.spacing(8)
-    },
+    marginBottom: theme.spacing(2),
+    marginTop: theme.spacing(2)
   }
 }));
 
@@ -71,8 +71,8 @@ function MBGatewayDeviceDisplay({ selectedDevice, allDevices, tableView }) {
       t('DevicesSelectionPage.Properties.value'),
       t('DevicesSelectionPage.Properties.unit'),
       t('DevicesSelectionPage.Properties.defaultValue'),
-      t('DevicesSelectionPage.Properties.length'),
       t('DevicesSelectionPage.Properties.offset'),
+      t('DevicesSelectionPage.Properties.length'),
       t('DevicesSelectionPage.Properties.read/write'),
       t('DevicesSelectionPage.Properties.group'),
       t('DevicesSelectionPage.Properties.function'),
@@ -86,6 +86,7 @@ function MBGatewayDeviceDisplay({ selectedDevice, allDevices, tableView }) {
       if (variable.read !== undefined && variable.write !== undefined && variable.readAsSingle !== undefined && variable.writeAsSingle !== undefined) {
         variable = {
           ...variable,
+          value: mbVariableConverter(variable),
           readWrite: variable.read ? 'Read' : 'Write',
           readWriteAsSingle: variable.read ? 'readAsSingle' : 'writeAsSingle',
           readWriteFCode: variable.read ? 'readFCode' : 'writeFCode'
@@ -96,7 +97,7 @@ function MBGatewayDeviceDisplay({ selectedDevice, allDevices, tableView }) {
         rows.push([variable.name, variable.value, variable.unit, variable.lastValueTick])
       }
       else {
-        rows.push([variable.name, variable.type, variable.value, variable.unit, variable.defaultValue, variable.length, variable.offset, variable.readWrite, `${!variable[variable.readWriteAsSingle]}`, variable[variable.readWriteFCode], variable.sampleTime, variable.unitID, variable.lastValueTick])
+        rows.push([variable.name, variable.type, variable.value, variable.unit, variable.defaultValue, variable.offset, variable.length, variable.readWrite, `${!variable[variable.readWriteAsSingle]}`, variable[variable.readWriteFCode], variable.sampleTime, variable.unitID, variable.lastValueTick])
       }
     })
     const sortedRows = sortRowsBy(rows, cols, t('DevicesSelectionPage.Properties.name'), 'MB', t('DevicesSelectionPage.Properties.unitID'), t('DevicesSelectionPage.Properties.function'), t('DevicesSelectionPage.Properties.offset'))
@@ -113,9 +114,8 @@ function MBGatewayDeviceDisplay({ selectedDevice, allDevices, tableView }) {
     const variables = Object.values(device.variables).map(variable => {
       return {
         ...variable,
-        value: variable.type === 'MBByteArray' ? `[${variable.value}]` : `${variable.value}`,
         defaultValue: variable.type === 'MBByteArray' ? `[${variable.defaultValue}]` : `${variable.defaultValue}`,
-        lastValueTick: variable.lastValueTick === 0 ? '' : formatDateTime(new Date(parseFloat(variable.lastValueTick) * 1000))
+        lastValueTick: variable.lastValueTick === 0 ? '' : formatDateTime(new Date(parseFloat(variable.lastValueTick) * 1000)),
       }
     })
 
@@ -146,6 +146,9 @@ function MBGatewayDeviceDisplay({ selectedDevice, allDevices, tableView }) {
         <Grid item xs={12}>
           <DeviceDetailsTitle />
         </Grid>
+        <Grid container item xs={12} spacing={1} className={classes.controlButtons}>
+          <StandardBottomToolbar />
+        </Grid>
         <Grid item xs={12}>
           <UniversalTabs
             name="MBGatewayDevice"
@@ -167,9 +170,6 @@ function MBGatewayDeviceDisplay({ selectedDevice, allDevices, tableView }) {
                 content: <AlertsTabContent alertElementsObject={device.alerts} />
               }
             ]} />
-        </Grid>
-        <Grid container item xs={12} spacing={1} className={classes.controlButtons}>
-          <StandardBottomToolbar />
         </Grid>
       </Grid>
     </React.Fragment>

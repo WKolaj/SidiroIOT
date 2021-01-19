@@ -39,9 +39,6 @@ const useStyles = makeStyles((theme) => ({
     width: '100%',
     textAlign: 'center'
   },
-  fullHeight: {
-    height: '100%'
-  },
   sticky: {
     [`${theme.breakpoints.up('md')}`]: {
       position: 'sticky',
@@ -57,12 +54,10 @@ function DevicesSelectionPage(props) {
   const { t } = useTranslation();
   const { setAllDevices, allDevices, selectedDevice, authenticated, refreshDeviceParams } = props;
 
-  const sortObjectKeys = (obj) => Object.entries(obj).sort().reduce((o, [k, v]) => { o[k] = v; return o }, {})
-
   const fetchDevices = useCallback(() => {
     DeviceService.getDevices().then(res => {
       if (res.status === 200) {
-        setAllDevices(sortObjectKeys(res.data))
+        setAllDevices(res.data)
       }
     })
   }, [setAllDevices]);
@@ -122,8 +117,8 @@ function DevicesSelectionPage(props) {
 
   return (
     <React.Fragment>
-      <Grid container spacing={2} justify="flex-start" alignItems="flex-start" className={classes.root}>
-        <Grid item xs={12} sm={12} md={3} xl={2} className={classes.sticky}>
+      <Grid container spacing={2} justify="flex-start" alignItems="flex-start" alignContent="flex-start" className={classes.root} >
+        <Grid item xs={12} sm={12} md={4} lg={3} xl={2} className={classes.sticky}>
           <Typography variant="h4" className={classes.devicesTitleInline}>{t('DevicesSelectionPage.DevicesTitle')}</Typography>
           <Zoom in={true} style={{ transitionDelay: '500ms' }}>
             <Tooltip title={t('DevicesSelectionPage.RefreshAllDevices')} placement="bottom">
@@ -136,7 +131,7 @@ function DevicesSelectionPage(props) {
         </Grid>
 
         {Object.keys(allDevices).length > 0 ?
-          <Grid container item xs={12} sm={12} md={9} xl={10} spacing={0} className={classes.fullHeight}>
+          <Grid container item xs={12} sm={12} md={8} lg={9} xl={10} spacing={0}>
             <Grid item xs={12} >
               {displaySelectedDevice()}
             </Grid>

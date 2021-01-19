@@ -18,19 +18,30 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-function EdgeComputingTabContent({ alertElementsObject }) {
+function EdgeComputingTabContent({ alertElementsObject, selectedDevice, allDevices }) {
   const { t } = useTranslation();
   const classes = useStyles();
+  const device = allDevices[selectedDevice.selectedDeviceID]
+
+  const alertValueConverter = (alertValue) => {
+    switch (typeof alertValue) {
+      case 'number':
+        return parseFloat(alertValue).toFixed(3)
+      case 'undefined':
+        return ''
+      default:
+        return `${alertValue}`
+    }
+  }
 
   const alertElements = Object.values(alertElementsObject).map(alert => {
-    const alertValueSubString = alert.value !== null ? Object.values(alert.value)[0].substring(Object.values(alert.value)[0].lastIndexOf(':') + 2, Object.values(alert.value)[0].length) : null
-    //added arrows to BandwidthLimitAlert
     return {
       ...alert,
-      value: alert.value === null ? 
-      t('DevicesSelectionPage.Properties.inactive') 
-      : 
-      <span className={classes.alertActive}>{alertValueSubString}</span>,
+      variableID: device.variables[alert.variableID] !== undefined ? device.variables[alert.variableID].name : '',
+      value: alert.value === null ?
+        t('DevicesSelectionPage.Properties.inactive')
+        :
+        <span className={classes.alertActive}>{t('DevicesSelectionPage.Properties.active')} ({alertValueConverter(device.variables[alert.variableID]!==undefined? device.variables[alert.variableID].value : '')})</span>,
       defaultValue: alert.defaultValue === null ? t('DevicesSelectionPage.Properties.inactive') : t('DevicesSelectionPage.Properties.active'),
       lastValueTick: alert.lastValueTick === 0 ? '' : formatDateTime(new Date(parseFloat(alert.lastValueTick) * 1000))
     }
@@ -70,4 +81,12 @@ function EdgeComputingTabContent({ alertElementsObject }) {
   )
 }
 
-export default connect()(EdgeComputingTabContent)
+const mapStateToProps = (state) => {
+  return {
+    selectedDevice: state.DevicesListReducer,
+    allDevices: state.DevicesSelectionPageReducer.devices,
+    tableView: state.DevicesSelectionPageReducer.tableView
+  }
+}
+
+export default connect(mapStateToProps)(EdgeComputingTabContent)

@@ -1,6 +1,6 @@
 import React from 'react';
 import { UniversalTable } from '../UniversalTable.component';
-import CollapsibleTable from '../CollapsibleTable.component';
+import {CollapsibleTable} from '../CollapsibleTable.component';
 import { useTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
 
@@ -32,6 +32,7 @@ export function BandwidthLimitAlertTable({ bandwidthLimitAlertArray, tableView }
     t('DevicesSelectionPage.Properties.sampleTime'),
     t('DevicesSelectionPage.Properties.timeOffDelay'),
     t('DevicesSelectionPage.Properties.timeOnDelay'),
+    t('DevicesSelectionPage.Properties.variableName'),
     t('DevicesSelectionPage.Properties.lastValueTick')]
   }
   bandwidthLimitAlertArray.forEach((bandwidthLimitAlertElement, i) => {
@@ -57,6 +58,7 @@ export function BandwidthLimitAlertTable({ bandwidthLimitAlertArray, tableView }
         bandwidthLimitAlertElement.sampleTime,
         bandwidthLimitAlertElement.timeOffDelay,
         bandwidthLimitAlertElement.timeOnDelay,
+        bandwidthLimitAlertElement.variableID,
         bandwidthLimitAlertElement.lastValueTick])
     }
   })
@@ -65,6 +67,7 @@ export function BandwidthLimitAlertTable({ bandwidthLimitAlertArray, tableView }
       columns={cols}
       rows={rows}
       collapsedRows={rowToBeCollapsed}
+      name='BandwidthLimitAlertTable'
     />
 }
 

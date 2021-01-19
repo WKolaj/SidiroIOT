@@ -1,6 +1,6 @@
 import React from 'react';
 import { UniversalTable } from '../UniversalTable.component';
-import CollapsibleTable from '../CollapsibleTable.component';
+import {CollapsibleTable} from '../CollapsibleTable.component';
 import { useTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
 
@@ -30,6 +30,7 @@ export function ExactValuesAlertTable({ exactValuesAlertArray, tableView }) {
     t('DevicesSelectionPage.Properties.timeOffDelay'),
     t('DevicesSelectionPage.Properties.timeOnDelay'),
     t('DevicesSelectionPage.Properties.alertValues'),
+    t('DevicesSelectionPage.Properties.variableName'),
     t('DevicesSelectionPage.Properties.lastValueTick')]
   }
   exactValuesAlertArray.forEach((exactValuesAlertElement, i) => {
@@ -59,6 +60,7 @@ export function ExactValuesAlertTable({ exactValuesAlertArray, tableView }) {
       exactValuesAlertElement.timeOffDelay,
       exactValuesAlertElement.timeOnDelay,
       exactValuesAlertElement.alertValues,
+      exactValuesAlertElement.variableID,
       exactValuesAlertElement.lastValueTick])
     }
   })
@@ -67,6 +69,7 @@ export function ExactValuesAlertTable({ exactValuesAlertArray, tableView }) {
       columns={cols}
       rows={rows}
       collapsedRows={rowToBeCollapsed}
+      name='ExactValuesAlertTable'
     />
 }
 

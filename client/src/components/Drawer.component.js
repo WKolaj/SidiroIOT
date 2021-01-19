@@ -16,12 +16,10 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import LanguageIcon from "@material-ui/icons/Language";
-import ViewArrayIcon from "@material-ui/icons/ViewArray";
 import { Link, Route, Switch, useHistory, useLocation } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import BottomNavigation from '@material-ui/core/BottomNavigation';
 import BottomNavigationAction from '@material-ui/core/BottomNavigationAction';
-import DeviceHubIcon from "@material-ui/icons/DeviceHub";
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import DrawerRoutes from '../routes/DrawerRoutes.routes';
 import { setLanguageDialogOpen } from '../actions/LanguageDialog.action';
@@ -44,7 +42,9 @@ import { setCreateAccountDialogOpen } from '../actions/CreateAccountDialog.actio
 import { isAdmin } from '../services/isAuthenticated.service';
 import CircularProgressWithLabel from './CircularProgress.component';
 import { setLoginFormUsername, setLoginFormPassword } from '../actions/LoginPage.action';
-import CodeIcon from '@material-ui/icons/Code';
+import SiemensLogoPetrol from '../assets/sie-logo-petrol-rgb.svg';
+import AccountTreeIcon from '@material-ui/icons/AccountTree';
+import EventNoteIcon from '@material-ui/icons/EventNote';
 
 const drawerWidth = 240;
 
@@ -164,7 +164,11 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.up('md')]: {
       display: 'flex',
     }
-  }
+  },
+  siemensLogo: {
+    paddingRight: '15px',
+    maxHeight: '19px'
+  },
 }));
 
 let instance;
@@ -382,6 +386,7 @@ function MiniDrawer(props) {
                 <Typography variant="h6" noWrap className={classes.title}>
                   SidiroIOT
                 </Typography>
+
                 <div className={classes.sectionDesktop}>
                   <Typography variant="body1">CPU</Typography>
                   <CircularProgressWithLabel value={props.hardwareUsage.cpuUsage} unit="%" />
@@ -432,6 +437,7 @@ function MiniDrawer(props) {
               }}
             >
               <div className={classes.toolbar}>
+                <img src={SiemensLogoPetrol} alt="Siemens Logo" className={classes.siemensLogo} />
                 <IconButton onClick={handleDrawerClose}>
                   {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
                 </IconButton>
@@ -440,24 +446,24 @@ function MiniDrawer(props) {
               <List>
                 <ListItem button component={Link} to="/" selected={location.pathname === "/" ? true : false} >
                   <ListItemIcon>
-                    <DeviceHubIcon />
+                    <AccountTreeIcon />
                   </ListItemIcon>
                   <ListItemText primary={t('Drawer.Devices')} />
                 </ListItem>
                 {isAdmin() ?
-                <React.Fragment>
-                  <ListItem button component={Link} to="/settings" selected={location.pathname === "/settings" ? true : false} >
-                    <ListItemIcon>
-                      <SettingsIcon />
-                    </ListItemIcon>
-                    <ListItemText primary={t('Drawer.Settings')} />
-                  </ListItem>
-                  <ListItem button component={Link} to="/logs" selected={location.pathname === "/logs" ? true : false} >
-                    <ListItemIcon>
-                      <CodeIcon />
-                    </ListItemIcon>
-                    <ListItemText primary={t('Drawer.Logs')} />
-                  </ListItem>
+                  <React.Fragment>
+                    <ListItem button component={Link} to="/settings" selected={location.pathname === "/settings" ? true : false} >
+                      <ListItemIcon>
+                        <SettingsIcon />
+                      </ListItemIcon>
+                      <ListItemText primary={t('Drawer.Settings')} />
+                    </ListItem>
+                    <ListItem button component={Link} to="/logs" selected={location.pathname === "/logs" ? true : false} >
+                      <ListItemIcon>
+                        <EventNoteIcon />
+                      </ListItemIcon>
+                      <ListItemText primary={t('Drawer.Logs')} />
+                    </ListItem>
                   </React.Fragment>
                   : null}
 
@@ -479,9 +485,9 @@ function MiniDrawer(props) {
               className={classes.bottomNavi}
               value={bottomNaviValue}
             >
-              <BottomNavigationAction value="/" label={t('Drawer.Devices')} icon={<DeviceHubIcon />} component={Link} to="/" />
-              {isAdmin() ? <BottomNavigationAction value="/settings" label={t('Drawer.Settings')} icon={<ViewArrayIcon />} component={Link} to="/settings" /> : null}
-              {isAdmin() ? <BottomNavigationAction value="/logs" label={t('Drawer.Logs')} icon={<CodeIcon />} component={Link} to="/logs" /> : null}
+              <BottomNavigationAction value="/" label={t('Drawer.Devices')} icon={<AccountTreeIcon />} component={Link} to="/" />
+              {isAdmin() ? <BottomNavigationAction value="/settings" label={t('Drawer.Settings')} icon={<SettingsIcon />} component={Link} to="/settings" /> : null}
+              {isAdmin() ? <BottomNavigationAction value="/logs" label={t('Drawer.Logs')} icon={<EventNoteIcon />} component={Link} to="/logs" /> : null}
               <BottomNavigationAction label={t('Drawer.Language')} icon={<LanguageIcon />} onClick={() => props.setLanguageDialogOpen(true)} />
             </BottomNavigation>
           </React.Fragment>

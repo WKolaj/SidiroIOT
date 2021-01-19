@@ -14,6 +14,9 @@ const useStyles = makeStyles((theme) => ({
   },
   offboarded: {
     color: 'red'
+  },
+  active: {
+    color: '#2fcc2f'
   }
 }));
 
@@ -46,7 +49,7 @@ function MSAgentBottomToolbar({ selectedDevice, allDevices, refreshDeviceParams 
     <React.Fragment>
       <Grid item xs={12} sm={6}>
         <Typography variant="h5">
-          {t('DevicesSelectionPage.Status')}: {isActive() ? t('DevicesSelectionPage.StatusConnected') : t('DevicesSelectionPage.StatusDisconnected')} {isBoarded() ? <span className={classes.onboarded}>({t('DevicesSelectionPage.StatusOnboarded')})</span> : <span className={classes.offboarded}>({t('DevicesSelectionPage.StatusOffboarded')})</span>}
+          {t('DevicesSelectionPage.Status')}: {isActive() ? <span className={classes.active}>{t('DevicesSelectionPage.StatusConnected')}</span> : <span className={classes.offboarded}>{t('DevicesSelectionPage.StatusDisconnected')}</span>} {isBoarded() ? <span className={classes.onboarded}>({t('DevicesSelectionPage.StatusOnboarded')})</span> : <span className={classes.offboarded}>({t('DevicesSelectionPage.StatusOffboarded')})</span>}
         </Typography>
       </Grid>
       <Grid item xs={6} sm={3}>

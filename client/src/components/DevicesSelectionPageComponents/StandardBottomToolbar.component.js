@@ -2,13 +2,27 @@ import React from 'react';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
+import { makeStyles } from '@material-ui/core/styles';
 import { connect } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import ActivateService from '../../services/activate.service';
 import { refreshDeviceParams } from '../../actions/DevicesSelectionPage.action';
 
- function StandardBottomToolbar({ selectedDevice, allDevices, refreshDeviceParams }) {
+const useStyles = makeStyles((theme) => ({
+  onboarded: {
+    color: 'green'
+  },
+  offboarded: {
+    color: 'red'
+  },
+  active: {
+    color: '#2fcc2f'
+  }
+}));
+
+function StandardBottomToolbar({ selectedDevice, allDevices, refreshDeviceParams }) {
   const { t } = useTranslation();
+  const classes = useStyles();
 
   const activateDevice = (activate, device) => {
     ActivateService.activateDevice(activate, device).then(res => {
@@ -17,7 +31,7 @@ import { refreshDeviceParams } from '../../actions/DevicesSelectionPage.action';
       }
     })
   }
-  
+
   const isActive = () => {
     if (selectedDevice.selectedDeviceID !== '' && allDevices[selectedDevice.selectedDeviceID] !== undefined) {
       return allDevices[selectedDevice.selectedDeviceID].isActive
@@ -30,13 +44,13 @@ import { refreshDeviceParams } from '../../actions/DevicesSelectionPage.action';
   return (
     <React.Fragment>
       <Grid item xs={12} sm={6}>
-        <Typography variant="h5">{t('DevicesSelectionPage.Status')}: {isActive() ? t('DevicesSelectionPage.StatusConnected') : t('DevicesSelectionPage.StatusDisconnected')}</Typography>
+        <Typography variant="h5">{t('DevicesSelectionPage.Status')}: {isActive() ? <span className={classes.active}>{t('DevicesSelectionPage.StatusConnected')}</span> : <span className={classes.offboarded}>{t('DevicesSelectionPage.StatusDisconnected')}</span>}</Typography>
       </Grid>
       <Grid item xs={6} sm={3}>
-        <Button disabled={isActive()} fullWidth variant="contained" color="primary" onClick={()=>activateDevice(true, selectedDevice.selectedDeviceID)}>{t('DevicesSelectionPage.Connect')}</Button>
+        <Button disabled={isActive()} fullWidth variant="contained" color="primary" onClick={() => activateDevice(true, selectedDevice.selectedDeviceID)}>{t('DevicesSelectionPage.Connect')}</Button>
       </Grid>
       <Grid item xs={6} sm={3}>
-        <Button disabled={!isActive()} fullWidth variant="contained" color="secondary" onClick={()=>activateDevice(false, selectedDevice.selectedDeviceID)}>{t('DevicesSelectionPage.Disconnect')}</Button>
+        <Button disabled={!isActive()} fullWidth variant="contained" color="secondary" onClick={() => activateDevice(false, selectedDevice.selectedDeviceID)}>{t('DevicesSelectionPage.Disconnect')}</Button>
       </Grid>
     </React.Fragment>
   )

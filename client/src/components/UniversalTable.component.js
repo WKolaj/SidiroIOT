@@ -14,7 +14,7 @@ export function UniversalTable({ rows, columns, small = false, noElevation = fal
       <Table aria-label="simple table" size={small ? "small" : "medium"}>
         <TableHead>
           <TableRow>
-            {columns.map((col) => <TableCell style={{width: `${100/columns.length}%`}} key={col}>{col}</TableCell>
+            {columns.map((col) => <TableCell style={{ width: `${100 / columns.length}%` }} key={col}>{col}</TableCell>
             )}
           </TableRow>
         </TableHead>
@@ -22,7 +22,7 @@ export function UniversalTable({ rows, columns, small = false, noElevation = fal
           {rows.map((row, i) => {
             return (
               <TableRow key={i}>
-                {row.map((cell, index) => <TableCell key={index}>{cell}</TableCell>
+                {row.map((cell, index) => <TableCell key={index}>{cell !== undefined ? `${cell}` : ''}</TableCell>
                 )}
               </TableRow>
             )

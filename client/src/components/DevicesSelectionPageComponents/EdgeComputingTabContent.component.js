@@ -24,7 +24,7 @@ function EdgeComputingTabContent({ calcElementsObject }) {
   const calcElements = Object.values(calcElementsObject).map(calcElement => {
     return {
       ...calcElement,
-      value: parseFloat(calcElement.value).toFixed(2),
+      value: parseFloat(calcElement.value).toFixed(3),
       lastValueTick: calcElement.lastValueTick === 0 ? '' : formatDateTime(new Date(parseFloat(calcElement.lastValueTick) * 1000))
     }
   })

@@ -19,9 +19,8 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(2)
   },
   controlButtons: {
-    [`${theme.breakpoints.down('sm')} and (orientation: portrait)`]: {
-      marginBottom: theme.spacing(8)
-    },
+    marginBottom: theme.spacing(2),
+    marginTop: theme.spacing(2)
   }
 }));
 
@@ -74,9 +73,9 @@ function S7DeviceDisplay({ selectedDevice, allDevices, tableView }) {
       t('DevicesSelectionPage.Properties.unit'),
       t('DevicesSelectionPage.Properties.defaultValue'),
       t('DevicesSelectionPage.Properties.dbNumber'),
+      t('DevicesSelectionPage.Properties.offset'),
       t('DevicesSelectionPage.Properties.length'),
       t('DevicesSelectionPage.Properties.memoryType'),
-      t('DevicesSelectionPage.Properties.offset'),
       t('DevicesSelectionPage.Properties.read/write'),
       t('DevicesSelectionPage.Properties.group'),
       t('DevicesSelectionPage.Properties.sampleTime'),
@@ -88,6 +87,7 @@ function S7DeviceDisplay({ selectedDevice, allDevices, tableView }) {
       if (variable.read !== undefined && variable.write !== undefined && variable.readAsSingle !== undefined && variable.writeAsSingle !== undefined) {
         variable = {
           ...variable,
+          value: S7VariablesConverter(variable),
           readWrite: variable.read ? 'Read' : 'Write',
           readWriteAsSingle: variable.read ? 'readAsSingle' : 'writeAsSingle'
         }
@@ -97,7 +97,7 @@ function S7DeviceDisplay({ selectedDevice, allDevices, tableView }) {
         rows.push([variable.name, variable.value, variable.unit, variable.lastValueTick])
       }
       else {
-        rows.push([variable.name, variable.type, variable.value, variable.unit, variable.defaultValue, variable.dbNumber, variable.length, variable.memoryType, variable.offset, variable.readWrite, `${!variable[variable.readWriteAsSingle]}`, variable.sampleTime, variable.lastValueTick])
+        rows.push([variable.name, variable.type, variable.value, variable.unit, variable.defaultValue, variable.dbNumber, variable.offset, variable.length, variable.memoryType, variable.readWrite, `${!variable[variable.readWriteAsSingle]}`, variable.sampleTime, variable.lastValueTick])
       }
     })
     const sortedRows = sortRowsBy(rows, cols, t('DevicesSelectionPage.Properties.name'), 'S7', t('DevicesSelectionPage.Properties.unitID'), t('DevicesSelectionPage.Properties.function'), t('DevicesSelectionPage.Properties.offset'))
@@ -107,6 +107,20 @@ function S7DeviceDisplay({ selectedDevice, allDevices, tableView }) {
 
   /////////////////////////////////////////////////////////////////////
 
+  const S7VariablesConverter = (variable) => {
+    switch(variable.type) {
+      case 'S7ByteArray':
+        return `[${variable.value}]`
+      case 'S7DTL':
+        return formatDateTime(new Date(parseFloat(variable.value)))
+      case 'S7Real':
+        return parseFloat(variable.value).toFixed(3)
+      default:
+        //Integers
+        return variable.value
+    }
+  }
+
   //rendering whole VARIABLES TAB
   const renderVariablesTabContent = () => {
     //group S7 variables in one table and DeviceConnectionVariable in other table 
@@ -114,7 +128,6 @@ function S7DeviceDisplay({ selectedDevice, allDevices, tableView }) {
     const variables = Object.values(device.variables).map(variable => {
       return {
         ...variable,
-        value: variable.type === 'S7ByteArray' ? `[${variable.value}]` : `${variable.value}`,
         defaultValue: variable.type === 'S7ByteArray' ? `[${variable.defaultValue}]` : `${variable.defaultValue}`,
         lastValueTick: variable.lastValueTick === 0 ? '' : formatDateTime(new Date(parseFloat(variable.lastValueTick) * 1000))
       }
@@ -148,6 +161,9 @@ function S7DeviceDisplay({ selectedDevice, allDevices, tableView }) {
         <Grid item xs={12}>
           <DeviceDetailsTitle />
         </Grid>
+        <Grid container item xs={12} spacing={1} className={classes.controlButtons}>
+          <StandardBottomToolbar />
+        </Grid>
         <Grid item xs={12}>
           <UniversalTabs
             name="S7Device"
@@ -169,9 +185,6 @@ function S7DeviceDisplay({ selectedDevice, allDevices, tableView }) {
                 content: <AlertsTabContent alertElementsObject={device.alerts} />
               }
             ]} />
-        </Grid>
-        <Grid container item xs={12} spacing={1} className={classes.controlButtons}>
-          <StandardBottomToolbar />
         </Grid>
       </Grid>
     </React.Fragment>

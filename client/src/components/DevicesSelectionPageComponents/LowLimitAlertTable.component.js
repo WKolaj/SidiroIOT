@@ -1,10 +1,10 @@
 import React from 'react';
 import { UniversalTable } from '../UniversalTable.component';
-import CollapsibleTable from '../CollapsibleTable.component';
+import {CollapsibleTable} from '../CollapsibleTable.component';
 import { useTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
 
-export function LowLimitAlertTable({ lowLimitAlertArray, tableView }) {
+export function LowLimitAlertTable({ lowLimitAlertArray, tableView, allDevices, selectedDevice }) {
   const { t } = useTranslation();
 
   let rows = []
@@ -25,12 +25,13 @@ export function LowLimitAlertTable({ lowLimitAlertArray, tableView }) {
     t('DevicesSelectionPage.Properties.value'),
     t('DevicesSelectionPage.Properties.unit'),
     t('DevicesSelectionPage.Properties.defaultValue'),
-    t('DevicesSelectionPage.Properties.highLimit'),
+    t('DevicesSelectionPage.Properties.lowLimit'),
     t('DevicesSelectionPage.Properties.hysteresis'),
     t('DevicesSelectionPage.Properties.severity'),
     t('DevicesSelectionPage.Properties.sampleTime'),
     t('DevicesSelectionPage.Properties.timeOffDelay'),
     t('DevicesSelectionPage.Properties.timeOnDelay'),
+    t('DevicesSelectionPage.Properties.variableName'),
     t('DevicesSelectionPage.Properties.lastValueTick')]
   }
   lowLimitAlertArray.forEach((lowLimitAlertElement, i) => {
@@ -48,12 +49,13 @@ export function LowLimitAlertTable({ lowLimitAlertArray, tableView }) {
         lowLimitAlertElement.value, 
         lowLimitAlertElement.unit, 
         lowLimitAlertElement.defaultValue, 
-        lowLimitAlertElement.highLimit, 
+        lowLimitAlertElement.lowLimit, 
         lowLimitAlertElement.hysteresis, 
         lowLimitAlertElement.severity,
         lowLimitAlertElement.sampleTime,
         lowLimitAlertElement.timeOffDelay,
         lowLimitAlertElement.timeOnDelay,
+        lowLimitAlertElement.variableID,
         lowLimitAlertElement.lastValueTick])
     }
   })
@@ -62,6 +64,7 @@ export function LowLimitAlertTable({ lowLimitAlertArray, tableView }) {
       columns={cols}
       rows={rows}
       collapsedRows={rowToBeCollapsed}
+      name='LowLimitAlertTable'
     />
 }
 

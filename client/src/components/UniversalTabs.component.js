@@ -48,7 +48,7 @@ export function a11yProps(index) {
 export const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
-    marginBottom: '20px'
+    marginBottom: theme.spacing(8)
   },
   defaultRoot: {
     flexGrow: 1,

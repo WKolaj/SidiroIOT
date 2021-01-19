@@ -1,6 +1,6 @@
 import React from 'react';
 import { UniversalTable } from '../UniversalTable.component';
-import CollapsibleTable from '../CollapsibleTable.component';
+import {CollapsibleTable} from '../CollapsibleTable.component';
 import { useTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
 
@@ -53,6 +53,7 @@ export function SumCalculatorTable({ sumCalcElementsArray, selectedDevice, allDe
       columns={cols}
       rows={rows}
       collapsedRows={rowToBeCollapsed}
+      name='SumCalculatorTable'
     />
 }
 

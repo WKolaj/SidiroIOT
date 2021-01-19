@@ -1,7 +1,7 @@
 import React from 'react';
 import UniversalTabs from '../UniversalTabs.component';
 import { UniversalTable } from '../UniversalTable.component';
-import CollapsibleTable from '../CollapsibleTable.component';
+import {CollapsibleTable} from '../CollapsibleTable.component';
 import { useTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
 import Grid from '@material-ui/core/Grid';
@@ -18,9 +18,8 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(2)
   },
   controlButtons: {
-    [`${theme.breakpoints.down('sm')} and (orientation: portrait)`]: {
-      marginBottom: theme.spacing(8)
-    },
+    marginBottom: theme.spacing(2),
+    marginTop: theme.spacing(2)
   }
 }));
 
@@ -106,6 +105,7 @@ function MSAgentDeviceDisplay({ selectedDevice, allDevices, tableView }) {
     const variables = Object.values(device.variables).map(variable => {
       return {
         ...variable,
+        value: !isNaN(variable.value)? parseFloat(variable.value).toFixed(3) : `${variable.value}`,
         lastValueTick: variable.lastValueTick === 0 ? '' : formatDateTime(new Date(parseFloat(variable.lastValueTick) * 1000))
       }
     })
@@ -134,7 +134,7 @@ function MSAgentDeviceDisplay({ selectedDevice, allDevices, tableView }) {
     let rowToBeCollapsed = []
 
     if (tableView === 'simple') {
-      cols = [t('DevicesSelectionPage.Properties.deviceName'), t('DevicesSelectionPage.Properties.elementName')]
+      cols = [t('DevicesSelectionPage.Properties.deviceName'), t('DevicesSelectionPage.Properties.elementName'), t('DevicesSelectionPage.Properties.sendingInterval')]
     }
     else {
       //push collapsed cols
@@ -157,7 +157,7 @@ function MSAgentDeviceDisplay({ selectedDevice, allDevices, tableView }) {
         associatedElementIDName: allDevices[dataConfig.deviceId] !== undefined && allDevices[dataConfig.deviceId].variables[dataConfig.elementId] !== undefined ? allDevices[dataConfig.deviceId].variables[dataConfig.elementId].name : ''
       }
       if (tableView === 'simple') {
-        rows.push([dataConfig.associatedDeviceIDName, dataConfig.associatedElementIDName])
+        rows.push([dataConfig.associatedDeviceIDName, dataConfig.associatedElementIDName, dataConfig.sendingInterval])
       }
       else {
         //push Texts property contents into collapsed table
@@ -173,6 +173,7 @@ function MSAgentDeviceDisplay({ selectedDevice, allDevices, tableView }) {
         columns={cols}
         rows={rows}
         collapsedRows={rowToBeCollapsed}
+        name='MSAgentDataSent'
       />
   }
 
@@ -202,7 +203,13 @@ function MSAgentDeviceDisplay({ selectedDevice, allDevices, tableView }) {
       eventConfig = {
         ...eventConfig,
         associatedDeviceIDName: allDevices[eventConfig.deviceId] !== undefined ? allDevices[eventConfig.deviceId].name : '',
-        associatedElementIDName: allDevices[eventConfig.deviceId] !== undefined && allDevices[eventConfig.deviceId].alerts[eventConfig.elementId] !== undefined ? allDevices[eventConfig.deviceId].alerts[eventConfig.elementId].name : ''
+        associatedElementIDName: allDevices[eventConfig.deviceId] !== undefined && allDevices[eventConfig.deviceId].alerts[eventConfig.elementId] !== undefined ? allDevices[eventConfig.deviceId].alerts[eventConfig.elementId].name : '',
+        //make sure the following exist, if not set them empty string
+        source: eventConfig.source !==undefined ? eventConfig.source : '',
+        code: eventConfig.code !==undefined ? eventConfig.code : '',
+        acknowledged: eventConfig.acknowledged !== undefined ? `${eventConfig.acknowledged}` : '',
+        correlationId: eventConfig.correlationId !== undefined ? eventConfig.correlationId : ''
+
       }
       if (tableView === 'simple') {
         rows.push([eventConfig.associatedDeviceIDName, eventConfig.associatedElementIDName, eventConfig.sendingInterval])
@@ -220,6 +227,9 @@ function MSAgentDeviceDisplay({ selectedDevice, allDevices, tableView }) {
       <Grid container spacing={1}>
         <Grid item xs={12}>
           <DeviceDetailsTitle />
+        </Grid>
+        <Grid container item xs={12} spacing={1} className={classes.controlButtons}>
+          <MSAgentBottomToolbar />
         </Grid>
         <Grid item xs={12}>
           <UniversalTabs
@@ -250,9 +260,6 @@ function MSAgentDeviceDisplay({ selectedDevice, allDevices, tableView }) {
                 content: renderEventsSentTabContent()
               }
             ]} />
-        </Grid>
-        <Grid container item xs={12} spacing={1} className={classes.controlButtons}>
-          <MSAgentBottomToolbar />
         </Grid>
       </Grid>
     </React.Fragment>

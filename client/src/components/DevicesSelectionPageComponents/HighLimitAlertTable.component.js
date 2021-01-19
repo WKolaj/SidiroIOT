@@ -1,6 +1,6 @@
 import React from 'react';
 import { UniversalTable } from '../UniversalTable.component';
-import CollapsibleTable from '../CollapsibleTable.component';
+import {CollapsibleTable} from '../CollapsibleTable.component';
 import { useTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
 
@@ -31,6 +31,7 @@ export function HighLimitAlertTable({ highLimitAlertArray, tableView }) {
     t('DevicesSelectionPage.Properties.sampleTime'),
     t('DevicesSelectionPage.Properties.timeOffDelay'),
     t('DevicesSelectionPage.Properties.timeOnDelay'),
+    t('DevicesSelectionPage.Properties.variableName'),
     t('DevicesSelectionPage.Properties.lastValueTick')]
   }
   highLimitAlertArray.forEach((highLimitAlertElement, i) => {
@@ -54,6 +55,7 @@ export function HighLimitAlertTable({ highLimitAlertArray, tableView }) {
         highLimitAlertElement.sampleTime,
         highLimitAlertElement.timeOffDelay,
         highLimitAlertElement.timeOnDelay,
+        highLimitAlertElement.variableID,
         highLimitAlertElement.lastValueTick])
     }
   })
@@ -62,6 +64,7 @@ export function HighLimitAlertTable({ highLimitAlertArray, tableView }) {
       columns={cols}
       rows={rows}
       collapsedRows={rowToBeCollapsed}
+      name='HighLimitAlertTable'
     />
 }
 

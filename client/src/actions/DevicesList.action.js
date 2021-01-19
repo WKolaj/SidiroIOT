@@ -1,3 +1,3 @@
 export const SELECT_DEVICE = 'SELECT_DEVICE';
 
-export const selectDevice = (deviceIndex, deviceID, deviceType) => ({ type: SELECT_DEVICE, deviceIndex: deviceIndex, deviceID: deviceID, deviceType: deviceType })
+export const selectDevice = (deviceID, deviceType) => ({ type: SELECT_DEVICE, deviceID: deviceID, deviceType: deviceType })
