@@ -37,7 +37,7 @@ function EdgeComputingTabContent({ alertElementsObject, selectedDevice, allDevic
   const alertElements = Object.values(alertElementsObject).map(alert => {
     return {
       ...alert,
-      variableID: device.variables[alert.variableID] !== undefined ? device.variables[alert.variableID].name : '',
+      variableName: device.variables[alert.variableID] !== undefined ? device.variables[alert.variableID].name : '',
       value: alert.value === null ?
         t('DevicesSelectionPage.Properties.inactive')
         :

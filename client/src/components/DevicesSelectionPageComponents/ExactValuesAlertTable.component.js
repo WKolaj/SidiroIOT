@@ -60,7 +60,7 @@ export function ExactValuesAlertTable({ exactValuesAlertArray, tableView }) {
       exactValuesAlertElement.timeOffDelay,
       exactValuesAlertElement.timeOnDelay,
       exactValuesAlertElement.alertValues,
-      exactValuesAlertElement.variableID,
+      exactValuesAlertElement.variableName,
       exactValuesAlertElement.lastValueTick])
     }
   })

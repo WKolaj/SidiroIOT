@@ -55,7 +55,7 @@ export function LowLimitAlertTable({ lowLimitAlertArray, tableView, allDevices, 
         lowLimitAlertElement.sampleTime,
         lowLimitAlertElement.timeOffDelay,
         lowLimitAlertElement.timeOnDelay,
-        lowLimitAlertElement.variableID,
+        lowLimitAlertElement.variableName,
         lowLimitAlertElement.lastValueTick])
     }
   })

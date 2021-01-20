@@ -23,10 +23,10 @@ export function DeviceConnectionVariableTable({ deviceConnectionVariablesArray, 
   }
   deviceConnectionVariablesArray.forEach(variable => {
     if (tableView === 'simple') {
-      rows.push([variable.name, variable.value, variable.unit, variable.lastValueTick])
+      rows.push([variable.name, `${variable.value}`, variable.unit, variable.lastValueTick])
     }
     else {
-      rows.push([variable.name, variable.type, variable.value, variable.unit, variable.defaultValue, variable.sampleTime, variable.lastValueTick])
+      rows.push([variable.name, variable.type, `${variable.value}`, variable.unit, variable.defaultValue, variable.sampleTime, variable.lastValueTick])
     }
   })
   return <UniversalTable columns={cols} rows={rows} />
