@@ -500,3 +500,13 @@ module.exports.removeExtensionFromFileName = function (filename) {
 module.exports.cloneObject = function (objectToClone) {
   return JSON.parse(JSON.stringify(objectToClone));
 };
+
+/**
+ * @description Method replacing all element in string
+ * @param {string} str
+ * @param {string} find
+ * @param {string} replace
+ */
+module.exports.replaceAll = function (str, find, replace) {
+  return str.replace(new RegExp(find, "g"), replace);
+};

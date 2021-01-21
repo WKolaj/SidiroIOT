@@ -12,6 +12,7 @@ const {
   checkIfProjectIdsAreUniq,
 } = require("../../models/Project/Project");
 const MSAgentDevice = require("../Device/AgentDevice/MSAgentDevice");
+const MSMQTTAgentDevice = require("../Device/AgentDevice/MSMQTTAgentDevice");
 
 class Project {
   //#region ========= CONSTRUCTOR =========
@@ -256,6 +257,9 @@ class Project {
       }
       case "MSAgentDevice": {
         return new MSAgentDevice(this);
+      }
+      case "MSMQTTAgentDevice": {
+        return new MSMQTTAgentDevice(this);
       }
       default:
         throw new Error(`Unrecognized Device type: ${type}`);
