@@ -1,30 +1,31 @@
 {
   "files": {
     "main.css": "/static/css/main.78201f48.chunk.css",
-    "main.js": "/static/js/main.1c3e4d83.chunk.js",
-    "main.js.map": "/static/js/main.1c3e4d83.chunk.js.map",
+    "main.js": "/static/js/main.421d5c09.chunk.js",
+    "main.js.map": "/static/js/main.421d5c09.chunk.js.map",
     "runtime-main.js": "/static/js/runtime-main.fc1ff1c9.js",
     "runtime-main.js.map": "/static/js/runtime-main.fc1ff1c9.js.map",
-    "static/js/2.60a8eb22.chunk.js": "/static/js/2.60a8eb22.chunk.js",
-    "static/js/2.60a8eb22.chunk.js.map": "/static/js/2.60a8eb22.chunk.js.map",
-    "f3777365047436e14a0b.worker.js": "/f3777365047436e14a0b.worker.js",
-    "f3777365047436e14a0b.worker.js.map": "/f3777365047436e14a0b.worker.js.map",
-    "fbc80155800e4987c9aa.worker.js": "/fbc80155800e4987c9aa.worker.js",
-    "fbc80155800e4987c9aa.worker.js.map": "/fbc80155800e4987c9aa.worker.js.map",
+    "static/js/2.f6525673.chunk.js": "/static/js/2.f6525673.chunk.js",
+    "static/js/2.f6525673.chunk.js.map": "/static/js/2.f6525673.chunk.js.map",
+    "0fbc5c0168903192609a.worker.js": "/0fbc5c0168903192609a.worker.js",
+    "0fbc5c0168903192609a.worker.js.map": "/0fbc5c0168903192609a.worker.js.map",
+    "2461d4f30c964a1bb67d.worker.js": "/2461d4f30c964a1bb67d.worker.js",
+    "2461d4f30c964a1bb67d.worker.js.map": "/2461d4f30c964a1bb67d.worker.js.map",
     "index.html": "/index.html",
     "static/css/main.78201f48.chunk.css.map": "/static/css/main.78201f48.chunk.css.map",
-    "static/js/2.60a8eb22.chunk.js.LICENSE.txt": "/static/js/2.60a8eb22.chunk.js.LICENSE.txt",
+    "static/js/2.f6525673.chunk.js.LICENSE.txt": "/static/js/2.f6525673.chunk.js.LICENSE.txt",
     "static/media/InternalDeviceIcon.2a2f7093.svg": "/static/media/InternalDeviceIcon.2a2f7093.svg",
     "static/media/MBGatewayIcon.482b2385.svg": "/static/media/MBGatewayIcon.482b2385.svg",
+    "static/media/MQTTIcon.49d79e9c.svg": "/static/media/MQTTIcon.49d79e9c.svg",
     "static/media/MSAgentIcon.da1d1ad7.svg": "/static/media/MSAgentIcon.da1d1ad7.svg",
+    "static/media/PacIcon.cf00dc55.svg": "/static/media/PacIcon.cf00dc55.svg",
     "static/media/S7Icon.475f3f22.svg": "/static/media/S7Icon.475f3f22.svg",
-    "static/media/pacIcon.cf00dc55.svg": "/static/media/pacIcon.cf00dc55.svg",
     "static/media/sie-logo-petrol-rgb.d3a18e49.svg": "/static/media/sie-logo-petrol-rgb.d3a18e49.svg"
   },
   "entrypoints": [
     "static/js/runtime-main.fc1ff1c9.js",
-    "static/js/2.60a8eb22.chunk.js",
+    "static/js/2.f6525673.chunk.js",
     "static/css/main.78201f48.chunk.css",
-    "static/js/main.1c3e4d83.chunk.js"
+    "static/js/main.421d5c09.chunk.js"
   ]
 }
