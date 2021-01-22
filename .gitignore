@@ -111,3 +111,6 @@ dist
 
 # mindconnect dir
 .mc/
+
+# package-lock
+package-lock.json
