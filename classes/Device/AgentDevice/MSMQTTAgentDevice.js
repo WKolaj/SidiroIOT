@@ -136,6 +136,46 @@ class MSMQTTAgentDevice extends AgentDevice {
     else return null;
   }
 
+  /**
+   * @description Method for normalizing string to send via smartRest - eg. change , to .
+   * @param {string} stringToNormalize string to normalize
+   */
+  static normalizeStringToSendViaSmartREST(stringToNormalize) {
+    if (!exists(stringToNormalize)) return "";
+    //Changing " to '"'
+    let convertedString = replaceAll(stringToNormalize, `"`, `""`);
+
+    //Whole string should inserted inside " "
+    convertedString = `"${convertedString}"`;
+
+    return convertedString;
+  }
+
+  /**
+   * @description Method for converting mindsphere severity to mqtt severity
+   * @param {number} severity MindSphere severity
+   */
+  static normalizeMindConnectSeverity(severity) {
+    /**
+     *
+     * MindConnect Exentsion:
+     * Template 301 creates a critical alarm.
+     * Template 302 creates a major alarm.
+     * Template 303 creates a minor alarm.
+     * Template 304 creates a warning alarm.
+     *
+     * MindConnectLib:
+     * 0-99 : 20:error, 30:warning, 40: information
+     *
+     */
+
+    if (severity <= 20) return 301;
+    if (severity <= 30) return 302;
+    if (severity <= 40) return 303;
+
+    return 304;
+  }
+
   //#endregion  ========= PUBLIC STATIC METHODS =========
 
   //#region ========= PRIVATE METHODS =========
@@ -184,6 +224,9 @@ class MSMQTTAgentDevice extends AgentDevice {
 
     let elementConverter = this._valueConverters[elementId];
 
+    //boolean values cannot be send
+    if (typeof value === "boolean") return null;
+
     let convertedValue = value.toString();
     if (exists(elementConverter))
       convertedValue = elementConverter.convertValue(value);
@@ -227,7 +270,7 @@ class MSMQTTAgentDevice extends AgentDevice {
           currentCommandLength++;
 
           //Switching to new command if actual one is to long
-          if (currentCommandLength > this.MQTTMessagesLimit) {
+          if (currentCommandLength >= this.MQTTMessagesLimit) {
             commandsToReturn.push(currentCommand);
             currentCommand = "";
             currentCommandLength = 0;
@@ -237,50 +280,11 @@ class MSMQTTAgentDevice extends AgentDevice {
     }
 
     //Adding current command to array - if it was not added
-    if (!commandsToReturn.includes(currentCommand))
+    if (!commandsToReturn.includes(currentCommand) && currentCommand !== "")
       commandsToReturn.push(currentCommand);
 
     if (commandsToReturn.length > 0) return commandsToReturn;
     else return null;
-  }
-
-  /**
-   * @description Method for normalizing string to send via smartRest - eg. change , to .
-   * @param {string} stringToNormalize string to normalize
-   */
-  static normalizeStringToSendViaSmartREST(stringToNormalize) {
-    //Changing " to '"'
-    let convertedString = replaceAll(stringToNormalize, `"`, `""`);
-
-    //Whole string should inserted inside " "
-    convertedString = `"${convertedString}"`;
-
-    return convertedString;
-  }
-
-  /**
-   * @description Method for converting mindsphere severity to mqtt severity
-   * @param {number} severity MindSphere severity
-   */
-  static normalizeMindConnectSeverity(severity) {
-    /**
-     *
-     * MindConnect Exentsion:
-     * Template 301 creates a critical alarm.
-     * Template 302 creates a major alarm.
-     * Template 303 creates a minor alarm.
-     * Template 304 creates a warning alarm.
-     *
-     * MindConnectLib:
-     * 0-99 : 20:error, 30:warning, 40: information
-     *
-     */
-
-    if (severity <= 20) return 301;
-    if (severity <= 30) return 302;
-    if (severity <= 40) return 303;
-
-    return 304;
   }
 
   /**
@@ -361,9 +365,10 @@ class MSMQTTAgentDevice extends AgentDevice {
 
   /**
    * @description Method for closing connection with MQTT Broker. According to npm package mqtt - connection should be closed every send of data
+   * @param {boolean} forceEnd should connection be ended by force
    */
-  async _closeConnectionWithBroker() {
-    await this._mqttClient.end();
+  async _closeConnectionWithBroker(forceEnd) {
+    await this._mqttClient.end(forceEnd);
   }
 
   /**
@@ -380,9 +385,11 @@ class MSMQTTAgentDevice extends AgentDevice {
    * @param {string} command Command to send
    */
   async _sendMQTTCommand(command) {
+    let self = this;
+
     return new Promise(async (resolve, reject) => {
       try {
-        let mqttClient = this._mqttClient;
+        let mqttClient = self._mqttClient;
 
         //Throwing in case there device is not connected - could be disconnected while sending data or event due to timeout!
         if (!mqttClient || !mqttClient.connected)
@@ -394,17 +401,17 @@ class MSMQTTAgentDevice extends AgentDevice {
         let timeoutHandler = setTimeout(async () => {
           try {
             //Trying - in case end throws, promise has to be rejected
-            await mqttClient.end(true);
+            await self._closeConnectionWithBroker(true);
             return reject(new Error("Publish MQTT message timeout..."));
           } catch (err) {
             return reject(
               new Error("Error while disconnecting after message timeout")
             );
           }
-        }, this.PublishTimeout);
+        }, self.PublishTimeout);
 
         //Publish method hangs if there is no Internet connection
-        await this._mqttClient.publish("s/us", command, { qos: this.QoS });
+        await self._mqttClient.publish("s/us", command, { qos: self.QoS });
 
         clearTimeout(timeoutHandler);
 
