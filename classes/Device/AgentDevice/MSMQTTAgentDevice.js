@@ -33,8 +33,11 @@ class MSMQTTAgentDevice extends AgentDevice {
     this._userPassword = null;
     this._serialNumber = null;
     this._mqttMessagesLimit = null;
+    this._qos = null;
+    this._publishTimeout = null;
+    this._reconnectInterval = null;
 
-    //Flag for determining wether device was initially created via MQTT - (boarded)
+    //Flag for determining whether device was boarded before
     this._deviceCreatedViaMQTT = null;
   }
 
@@ -96,6 +99,27 @@ class MSMQTTAgentDevice extends AgentDevice {
    */
   get TenantName() {
     return this._tenantName;
+  }
+
+  /**
+   * @description QoS used for publishing data and events
+   */
+  get QoS() {
+    return this._qos;
+  }
+
+  /**
+   * @description Timeout of publish method for data and events
+   */
+  get PublishTimeout() {
+    return this._publishTimeout;
+  }
+
+  /**
+   * @ReconnectInterval Interval between reconnects of client [ms]
+   */
+  get ReconnectInterval() {
+    return this._reconnectInterval;
   }
 
   //#endregion ========= PROPERTIES =========
@@ -318,6 +342,7 @@ class MSMQTTAgentDevice extends AgentDevice {
       tenant: this.TenantName,
       protocol: MQTTProtocol,
       host: MQTTHost,
+      reconnectPeriod: this.ReconnectInterval,
     };
   }
 
@@ -330,7 +355,7 @@ class MSMQTTAgentDevice extends AgentDevice {
     this._mqttClient = await mqtt.connectAsync(
       `${this.TenantName}.${MQTTHost}`,
       connectParameters,
-      false
+      true
     );
   }
 
@@ -355,7 +380,39 @@ class MSMQTTAgentDevice extends AgentDevice {
    * @param {string} command Command to send
    */
   async _sendMQTTCommand(command) {
-    return this._mqttClient.publish("s/us", command);
+    return new Promise(async (resolve, reject) => {
+      try {
+        let mqttClient = this._mqttClient;
+
+        //Throwing in case there device is not connected - could be disconnected while sending data or event due to timeout!
+        if (!mqttClient || !mqttClient.connected)
+          return reject(
+            new Error("Cannot publish MQTT when device not connected!")
+          );
+
+        //Timeout function - in case of a timeout, disconnect the client and reject
+        let timeoutHandler = setTimeout(async () => {
+          try {
+            //Trying - in case end throws, promise has to be rejected
+            await mqttClient.end(true);
+            return reject(new Error("Publish MQTT message timeout..."));
+          } catch (err) {
+            return reject(
+              new Error("Error while disconnecting after message timeout")
+            );
+          }
+        }, this.PublishTimeout);
+
+        //Publish method hangs if there is no Internet connection
+        await this._mqttClient.publish("s/us", command, { qos: this.QoS });
+
+        clearTimeout(timeoutHandler);
+
+        return resolve(true);
+      } catch (err) {
+        return reject(err);
+      }
+    });
   }
 
   /**
@@ -407,6 +464,13 @@ class MSMQTTAgentDevice extends AgentDevice {
     this._serialNumber = payload.serialNumber;
     this._mqttMessagesLimit = payload.mqttMessagesLimit;
 
+    this._qos = payload.qos;
+    this._publishTimeout = payload.publishTimeout;
+    this._reconnectInterval = payload.reconnectInterval;
+
+    //Flag for determining whether device was boarded before
+    this._deviceCreatedViaMQTT = false;
+
     //Initializing value converters
     this._initValueConverters();
   }
@@ -426,6 +490,10 @@ class MSMQTTAgentDevice extends AgentDevice {
     superPayload.serialNumber = this.SerialNumber;
     superPayload.mqttMessagesLimit = this.MQTTMessagesLimit;
 
+    superPayload.qos = this.QoS;
+    superPayload.publishTimeout = this.PublishTimeout;
+    superPayload.reconnectInterval = this.ReconnectInterval;
+
     return superPayload;
   }
 
@@ -436,8 +504,6 @@ class MSMQTTAgentDevice extends AgentDevice {
     await this._connectToMQTTBroker();
     await this._createAndSetUpMQTTDevice();
     this._deviceCreatedViaMQTT = true;
-    //After each action, connection with broker should be closed
-    await this._closeConnectionWithBroker();
   }
 
   /**
@@ -455,7 +521,6 @@ class MSMQTTAgentDevice extends AgentDevice {
    * @description Method for REAL check if device is boarded.
    */
   async _checkIfBoarded() {
-    //No point to check boarding state here - reconnecting is done every time data or events are send
     return this._deviceCreatedViaMQTT;
   }
 
@@ -470,15 +535,13 @@ class MSMQTTAgentDevice extends AgentDevice {
     );
     if (!exists(sendDataCommands)) return;
 
-    //connecting if client not connected - obligatory due to disconnection on every send data attempt
+    //Connection can be broken, and device will return that is onboarded even if there is no internet connection
+    //Due to giving possibility to save events or data to file if device cannot connect - if onBoard throws, data is not being save into file!
     await this._connectToBrokerIfNotConnected();
 
     for (let command of sendDataCommands) {
       await this._sendMQTTCommand(command);
     }
-
-    //After each action, connection with broker should be closed
-    await this._closeConnectionWithBroker();
   }
 
   /**
@@ -496,13 +559,11 @@ class MSMQTTAgentDevice extends AgentDevice {
     );
     if (!exists(sendEventCommand)) return;
 
-    //connecting if client not connected - obligatory due to disconnection on every send event attempt
+    //Connection can be broken, and device will return that is onboarded even if there is no internet connection
+    //Due to giving possibility to save events or data to file if device cannot connect - if onBoard throws, data is not being save into file!
     await this._connectToBrokerIfNotConnected();
 
     await this._sendMQTTCommand(sendEventCommand);
-
-    //After each action, connection with broker should be closed
-    await this._closeConnectionWithBroker();
   }
 
   //#endregion ========= OVERRIDE PRIVATE METHODS =========
