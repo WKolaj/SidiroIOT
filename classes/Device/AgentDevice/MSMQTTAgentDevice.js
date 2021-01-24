@@ -370,7 +370,7 @@ class MSMQTTAgentDevice extends AgentDevice {
   async _closeConnectionWithBroker(forceEnd) {
     await this._mqttClient.end(forceEnd);
   }
-
+  false;
   /**
    * @description Method for connecting if client is not connected
    */
@@ -386,6 +386,8 @@ class MSMQTTAgentDevice extends AgentDevice {
    */
   async _sendMQTTCommand(command) {
     let self = this;
+
+    if (!exists(command) || command === "") return false;
 
     return new Promise(async (resolve, reject) => {
       try {
@@ -577,5 +579,3 @@ class MSMQTTAgentDevice extends AgentDevice {
 }
 
 module.exports = MSMQTTAgentDevice;
-
-//TODO - test this class!

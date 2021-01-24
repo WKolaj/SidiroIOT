@@ -8,6 +8,7 @@ const {
   checkIfFileExistsAsync,
   exists,
   generateRandomString,
+  snooze,
 } = require("../../../../../utilities/utilities");
 const path = require("path");
 const mqtt = require("async-mqtt");
@@ -6500,7 +6501,6 @@ describe("MSMQTTAgentDevice", () => {
     let deactivateMockFunc;
     let initPayload;
     let internetConnection;
-    let forceEnd;
     let initAgent;
     let connectBroker;
     let disconnectAfterConnecting;
@@ -6923,5 +6923,3659 @@ describe("MSMQTTAgentDevice", () => {
     });
   });
 
-  //TODO - test rest of MSMQTTAgentDevice
+  describe("_sendMQTTCommand", () => {
+    let project;
+    let agent;
+    let getElementMockFunc;
+    let getElementReturnValue;
+    let initPayload;
+    let internetConnection;
+    let initAgent;
+    let connectBroker;
+    let disconnectAfterConnecting;
+    let command;
+    let qos;
+    let publishTimeout;
+    let endThrows;
+    let publishThrows;
+
+    beforeEach(async () => {
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
+
+      qos = 1;
+      publishTimeout = 100;
+
+      getElementReturnValue = {
+        LastValueTick: 123,
+        Value: 456.789,
+        DefaultValue: 987.321,
+      };
+
+      project = {
+        AgentsDirPath: AgentsDirPath,
+      };
+
+      project = {
+        AgentsDirPath: AgentsDirPath,
+      };
+
+      initPayload = {
+        id: "deviceID",
+        name: "deviceName",
+        type: "MSMQTTAgentDevice",
+        variables: {
+          associatedVariableID: {
+            id: "associatedVariableID",
+            name: "associatedVariableName",
+            type: "AssociatedVariable",
+            unit: "A",
+            sampleTime: 1,
+            associatedElementID: "fakeDeviceID",
+            associatedDeviceID: "fakeVariableID",
+          },
+        },
+        calcElements: {
+          averageCalculatorID: {
+            id: "averageCalculatorID",
+            name: "averageCalculatorName",
+            type: "AverageCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            calculationInterval: 15,
+          },
+          factorCalculatorID: {
+            id: "factorCalculatorID",
+            name: "factorCalculatorName",
+            type: "FactorCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+          },
+          increaseCalculatorID: {
+            id: "increaseCalculatorID",
+            name: "increaseCalculatorName",
+            type: "IncreaseCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            calculationInterval: 15,
+            overflow: 1234,
+          },
+          sumCalculatorID: {
+            id: "sumCalculatorID",
+            name: "sumCalculatorName",
+            type: "SumCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableIDs: [
+              { variableID: "fakeVariableID1", factor: 1 },
+              { variableID: "fakeVariableID2", factor: 2 },
+              { variableID: "fakeVariableID3", factor: 3 },
+            ],
+          },
+          valueFromByteArrayCalculatorID: {
+            id: "valueFromByteArrayCalculatorID",
+            name: "valueFromByteArrayCalculatorName",
+            type: "ValueFromByteArrayCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 15,
+            variableID: "fakeVariableID",
+            bitNumber: 4,
+            byteNumber: 3,
+            length: 2,
+          },
+          expessionCalculatorID: {
+            id: "expessionCalculatorID",
+            name: "expessionCalculatorName",
+            type: "ExpressionCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 15,
+            expression: "p1+p2+p3",
+            parameters: {
+              p1: { type: "static", value: 100 },
+              p2: { type: "dynamic", elementId: "associatedVariableID" },
+              p3: { type: "dynamic", elementId: "cpuLoadVariableID" },
+            },
+          },
+        },
+        alerts: {
+          bandwidthLimitAlertID: {
+            id: "bandwidthLimitAlertID",
+            name: "bandwidthLimitAlertName",
+            type: "BandwidthLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            highLimit: 100,
+            lowLimit: -50,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              highLimit: {
+                pl: "fakeHighLimitTextPL",
+                en: "fakeHighLimitTextEN",
+              },
+              lowLimit: {
+                pl: "fakeLowLimitTextPL",
+                en: "fakeLowLimitTextEN",
+              },
+            },
+          },
+          exactValuesAlertID: {
+            id: "exactValuesAlertID",
+            name: "exactValuesAlertName",
+            type: "ExactValuesAlert",
+            unit: "A",
+            sampleTime: 1,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            alertValues: [10, 20, 30, 40, 50],
+            severity: 10,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              10: {
+                en: "step 1: $VALUE",
+                pl: "próg 1: $VALUE",
+              },
+              20: {
+                en: "step 2: $VALUE",
+                pl: "próg 2: $VALUE",
+              },
+              30: {
+                en: "step 3: $VALUE",
+                pl: "próg 3: $VALUE",
+              },
+              40: {
+                en: "step 4: $VALUE",
+                pl: "próg 4: $VALUE",
+              },
+              50: {
+                en: "step 5: $VALUE",
+                pl: "próg 5: $VALUE",
+              },
+            },
+          },
+          highLimitAlertID: {
+            id: "highLimitAlertID",
+            name: "highLimitAlertName",
+            type: "HighLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            highLimit: 100,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              pl: "fakeTextPL",
+              en: "fakeTextEN",
+            },
+          },
+          lowLimitAlertID: {
+            id: "lowLimitAlertID",
+            name: "lowLimitAlertName",
+            type: "LowLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            lowLimit: 100,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              pl: "fakeTextPL",
+              en: "fakeTextEN",
+            },
+          },
+        },
+        isActive: true,
+        sendDataFileInterval: 10,
+        sendEventFileInterval: 5,
+        dataStorageSize: 20,
+        eventStorageSize: 30,
+        numberOfDataFilesToSend: 3,
+        numberOfEventFilesToSend: 6,
+        dataToSendConfig: {
+          testElement1ID: {
+            elementId: "testElement1ID",
+            deviceId: "testDevice1ID",
+            sendingInterval: 100,
+            groupName: "testElement1Group",
+            variableName: "testElement1Name",
+            variableUnit: "testElement1Unit",
+            dataConverter: {
+              conversionType: "fixed",
+              precision: 3,
+            },
+          },
+          testElement2ID: {
+            elementId: "testElement2ID",
+            deviceId: "testDevice2ID",
+            sendingInterval: 200,
+            groupName: "testElement2Group",
+            variableName: "testElement2Name",
+            variableUnit: "testElement2Unit",
+            dataConverter: {
+              conversionType: "precision",
+              precision: 3,
+            },
+          },
+          testElement3ID: {
+            elementId: "testElement3ID",
+            deviceId: "testDevice3ID",
+            sendingInterval: 300,
+            groupName: "testElement3Group",
+            variableName: "testElement3Name",
+            variableUnit: "testElement3Unit",
+            dataConverter: null,
+          },
+        },
+        eventsToSendConfig: {
+          testElement1ID: {
+            elementId: "testElement1ID",
+            deviceId: "testDevice1ID",
+            sendingInterval: 100,
+            severity: 20,
+            eventName: "testElement1Event",
+            eventType: "EVENT",
+          },
+          testElement2ID: {
+            elementId: "testElement2ID",
+            deviceId: "testDevice2ID",
+            sendingInterval: 200,
+            severity: 30,
+            eventName: "testElement2Alert",
+            eventType: "ALERT",
+          },
+          testElement3ID: {
+            elementId: "testElement3ID",
+            deviceId: "testDevice3ID",
+            sendingInterval: 300,
+            severity: 40,
+            eventName: "testElement3Event",
+            eventType: "EVENT",
+          },
+        },
+        mqttName: "testMQTTName",
+        clientId: "testMQTTClientId",
+        checkStateInterval: 123,
+        model: "testModel",
+        revision: "testRevision",
+        tenantName: "testTenant",
+        userName: "testUserName",
+        userPassword: "testUserPassword",
+        serialNumber: "testSerialNumber",
+        mqttMessagesLimit: 5,
+        qos: 1,
+        publishTimeout: 1234,
+        reconnectInterval: 4321,
+      };
+
+      internetConnection = true;
+
+      initAgent = true;
+
+      connectBroker = true;
+      disconnectAfterConnecting = false;
+      command = "testCommandText";
+      endThrows = false;
+      publishThrows = false;
+    });
+
+    afterEach(async () => {
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
+    });
+
+    let exec = async () => {
+      initPayload.qos = qos;
+      initPayload.publishTimeout = publishTimeout;
+
+      getElementMockFunc = jest.fn(() => getElementReturnValue);
+      project.getElement = getElementMockFunc;
+
+      mqtt.mockSetInternetConnection(true);
+
+      agent = new MSMQTTAgentDevice(project);
+      if (initAgent) await agent.init(initPayload);
+      if (connectBroker) await agent._connectToMQTTBroker();
+      if (disconnectAfterConnecting) await agent._closeConnectionWithBroker();
+
+      mqtt.mockSetInternetConnection(internetConnection);
+
+      if (endThrows && agent._mqttClient)
+        agent._mqttClient.end = jest.fn(() => {
+          throw new Error("testError");
+        });
+
+      if (publishThrows && agent._mqttClient)
+        agent._mqttClient.publish = jest.fn(() => {
+          throw new Error("testError");
+        });
+
+      return agent._sendMQTTCommand(command);
+    };
+
+    it("invoke publish on s/us topic and command with qos set to value of agent's qos and return true", async () => {
+      let result = await exec();
+
+      expect(agent._mqttClient.publish).toHaveBeenCalledTimes(1);
+      expect(agent._mqttClient.publish.mock.calls[0][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[0][1]).toEqual(command);
+      expect(agent._mqttClient.publish.mock.calls[0][2]).toEqual({ qos: qos });
+
+      expect(result).toEqual(true);
+    });
+
+    it("should not throw - if publish was invoked properly, and publish time delay elapsed - qos set to 0", async () => {
+      qos = 0;
+
+      await exec();
+
+      await snooze(2 * publishTimeout);
+
+      expect(agent._mqttClient.publish).toHaveBeenCalledTimes(1);
+      expect(agent._mqttClient.publish.mock.calls[0][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[0][1]).toEqual(command);
+      expect(agent._mqttClient.publish.mock.calls[0][2]).toEqual({ qos: qos });
+    });
+
+    it("should not throw - if publish was invoked properly, and publish time delay elapsed - qos set to 1", async () => {
+      qos = 1;
+
+      await exec();
+
+      await snooze(2 * publishTimeout);
+
+      expect(agent._mqttClient.publish).toHaveBeenCalledTimes(1);
+      expect(agent._mqttClient.publish.mock.calls[0][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[0][1]).toEqual(command);
+      expect(agent._mqttClient.publish.mock.calls[0][2]).toEqual({ qos: qos });
+    });
+
+    it("should not throw - if publish was invoked properly, and publish time delay elapsed - qos set to 2", async () => {
+      qos = 2;
+
+      await exec();
+
+      await snooze(2 * publishTimeout);
+
+      expect(agent._mqttClient.publish).toHaveBeenCalledTimes(1);
+      expect(agent._mqttClient.publish.mock.calls[0][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[0][1]).toEqual(command);
+      expect(agent._mqttClient.publish.mock.calls[0][2]).toEqual({ qos: qos });
+    });
+
+    it("should not throw - if there is no internet connection and publish does not hang, qos set to 0", async () => {
+      qos = 0;
+
+      await exec();
+
+      await snooze(2 * publishTimeout);
+
+      expect(agent._mqttClient.publish).toHaveBeenCalledTimes(1);
+      expect(agent._mqttClient.publish.mock.calls[0][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[0][1]).toEqual(command);
+      expect(agent._mqttClient.publish.mock.calls[0][2]).toEqual({ qos: qos });
+
+      expect(agent._mqttClient.end).not.toHaveBeenCalled();
+    });
+
+    it("should throw after publish timeout and disconnect - if there is no internet connection and publish method hangs, qos set to 1", async () => {
+      qos = 1;
+      internetConnection = false;
+      let startDate = Date.now();
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      let stopDate = Date.now();
+
+      expect(stopDate - startDate).toBeGreaterThanOrEqual(publishTimeout);
+
+      expect(error.message).toEqual("Publish MQTT message timeout...");
+
+      //publish should have been called
+      expect(agent._mqttClient.publish).toHaveBeenCalledTimes(1);
+      expect(agent._mqttClient.publish.mock.calls[0][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[0][1]).toEqual(command);
+      expect(agent._mqttClient.publish.mock.calls[0][2]).toEqual({ qos: qos });
+
+      //than end should be called with flag force
+      expect(agent._mqttClient.end).toHaveBeenCalledTimes(1);
+      expect(agent._mqttClient.end.mock.calls[0][0]).toEqual(true);
+      expect(agent._mqttClient.end).toHaveBeenCalledAfter(
+        agent._mqttClient.publish
+      );
+    });
+
+    it("should throw after publish timeout and disconnect - if there is no internet connection and publish method hangs, qos set to 2", async () => {
+      qos = 2;
+      internetConnection = false;
+      let startDate = Date.now();
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      let stopDate = Date.now();
+
+      expect(stopDate - startDate).toBeGreaterThanOrEqual(publishTimeout);
+
+      expect(error.message).toEqual("Publish MQTT message timeout...");
+
+      //publish should have been called
+      expect(agent._mqttClient.publish).toHaveBeenCalledTimes(1);
+      expect(agent._mqttClient.publish.mock.calls[0][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[0][1]).toEqual(command);
+      expect(agent._mqttClient.publish.mock.calls[0][2]).toEqual({ qos: qos });
+
+      //than end should be called with flag force
+      expect(agent._mqttClient.end).toHaveBeenCalledTimes(1);
+      expect(agent._mqttClient.end.mock.calls[0][0]).toEqual(true);
+      expect(agent._mqttClient.end).toHaveBeenCalledAfter(
+        agent._mqttClient.publish
+      );
+    });
+
+    it("should throw and not publish if mqtt is not connected but previously was connected", async () => {
+      disconnectAfterConnecting = true;
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(error.message).toEqual(
+        "Cannot publish MQTT when device not connected!"
+      );
+
+      //publish should have been called
+      expect(agent._mqttClient.publish).not.toHaveBeenCalled();
+
+      //than end should be called only once - while disconnecting after connecting, but not in publish
+      expect(agent._mqttClient.end).toHaveBeenCalledTimes(1);
+    });
+
+    it("should throw and not publish if mqtt is not connected and has never been connected before", async () => {
+      disconnectAfterConnecting = false;
+      connectBroker = false;
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(error.message).toEqual(
+        "Cannot publish MQTT when device not connected!"
+      );
+
+      //publish should have been called
+      expect(agent._mqttClient).toEqual(null);
+    });
+
+    it("should throw if there was a timeout while publishing and end connection throws an error", async () => {
+      endThrows = true;
+      //Internet connection set to false - in order for publish to hang
+      internetConnection = false;
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(error.message).toEqual(
+        "Error while disconnecting after message timeout"
+      );
+
+      //publish should have been called
+      expect(agent._mqttClient.publish).toHaveBeenCalledTimes(1);
+      expect(agent._mqttClient.publish.mock.calls[0][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[0][1]).toEqual(command);
+      expect(agent._mqttClient.publish.mock.calls[0][2]).toEqual({ qos: qos });
+
+      //than end should be called with flag force
+      expect(agent._mqttClient.end).toHaveBeenCalledTimes(1);
+      expect(agent._mqttClient.end.mock.calls[0][0]).toEqual(true);
+      expect(agent._mqttClient.end).toHaveBeenCalledAfter(
+        agent._mqttClient.publish
+      );
+    });
+
+    it("should throw if publish throws", async () => {
+      publishThrows = true;
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(error.message).toEqual("testError");
+
+      //publish should have been called
+      expect(agent._mqttClient.publish).toHaveBeenCalledTimes(1);
+      expect(agent._mqttClient.publish.mock.calls[0][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[0][1]).toEqual(command);
+      expect(agent._mqttClient.publish.mock.calls[0][2]).toEqual({ qos: qos });
+
+      //end should not have been called
+      expect(agent._mqttClient.end).not.toHaveBeenCalled();
+    });
+
+    it("should not invoke publish if command is undefined and returng false", async () => {
+      command = undefined;
+
+      let result = await exec();
+
+      expect(result).toEqual(false);
+
+      expect(agent._mqttClient.publish).not.toHaveBeenCalled();
+    });
+
+    it("should not invoke publish if command is null", async () => {
+      command = null;
+
+      let result = await exec();
+
+      expect(result).toEqual(false);
+
+      expect(agent._mqttClient.publish).not.toHaveBeenCalled();
+    });
+
+    it("should not invoke publish if command is an empty string", async () => {
+      command = "";
+
+      let result = await exec();
+
+      expect(result).toEqual(false);
+
+      expect(agent._mqttClient.publish).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("_createAndSetUpMQTTDevice", () => {
+    let project;
+    let agent;
+    let getElementMockFunc;
+    let getElementReturnValue;
+    let initPayload;
+    let internetConnection;
+    let initAgent;
+    let connectBroker;
+    let disconnectAfterConnecting;
+    let qos;
+    let publishTimeout;
+    let endThrows;
+    let publishThrows;
+    let mqttDeviceName;
+    let mqttClientId;
+    let mqttCheckIntervalState;
+    let mqttSerialNumber;
+    let mqttModel;
+    let mqttRevision;
+
+    beforeEach(async () => {
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
+
+      qos = 1;
+      publishTimeout = 100;
+
+      getElementReturnValue = {
+        LastValueTick: 123,
+        Value: 456.789,
+        DefaultValue: 987.321,
+      };
+
+      project = {
+        AgentsDirPath: AgentsDirPath,
+      };
+
+      project = {
+        AgentsDirPath: AgentsDirPath,
+      };
+
+      initPayload = {
+        id: "deviceID",
+        name: "deviceName",
+        type: "MSMQTTAgentDevice",
+        variables: {
+          associatedVariableID: {
+            id: "associatedVariableID",
+            name: "associatedVariableName",
+            type: "AssociatedVariable",
+            unit: "A",
+            sampleTime: 1,
+            associatedElementID: "fakeDeviceID",
+            associatedDeviceID: "fakeVariableID",
+          },
+        },
+        calcElements: {
+          averageCalculatorID: {
+            id: "averageCalculatorID",
+            name: "averageCalculatorName",
+            type: "AverageCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            calculationInterval: 15,
+          },
+          factorCalculatorID: {
+            id: "factorCalculatorID",
+            name: "factorCalculatorName",
+            type: "FactorCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+          },
+          increaseCalculatorID: {
+            id: "increaseCalculatorID",
+            name: "increaseCalculatorName",
+            type: "IncreaseCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            calculationInterval: 15,
+            overflow: 1234,
+          },
+          sumCalculatorID: {
+            id: "sumCalculatorID",
+            name: "sumCalculatorName",
+            type: "SumCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableIDs: [
+              { variableID: "fakeVariableID1", factor: 1 },
+              { variableID: "fakeVariableID2", factor: 2 },
+              { variableID: "fakeVariableID3", factor: 3 },
+            ],
+          },
+          valueFromByteArrayCalculatorID: {
+            id: "valueFromByteArrayCalculatorID",
+            name: "valueFromByteArrayCalculatorName",
+            type: "ValueFromByteArrayCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 15,
+            variableID: "fakeVariableID",
+            bitNumber: 4,
+            byteNumber: 3,
+            length: 2,
+          },
+          expessionCalculatorID: {
+            id: "expessionCalculatorID",
+            name: "expessionCalculatorName",
+            type: "ExpressionCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 15,
+            expression: "p1+p2+p3",
+            parameters: {
+              p1: { type: "static", value: 100 },
+              p2: { type: "dynamic", elementId: "associatedVariableID" },
+              p3: { type: "dynamic", elementId: "cpuLoadVariableID" },
+            },
+          },
+        },
+        alerts: {
+          bandwidthLimitAlertID: {
+            id: "bandwidthLimitAlertID",
+            name: "bandwidthLimitAlertName",
+            type: "BandwidthLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            highLimit: 100,
+            lowLimit: -50,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              highLimit: {
+                pl: "fakeHighLimitTextPL",
+                en: "fakeHighLimitTextEN",
+              },
+              lowLimit: {
+                pl: "fakeLowLimitTextPL",
+                en: "fakeLowLimitTextEN",
+              },
+            },
+          },
+          exactValuesAlertID: {
+            id: "exactValuesAlertID",
+            name: "exactValuesAlertName",
+            type: "ExactValuesAlert",
+            unit: "A",
+            sampleTime: 1,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            alertValues: [10, 20, 30, 40, 50],
+            severity: 10,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              10: {
+                en: "step 1: $VALUE",
+                pl: "próg 1: $VALUE",
+              },
+              20: {
+                en: "step 2: $VALUE",
+                pl: "próg 2: $VALUE",
+              },
+              30: {
+                en: "step 3: $VALUE",
+                pl: "próg 3: $VALUE",
+              },
+              40: {
+                en: "step 4: $VALUE",
+                pl: "próg 4: $VALUE",
+              },
+              50: {
+                en: "step 5: $VALUE",
+                pl: "próg 5: $VALUE",
+              },
+            },
+          },
+          highLimitAlertID: {
+            id: "highLimitAlertID",
+            name: "highLimitAlertName",
+            type: "HighLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            highLimit: 100,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              pl: "fakeTextPL",
+              en: "fakeTextEN",
+            },
+          },
+          lowLimitAlertID: {
+            id: "lowLimitAlertID",
+            name: "lowLimitAlertName",
+            type: "LowLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            lowLimit: 100,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              pl: "fakeTextPL",
+              en: "fakeTextEN",
+            },
+          },
+        },
+        isActive: true,
+        sendDataFileInterval: 10,
+        sendEventFileInterval: 5,
+        dataStorageSize: 20,
+        eventStorageSize: 30,
+        numberOfDataFilesToSend: 3,
+        numberOfEventFilesToSend: 6,
+        dataToSendConfig: {
+          testElement1ID: {
+            elementId: "testElement1ID",
+            deviceId: "testDevice1ID",
+            sendingInterval: 100,
+            groupName: "testElement1Group",
+            variableName: "testElement1Name",
+            variableUnit: "testElement1Unit",
+            dataConverter: {
+              conversionType: "fixed",
+              precision: 3,
+            },
+          },
+          testElement2ID: {
+            elementId: "testElement2ID",
+            deviceId: "testDevice2ID",
+            sendingInterval: 200,
+            groupName: "testElement2Group",
+            variableName: "testElement2Name",
+            variableUnit: "testElement2Unit",
+            dataConverter: {
+              conversionType: "precision",
+              precision: 3,
+            },
+          },
+          testElement3ID: {
+            elementId: "testElement3ID",
+            deviceId: "testDevice3ID",
+            sendingInterval: 300,
+            groupName: "testElement3Group",
+            variableName: "testElement3Name",
+            variableUnit: "testElement3Unit",
+            dataConverter: null,
+          },
+        },
+        eventsToSendConfig: {
+          testElement1ID: {
+            elementId: "testElement1ID",
+            deviceId: "testDevice1ID",
+            sendingInterval: 100,
+            severity: 20,
+            eventName: "testElement1Event",
+            eventType: "EVENT",
+          },
+          testElement2ID: {
+            elementId: "testElement2ID",
+            deviceId: "testDevice2ID",
+            sendingInterval: 200,
+            severity: 30,
+            eventName: "testElement2Alert",
+            eventType: "ALERT",
+          },
+          testElement3ID: {
+            elementId: "testElement3ID",
+            deviceId: "testDevice3ID",
+            sendingInterval: 300,
+            severity: 40,
+            eventName: "testElement3Event",
+            eventType: "EVENT",
+          },
+        },
+        mqttName: "testMQTTName",
+        clientId: "testMQTTClientId",
+        checkStateInterval: 123,
+        model: "testModel",
+        revision: "testRevision",
+        serialNumber: "testSerialNumber",
+        tenantName: "testTenant",
+        userName: "testUserName",
+        userPassword: "testUserPassword",
+        mqttMessagesLimit: 5,
+        qos: 1,
+        publishTimeout: 1234,
+        reconnectInterval: 4321,
+      };
+
+      internetConnection = true;
+
+      initAgent = true;
+
+      connectBroker = true;
+      disconnectAfterConnecting = false;
+      endThrows = false;
+      publishThrows = false;
+
+      mqttDeviceName = "mqttTestDeviceName";
+      mqttClientId = "mqttTestClientId";
+      mqttCheckIntervalState = 1234;
+      mqttSerialNumber = "mqttTestSerialNumber";
+      mqttModel = "mqttTestModel";
+      mqttRevision = "mqttTestRevision";
+    });
+
+    afterEach(async () => {
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
+    });
+
+    let exec = async () => {
+      initPayload.qos = qos;
+      initPayload.publishTimeout = publishTimeout;
+      initPayload.mqttName = mqttDeviceName;
+      initPayload.clientId = mqttClientId;
+      initPayload.checkStateInterval = mqttCheckIntervalState;
+      initPayload.clientId = mqttClientId;
+      initPayload.model = mqttModel;
+      initPayload.serialNumber = mqttSerialNumber;
+      initPayload.model = mqttModel;
+      initPayload.revision = mqttRevision;
+
+      getElementMockFunc = jest.fn(() => getElementReturnValue);
+      project.getElement = getElementMockFunc;
+
+      mqtt.mockSetInternetConnection(true);
+
+      agent = new MSMQTTAgentDevice(project);
+      if (initAgent) await agent.init(initPayload);
+      if (connectBroker) await agent._connectToMQTTBroker();
+      if (disconnectAfterConnecting) await agent._closeConnectionWithBroker();
+
+      mqtt.mockSetInternetConnection(internetConnection);
+
+      if (endThrows && agent._mqttClient)
+        agent._mqttClient.end = jest.fn(() => {
+          throw new Error("testError");
+        });
+
+      if (publishThrows && agent._mqttClient)
+        agent._mqttClient.publish = jest.fn(() => {
+          throw new Error("testError");
+        });
+
+      return agent._createAndSetUpMQTTDevice();
+    };
+
+    it("invoke publish on s/us topic and proper command with qos set to value of agent's qos", async () => {
+      await exec();
+
+      let expectedCommand =
+        "100,mqttTestDeviceName,mqttTestClientId\n" +
+        "117,1234\n" +
+        "110,mqttTestSerialNumber,mqttTestModel,mqttTestRevision";
+
+      expect(agent._mqttClient.publish).toHaveBeenCalledTimes(1);
+      expect(agent._mqttClient.publish.mock.calls[0][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[0][1]).toEqual(
+        expectedCommand
+      );
+      expect(agent._mqttClient.publish.mock.calls[0][2]).toEqual({ qos: qos });
+    });
+
+    it("invoke publish on s/us topic and proper command with qos set to value of agent's qos", async () => {
+      await exec();
+
+      let expectedCommand =
+        "100,mqttTestDeviceName,mqttTestClientId\n" +
+        "117,1234\n" +
+        "110,mqttTestSerialNumber,mqttTestModel,mqttTestRevision";
+
+      expect(agent._mqttClient.publish).toHaveBeenCalledTimes(1);
+      expect(agent._mqttClient.publish.mock.calls[0][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[0][1]).toEqual(
+        expectedCommand
+      );
+      expect(agent._mqttClient.publish.mock.calls[0][2]).toEqual({ qos: qos });
+    });
+
+    it("should not throw - if there is no internet connection and publish does not hang, qos set to 0", async () => {
+      qos = 0;
+
+      await exec();
+
+      await snooze(2 * publishTimeout);
+
+      let expectedCommand =
+        "100,mqttTestDeviceName,mqttTestClientId\n" +
+        "117,1234\n" +
+        "110,mqttTestSerialNumber,mqttTestModel,mqttTestRevision";
+
+      expect(agent._mqttClient.publish).toHaveBeenCalledTimes(1);
+      expect(agent._mqttClient.publish.mock.calls[0][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[0][1]).toEqual(
+        expectedCommand
+      );
+      expect(agent._mqttClient.publish.mock.calls[0][2]).toEqual({ qos: qos });
+
+      expect(agent._mqttClient.end).not.toHaveBeenCalled();
+    });
+
+    it("should throw after publish timeout and disconnect - if there is no internet connection and publish method hangs, qos set to 1", async () => {
+      qos = 1;
+      internetConnection = false;
+      let startDate = Date.now();
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      let stopDate = Date.now();
+
+      expect(stopDate - startDate).toBeGreaterThanOrEqual(publishTimeout);
+
+      expect(error.message).toEqual("Publish MQTT message timeout...");
+
+      let expectedCommand =
+        "100,mqttTestDeviceName,mqttTestClientId\n" +
+        "117,1234\n" +
+        "110,mqttTestSerialNumber,mqttTestModel,mqttTestRevision";
+
+      //publish should have been called
+      expect(agent._mqttClient.publish).toHaveBeenCalledTimes(1);
+      expect(agent._mqttClient.publish.mock.calls[0][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[0][1]).toEqual(
+        expectedCommand
+      );
+      expect(agent._mqttClient.publish.mock.calls[0][2]).toEqual({ qos: qos });
+
+      //than end should be called with flag force
+      expect(agent._mqttClient.end).toHaveBeenCalledTimes(1);
+      expect(agent._mqttClient.end.mock.calls[0][0]).toEqual(true);
+      expect(agent._mqttClient.end).toHaveBeenCalledAfter(
+        agent._mqttClient.publish
+      );
+    });
+
+    it("should throw after publish timeout and disconnect - if there is no internet connection and publish method hangs, qos set to 2", async () => {
+      qos = 2;
+      internetConnection = false;
+      let startDate = Date.now();
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      let stopDate = Date.now();
+
+      expect(stopDate - startDate).toBeGreaterThanOrEqual(publishTimeout);
+
+      expect(error.message).toEqual("Publish MQTT message timeout...");
+
+      let expectedCommand =
+        "100,mqttTestDeviceName,mqttTestClientId\n" +
+        "117,1234\n" +
+        "110,mqttTestSerialNumber,mqttTestModel,mqttTestRevision";
+
+      //publish should have been called
+      expect(agent._mqttClient.publish).toHaveBeenCalledTimes(1);
+      expect(agent._mqttClient.publish.mock.calls[0][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[0][1]).toEqual(
+        expectedCommand
+      );
+      expect(agent._mqttClient.publish.mock.calls[0][2]).toEqual({ qos: qos });
+
+      //than end should be called with flag force
+      expect(agent._mqttClient.end).toHaveBeenCalledTimes(1);
+      expect(agent._mqttClient.end.mock.calls[0][0]).toEqual(true);
+      expect(agent._mqttClient.end).toHaveBeenCalledAfter(
+        agent._mqttClient.publish
+      );
+    });
+
+    it("should throw and not publish if mqtt is not connected but previously was connected", async () => {
+      disconnectAfterConnecting = true;
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(error.message).toEqual(
+        "Cannot publish MQTT when device not connected!"
+      );
+
+      //publish should have been called
+      expect(agent._mqttClient.publish).not.toHaveBeenCalled();
+
+      //than end should be called only once - while disconnecting after connecting, but not in publish
+      expect(agent._mqttClient.end).toHaveBeenCalledTimes(1);
+    });
+
+    it("should throw and not publish if mqtt is not connected and has never been connected before", async () => {
+      disconnectAfterConnecting = false;
+      connectBroker = false;
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(error.message).toEqual(
+        "Cannot publish MQTT when device not connected!"
+      );
+
+      //publish should have been called
+      expect(agent._mqttClient).toEqual(null);
+    });
+  });
+
+  describe("OnBoard", () => {
+    let project;
+    let agent;
+    let getElementMockFunc;
+    let getElementReturnValue;
+    let initPayload;
+    let internetConnection;
+    let qos;
+    let publishTimeout;
+
+    beforeEach(async () => {
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
+
+      qos = 1;
+      publishTimeout = 100;
+
+      getElementReturnValue = {
+        LastValueTick: 123,
+        Value: 456.789,
+        DefaultValue: 987.321,
+      };
+
+      project = {
+        AgentsDirPath: AgentsDirPath,
+      };
+
+      project = {
+        AgentsDirPath: AgentsDirPath,
+      };
+
+      initPayload = {
+        id: "deviceID",
+        name: "deviceName",
+        type: "MSMQTTAgentDevice",
+        variables: {
+          associatedVariableID: {
+            id: "associatedVariableID",
+            name: "associatedVariableName",
+            type: "AssociatedVariable",
+            unit: "A",
+            sampleTime: 1,
+            associatedElementID: "fakeDeviceID",
+            associatedDeviceID: "fakeVariableID",
+          },
+        },
+        calcElements: {
+          averageCalculatorID: {
+            id: "averageCalculatorID",
+            name: "averageCalculatorName",
+            type: "AverageCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            calculationInterval: 15,
+          },
+          factorCalculatorID: {
+            id: "factorCalculatorID",
+            name: "factorCalculatorName",
+            type: "FactorCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+          },
+          increaseCalculatorID: {
+            id: "increaseCalculatorID",
+            name: "increaseCalculatorName",
+            type: "IncreaseCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            calculationInterval: 15,
+            overflow: 1234,
+          },
+          sumCalculatorID: {
+            id: "sumCalculatorID",
+            name: "sumCalculatorName",
+            type: "SumCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableIDs: [
+              { variableID: "fakeVariableID1", factor: 1 },
+              { variableID: "fakeVariableID2", factor: 2 },
+              { variableID: "fakeVariableID3", factor: 3 },
+            ],
+          },
+          valueFromByteArrayCalculatorID: {
+            id: "valueFromByteArrayCalculatorID",
+            name: "valueFromByteArrayCalculatorName",
+            type: "ValueFromByteArrayCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 15,
+            variableID: "fakeVariableID",
+            bitNumber: 4,
+            byteNumber: 3,
+            length: 2,
+          },
+          expessionCalculatorID: {
+            id: "expessionCalculatorID",
+            name: "expessionCalculatorName",
+            type: "ExpressionCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 15,
+            expression: "p1+p2+p3",
+            parameters: {
+              p1: { type: "static", value: 100 },
+              p2: { type: "dynamic", elementId: "associatedVariableID" },
+              p3: { type: "dynamic", elementId: "cpuLoadVariableID" },
+            },
+          },
+        },
+        alerts: {
+          bandwidthLimitAlertID: {
+            id: "bandwidthLimitAlertID",
+            name: "bandwidthLimitAlertName",
+            type: "BandwidthLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            highLimit: 100,
+            lowLimit: -50,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              highLimit: {
+                pl: "fakeHighLimitTextPL",
+                en: "fakeHighLimitTextEN",
+              },
+              lowLimit: {
+                pl: "fakeLowLimitTextPL",
+                en: "fakeLowLimitTextEN",
+              },
+            },
+          },
+          exactValuesAlertID: {
+            id: "exactValuesAlertID",
+            name: "exactValuesAlertName",
+            type: "ExactValuesAlert",
+            unit: "A",
+            sampleTime: 1,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            alertValues: [10, 20, 30, 40, 50],
+            severity: 10,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              10: {
+                en: "step 1: $VALUE",
+                pl: "próg 1: $VALUE",
+              },
+              20: {
+                en: "step 2: $VALUE",
+                pl: "próg 2: $VALUE",
+              },
+              30: {
+                en: "step 3: $VALUE",
+                pl: "próg 3: $VALUE",
+              },
+              40: {
+                en: "step 4: $VALUE",
+                pl: "próg 4: $VALUE",
+              },
+              50: {
+                en: "step 5: $VALUE",
+                pl: "próg 5: $VALUE",
+              },
+            },
+          },
+          highLimitAlertID: {
+            id: "highLimitAlertID",
+            name: "highLimitAlertName",
+            type: "HighLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            highLimit: 100,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              pl: "fakeTextPL",
+              en: "fakeTextEN",
+            },
+          },
+          lowLimitAlertID: {
+            id: "lowLimitAlertID",
+            name: "lowLimitAlertName",
+            type: "LowLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            lowLimit: 100,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              pl: "fakeTextPL",
+              en: "fakeTextEN",
+            },
+          },
+        },
+        isActive: true,
+        sendDataFileInterval: 10,
+        sendEventFileInterval: 5,
+        dataStorageSize: 20,
+        eventStorageSize: 30,
+        numberOfDataFilesToSend: 3,
+        numberOfEventFilesToSend: 6,
+        dataToSendConfig: {
+          testElement1ID: {
+            elementId: "testElement1ID",
+            deviceId: "testDevice1ID",
+            sendingInterval: 100,
+            groupName: "testElement1Group",
+            variableName: "testElement1Name",
+            variableUnit: "testElement1Unit",
+            dataConverter: {
+              conversionType: "fixed",
+              precision: 3,
+            },
+          },
+          testElement2ID: {
+            elementId: "testElement2ID",
+            deviceId: "testDevice2ID",
+            sendingInterval: 200,
+            groupName: "testElement2Group",
+            variableName: "testElement2Name",
+            variableUnit: "testElement2Unit",
+            dataConverter: {
+              conversionType: "precision",
+              precision: 3,
+            },
+          },
+          testElement3ID: {
+            elementId: "testElement3ID",
+            deviceId: "testDevice3ID",
+            sendingInterval: 300,
+            groupName: "testElement3Group",
+            variableName: "testElement3Name",
+            variableUnit: "testElement3Unit",
+            dataConverter: null,
+          },
+        },
+        eventsToSendConfig: {
+          testElement1ID: {
+            elementId: "testElement1ID",
+            deviceId: "testDevice1ID",
+            sendingInterval: 100,
+            severity: 20,
+            eventName: "testElement1Event",
+            eventType: "EVENT",
+          },
+          testElement2ID: {
+            elementId: "testElement2ID",
+            deviceId: "testDevice2ID",
+            sendingInterval: 200,
+            severity: 30,
+            eventName: "testElement2Alert",
+            eventType: "ALERT",
+          },
+          testElement3ID: {
+            elementId: "testElement3ID",
+            deviceId: "testDevice3ID",
+            sendingInterval: 300,
+            severity: 40,
+            eventName: "testElement3Event",
+            eventType: "EVENT",
+          },
+        },
+        mqttName: "testMQTTName",
+        clientId: "testMQTTClientId",
+        checkStateInterval: 123,
+        model: "testModel",
+        revision: "testRevision",
+        serialNumber: "testSerialNumber",
+        tenantName: "testTenant",
+        userName: "testUserName",
+        userPassword: "testUserPassword",
+        mqttMessagesLimit: 5,
+        qos: 1,
+        publishTimeout: 1234,
+        reconnectInterval: 4321,
+      };
+
+      internetConnection = true;
+    });
+
+    afterEach(async () => {
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
+    });
+
+    let exec = async () => {
+      initPayload.qos = qos;
+      initPayload.publishTimeout = publishTimeout;
+
+      getElementMockFunc = jest.fn(() => getElementReturnValue);
+      project.getElement = getElementMockFunc;
+
+      mqtt.mockSetInternetConnection(true);
+
+      agent = new MSMQTTAgentDevice(project);
+      await agent.init(initPayload);
+
+      mqtt.mockSetInternetConnection(internetConnection);
+
+      return agent.OnBoard();
+    };
+
+    it("connect to broker, create the device and than set deviceCreatedViaMQTT to true", async () => {
+      await exec();
+
+      //#region checking connection
+
+      expect(mqtt.connectAsync).toHaveBeenCalledTimes(1);
+
+      let expectedParams = {
+        port: 1883,
+        clientId: "testMQTTClientId",
+        username: `testTenant/testUserName`,
+        password: "testUserPassword",
+        device_name: "testMQTTClientId",
+        tenant: "testTenant",
+        protocol: "mqtt/tcp",
+        host: "mciotextension.eu1.mindsphere.io",
+        reconnectPeriod: 4321,
+      };
+
+      expect(mqtt.connectAsync).toHaveBeenCalledTimes(1);
+      expect(mqtt.connectAsync.mock.calls[0][0]).toEqual(
+        "testTenant.mciotextension.eu1.mindsphere.io"
+      );
+      expect(mqtt.connectAsync.mock.calls[0][1]).toEqual(expectedParams);
+      expect(mqtt.connectAsync.mock.calls[0][2]).toEqual(true);
+
+      expect(agent._mqttClient).toBeDefined();
+      expect(agent._mqttClient instanceof mqtt.MockClient).toEqual(true);
+
+      expect(agent._mqttClient.mockUrl).toEqual(
+        "testTenant.mciotextension.eu1.mindsphere.io"
+      );
+
+      expect(agent._mqttClient.mockConnectionParams).toEqual(expectedParams);
+
+      //#endregion checking connection
+
+      //#region checking device creation
+
+      let expectedCommand =
+        "100,testMQTTName,testMQTTClientId\n" +
+        "117,123\n" +
+        "110,testSerialNumber,testModel,testRevision";
+
+      expect(agent._mqttClient.publish).toHaveBeenCalledTimes(1);
+      expect(agent._mqttClient.publish.mock.calls[0][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[0][1]).toEqual(
+        expectedCommand
+      );
+      expect(agent._mqttClient.publish.mock.calls[0][2]).toEqual({ qos: qos });
+
+      //#endregion checking device creation
+
+      //#region checking deviceCreatedViaMQTT
+
+      expect(agent._deviceCreatedViaMQTT).toEqual(true);
+
+      expect(await agent._checkIfBoarded()).toEqual(true);
+
+      //#endregion checking deviceCreatedViaMQTT
+    });
+
+    it("should throw, and not publish anything and not set _deviceCreatedViaMQTT to true - if there is no internet connection", async () => {
+      internetConnection = false;
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(error.message).toEqual("Cannot connect - no internet connection");
+
+      //#region checking connection
+
+      expect(mqtt.connectAsync).toHaveBeenCalledTimes(1);
+
+      let expectedParams = {
+        port: 1883,
+        clientId: "testMQTTClientId",
+        username: `testTenant/testUserName`,
+        password: "testUserPassword",
+        device_name: "testMQTTClientId",
+        tenant: "testTenant",
+        protocol: "mqtt/tcp",
+        host: "mciotextension.eu1.mindsphere.io",
+        reconnectPeriod: 4321,
+      };
+
+      expect(mqtt.connectAsync).toHaveBeenCalledTimes(1);
+      expect(mqtt.connectAsync.mock.calls[0][0]).toEqual(
+        "testTenant.mciotextension.eu1.mindsphere.io"
+      );
+      expect(mqtt.connectAsync.mock.calls[0][1]).toEqual(expectedParams);
+      expect(mqtt.connectAsync.mock.calls[0][2]).toEqual(true);
+
+      expect(agent._mqttClient).toEqual(null);
+
+      //#endregion checking connection
+
+      //#region checking device creation
+
+      //Cannot invoke publish becouse client is null
+
+      //#endregion checking device creation
+
+      //#region checking deviceCreatedViaMQTT
+
+      expect(agent._deviceCreatedViaMQTT).toEqual(false);
+
+      expect(await agent._checkIfBoarded()).toEqual(false);
+
+      //#endregion checking deviceCreatedViaMQTT
+    });
+  });
+
+  describe("_checkIfBoarded", () => {
+    let project;
+    let agent;
+    let getElementMockFunc;
+    let getElementReturnValue;
+    let initPayload;
+    let deviceCreatedViaMQTT;
+
+    beforeEach(async () => {
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
+
+      getElementReturnValue = {
+        LastValueTick: 123,
+        Value: 456.789,
+        DefaultValue: 987.321,
+      };
+
+      project = {
+        AgentsDirPath: AgentsDirPath,
+      };
+
+      project = {
+        AgentsDirPath: AgentsDirPath,
+      };
+
+      initPayload = {
+        id: "deviceID",
+        name: "deviceName",
+        type: "MSMQTTAgentDevice",
+        variables: {
+          associatedVariableID: {
+            id: "associatedVariableID",
+            name: "associatedVariableName",
+            type: "AssociatedVariable",
+            unit: "A",
+            sampleTime: 1,
+            associatedElementID: "fakeDeviceID",
+            associatedDeviceID: "fakeVariableID",
+          },
+        },
+        calcElements: {
+          averageCalculatorID: {
+            id: "averageCalculatorID",
+            name: "averageCalculatorName",
+            type: "AverageCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            calculationInterval: 15,
+          },
+          factorCalculatorID: {
+            id: "factorCalculatorID",
+            name: "factorCalculatorName",
+            type: "FactorCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+          },
+          increaseCalculatorID: {
+            id: "increaseCalculatorID",
+            name: "increaseCalculatorName",
+            type: "IncreaseCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            calculationInterval: 15,
+            overflow: 1234,
+          },
+          sumCalculatorID: {
+            id: "sumCalculatorID",
+            name: "sumCalculatorName",
+            type: "SumCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableIDs: [
+              { variableID: "fakeVariableID1", factor: 1 },
+              { variableID: "fakeVariableID2", factor: 2 },
+              { variableID: "fakeVariableID3", factor: 3 },
+            ],
+          },
+          valueFromByteArrayCalculatorID: {
+            id: "valueFromByteArrayCalculatorID",
+            name: "valueFromByteArrayCalculatorName",
+            type: "ValueFromByteArrayCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 15,
+            variableID: "fakeVariableID",
+            bitNumber: 4,
+            byteNumber: 3,
+            length: 2,
+          },
+          expessionCalculatorID: {
+            id: "expessionCalculatorID",
+            name: "expessionCalculatorName",
+            type: "ExpressionCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 15,
+            expression: "p1+p2+p3",
+            parameters: {
+              p1: { type: "static", value: 100 },
+              p2: { type: "dynamic", elementId: "associatedVariableID" },
+              p3: { type: "dynamic", elementId: "cpuLoadVariableID" },
+            },
+          },
+        },
+        alerts: {
+          bandwidthLimitAlertID: {
+            id: "bandwidthLimitAlertID",
+            name: "bandwidthLimitAlertName",
+            type: "BandwidthLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            highLimit: 100,
+            lowLimit: -50,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              highLimit: {
+                pl: "fakeHighLimitTextPL",
+                en: "fakeHighLimitTextEN",
+              },
+              lowLimit: {
+                pl: "fakeLowLimitTextPL",
+                en: "fakeLowLimitTextEN",
+              },
+            },
+          },
+          exactValuesAlertID: {
+            id: "exactValuesAlertID",
+            name: "exactValuesAlertName",
+            type: "ExactValuesAlert",
+            unit: "A",
+            sampleTime: 1,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            alertValues: [10, 20, 30, 40, 50],
+            severity: 10,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              10: {
+                en: "step 1: $VALUE",
+                pl: "próg 1: $VALUE",
+              },
+              20: {
+                en: "step 2: $VALUE",
+                pl: "próg 2: $VALUE",
+              },
+              30: {
+                en: "step 3: $VALUE",
+                pl: "próg 3: $VALUE",
+              },
+              40: {
+                en: "step 4: $VALUE",
+                pl: "próg 4: $VALUE",
+              },
+              50: {
+                en: "step 5: $VALUE",
+                pl: "próg 5: $VALUE",
+              },
+            },
+          },
+          highLimitAlertID: {
+            id: "highLimitAlertID",
+            name: "highLimitAlertName",
+            type: "HighLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            highLimit: 100,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              pl: "fakeTextPL",
+              en: "fakeTextEN",
+            },
+          },
+          lowLimitAlertID: {
+            id: "lowLimitAlertID",
+            name: "lowLimitAlertName",
+            type: "LowLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            lowLimit: 100,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              pl: "fakeTextPL",
+              en: "fakeTextEN",
+            },
+          },
+        },
+        isActive: true,
+        sendDataFileInterval: 10,
+        sendEventFileInterval: 5,
+        dataStorageSize: 20,
+        eventStorageSize: 30,
+        numberOfDataFilesToSend: 3,
+        numberOfEventFilesToSend: 6,
+        dataToSendConfig: {
+          testElement1ID: {
+            elementId: "testElement1ID",
+            deviceId: "testDevice1ID",
+            sendingInterval: 100,
+            groupName: "testElement1Group",
+            variableName: "testElement1Name",
+            variableUnit: "testElement1Unit",
+            dataConverter: {
+              conversionType: "fixed",
+              precision: 3,
+            },
+          },
+          testElement2ID: {
+            elementId: "testElement2ID",
+            deviceId: "testDevice2ID",
+            sendingInterval: 200,
+            groupName: "testElement2Group",
+            variableName: "testElement2Name",
+            variableUnit: "testElement2Unit",
+            dataConverter: {
+              conversionType: "precision",
+              precision: 3,
+            },
+          },
+          testElement3ID: {
+            elementId: "testElement3ID",
+            deviceId: "testDevice3ID",
+            sendingInterval: 300,
+            groupName: "testElement3Group",
+            variableName: "testElement3Name",
+            variableUnit: "testElement3Unit",
+            dataConverter: null,
+          },
+        },
+        eventsToSendConfig: {
+          testElement1ID: {
+            elementId: "testElement1ID",
+            deviceId: "testDevice1ID",
+            sendingInterval: 100,
+            severity: 20,
+            eventName: "testElement1Event",
+            eventType: "EVENT",
+          },
+          testElement2ID: {
+            elementId: "testElement2ID",
+            deviceId: "testDevice2ID",
+            sendingInterval: 200,
+            severity: 30,
+            eventName: "testElement2Alert",
+            eventType: "ALERT",
+          },
+          testElement3ID: {
+            elementId: "testElement3ID",
+            deviceId: "testDevice3ID",
+            sendingInterval: 300,
+            severity: 40,
+            eventName: "testElement3Event",
+            eventType: "EVENT",
+          },
+        },
+        mqttName: "testMQTTName",
+        clientId: "testMQTTClientId",
+        checkStateInterval: 123,
+        model: "testModel",
+        revision: "testRevision",
+        serialNumber: "testSerialNumber",
+        tenantName: "testTenant",
+        userName: "testUserName",
+        userPassword: "testUserPassword",
+        mqttMessagesLimit: 5,
+        qos: 1,
+        publishTimeout: 1234,
+        reconnectInterval: 4321,
+      };
+
+      internetConnection = true;
+
+      deviceCreatedViaMQTT = false;
+    });
+
+    afterEach(async () => {
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
+    });
+
+    let exec = async () => {
+      getElementMockFunc = jest.fn(() => getElementReturnValue);
+      project.getElement = getElementMockFunc;
+
+      mqtt.mockSetInternetConnection(true);
+
+      agent = new MSMQTTAgentDevice(project);
+      await agent.init(initPayload);
+
+      agent._deviceCreatedViaMQTT = deviceCreatedViaMQTT;
+
+      return agent._checkIfBoarded();
+    };
+
+    it("should return deviceCreatedViaMQTT - if it is set to false", async () => {
+      deviceCreatedViaMQTT = false;
+
+      let result = await exec();
+
+      expect(result).toEqual(false);
+    });
+
+    it("should return deviceCreatedViaMQTT - if it is set to true", async () => {
+      deviceCreatedViaMQTT = true;
+
+      let result = await exec();
+
+      expect(result).toEqual(true);
+    });
+  });
+
+  describe("_sendData", () => {
+    let project;
+    let agent;
+    let getElementMockFunc;
+    let getElementReturnValue;
+    let initPayload;
+    let internetConnection;
+    let initAgent;
+    let connectBroker;
+    let disconnectAfterConnecting;
+    let command;
+    let qos;
+    let publishTimeout;
+    let endThrows;
+    let publishThrows;
+    let payloadToSend;
+    let mqttMessagesLimit;
+    let initialMQTTClient;
+
+    beforeEach(async () => {
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
+
+      mqttMessagesLimit = 5;
+      qos = 1;
+      publishTimeout = 100;
+
+      getElementReturnValue = {
+        LastValueTick: 123,
+        Value: 456.789,
+        DefaultValue: 987.321,
+      };
+
+      project = {
+        AgentsDirPath: AgentsDirPath,
+      };
+
+      project = {
+        AgentsDirPath: AgentsDirPath,
+      };
+
+      initPayload = {
+        id: "deviceID",
+        name: "deviceName",
+        type: "MSMQTTAgentDevice",
+        variables: {
+          associatedVariableID: {
+            id: "associatedVariableID",
+            name: "associatedVariableName",
+            type: "AssociatedVariable",
+            unit: "A",
+            sampleTime: 1,
+            associatedElementID: "fakeDeviceID",
+            associatedDeviceID: "fakeVariableID",
+          },
+        },
+        calcElements: {
+          averageCalculatorID: {
+            id: "averageCalculatorID",
+            name: "averageCalculatorName",
+            type: "AverageCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            calculationInterval: 15,
+          },
+          factorCalculatorID: {
+            id: "factorCalculatorID",
+            name: "factorCalculatorName",
+            type: "FactorCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+          },
+          increaseCalculatorID: {
+            id: "increaseCalculatorID",
+            name: "increaseCalculatorName",
+            type: "IncreaseCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            calculationInterval: 15,
+            overflow: 1234,
+          },
+          sumCalculatorID: {
+            id: "sumCalculatorID",
+            name: "sumCalculatorName",
+            type: "SumCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableIDs: [
+              { variableID: "fakeVariableID1", factor: 1 },
+              { variableID: "fakeVariableID2", factor: 2 },
+              { variableID: "fakeVariableID3", factor: 3 },
+            ],
+          },
+          valueFromByteArrayCalculatorID: {
+            id: "valueFromByteArrayCalculatorID",
+            name: "valueFromByteArrayCalculatorName",
+            type: "ValueFromByteArrayCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 15,
+            variableID: "fakeVariableID",
+            bitNumber: 4,
+            byteNumber: 3,
+            length: 2,
+          },
+          expessionCalculatorID: {
+            id: "expessionCalculatorID",
+            name: "expessionCalculatorName",
+            type: "ExpressionCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 15,
+            expression: "p1+p2+p3",
+            parameters: {
+              p1: { type: "static", value: 100 },
+              p2: { type: "dynamic", elementId: "associatedVariableID" },
+              p3: { type: "dynamic", elementId: "cpuLoadVariableID" },
+            },
+          },
+        },
+        alerts: {
+          bandwidthLimitAlertID: {
+            id: "bandwidthLimitAlertID",
+            name: "bandwidthLimitAlertName",
+            type: "BandwidthLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            highLimit: 100,
+            lowLimit: -50,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              highLimit: {
+                pl: "fakeHighLimitTextPL",
+                en: "fakeHighLimitTextEN",
+              },
+              lowLimit: {
+                pl: "fakeLowLimitTextPL",
+                en: "fakeLowLimitTextEN",
+              },
+            },
+          },
+          exactValuesAlertID: {
+            id: "exactValuesAlertID",
+            name: "exactValuesAlertName",
+            type: "ExactValuesAlert",
+            unit: "A",
+            sampleTime: 1,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            alertValues: [10, 20, 30, 40, 50],
+            severity: 10,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              10: {
+                en: "step 1: $VALUE",
+                pl: "próg 1: $VALUE",
+              },
+              20: {
+                en: "step 2: $VALUE",
+                pl: "próg 2: $VALUE",
+              },
+              30: {
+                en: "step 3: $VALUE",
+                pl: "próg 3: $VALUE",
+              },
+              40: {
+                en: "step 4: $VALUE",
+                pl: "próg 4: $VALUE",
+              },
+              50: {
+                en: "step 5: $VALUE",
+                pl: "próg 5: $VALUE",
+              },
+            },
+          },
+          highLimitAlertID: {
+            id: "highLimitAlertID",
+            name: "highLimitAlertName",
+            type: "HighLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            highLimit: 100,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              pl: "fakeTextPL",
+              en: "fakeTextEN",
+            },
+          },
+          lowLimitAlertID: {
+            id: "lowLimitAlertID",
+            name: "lowLimitAlertName",
+            type: "LowLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            lowLimit: 100,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              pl: "fakeTextPL",
+              en: "fakeTextEN",
+            },
+          },
+        },
+        isActive: true,
+        sendDataFileInterval: 10,
+        sendEventFileInterval: 5,
+        dataStorageSize: 20,
+        eventStorageSize: 30,
+        numberOfDataFilesToSend: 3,
+        numberOfEventFilesToSend: 6,
+        dataToSendConfig: {
+          testElement1ID: {
+            elementId: "testElement1ID",
+            deviceId: "testDevice1ID",
+            sendingInterval: 100,
+            groupName: "testElement1Group",
+            variableName: "testElement1Name",
+            variableUnit: "testElement1Unit",
+            dataConverter: {
+              conversionType: "fixed",
+              precision: 3,
+            },
+          },
+          testElement2ID: {
+            elementId: "testElement2ID",
+            deviceId: "testDevice2ID",
+            sendingInterval: 200,
+            groupName: "testElement2Group",
+            variableName: "testElement2Name",
+            variableUnit: "testElement2Unit",
+            dataConverter: {
+              conversionType: "precision",
+              precision: 3,
+            },
+          },
+          testElement3ID: {
+            elementId: "testElement3ID",
+            deviceId: "testDevice3ID",
+            sendingInterval: 300,
+            groupName: "testElement3Group",
+            variableName: "testElement3Name",
+            variableUnit: "testElement3Unit",
+            dataConverter: null,
+          },
+        },
+        eventsToSendConfig: {
+          testElement1ID: {
+            elementId: "testElement1ID",
+            deviceId: "testDevice1ID",
+            sendingInterval: 100,
+            severity: 20,
+            eventName: "testElement1Event",
+            eventType: "EVENT",
+          },
+          testElement2ID: {
+            elementId: "testElement2ID",
+            deviceId: "testDevice2ID",
+            sendingInterval: 200,
+            severity: 30,
+            eventName: "testElement2Alert",
+            eventType: "ALERT",
+          },
+          testElement3ID: {
+            elementId: "testElement3ID",
+            deviceId: "testDevice3ID",
+            sendingInterval: 300,
+            severity: 40,
+            eventName: "testElement3Event",
+            eventType: "EVENT",
+          },
+        },
+        mqttName: "testMQTTName",
+        clientId: "testMQTTClientId",
+        checkStateInterval: 123,
+        model: "testModel",
+        revision: "testRevision",
+        tenantName: "testTenant",
+        userName: "testUserName",
+        userPassword: "testUserPassword",
+        serialNumber: "testSerialNumber",
+        mqttMessagesLimit: 5,
+        qos: 1,
+        publishTimeout: 1234,
+        reconnectInterval: 4321,
+      };
+
+      internetConnection = true;
+
+      initAgent = true;
+
+      connectBroker = true;
+      disconnectAfterConnecting = false;
+      endThrows = false;
+      publishThrows = false;
+
+      //1607100000000 - Fri Dec 04 2020 17:40:00 GMT+0100 (Central European Standard Time)
+      //1607100001000 - Fri Dec 04 2020 17:40:01 GMT+0100 (Central European Standard Time)
+      //1607100002000 - Fri Dec 04 2020 17:40:02 GMT+0100 (Central European Standard Time)
+      payloadToSend = {
+        1607100000: {
+          testElement1ID: 1001.1001,
+          testElement2ID: 2001.2001,
+          testElement3ID: 3001.3001,
+        },
+        1607100001: {
+          testElement1ID: 1002.1002,
+          testElement2ID: 2002.2002,
+          testElement3ID: 3002.3002,
+        },
+        1607100002: {
+          testElement1ID: 1003.1003,
+          testElement2ID: 2003.2003,
+          testElement3ID: 3003.3003,
+        },
+      };
+    });
+
+    afterEach(async () => {
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
+    });
+
+    let exec = async () => {
+      initPayload.mqttMessagesLimit = mqttMessagesLimit;
+      initPayload.qos = qos;
+      initPayload.publishTimeout = publishTimeout;
+
+      getElementMockFunc = jest.fn(() => getElementReturnValue);
+      project.getElement = getElementMockFunc;
+
+      mqtt.mockSetInternetConnection(true);
+
+      agent = new MSMQTTAgentDevice(project);
+      if (initAgent) await agent.init(initPayload);
+      if (connectBroker) await agent._connectToMQTTBroker();
+      if (disconnectAfterConnecting) await agent._closeConnectionWithBroker();
+
+      initialMQTTClient = agent._mqttClient;
+
+      mqtt.mockSetInternetConnection(internetConnection);
+
+      if (endThrows && agent._mqttClient)
+        agent._mqttClient.end = jest.fn(() => {
+          throw new Error("testError");
+        });
+
+      if (publishThrows && agent._mqttClient)
+        agent._mqttClient.publish = jest.fn(() => {
+          throw new Error("testError");
+        });
+
+      return agent._sendData(payloadToSend);
+    };
+
+    it("should split messages according to mqttMessagesLimit and publish them", async () => {
+      await exec();
+
+      let expectedCommands = [
+        "200,testElement1Group,testElement1Name,1001.100,testElement1Unit,2020-12-04T16:40:00.000Z\n" +
+          "200,testElement2Group,testElement2Name,2.00e+3,testElement2Unit,2020-12-04T16:40:00.000Z\n" +
+          "200,testElement3Group,testElement3Name,3001.3001,testElement3Unit,2020-12-04T16:40:00.000Z\n" +
+          "200,testElement1Group,testElement1Name,1002.100,testElement1Unit,2020-12-04T16:40:01.000Z\n" +
+          "200,testElement2Group,testElement2Name,2.00e+3,testElement2Unit,2020-12-04T16:40:01.000Z\n",
+        "200,testElement3Group,testElement3Name,3002.3002,testElement3Unit,2020-12-04T16:40:01.000Z\n" +
+          "200,testElement1Group,testElement1Name,1003.100,testElement1Unit,2020-12-04T16:40:02.000Z\n" +
+          "200,testElement2Group,testElement2Name,2.00e+3,testElement2Unit,2020-12-04T16:40:02.000Z\n" +
+          "200,testElement3Group,testElement3Name,3003.3003,testElement3Unit,2020-12-04T16:40:02.000Z\n",
+      ];
+
+      expect(agent._mqttClient.publish).toHaveBeenCalledTimes(2);
+
+      expect(agent._mqttClient.publish.mock.calls[0][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[0][1]).toEqual(
+        expectedCommands[0]
+      );
+      expect(agent._mqttClient.publish.mock.calls[0][2]).toEqual({ qos: qos });
+
+      expect(agent._mqttClient.publish.mock.calls[1][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[1][1]).toEqual(
+        expectedCommands[1]
+      );
+      expect(agent._mqttClient.publish.mock.calls[1][2]).toEqual({ qos: qos });
+    });
+
+    it("should publish one huge message - if mqttMessagesLimit is greater than messages in payload", async () => {
+      mqttMessagesLimit = 11;
+
+      await exec();
+
+      let expectedCommands = [
+        "200,testElement1Group,testElement1Name,1001.100,testElement1Unit,2020-12-04T16:40:00.000Z\n" +
+          "200,testElement2Group,testElement2Name,2.00e+3,testElement2Unit,2020-12-04T16:40:00.000Z\n" +
+          "200,testElement3Group,testElement3Name,3001.3001,testElement3Unit,2020-12-04T16:40:00.000Z\n" +
+          "200,testElement1Group,testElement1Name,1002.100,testElement1Unit,2020-12-04T16:40:01.000Z\n" +
+          "200,testElement2Group,testElement2Name,2.00e+3,testElement2Unit,2020-12-04T16:40:01.000Z\n" +
+          "200,testElement3Group,testElement3Name,3002.3002,testElement3Unit,2020-12-04T16:40:01.000Z\n" +
+          "200,testElement1Group,testElement1Name,1003.100,testElement1Unit,2020-12-04T16:40:02.000Z\n" +
+          "200,testElement2Group,testElement2Name,2.00e+3,testElement2Unit,2020-12-04T16:40:02.000Z\n" +
+          "200,testElement3Group,testElement3Name,3003.3003,testElement3Unit,2020-12-04T16:40:02.000Z\n",
+      ];
+
+      expect(agent._mqttClient.publish).toHaveBeenCalledTimes(1);
+
+      expect(agent._mqttClient.publish.mock.calls[0][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[0][1]).toEqual(
+        expectedCommands[0]
+      );
+      expect(agent._mqttClient.publish.mock.calls[0][2]).toEqual({ qos: qos });
+    });
+
+    it("should not throw - if there is no internet connection and publish does not hang, qos set to 0", async () => {
+      qos = 0;
+
+      await exec();
+
+      await snooze(2 * publishTimeout);
+
+      let expectedCommands = [
+        "200,testElement1Group,testElement1Name,1001.100,testElement1Unit,2020-12-04T16:40:00.000Z\n" +
+          "200,testElement2Group,testElement2Name,2.00e+3,testElement2Unit,2020-12-04T16:40:00.000Z\n" +
+          "200,testElement3Group,testElement3Name,3001.3001,testElement3Unit,2020-12-04T16:40:00.000Z\n" +
+          "200,testElement1Group,testElement1Name,1002.100,testElement1Unit,2020-12-04T16:40:01.000Z\n" +
+          "200,testElement2Group,testElement2Name,2.00e+3,testElement2Unit,2020-12-04T16:40:01.000Z\n",
+        "200,testElement3Group,testElement3Name,3002.3002,testElement3Unit,2020-12-04T16:40:01.000Z\n" +
+          "200,testElement1Group,testElement1Name,1003.100,testElement1Unit,2020-12-04T16:40:02.000Z\n" +
+          "200,testElement2Group,testElement2Name,2.00e+3,testElement2Unit,2020-12-04T16:40:02.000Z\n" +
+          "200,testElement3Group,testElement3Name,3003.3003,testElement3Unit,2020-12-04T16:40:02.000Z\n",
+      ];
+
+      expect(agent._mqttClient.publish).toHaveBeenCalledTimes(2);
+
+      expect(agent._mqttClient.publish.mock.calls[0][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[0][1]).toEqual(
+        expectedCommands[0]
+      );
+      expect(agent._mqttClient.publish.mock.calls[0][2]).toEqual({ qos: qos });
+
+      expect(agent._mqttClient.publish.mock.calls[1][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[1][1]).toEqual(
+        expectedCommands[1]
+      );
+      expect(agent._mqttClient.publish.mock.calls[1][2]).toEqual({ qos: qos });
+    });
+
+    it("should throw after publish timeout and disconnect - if there is no internet connection and publish method hangs, qos set to 1", async () => {
+      qos = 1;
+      internetConnection = false;
+      let startDate = Date.now();
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      let stopDate = Date.now();
+
+      expect(stopDate - startDate).toBeGreaterThanOrEqual(publishTimeout);
+
+      expect(error.message).toEqual("Publish MQTT message timeout...");
+
+      let expectedCommands = [
+        "200,testElement1Group,testElement1Name,1001.100,testElement1Unit,2020-12-04T16:40:00.000Z\n" +
+          "200,testElement2Group,testElement2Name,2.00e+3,testElement2Unit,2020-12-04T16:40:00.000Z\n" +
+          "200,testElement3Group,testElement3Name,3001.3001,testElement3Unit,2020-12-04T16:40:00.000Z\n" +
+          "200,testElement1Group,testElement1Name,1002.100,testElement1Unit,2020-12-04T16:40:01.000Z\n" +
+          "200,testElement2Group,testElement2Name,2.00e+3,testElement2Unit,2020-12-04T16:40:01.000Z\n",
+      ];
+
+      //publish should have been called
+      expect(agent._mqttClient.publish).toHaveBeenCalledTimes(1);
+      expect(agent._mqttClient.publish.mock.calls[0][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[0][1]).toEqual(
+        expectedCommands[0]
+      );
+      expect(agent._mqttClient.publish.mock.calls[0][2]).toEqual({ qos: qos });
+
+      //than end should be called with flag force
+      expect(agent._mqttClient.end).toHaveBeenCalledTimes(1);
+      expect(agent._mqttClient.end.mock.calls[0][0]).toEqual(true);
+      expect(agent._mqttClient.end).toHaveBeenCalledAfter(
+        agent._mqttClient.publish
+      );
+    });
+
+    it("should throw after publish timeout and disconnect - if there is no internet connection and publish method hangs, qos set to 2", async () => {
+      qos = 2;
+      internetConnection = false;
+      let startDate = Date.now();
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      let stopDate = Date.now();
+
+      expect(stopDate - startDate).toBeGreaterThanOrEqual(publishTimeout);
+
+      expect(error.message).toEqual("Publish MQTT message timeout...");
+
+      let expectedCommands = [
+        "200,testElement1Group,testElement1Name,1001.100,testElement1Unit,2020-12-04T16:40:00.000Z\n" +
+          "200,testElement2Group,testElement2Name,2.00e+3,testElement2Unit,2020-12-04T16:40:00.000Z\n" +
+          "200,testElement3Group,testElement3Name,3001.3001,testElement3Unit,2020-12-04T16:40:00.000Z\n" +
+          "200,testElement1Group,testElement1Name,1002.100,testElement1Unit,2020-12-04T16:40:01.000Z\n" +
+          "200,testElement2Group,testElement2Name,2.00e+3,testElement2Unit,2020-12-04T16:40:01.000Z\n",
+      ];
+
+      //publish should have been called
+      expect(agent._mqttClient.publish).toHaveBeenCalledTimes(1);
+      expect(agent._mqttClient.publish.mock.calls[0][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[0][1]).toEqual(
+        expectedCommands[0]
+      );
+      expect(agent._mqttClient.publish.mock.calls[0][2]).toEqual({ qos: qos });
+
+      //than end should be called with flag force
+      expect(agent._mqttClient.end).toHaveBeenCalledTimes(1);
+      expect(agent._mqttClient.end.mock.calls[0][0]).toEqual(true);
+      expect(agent._mqttClient.end).toHaveBeenCalledAfter(
+        agent._mqttClient.publish
+      );
+    });
+
+    it("should throw if publish throws", async () => {
+      publishThrows = true;
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(error.message).toEqual("testError");
+
+      let expectedCommands = [
+        "200,testElement1Group,testElement1Name,1001.100,testElement1Unit,2020-12-04T16:40:00.000Z\n" +
+          "200,testElement2Group,testElement2Name,2.00e+3,testElement2Unit,2020-12-04T16:40:00.000Z\n" +
+          "200,testElement3Group,testElement3Name,3001.3001,testElement3Unit,2020-12-04T16:40:00.000Z\n" +
+          "200,testElement1Group,testElement1Name,1002.100,testElement1Unit,2020-12-04T16:40:01.000Z\n" +
+          "200,testElement2Group,testElement2Name,2.00e+3,testElement2Unit,2020-12-04T16:40:01.000Z\n",
+      ];
+      //publish should have been called
+      expect(agent._mqttClient.publish).toHaveBeenCalledTimes(1);
+      expect(agent._mqttClient.publish.mock.calls[0][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[0][1]).toEqual(
+        expectedCommands[0]
+      );
+      expect(agent._mqttClient.publish.mock.calls[0][2]).toEqual({ qos: qos });
+
+      //end should not have been called
+      expect(agent._mqttClient.end).not.toHaveBeenCalled();
+    });
+
+    it("should should connect if device is not connected but was previously connected", async () => {
+      disconnectAfterConnecting = true;
+
+      await exec();
+
+      //agent should have new mqtt client
+      expect(agent._mqttClient).not.toEqual(initialMQTTClient);
+
+      //connect async of new mqtt client should have been called
+
+      let expectedParams = {
+        port: 1883,
+        clientId: "testMQTTClientId",
+        username: `testTenant/testUserName`,
+        password: "testUserPassword",
+        device_name: "testMQTTClientId",
+        tenant: "testTenant",
+        protocol: "mqtt/tcp",
+        host: "mciotextension.eu1.mindsphere.io",
+        reconnectPeriod: 4321,
+      };
+
+      //First time connect is called during firt connection - next during sending data
+      expect(mqtt.connectAsync).toHaveBeenCalledTimes(2);
+      expect(mqtt.connectAsync.mock.calls[1][0]).toEqual(
+        "testTenant.mciotextension.eu1.mindsphere.io"
+      );
+      expect(mqtt.connectAsync.mock.calls[1][1]).toEqual(expectedParams);
+      expect(mqtt.connectAsync.mock.calls[1][2]).toEqual(true);
+
+      expect(agent._mqttClient).toBeDefined();
+      expect(agent._mqttClient instanceof mqtt.MockClient).toEqual(true);
+
+      expect(agent._mqttClient.mockUrl).toEqual(
+        "testTenant.mciotextension.eu1.mindsphere.io"
+      );
+
+      expect(agent._mqttClient.mockConnectionParams).toEqual(expectedParams);
+
+      //Commands should have been called normally
+      let expectedCommands = [
+        "200,testElement1Group,testElement1Name,1001.100,testElement1Unit,2020-12-04T16:40:00.000Z\n" +
+          "200,testElement2Group,testElement2Name,2.00e+3,testElement2Unit,2020-12-04T16:40:00.000Z\n" +
+          "200,testElement3Group,testElement3Name,3001.3001,testElement3Unit,2020-12-04T16:40:00.000Z\n" +
+          "200,testElement1Group,testElement1Name,1002.100,testElement1Unit,2020-12-04T16:40:01.000Z\n" +
+          "200,testElement2Group,testElement2Name,2.00e+3,testElement2Unit,2020-12-04T16:40:01.000Z\n",
+        "200,testElement3Group,testElement3Name,3002.3002,testElement3Unit,2020-12-04T16:40:01.000Z\n" +
+          "200,testElement1Group,testElement1Name,1003.100,testElement1Unit,2020-12-04T16:40:02.000Z\n" +
+          "200,testElement2Group,testElement2Name,2.00e+3,testElement2Unit,2020-12-04T16:40:02.000Z\n" +
+          "200,testElement3Group,testElement3Name,3003.3003,testElement3Unit,2020-12-04T16:40:02.000Z\n",
+      ];
+
+      expect(agent._mqttClient.publish).toHaveBeenCalledTimes(2);
+
+      expect(agent._mqttClient.publish.mock.calls[0][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[0][1]).toEqual(
+        expectedCommands[0]
+      );
+      expect(agent._mqttClient.publish.mock.calls[0][2]).toEqual({ qos: qos });
+
+      expect(agent._mqttClient.publish.mock.calls[1][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[1][1]).toEqual(
+        expectedCommands[1]
+      );
+      expect(agent._mqttClient.publish.mock.calls[1][2]).toEqual({ qos: qos });
+    });
+
+    it("should should connect if device is not connected and has never been connected", async () => {
+      connectBroker = false;
+      disconnectAfterConnecting = false;
+
+      await exec();
+
+      //connect async of new mqtt client should have been called
+
+      let expectedParams = {
+        port: 1883,
+        clientId: "testMQTTClientId",
+        username: `testTenant/testUserName`,
+        password: "testUserPassword",
+        device_name: "testMQTTClientId",
+        tenant: "testTenant",
+        protocol: "mqtt/tcp",
+        host: "mciotextension.eu1.mindsphere.io",
+        reconnectPeriod: 4321,
+      };
+
+      expect(mqtt.connectAsync).toHaveBeenCalledTimes(1);
+      expect(mqtt.connectAsync.mock.calls[0][0]).toEqual(
+        "testTenant.mciotextension.eu1.mindsphere.io"
+      );
+      expect(mqtt.connectAsync.mock.calls[0][1]).toEqual(expectedParams);
+      expect(mqtt.connectAsync.mock.calls[0][2]).toEqual(true);
+
+      expect(agent._mqttClient).toBeDefined();
+      expect(agent._mqttClient instanceof mqtt.MockClient).toEqual(true);
+
+      expect(agent._mqttClient.mockUrl).toEqual(
+        "testTenant.mciotextension.eu1.mindsphere.io"
+      );
+
+      expect(agent._mqttClient.mockConnectionParams).toEqual(expectedParams);
+
+      //Commands should have been called normally
+      let expectedCommands = [
+        "200,testElement1Group,testElement1Name,1001.100,testElement1Unit,2020-12-04T16:40:00.000Z\n" +
+          "200,testElement2Group,testElement2Name,2.00e+3,testElement2Unit,2020-12-04T16:40:00.000Z\n" +
+          "200,testElement3Group,testElement3Name,3001.3001,testElement3Unit,2020-12-04T16:40:00.000Z\n" +
+          "200,testElement1Group,testElement1Name,1002.100,testElement1Unit,2020-12-04T16:40:01.000Z\n" +
+          "200,testElement2Group,testElement2Name,2.00e+3,testElement2Unit,2020-12-04T16:40:01.000Z\n",
+        "200,testElement3Group,testElement3Name,3002.3002,testElement3Unit,2020-12-04T16:40:01.000Z\n" +
+          "200,testElement1Group,testElement1Name,1003.100,testElement1Unit,2020-12-04T16:40:02.000Z\n" +
+          "200,testElement2Group,testElement2Name,2.00e+3,testElement2Unit,2020-12-04T16:40:02.000Z\n" +
+          "200,testElement3Group,testElement3Name,3003.3003,testElement3Unit,2020-12-04T16:40:02.000Z\n",
+      ];
+
+      expect(agent._mqttClient.publish).toHaveBeenCalledTimes(2);
+
+      expect(agent._mqttClient.publish.mock.calls[0][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[0][1]).toEqual(
+        expectedCommands[0]
+      );
+      expect(agent._mqttClient.publish.mock.calls[0][2]).toEqual({ qos: qos });
+
+      expect(agent._mqttClient.publish.mock.calls[1][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[1][1]).toEqual(
+        expectedCommands[1]
+      );
+      expect(agent._mqttClient.publish.mock.calls[1][2]).toEqual({ qos: qos });
+    });
+
+    it("should should throw if device is not connected and there is no internet connection to connect it", async () => {
+      disconnectAfterConnecting = true;
+
+      internetConnection = false;
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(error.message).toEqual("Cannot connect - no internet connection");
+
+      //Commands should not have been called
+      expect(agent._mqttClient.publish).not.toHaveBeenCalled();
+    });
+
+    it("should should throw if device is not connected and connect throws", async () => {
+      disconnectAfterConnecting = true;
+
+      //connect throws if there is no internet connection
+      internetConnection = false;
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(error.message).toEqual("Cannot connect - no internet connection");
+
+      //Commands should not have been called
+      expect(agent._mqttClient.publish).not.toHaveBeenCalled();
+    });
+
+    it("should throw if there was a timeout while publishing and end connection throws an error", async () => {
+      endThrows = true;
+      //Internet connection set to false - in order for publish to hang
+      internetConnection = false;
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(error.message).toEqual(
+        "Error while disconnecting after message timeout"
+      );
+
+      let expectedCommands = [
+        "200,testElement1Group,testElement1Name,1001.100,testElement1Unit,2020-12-04T16:40:00.000Z\n" +
+          "200,testElement2Group,testElement2Name,2.00e+3,testElement2Unit,2020-12-04T16:40:00.000Z\n" +
+          "200,testElement3Group,testElement3Name,3001.3001,testElement3Unit,2020-12-04T16:40:00.000Z\n" +
+          "200,testElement1Group,testElement1Name,1002.100,testElement1Unit,2020-12-04T16:40:01.000Z\n" +
+          "200,testElement2Group,testElement2Name,2.00e+3,testElement2Unit,2020-12-04T16:40:01.000Z\n",
+      ];
+
+      //publish should have been called
+      expect(agent._mqttClient.publish).toHaveBeenCalledTimes(1);
+      expect(agent._mqttClient.publish.mock.calls[0][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[0][1]).toEqual(
+        expectedCommands[0]
+      );
+      expect(agent._mqttClient.publish.mock.calls[0][2]).toEqual({ qos: qos });
+
+      //than end should be called with flag force
+      expect(agent._mqttClient.end).toHaveBeenCalledTimes(1);
+      expect(agent._mqttClient.end.mock.calls[0][0]).toEqual(true);
+      expect(agent._mqttClient.end).toHaveBeenCalledAfter(
+        agent._mqttClient.publish
+      );
+    });
+
+    it("should not throw but not send anything - if payload is empty", async () => {
+      payloadToSend = {};
+
+      await exec();
+
+      await snooze(2 * publishTimeout);
+
+      expect(agent._mqttClient.publish).not.toHaveBeenCalled();
+    });
+
+    it("should not throw but not send anything - if payload is null", async () => {
+      payloadToSend = null;
+
+      await exec();
+
+      await snooze(2 * publishTimeout);
+
+      expect(agent._mqttClient.publish).not.toHaveBeenCalled();
+    });
+
+    it("should not throw but not send anything - if payload is undefined", async () => {
+      payloadToSend = undefined;
+
+      await exec();
+
+      await snooze(2 * publishTimeout);
+
+      expect(agent._mqttClient.publish).not.toHaveBeenCalled();
+    });
+
+    it("should not throw but not connect - if payload is empty and device is not connected", async () => {
+      disconnectAfterConnecting = true;
+
+      payloadToSend = {};
+
+      await exec();
+
+      await snooze(2 * publishTimeout);
+
+      //Connect should have been called only once - during tests initialization
+      expect(mqtt.connectAsync).toHaveBeenCalledTimes(1);
+      expect(agent._mqttClient.publish).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("_sendEvent", () => {
+    let project;
+    let agent;
+    let getElementMockFunc;
+    let getElementReturnValue;
+    let initPayload;
+    let internetConnection;
+    let initAgent;
+    let connectBroker;
+    let disconnectAfterConnecting;
+    let qos;
+    let publishTimeout;
+    let endThrows;
+    let publishThrows;
+    let mqttMessagesLimit;
+    let initialMQTTClient;
+    let tickId;
+    let elementId;
+    let value;
+
+    beforeEach(async () => {
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
+
+      mqttMessagesLimit = 5;
+      qos = 1;
+      publishTimeout = 100;
+
+      getElementReturnValue = {
+        LastValueTick: 123,
+        Value: 456.789,
+        DefaultValue: 987.321,
+      };
+
+      project = {
+        AgentsDirPath: AgentsDirPath,
+      };
+
+      project = {
+        AgentsDirPath: AgentsDirPath,
+      };
+
+      initPayload = {
+        id: "deviceID",
+        name: "deviceName",
+        type: "MSMQTTAgentDevice",
+        variables: {
+          associatedVariableID: {
+            id: "associatedVariableID",
+            name: "associatedVariableName",
+            type: "AssociatedVariable",
+            unit: "A",
+            sampleTime: 1,
+            associatedElementID: "fakeDeviceID",
+            associatedDeviceID: "fakeVariableID",
+          },
+        },
+        calcElements: {
+          averageCalculatorID: {
+            id: "averageCalculatorID",
+            name: "averageCalculatorName",
+            type: "AverageCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            calculationInterval: 15,
+          },
+          factorCalculatorID: {
+            id: "factorCalculatorID",
+            name: "factorCalculatorName",
+            type: "FactorCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+          },
+          increaseCalculatorID: {
+            id: "increaseCalculatorID",
+            name: "increaseCalculatorName",
+            type: "IncreaseCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            calculationInterval: 15,
+            overflow: 1234,
+          },
+          sumCalculatorID: {
+            id: "sumCalculatorID",
+            name: "sumCalculatorName",
+            type: "SumCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableIDs: [
+              { variableID: "fakeVariableID1", factor: 1 },
+              { variableID: "fakeVariableID2", factor: 2 },
+              { variableID: "fakeVariableID3", factor: 3 },
+            ],
+          },
+          valueFromByteArrayCalculatorID: {
+            id: "valueFromByteArrayCalculatorID",
+            name: "valueFromByteArrayCalculatorName",
+            type: "ValueFromByteArrayCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 15,
+            variableID: "fakeVariableID",
+            bitNumber: 4,
+            byteNumber: 3,
+            length: 2,
+          },
+          expessionCalculatorID: {
+            id: "expessionCalculatorID",
+            name: "expessionCalculatorName",
+            type: "ExpressionCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 15,
+            expression: "p1+p2+p3",
+            parameters: {
+              p1: { type: "static", value: 100 },
+              p2: { type: "dynamic", elementId: "associatedVariableID" },
+              p3: { type: "dynamic", elementId: "cpuLoadVariableID" },
+            },
+          },
+        },
+        alerts: {
+          bandwidthLimitAlertID: {
+            id: "bandwidthLimitAlertID",
+            name: "bandwidthLimitAlertName",
+            type: "BandwidthLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            highLimit: 100,
+            lowLimit: -50,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              highLimit: {
+                pl: "fakeHighLimitTextPL",
+                en: "fakeHighLimitTextEN",
+              },
+              lowLimit: {
+                pl: "fakeLowLimitTextPL",
+                en: "fakeLowLimitTextEN",
+              },
+            },
+          },
+          exactValuesAlertID: {
+            id: "exactValuesAlertID",
+            name: "exactValuesAlertName",
+            type: "ExactValuesAlert",
+            unit: "A",
+            sampleTime: 1,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            alertValues: [10, 20, 30, 40, 50],
+            severity: 10,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              10: {
+                en: "step 1: $VALUE",
+                pl: "próg 1: $VALUE",
+              },
+              20: {
+                en: "step 2: $VALUE",
+                pl: "próg 2: $VALUE",
+              },
+              30: {
+                en: "step 3: $VALUE",
+                pl: "próg 3: $VALUE",
+              },
+              40: {
+                en: "step 4: $VALUE",
+                pl: "próg 4: $VALUE",
+              },
+              50: {
+                en: "step 5: $VALUE",
+                pl: "próg 5: $VALUE",
+              },
+            },
+          },
+          highLimitAlertID: {
+            id: "highLimitAlertID",
+            name: "highLimitAlertName",
+            type: "HighLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            highLimit: 100,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              pl: "fakeTextPL",
+              en: "fakeTextEN",
+            },
+          },
+          lowLimitAlertID: {
+            id: "lowLimitAlertID",
+            name: "lowLimitAlertName",
+            type: "LowLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            lowLimit: 100,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              pl: "fakeTextPL",
+              en: "fakeTextEN",
+            },
+          },
+        },
+        isActive: true,
+        sendDataFileInterval: 10,
+        sendEventFileInterval: 5,
+        dataStorageSize: 20,
+        eventStorageSize: 30,
+        numberOfDataFilesToSend: 3,
+        numberOfEventFilesToSend: 6,
+        dataToSendConfig: {
+          testElement1ID: {
+            elementId: "testElement1ID",
+            deviceId: "testDevice1ID",
+            sendingInterval: 100,
+            groupName: "testElement1Group",
+            variableName: "testElement1Name",
+            variableUnit: "testElement1Unit",
+            dataConverter: {
+              conversionType: "fixed",
+              precision: 3,
+            },
+          },
+          testElement2ID: {
+            elementId: "testElement2ID",
+            deviceId: "testDevice2ID",
+            sendingInterval: 200,
+            groupName: "testElement2Group",
+            variableName: "testElement2Name",
+            variableUnit: "testElement2Unit",
+            dataConverter: {
+              conversionType: "precision",
+              precision: 3,
+            },
+          },
+          testElement3ID: {
+            elementId: "testElement3ID",
+            deviceId: "testDevice3ID",
+            sendingInterval: 300,
+            groupName: "testElement3Group",
+            variableName: "testElement3Name",
+            variableUnit: "testElement3Unit",
+            dataConverter: null,
+          },
+        },
+        eventsToSendConfig: {
+          testElement1ID: {
+            elementId: "testElement1ID",
+            deviceId: "testDevice1ID",
+            sendingInterval: 100,
+            severity: 20,
+            eventName: "testElement1Event",
+            eventType: "EVENT",
+          },
+          testElement2ID: {
+            elementId: "testElement2ID",
+            deviceId: "testDevice2ID",
+            sendingInterval: 200,
+            severity: 30,
+            eventName: "testElement2Alert",
+            eventType: "ALERT",
+          },
+          testElement3ID: {
+            elementId: "testElement3ID",
+            deviceId: "testDevice3ID",
+            sendingInterval: 300,
+            severity: 40,
+            eventName: "testElement3Event",
+            eventType: "EVENT",
+          },
+        },
+        mqttName: "testMQTTName",
+        clientId: "testMQTTClientId",
+        checkStateInterval: 123,
+        model: "testModel",
+        revision: "testRevision",
+        tenantName: "testTenant",
+        userName: "testUserName",
+        userPassword: "testUserPassword",
+        serialNumber: "testSerialNumber",
+        mqttMessagesLimit: 5,
+        qos: 1,
+        publishTimeout: 1234,
+        reconnectInterval: 4321,
+      };
+
+      internetConnection = true;
+
+      initAgent = true;
+
+      connectBroker = true;
+      disconnectAfterConnecting = false;
+      endThrows = false;
+      publishThrows = false;
+
+      //1607100000000 - Fri Dec 04 2020 17:40:00 GMT+0100 (Central European Standard Time)
+
+      tickId = 1607100000;
+      elementId = "testElement2ID";
+      value = { pl: "fakeTestTextPL", en: "fakeTestTextEN" };
+    });
+
+    afterEach(async () => {
+      await createDirIfNotExists(AgentsDirPath);
+      await clearDirectoryAsync(AgentsDirPath);
+    });
+
+    let exec = async () => {
+      initPayload.mqttMessagesLimit = mqttMessagesLimit;
+      initPayload.qos = qos;
+      initPayload.publishTimeout = publishTimeout;
+
+      getElementMockFunc = jest.fn(() => getElementReturnValue);
+      project.getElement = getElementMockFunc;
+
+      mqtt.mockSetInternetConnection(true);
+
+      agent = new MSMQTTAgentDevice(project);
+      if (initAgent) await agent.init(initPayload);
+      if (connectBroker) await agent._connectToMQTTBroker();
+      if (disconnectAfterConnecting) await agent._closeConnectionWithBroker();
+
+      initialMQTTClient = agent._mqttClient;
+
+      mqtt.mockSetInternetConnection(internetConnection);
+
+      if (endThrows && agent._mqttClient)
+        agent._mqttClient.end = jest.fn(() => {
+          throw new Error("testError");
+        });
+
+      if (publishThrows && agent._mqttClient)
+        agent._mqttClient.publish = jest.fn(() => {
+          throw new Error("testError");
+        });
+
+      return agent._sendEvent(tickId, elementId, value);
+    };
+
+    it("should publish event", async () => {
+      await exec();
+
+      expect(agent._mqttClient.publish).toHaveBeenCalledTimes(1);
+
+      expect(agent._mqttClient.publish.mock.calls[0][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[0][1]).toEqual(
+        `302,testElement2Alert,"{""pl"":""fakeTestTextPL"",""en"":""fakeTestTextEN""}",2020-12-04T16:40:00.000Z`
+      );
+      expect(agent._mqttClient.publish.mock.calls[0][2]).toEqual({ qos: qos });
+    });
+
+    it("should not throw - if there is no internet connection and publish does not hang, qos set to 0", async () => {
+      qos = 0;
+
+      await exec();
+
+      await snooze(2 * publishTimeout);
+
+      expect(agent._mqttClient.publish).toHaveBeenCalledTimes(1);
+
+      expect(agent._mqttClient.publish.mock.calls[0][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[0][1]).toEqual(
+        `302,testElement2Alert,"{""pl"":""fakeTestTextPL"",""en"":""fakeTestTextEN""}",2020-12-04T16:40:00.000Z`
+      );
+      expect(agent._mqttClient.publish.mock.calls[0][2]).toEqual({ qos: qos });
+    });
+
+    it("should throw after publish timeout and disconnect - if there is no internet connection and publish method hangs, qos set to 1", async () => {
+      qos = 1;
+      internetConnection = false;
+      let startDate = Date.now();
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      let stopDate = Date.now();
+
+      expect(stopDate - startDate).toBeGreaterThanOrEqual(publishTimeout);
+
+      expect(error.message).toEqual("Publish MQTT message timeout...");
+
+      expect(agent._mqttClient.publish).toHaveBeenCalledTimes(1);
+
+      expect(agent._mqttClient.publish.mock.calls[0][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[0][1]).toEqual(
+        `302,testElement2Alert,"{""pl"":""fakeTestTextPL"",""en"":""fakeTestTextEN""}",2020-12-04T16:40:00.000Z`
+      );
+      expect(agent._mqttClient.publish.mock.calls[0][2]).toEqual({ qos: qos });
+
+      //than end should be called with flag force
+      expect(agent._mqttClient.end).toHaveBeenCalledTimes(1);
+      expect(agent._mqttClient.end.mock.calls[0][0]).toEqual(true);
+      expect(agent._mqttClient.end).toHaveBeenCalledAfter(
+        agent._mqttClient.publish
+      );
+    });
+
+    it("should throw after publish timeout and disconnect - if there is no internet connection and publish method hangs, qos set to 2", async () => {
+      qos = 2;
+      internetConnection = false;
+      let startDate = Date.now();
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      let stopDate = Date.now();
+
+      expect(stopDate - startDate).toBeGreaterThanOrEqual(publishTimeout);
+
+      expect(error.message).toEqual("Publish MQTT message timeout...");
+
+      expect(agent._mqttClient.publish).toHaveBeenCalledTimes(1);
+
+      expect(agent._mqttClient.publish.mock.calls[0][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[0][1]).toEqual(
+        `302,testElement2Alert,"{""pl"":""fakeTestTextPL"",""en"":""fakeTestTextEN""}",2020-12-04T16:40:00.000Z`
+      );
+      expect(agent._mqttClient.publish.mock.calls[0][2]).toEqual({ qos: qos });
+
+      //than end should be called with flag force
+      expect(agent._mqttClient.end).toHaveBeenCalledTimes(1);
+      expect(agent._mqttClient.end.mock.calls[0][0]).toEqual(true);
+      expect(agent._mqttClient.end).toHaveBeenCalledAfter(
+        agent._mqttClient.publish
+      );
+    });
+
+    it("should throw if publish throws", async () => {
+      publishThrows = true;
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(error.message).toEqual("testError");
+
+      expect(agent._mqttClient.publish).toHaveBeenCalledTimes(1);
+
+      expect(agent._mqttClient.publish.mock.calls[0][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[0][1]).toEqual(
+        `302,testElement2Alert,"{""pl"":""fakeTestTextPL"",""en"":""fakeTestTextEN""}",2020-12-04T16:40:00.000Z`
+      );
+      expect(agent._mqttClient.publish.mock.calls[0][2]).toEqual({ qos: qos });
+
+      //end should not have been called
+      expect(agent._mqttClient.end).not.toHaveBeenCalled();
+    });
+
+    it("should should connect if device is not connected but was previously connected", async () => {
+      disconnectAfterConnecting = true;
+
+      await exec();
+
+      //agent should have new mqtt client
+      expect(agent._mqttClient).not.toEqual(initialMQTTClient);
+
+      //connect async of new mqtt client should have been called
+
+      let expectedParams = {
+        port: 1883,
+        clientId: "testMQTTClientId",
+        username: `testTenant/testUserName`,
+        password: "testUserPassword",
+        device_name: "testMQTTClientId",
+        tenant: "testTenant",
+        protocol: "mqtt/tcp",
+        host: "mciotextension.eu1.mindsphere.io",
+        reconnectPeriod: 4321,
+      };
+
+      //First time connect is called during firt connection - next during sending data
+      expect(mqtt.connectAsync).toHaveBeenCalledTimes(2);
+      expect(mqtt.connectAsync.mock.calls[1][0]).toEqual(
+        "testTenant.mciotextension.eu1.mindsphere.io"
+      );
+      expect(mqtt.connectAsync.mock.calls[1][1]).toEqual(expectedParams);
+      expect(mqtt.connectAsync.mock.calls[1][2]).toEqual(true);
+
+      expect(agent._mqttClient).toBeDefined();
+      expect(agent._mqttClient instanceof mqtt.MockClient).toEqual(true);
+
+      expect(agent._mqttClient.mockUrl).toEqual(
+        "testTenant.mciotextension.eu1.mindsphere.io"
+      );
+
+      expect(agent._mqttClient.mockConnectionParams).toEqual(expectedParams);
+
+      //Commands should have been called normally
+
+      expect(agent._mqttClient.publish).toHaveBeenCalledTimes(1);
+
+      expect(agent._mqttClient.publish.mock.calls[0][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[0][1]).toEqual(
+        `302,testElement2Alert,"{""pl"":""fakeTestTextPL"",""en"":""fakeTestTextEN""}",2020-12-04T16:40:00.000Z`
+      );
+      expect(agent._mqttClient.publish.mock.calls[0][2]).toEqual({ qos: qos });
+    });
+
+    it("should should connect if device is not connected and has never been connected", async () => {
+      connectBroker = false;
+      disconnectAfterConnecting = false;
+
+      await exec();
+
+      //connect async of new mqtt client should have been called
+
+      let expectedParams = {
+        port: 1883,
+        clientId: "testMQTTClientId",
+        username: `testTenant/testUserName`,
+        password: "testUserPassword",
+        device_name: "testMQTTClientId",
+        tenant: "testTenant",
+        protocol: "mqtt/tcp",
+        host: "mciotextension.eu1.mindsphere.io",
+        reconnectPeriod: 4321,
+      };
+
+      expect(mqtt.connectAsync).toHaveBeenCalledTimes(1);
+      expect(mqtt.connectAsync.mock.calls[0][0]).toEqual(
+        "testTenant.mciotextension.eu1.mindsphere.io"
+      );
+      expect(mqtt.connectAsync.mock.calls[0][1]).toEqual(expectedParams);
+      expect(mqtt.connectAsync.mock.calls[0][2]).toEqual(true);
+
+      expect(agent._mqttClient).toBeDefined();
+      expect(agent._mqttClient instanceof mqtt.MockClient).toEqual(true);
+
+      expect(agent._mqttClient.mockUrl).toEqual(
+        "testTenant.mciotextension.eu1.mindsphere.io"
+      );
+
+      expect(agent._mqttClient.mockConnectionParams).toEqual(expectedParams);
+
+      //Commands should have been called normally
+
+      expect(agent._mqttClient.publish).toHaveBeenCalledTimes(1);
+
+      expect(agent._mqttClient.publish.mock.calls[0][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[0][1]).toEqual(
+        `302,testElement2Alert,"{""pl"":""fakeTestTextPL"",""en"":""fakeTestTextEN""}",2020-12-04T16:40:00.000Z`
+      );
+      expect(agent._mqttClient.publish.mock.calls[0][2]).toEqual({ qos: qos });
+    });
+
+    it("should should throw if device is not connected and there is no internet connection to connect it", async () => {
+      disconnectAfterConnecting = true;
+
+      internetConnection = false;
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(error.message).toEqual("Cannot connect - no internet connection");
+
+      //Commands should not have been called
+      expect(agent._mqttClient.publish).not.toHaveBeenCalled();
+    });
+
+    it("should should throw if device is not connected and connect throws", async () => {
+      disconnectAfterConnecting = true;
+
+      //connect throws if there is no internet connection
+      internetConnection = false;
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(error.message).toEqual("Cannot connect - no internet connection");
+
+      //Commands should not have been called
+      expect(agent._mqttClient.publish).not.toHaveBeenCalled();
+    });
+
+    it("should throw if there was a timeout while publishing and end connection throws an error", async () => {
+      endThrows = true;
+      //Internet connection set to false - in order for publish to hang
+      internetConnection = false;
+
+      let error = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            error = err;
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(error.message).toEqual(
+        "Error while disconnecting after message timeout"
+      );
+
+      expect(agent._mqttClient.publish).toHaveBeenCalledTimes(1);
+
+      expect(agent._mqttClient.publish.mock.calls[0][0]).toEqual("s/us");
+      expect(agent._mqttClient.publish.mock.calls[0][1]).toEqual(
+        `302,testElement2Alert,"{""pl"":""fakeTestTextPL"",""en"":""fakeTestTextEN""}",2020-12-04T16:40:00.000Z`
+      );
+      expect(agent._mqttClient.publish.mock.calls[0][2]).toEqual({ qos: qos });
+
+      //than end should be called with flag force
+      expect(agent._mqttClient.end).toHaveBeenCalledTimes(1);
+      expect(agent._mqttClient.end.mock.calls[0][0]).toEqual(true);
+      expect(agent._mqttClient.end).toHaveBeenCalledAfter(
+        agent._mqttClient.publish
+      );
+    });
+
+    it("should not throw but not send anything - if tickId is undefined", async () => {
+      tickId = undefined;
+
+      await exec();
+
+      await snooze(2 * publishTimeout);
+
+      expect(agent._mqttClient.publish).not.toHaveBeenCalled();
+    });
+
+    it("should not throw but not send anything - if elementId is undefined", async () => {
+      elementId = undefined;
+
+      await exec();
+
+      await snooze(2 * publishTimeout);
+
+      expect(agent._mqttClient.publish).not.toHaveBeenCalled();
+    });
+
+    it("should not throw but not send anything - if value is undefined", async () => {
+      value = undefined;
+
+      await exec();
+
+      await snooze(2 * publishTimeout);
+
+      expect(agent._mqttClient.publish).not.toHaveBeenCalled();
+    });
+
+    it("should not throw but not send anything - if tickId is null", async () => {
+      tickId = null;
+
+      await exec();
+
+      await snooze(2 * publishTimeout);
+
+      expect(agent._mqttClient.publish).not.toHaveBeenCalled();
+    });
+
+    it("should not throw but not send anything - if elementId is null", async () => {
+      elementId = null;
+
+      await exec();
+
+      await snooze(2 * publishTimeout);
+
+      expect(agent._mqttClient.publish).not.toHaveBeenCalled();
+    });
+
+    it("should not throw but not send anything - if value is null", async () => {
+      value = null;
+
+      await exec();
+
+      await snooze(2 * publishTimeout);
+
+      expect(agent._mqttClient.publish).not.toHaveBeenCalled();
+    });
+
+    it("should not throw but not send anything - if there is no element of given elementId", async () => {
+      elementId = "fakeElementId";
+
+      await exec();
+
+      await snooze(2 * publishTimeout);
+
+      expect(agent._mqttClient.publish).not.toHaveBeenCalled();
+    });
+  });
 });

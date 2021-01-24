@@ -4,7 +4,7 @@ const mockConnectDelay = 10;
 //Normally, if there is not internet connection, publish should hang until internet reconnects. For testing - setting just long time
 const publishEndsOnLackOfInternetTime = 10000;
 
-let internetConnection = false;
+let internetConnection = true;
 
 class MockClient {
   constructor(url, connectionParameters) {
