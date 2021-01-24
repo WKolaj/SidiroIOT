@@ -101,6 +101,9 @@ describe("projectService", () => {
   });
 
   afterEach(async () => {
+    //Stopping current project
+    await projectService._stopCurrentProject();
+
     jest.resetAllMocks();
     jest.resetModules();
 
