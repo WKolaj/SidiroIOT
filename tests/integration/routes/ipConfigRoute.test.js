@@ -17,6 +17,7 @@ let {
   generateTestAdminAndSuperAdmin,
   generateTestUserAndAdminAndSuperAdmin,
 } = require("../../utilities/testUtilities");
+const projectService = require("../../../services/projectService");
 
 const socketFilePath = config.get("netplanConfigSocketFilePath");
 const settingsDirPath = config.get("settingsPath");
@@ -26,8 +27,6 @@ const projectFileName = config.get("projectFileName");
 const projectFilePath = path.join(settingsDirPath, projectFileName);
 
 const netplanAuthToken = config.get("netplanConfigAuthToken");
-
-const projectService = require("../../../services/projectService");
 
 let { exists, hashedStringMatch } = require("../../../utilities/utilities");
 let server;
@@ -92,6 +91,9 @@ describe("api/ipConfig", () => {
   });
 
   afterEach(async () => {
+    //Stopping current project
+    await projectService._stopCurrentProject();
+
     jest.resetAllMocks();
 
     //Clearing users in database after each test

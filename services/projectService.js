@@ -469,3 +469,13 @@ module.exports.getLastCycleDuration = () => {
 
   return project.LastCycleDuration;
 };
+
+/**
+ * @description method purely for testing - to stop actual project from running
+ */
+module.exports._stopCurrentProject = async () => {
+  if (project) {
+    project.Sampler.stop();
+    project = null;
+  }
+};

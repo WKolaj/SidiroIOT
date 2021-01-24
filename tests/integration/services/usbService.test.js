@@ -14,7 +14,7 @@ const usbDirPath1 = "__testDir/usb/usb1";
 const usbDirPath2 = "__testDir/usb/usb2";
 const usbDirPath3 = "__testDir/usb/usb3";
 
-describe("projectService", () => {
+describe("usbService", () => {
   let usb;
   let usbService;
   let projectService;
@@ -50,6 +50,9 @@ describe("projectService", () => {
   });
 
   afterEach(async () => {
+    //Stopping current project
+    await projectService._stopCurrentProject();
+
     let usbDirExists = await checkIfDirectoryExistsAsync(usbDirPath);
     if (usbDirExists) await clearDirectoryAsync(usbDirPath);
   });

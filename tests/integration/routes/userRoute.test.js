@@ -60,6 +60,8 @@ const projectFilePath = path.join(settingsDirPath, projectFileName);
 
 const socketFilePath = config.get("netplanConfigSocketFilePath");
 
+const projectService = require("../../../services/projectService");
+
 describe("api/user", () => {
   let uselessUser;
   let testAdmin;
@@ -118,6 +120,9 @@ describe("api/user", () => {
   });
 
   afterEach(async () => {
+    //Stopping current project
+    await projectService._stopCurrentProject();
+
     //Clearing project file if exists
     await removeFileIfExistsAsync(projectFilePath);
 

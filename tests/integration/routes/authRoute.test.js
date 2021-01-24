@@ -13,6 +13,7 @@ const privateKey = config.get("jwtPrivateKey");
 const settingsDirPath = config.get("settingsPath");
 const userFileName = config.get("userFileName");
 const userFilePath = path.join(settingsDirPath, userFileName);
+const projectService = require("../../../services/projectService");
 
 let { User } = require("../../../models/user");
 let {
@@ -88,6 +89,9 @@ describe("api/auth", () => {
   });
 
   afterEach(async () => {
+    //Stopping current project
+    await projectService._stopCurrentProject();
+
     //Clearing project file if exists
     await removeFileIfExistsAsync(projectFilePath);
 

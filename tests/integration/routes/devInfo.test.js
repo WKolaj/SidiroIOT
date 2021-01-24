@@ -80,6 +80,9 @@ describe("api/devInfo", () => {
   });
 
   afterEach(async () => {
+    //Stopping current project
+    await projectService._stopCurrentProject();
+
     //Clearing project file if exists
     await removeFileIfExistsAsync(projectFilePath);
 

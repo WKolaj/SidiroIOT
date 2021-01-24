@@ -61,6 +61,9 @@ describe("api/device", () => {
   });
 
   afterEach(async () => {
+    //Stopping current project
+    await projectService._stopCurrentProject();
+
     //Clearing project file if exists
     await removeFileIfExistsAsync(projectFilePath);
 
@@ -1330,6 +1333,275 @@ describe("api/device", () => {
                 expiration: "2020-12-18T11:15:08.000Z",
               },
             },
+            agentDeviceID2: {
+              id: "agentDeviceID2",
+              name: "agentDeviceName2",
+              type: "MSMQTTAgentDevice",
+              variables: {
+                AgentDevice2AssociatedVariableID: {
+                  id: "AgentDevice2AssociatedVariableID",
+                  name: "associatedVariableName",
+                  type: "AssociatedVariable",
+                  unit: "A",
+                  sampleTime: 1,
+                  associatedElementID: "fakeDeviceID",
+                  associatedDeviceID: "fakeVariableID",
+                },
+              },
+              calcElements: {
+                AgentDevice2AverageCalculatorID: {
+                  id: "AgentDevice2AverageCalculatorID",
+                  name: "averageCalculatorName",
+                  type: "AverageCalculator",
+                  unit: "FakeUnit",
+                  sampleTime: 15,
+                  defaultValue: 123456.654321,
+                  variableID: "fakeVariableID",
+                  factor: 5,
+                  calculationInterval: 15,
+                },
+                AgentDevice2FactorCalculatorID: {
+                  id: "AgentDevice2FactorCalculatorID",
+                  name: "factorCalculatorName",
+                  type: "FactorCalculator",
+                  unit: "FakeUnit",
+                  sampleTime: 15,
+                  defaultValue: 123456.654321,
+                  variableID: "fakeVariableID",
+                  factor: 5,
+                },
+                AgentDevice2IncreaseCalculatorID: {
+                  id: "AgentDevice2IncreaseCalculatorID",
+                  name: "increaseCalculatorName",
+                  type: "IncreaseCalculator",
+                  unit: "FakeUnit",
+                  sampleTime: 15,
+                  defaultValue: 123456.654321,
+                  variableID: "fakeVariableID",
+                  factor: 5,
+                  calculationInterval: 15,
+                  overflow: 1234,
+                },
+                AgentDevice2SumCalculatorID: {
+                  id: "AgentDevice2SumCalculatorID",
+                  name: "sumCalculatorName",
+                  type: "SumCalculator",
+                  unit: "FakeUnit",
+                  sampleTime: 15,
+                  defaultValue: 123456.654321,
+                  variableIDs: [
+                    { variableID: "fakeVariableID1", factor: 1 },
+                    { variableID: "fakeVariableID2", factor: 2 },
+                    { variableID: "fakeVariableID3", factor: 3 },
+                  ],
+                },
+                AgentDevice2ValueFromByteArrayCalculatorID: {
+                  id: "AgentDevice2ValueFromByteArrayCalculatorID",
+                  name: "valueFromByteArrayCalculatorName",
+                  type: "ValueFromByteArrayCalculator",
+                  unit: "FakeUnit",
+                  sampleTime: 15,
+                  defaultValue: 15,
+                  variableID: "fakeVariableID",
+                  bitNumber: 4,
+                  byteNumber: 3,
+                  length: 2,
+                },
+                AgentDevice2ExpessionCalculatorID: {
+                  id: "AgentDevice2ExpessionCalculatorID",
+                  name: "expessionCalculatorName",
+                  type: "ExpressionCalculator",
+                  unit: "FakeUnit",
+                  sampleTime: 15,
+                  defaultValue: 15,
+                  expression: "p1+p2+p3",
+                  parameters: {
+                    p1: { type: "static", value: 100 },
+                    p2: { type: "dynamic", elementId: "associatedVariableID" },
+                    p3: { type: "dynamic", elementId: "cpuLoadVariableID" },
+                  },
+                },
+              },
+              alerts: {
+                AgentDevice2BandwidthLimitAlertID: {
+                  id: "AgentDevice2BandwidthLimitAlertID",
+                  name: "bandwidthLimitAlertName",
+                  type: "BandwidthLimitAlert",
+                  unit: "FakeUnit",
+                  sampleTime: 15,
+                  defaultValue: null,
+                  variableID: "fakeVariableID",
+                  highLimit: 100,
+                  lowLimit: -50,
+                  severity: 1,
+                  hysteresis: 15,
+                  timeOnDelay: 5,
+                  timeOffDelay: 10,
+                  texts: {
+                    highLimit: {
+                      pl: "fakeHighLimitTextPL",
+                      en: "fakeHighLimitTextEN",
+                    },
+                    lowLimit: {
+                      pl: "fakeLowLimitTextPL",
+                      en: "fakeLowLimitTextEN",
+                    },
+                  },
+                },
+                AgentDevice2ExactValuesAlertID: {
+                  id: "AgentDevice2ExactValuesAlertID",
+                  name: "exactValuesAlertName",
+                  type: "ExactValuesAlert",
+                  unit: "A",
+                  sampleTime: 1,
+                  defaultValue: null,
+                  variableID: "fakeVariableID",
+                  alertValues: [10, 20, 30, 40, 50],
+                  severity: 10,
+                  timeOnDelay: 5,
+                  timeOffDelay: 10,
+                  texts: {
+                    10: {
+                      en: "step 1: $VALUE",
+                      pl: "próg 1: $VALUE",
+                    },
+                    20: {
+                      en: "step 2: $VALUE",
+                      pl: "próg 2: $VALUE",
+                    },
+                    30: {
+                      en: "step 3: $VALUE",
+                      pl: "próg 3: $VALUE",
+                    },
+                    40: {
+                      en: "step 4: $VALUE",
+                      pl: "próg 4: $VALUE",
+                    },
+                    50: {
+                      en: "step 5: $VALUE",
+                      pl: "próg 5: $VALUE",
+                    },
+                  },
+                },
+                AgentDevice2HighLimitAlertID: {
+                  id: "AgentDevice2HighLimitAlertID",
+                  name: "highLimitAlertName",
+                  type: "HighLimitAlert",
+                  unit: "FakeUnit",
+                  sampleTime: 15,
+                  defaultValue: null,
+                  variableID: "fakeVariableID",
+                  highLimit: 100,
+                  severity: 1,
+                  hysteresis: 15,
+                  timeOnDelay: 5,
+                  timeOffDelay: 10,
+                  texts: {
+                    pl: "fakeTextPL",
+                    en: "fakeTextEN",
+                  },
+                },
+                AgentDevice2LowLimitAlertID: {
+                  id: "AgentDevice2LowLimitAlertID",
+                  name: "lowLimitAlertName",
+                  type: "LowLimitAlert",
+                  unit: "FakeUnit",
+                  sampleTime: 15,
+                  defaultValue: null,
+                  variableID: "fakeVariableID",
+                  lowLimit: 100,
+                  severity: 1,
+                  hysteresis: 15,
+                  timeOnDelay: 5,
+                  timeOffDelay: 10,
+                  texts: {
+                    pl: "fakeTextPL",
+                    en: "fakeTextEN",
+                  },
+                },
+              },
+              isActive: true,
+              sendDataFileInterval: 10,
+              sendEventFileInterval: 5,
+              dataStorageSize: 20,
+              eventStorageSize: 30,
+              numberOfDataFilesToSend: 3,
+              numberOfEventFilesToSend: 6,
+              dataToSendConfig: {
+                testElement1ID: {
+                  elementId: "testElement1ID",
+                  deviceId: "testDevice1ID",
+                  sendingInterval: 100,
+                  groupName: "testElement1Group",
+                  variableName: "testElement1Name",
+                  variableUnit: "testElement1Unit",
+                  dataConverter: {
+                    conversionType: "fixed",
+                    precision: 3,
+                  },
+                },
+                testElement2ID: {
+                  elementId: "testElement2ID",
+                  deviceId: "testDevice2ID",
+                  sendingInterval: 200,
+                  groupName: "testElement2Group",
+                  variableName: "testElement2Name",
+                  variableUnit: "testElement2Unit",
+                  dataConverter: {
+                    conversionType: "precision",
+                    precision: 3,
+                  },
+                },
+                testElement3ID: {
+                  elementId: "testElement3ID",
+                  deviceId: "testDevice3ID",
+                  sendingInterval: 300,
+                  groupName: "testElement3Group",
+                  variableName: "testElement3Name",
+                  variableUnit: "testElement3Unit",
+                  dataConverter: null,
+                },
+              },
+              eventsToSendConfig: {
+                testElement1ID: {
+                  elementId: "testElement1ID",
+                  deviceId: "testDevice1ID",
+                  sendingInterval: 100,
+                  severity: 20,
+                  eventName: "testElement1Event",
+                  eventType: "EVENT",
+                },
+                testElement2ID: {
+                  elementId: "testElement2ID",
+                  deviceId: "testDevice2ID",
+                  sendingInterval: 200,
+                  severity: 30,
+                  eventName: "testElement2Alert",
+                  eventType: "ALERT",
+                },
+                testElement3ID: {
+                  elementId: "testElement3ID",
+                  deviceId: "testDevice3ID",
+                  sendingInterval: 300,
+                  severity: 40,
+                  eventName: "testElement3Event",
+                  eventType: "EVENT",
+                },
+              },
+              mqttName: "testMQTTName",
+              clientId: "testMQTTClientId",
+              checkStateInterval: 123,
+              model: "testModel",
+              revision: "testRevision",
+              tenantName: "testTenant",
+              userName: "testUserName",
+              userPassword: "testUserPassword",
+              serialNumber: "testSerialNumber",
+              mqttMessagesLimit: 123,
+              qos: 1,
+              publishTimeout: 1234,
+              reconnectInterval: 4321,
+            },
           },
         },
       };
@@ -1391,6 +1663,9 @@ describe("api/device", () => {
       expectedPayload[
         "agentDeviceID1"
       ] = devices.agentDeviceID1.generatePayload();
+      expectedPayload[
+        "agentDeviceID2"
+      ] = devices.agentDeviceID2.generatePayload();
 
       expect(result.body).toEqual(expectedPayload);
     });
@@ -2771,6 +3046,275 @@ describe("api/device", () => {
                 expiration: "2020-12-18T11:15:08.000Z",
               },
             },
+            agentDeviceID2: {
+              id: "agentDeviceID2",
+              name: "agentDeviceName2",
+              type: "MSMQTTAgentDevice",
+              variables: {
+                AgentDevice2AssociatedVariableID: {
+                  id: "AgentDevice2AssociatedVariableID",
+                  name: "associatedVariableName",
+                  type: "AssociatedVariable",
+                  unit: "A",
+                  sampleTime: 1,
+                  associatedElementID: "fakeDeviceID",
+                  associatedDeviceID: "fakeVariableID",
+                },
+              },
+              calcElements: {
+                AgentDevice2AverageCalculatorID: {
+                  id: "AgentDevice2AverageCalculatorID",
+                  name: "averageCalculatorName",
+                  type: "AverageCalculator",
+                  unit: "FakeUnit",
+                  sampleTime: 15,
+                  defaultValue: 123456.654321,
+                  variableID: "fakeVariableID",
+                  factor: 5,
+                  calculationInterval: 15,
+                },
+                AgentDevice2FactorCalculatorID: {
+                  id: "AgentDevice2FactorCalculatorID",
+                  name: "factorCalculatorName",
+                  type: "FactorCalculator",
+                  unit: "FakeUnit",
+                  sampleTime: 15,
+                  defaultValue: 123456.654321,
+                  variableID: "fakeVariableID",
+                  factor: 5,
+                },
+                AgentDevice2IncreaseCalculatorID: {
+                  id: "AgentDevice2IncreaseCalculatorID",
+                  name: "increaseCalculatorName",
+                  type: "IncreaseCalculator",
+                  unit: "FakeUnit",
+                  sampleTime: 15,
+                  defaultValue: 123456.654321,
+                  variableID: "fakeVariableID",
+                  factor: 5,
+                  calculationInterval: 15,
+                  overflow: 1234,
+                },
+                AgentDevice2SumCalculatorID: {
+                  id: "AgentDevice2SumCalculatorID",
+                  name: "sumCalculatorName",
+                  type: "SumCalculator",
+                  unit: "FakeUnit",
+                  sampleTime: 15,
+                  defaultValue: 123456.654321,
+                  variableIDs: [
+                    { variableID: "fakeVariableID1", factor: 1 },
+                    { variableID: "fakeVariableID2", factor: 2 },
+                    { variableID: "fakeVariableID3", factor: 3 },
+                  ],
+                },
+                AgentDevice2ValueFromByteArrayCalculatorID: {
+                  id: "AgentDevice2ValueFromByteArrayCalculatorID",
+                  name: "valueFromByteArrayCalculatorName",
+                  type: "ValueFromByteArrayCalculator",
+                  unit: "FakeUnit",
+                  sampleTime: 15,
+                  defaultValue: 15,
+                  variableID: "fakeVariableID",
+                  bitNumber: 4,
+                  byteNumber: 3,
+                  length: 2,
+                },
+                AgentDevice2ExpessionCalculatorID: {
+                  id: "AgentDevice2ExpessionCalculatorID",
+                  name: "expessionCalculatorName",
+                  type: "ExpressionCalculator",
+                  unit: "FakeUnit",
+                  sampleTime: 15,
+                  defaultValue: 15,
+                  expression: "p1+p2+p3",
+                  parameters: {
+                    p1: { type: "static", value: 100 },
+                    p2: { type: "dynamic", elementId: "associatedVariableID" },
+                    p3: { type: "dynamic", elementId: "cpuLoadVariableID" },
+                  },
+                },
+              },
+              alerts: {
+                AgentDevice2BandwidthLimitAlertID: {
+                  id: "AgentDevice2BandwidthLimitAlertID",
+                  name: "bandwidthLimitAlertName",
+                  type: "BandwidthLimitAlert",
+                  unit: "FakeUnit",
+                  sampleTime: 15,
+                  defaultValue: null,
+                  variableID: "fakeVariableID",
+                  highLimit: 100,
+                  lowLimit: -50,
+                  severity: 1,
+                  hysteresis: 15,
+                  timeOnDelay: 5,
+                  timeOffDelay: 10,
+                  texts: {
+                    highLimit: {
+                      pl: "fakeHighLimitTextPL",
+                      en: "fakeHighLimitTextEN",
+                    },
+                    lowLimit: {
+                      pl: "fakeLowLimitTextPL",
+                      en: "fakeLowLimitTextEN",
+                    },
+                  },
+                },
+                AgentDevice2ExactValuesAlertID: {
+                  id: "AgentDevice2ExactValuesAlertID",
+                  name: "exactValuesAlertName",
+                  type: "ExactValuesAlert",
+                  unit: "A",
+                  sampleTime: 1,
+                  defaultValue: null,
+                  variableID: "fakeVariableID",
+                  alertValues: [10, 20, 30, 40, 50],
+                  severity: 10,
+                  timeOnDelay: 5,
+                  timeOffDelay: 10,
+                  texts: {
+                    10: {
+                      en: "step 1: $VALUE",
+                      pl: "próg 1: $VALUE",
+                    },
+                    20: {
+                      en: "step 2: $VALUE",
+                      pl: "próg 2: $VALUE",
+                    },
+                    30: {
+                      en: "step 3: $VALUE",
+                      pl: "próg 3: $VALUE",
+                    },
+                    40: {
+                      en: "step 4: $VALUE",
+                      pl: "próg 4: $VALUE",
+                    },
+                    50: {
+                      en: "step 5: $VALUE",
+                      pl: "próg 5: $VALUE",
+                    },
+                  },
+                },
+                AgentDevice2HighLimitAlertID: {
+                  id: "AgentDevice2HighLimitAlertID",
+                  name: "highLimitAlertName",
+                  type: "HighLimitAlert",
+                  unit: "FakeUnit",
+                  sampleTime: 15,
+                  defaultValue: null,
+                  variableID: "fakeVariableID",
+                  highLimit: 100,
+                  severity: 1,
+                  hysteresis: 15,
+                  timeOnDelay: 5,
+                  timeOffDelay: 10,
+                  texts: {
+                    pl: "fakeTextPL",
+                    en: "fakeTextEN",
+                  },
+                },
+                AgentDevice2LowLimitAlertID: {
+                  id: "AgentDevice2LowLimitAlertID",
+                  name: "lowLimitAlertName",
+                  type: "LowLimitAlert",
+                  unit: "FakeUnit",
+                  sampleTime: 15,
+                  defaultValue: null,
+                  variableID: "fakeVariableID",
+                  lowLimit: 100,
+                  severity: 1,
+                  hysteresis: 15,
+                  timeOnDelay: 5,
+                  timeOffDelay: 10,
+                  texts: {
+                    pl: "fakeTextPL",
+                    en: "fakeTextEN",
+                  },
+                },
+              },
+              isActive: true,
+              sendDataFileInterval: 10,
+              sendEventFileInterval: 5,
+              dataStorageSize: 20,
+              eventStorageSize: 30,
+              numberOfDataFilesToSend: 3,
+              numberOfEventFilesToSend: 6,
+              dataToSendConfig: {
+                testElement1ID: {
+                  elementId: "testElement1ID",
+                  deviceId: "testDevice1ID",
+                  sendingInterval: 100,
+                  groupName: "testElement1Group",
+                  variableName: "testElement1Name",
+                  variableUnit: "testElement1Unit",
+                  dataConverter: {
+                    conversionType: "fixed",
+                    precision: 3,
+                  },
+                },
+                testElement2ID: {
+                  elementId: "testElement2ID",
+                  deviceId: "testDevice2ID",
+                  sendingInterval: 200,
+                  groupName: "testElement2Group",
+                  variableName: "testElement2Name",
+                  variableUnit: "testElement2Unit",
+                  dataConverter: {
+                    conversionType: "precision",
+                    precision: 3,
+                  },
+                },
+                testElement3ID: {
+                  elementId: "testElement3ID",
+                  deviceId: "testDevice3ID",
+                  sendingInterval: 300,
+                  groupName: "testElement3Group",
+                  variableName: "testElement3Name",
+                  variableUnit: "testElement3Unit",
+                  dataConverter: null,
+                },
+              },
+              eventsToSendConfig: {
+                testElement1ID: {
+                  elementId: "testElement1ID",
+                  deviceId: "testDevice1ID",
+                  sendingInterval: 100,
+                  severity: 20,
+                  eventName: "testElement1Event",
+                  eventType: "EVENT",
+                },
+                testElement2ID: {
+                  elementId: "testElement2ID",
+                  deviceId: "testDevice2ID",
+                  sendingInterval: 200,
+                  severity: 30,
+                  eventName: "testElement2Alert",
+                  eventType: "ALERT",
+                },
+                testElement3ID: {
+                  elementId: "testElement3ID",
+                  deviceId: "testDevice3ID",
+                  sendingInterval: 300,
+                  severity: 40,
+                  eventName: "testElement3Event",
+                  eventType: "EVENT",
+                },
+              },
+              mqttName: "testMQTTName",
+              clientId: "testMQTTClientId",
+              checkStateInterval: 123,
+              model: "testModel",
+              revision: "testRevision",
+              tenantName: "testTenant",
+              userName: "testUserName",
+              userPassword: "testUserPassword",
+              serialNumber: "testSerialNumber",
+              mqttMessagesLimit: 123,
+              qos: 1,
+              publishTimeout: 1234,
+              reconnectInterval: 4321,
+            },
           },
         },
       };
@@ -2838,6 +3382,18 @@ describe("api/device", () => {
       expect(result.status).toEqual(200);
 
       let device = projectService.getDevice("agentDeviceID1");
+
+      expect(result.body).toEqual(device.generatePayload());
+    });
+
+    it("should return 200 with and valid payload of given device - if device is an agent device - if device is MSMQTTDeviceAgent", async () => {
+      deviceId = "agentDeviceID2";
+
+      let result = await exec();
+
+      expect(result.status).toEqual(200);
+
+      let device = projectService.getDevice("agentDeviceID2");
 
       expect(result.body).toEqual(device.generatePayload());
     });
