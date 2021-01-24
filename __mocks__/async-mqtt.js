@@ -44,9 +44,14 @@ module.exports.MockClient = MockClient;
 module.exports.connectAsync = jest.fn(async (url, connectionParams) => {
   await snooze(mockConnectDelay);
 
-  //throwing if there is no internet connection
-  if (!internetConnection)
+  //there is no internet connection, connect should hang and throw after connection timeout
+  if (!internetConnection) {
+    let timeout = publishEndsOnLackOfInternetTime;
+    if (connectionParams.connectTimeout)
+      timeout = connectionParams.connectTimeout;
+    await snooze(timeout);
     throw new Error("Cannot connect - no internet connection");
+  }
 
   //If there is an internet connection - return connected client
   return new MockClient(url, connectionParams);

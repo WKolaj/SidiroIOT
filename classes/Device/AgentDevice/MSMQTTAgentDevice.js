@@ -346,7 +346,8 @@ class MSMQTTAgentDevice extends AgentDevice {
       tenant: this.TenantName,
       protocol: MQTTProtocol,
       host: MQTTHost,
-      reconnectPeriod: this.ReconnectInterval,
+      reconnectPeriod: 0,
+      connectTimeout: this.PublishTimeout,
     };
   }
 
@@ -355,12 +356,14 @@ class MSMQTTAgentDevice extends AgentDevice {
    */
   async _connectToMQTTBroker() {
     let connectParameters = this._generateConnectParameters();
-    //Flag for reconnecting set to false - no point to reconnect - agent tries reconnecting every data send
-    this._mqttClient = await mqtt.connectAsync(
+
+    let mqttClient = await mqtt.connectAsync(
       `${this.TenantName}.${MQTTHost}`,
       connectParameters,
-      true
+      false
     );
+
+    this._mqttClient = mqttClient;
   }
 
   /**
@@ -370,7 +373,7 @@ class MSMQTTAgentDevice extends AgentDevice {
   async _closeConnectionWithBroker(forceEnd) {
     await this._mqttClient.end(forceEnd);
   }
-  false;
+
   /**
    * @description Method for connecting if client is not connected
    */
@@ -399,9 +402,13 @@ class MSMQTTAgentDevice extends AgentDevice {
             new Error("Cannot publish MQTT when device not connected!")
           );
 
+        //Special flag to prevent further actions in case promise would somehow go further after rejecting
+        let promiseRejected = false;
+
         //Timeout function - in case of a timeout, disconnect the client and reject
         let timeoutHandler = setTimeout(async () => {
           try {
+            promiseRejected = true;
             //Trying - in case end throws, promise has to be rejected
             await self._closeConnectionWithBroker(true);
             return reject(new Error("Publish MQTT message timeout..."));
@@ -414,6 +421,9 @@ class MSMQTTAgentDevice extends AgentDevice {
 
         //Publish method hangs if there is no Internet connection
         await self._mqttClient.publish("s/us", command, { qos: self.QoS });
+
+        //Return imediatelly if promise already rejected
+        if (promiseRejected) return;
 
         clearTimeout(timeoutHandler);
 

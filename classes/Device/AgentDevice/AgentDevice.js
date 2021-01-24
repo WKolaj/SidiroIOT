@@ -378,7 +378,9 @@ class AgentDevice extends Device {
 
       return true;
     } catch (err) {
-      logger.error(err.message, err);
+      if (err.message) logger.error(err.message, err);
+      else logger.error(err);
+
       //If data not send successfully - write it to clipboard storage and do not proceed
       await this._trySavingDataToStorage(dataClipboardContent);
       return false;

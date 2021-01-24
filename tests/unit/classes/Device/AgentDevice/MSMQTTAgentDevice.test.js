@@ -5761,7 +5761,8 @@ describe("MSMQTTAgentDevice", () => {
         tenant: "testTenant",
         protocol: "mqtt/tcp",
         host: "mciotextension.eu1.mindsphere.io",
-        reconnectPeriod: 4321,
+        reconnectPeriod: 0,
+        connectTimeout: 1234,
       };
 
       expect(result).toEqual(expectedResult);
@@ -6102,7 +6103,8 @@ describe("MSMQTTAgentDevice", () => {
         tenant: "testTenant",
         protocol: "mqtt/tcp",
         host: "mciotextension.eu1.mindsphere.io",
-        reconnectPeriod: 4321,
+        reconnectPeriod: 0,
+        connectTimeout: 1234,
       };
 
       expect(mqtt.connectAsync).toHaveBeenCalledTimes(1);
@@ -6110,7 +6112,7 @@ describe("MSMQTTAgentDevice", () => {
         "testTenant.mciotextension.eu1.mindsphere.io"
       );
       expect(mqtt.connectAsync.mock.calls[0][1]).toEqual(expectedParams);
-      expect(mqtt.connectAsync.mock.calls[0][2]).toEqual(true);
+      expect(mqtt.connectAsync.mock.calls[0][2]).toEqual(false);
 
       expect(agent._mqttClient).toBeDefined();
       expect(agent._mqttClient instanceof mqtt.MockClient).toEqual(true);
@@ -6835,7 +6837,8 @@ describe("MSMQTTAgentDevice", () => {
         tenant: "testTenant",
         protocol: "mqtt/tcp",
         host: "mciotextension.eu1.mindsphere.io",
-        reconnectPeriod: 4321,
+        reconnectPeriod: 0,
+        connectTimeout: 1234,
       };
 
       expect(mqtt.connectAsync).toHaveBeenCalledTimes(1);
@@ -6843,7 +6846,7 @@ describe("MSMQTTAgentDevice", () => {
         "testTenant.mciotextension.eu1.mindsphere.io"
       );
       expect(mqtt.connectAsync.mock.calls[0][1]).toEqual(expectedParams);
-      expect(mqtt.connectAsync.mock.calls[0][2]).toEqual(true);
+      expect(mqtt.connectAsync.mock.calls[0][2]).toEqual(false);
 
       expect(agent._mqttClient).toBeDefined();
       expect(agent._mqttClient instanceof mqtt.MockClient).toEqual(true);
@@ -6870,7 +6873,9 @@ describe("MSMQTTAgentDevice", () => {
         tenant: "testTenant",
         protocol: "mqtt/tcp",
         host: "mciotextension.eu1.mindsphere.io",
-        reconnectPeriod: 4321,
+
+        reconnectPeriod: 0,
+        connectTimeout: 1234,
       };
 
       expect(mqtt.connectAsync).toHaveBeenCalledTimes(2);
@@ -6878,7 +6883,7 @@ describe("MSMQTTAgentDevice", () => {
         "testTenant.mciotextension.eu1.mindsphere.io"
       );
       expect(mqtt.connectAsync.mock.calls[1][1]).toEqual(expectedParams);
-      expect(mqtt.connectAsync.mock.calls[1][2]).toEqual(true);
+      expect(mqtt.connectAsync.mock.calls[1][2]).toEqual(false);
 
       expect(agent._mqttClient).toBeDefined();
       expect(agent._mqttClient instanceof mqtt.MockClient).toEqual(true);
@@ -8485,7 +8490,9 @@ describe("MSMQTTAgentDevice", () => {
         tenant: "testTenant",
         protocol: "mqtt/tcp",
         host: "mciotextension.eu1.mindsphere.io",
-        reconnectPeriod: 4321,
+
+        reconnectPeriod: 0,
+        connectTimeout: 100,
       };
 
       expect(mqtt.connectAsync).toHaveBeenCalledTimes(1);
@@ -8493,7 +8500,7 @@ describe("MSMQTTAgentDevice", () => {
         "testTenant.mciotextension.eu1.mindsphere.io"
       );
       expect(mqtt.connectAsync.mock.calls[0][1]).toEqual(expectedParams);
-      expect(mqtt.connectAsync.mock.calls[0][2]).toEqual(true);
+      expect(mqtt.connectAsync.mock.calls[0][2]).toEqual(false);
 
       expect(agent._mqttClient).toBeDefined();
       expect(agent._mqttClient instanceof mqtt.MockClient).toEqual(true);
@@ -8563,7 +8570,9 @@ describe("MSMQTTAgentDevice", () => {
         tenant: "testTenant",
         protocol: "mqtt/tcp",
         host: "mciotextension.eu1.mindsphere.io",
-        reconnectPeriod: 4321,
+
+        reconnectPeriod: 0,
+        connectTimeout: 100,
       };
 
       expect(mqtt.connectAsync).toHaveBeenCalledTimes(1);
@@ -8571,7 +8580,7 @@ describe("MSMQTTAgentDevice", () => {
         "testTenant.mciotextension.eu1.mindsphere.io"
       );
       expect(mqtt.connectAsync.mock.calls[0][1]).toEqual(expectedParams);
-      expect(mqtt.connectAsync.mock.calls[0][2]).toEqual(true);
+      expect(mqtt.connectAsync.mock.calls[0][2]).toEqual(false);
 
       expect(agent._mqttClient).toEqual(null);
 
@@ -9558,7 +9567,9 @@ describe("MSMQTTAgentDevice", () => {
         tenant: "testTenant",
         protocol: "mqtt/tcp",
         host: "mciotextension.eu1.mindsphere.io",
-        reconnectPeriod: 4321,
+
+        reconnectPeriod: 0,
+        connectTimeout: 100,
       };
 
       //First time connect is called during firt connection - next during sending data
@@ -9567,7 +9578,7 @@ describe("MSMQTTAgentDevice", () => {
         "testTenant.mciotextension.eu1.mindsphere.io"
       );
       expect(mqtt.connectAsync.mock.calls[1][1]).toEqual(expectedParams);
-      expect(mqtt.connectAsync.mock.calls[1][2]).toEqual(true);
+      expect(mqtt.connectAsync.mock.calls[1][2]).toEqual(false);
 
       expect(agent._mqttClient).toBeDefined();
       expect(agent._mqttClient instanceof mqtt.MockClient).toEqual(true);
@@ -9623,7 +9634,9 @@ describe("MSMQTTAgentDevice", () => {
         tenant: "testTenant",
         protocol: "mqtt/tcp",
         host: "mciotextension.eu1.mindsphere.io",
-        reconnectPeriod: 4321,
+
+        reconnectPeriod: 0,
+        connectTimeout: 100,
       };
 
       expect(mqtt.connectAsync).toHaveBeenCalledTimes(1);
@@ -9631,7 +9644,7 @@ describe("MSMQTTAgentDevice", () => {
         "testTenant.mciotextension.eu1.mindsphere.io"
       );
       expect(mqtt.connectAsync.mock.calls[0][1]).toEqual(expectedParams);
-      expect(mqtt.connectAsync.mock.calls[0][2]).toEqual(true);
+      expect(mqtt.connectAsync.mock.calls[0][2]).toEqual(false);
 
       expect(agent._mqttClient).toBeDefined();
       expect(agent._mqttClient instanceof mqtt.MockClient).toEqual(true);
@@ -10340,7 +10353,9 @@ describe("MSMQTTAgentDevice", () => {
         tenant: "testTenant",
         protocol: "mqtt/tcp",
         host: "mciotextension.eu1.mindsphere.io",
-        reconnectPeriod: 4321,
+
+        reconnectPeriod: 0,
+        connectTimeout: 100,
       };
 
       //First time connect is called during firt connection - next during sending data
@@ -10349,7 +10364,7 @@ describe("MSMQTTAgentDevice", () => {
         "testTenant.mciotextension.eu1.mindsphere.io"
       );
       expect(mqtt.connectAsync.mock.calls[1][1]).toEqual(expectedParams);
-      expect(mqtt.connectAsync.mock.calls[1][2]).toEqual(true);
+      expect(mqtt.connectAsync.mock.calls[1][2]).toEqual(false);
 
       expect(agent._mqttClient).toBeDefined();
       expect(agent._mqttClient instanceof mqtt.MockClient).toEqual(true);
@@ -10388,7 +10403,9 @@ describe("MSMQTTAgentDevice", () => {
         tenant: "testTenant",
         protocol: "mqtt/tcp",
         host: "mciotextension.eu1.mindsphere.io",
-        reconnectPeriod: 4321,
+
+        reconnectPeriod: 0,
+        connectTimeout: 100,
       };
 
       expect(mqtt.connectAsync).toHaveBeenCalledTimes(1);
@@ -10396,7 +10413,7 @@ describe("MSMQTTAgentDevice", () => {
         "testTenant.mciotextension.eu1.mindsphere.io"
       );
       expect(mqtt.connectAsync.mock.calls[0][1]).toEqual(expectedParams);
-      expect(mqtt.connectAsync.mock.calls[0][2]).toEqual(true);
+      expect(mqtt.connectAsync.mock.calls[0][2]).toEqual(false);
 
       expect(agent._mqttClient).toBeDefined();
       expect(agent._mqttClient instanceof mqtt.MockClient).toEqual(true);
