@@ -103,7 +103,7 @@ const schemaContent = {
   mqttMessagesLimit: Joi.number().integer().min(10).max(160).required(),
   qos: Joi.number().integer().valid(0, 1, 2).required(),
   publishTimeout: Joi.number().integer().min(100).required(),
-  reconnectInterval: Joi.number().integer().min(0).required(),
+  connectTimeout: Joi.number().integer().min(100).required(),
 };
 
 const joiSchema = Joi.object(schemaContent);

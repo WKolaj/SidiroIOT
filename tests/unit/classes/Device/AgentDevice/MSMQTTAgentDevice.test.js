@@ -73,7 +73,7 @@ describe("MSMQTTAgentDevice", () => {
       expect(device._deviceCreatedViaMQTT).toEqual(null);
       expect(device.QoS).toEqual(null);
       expect(device.PublishTimeout).toEqual(null);
-      expect(device.ReconnectInterval).toEqual(null);
+      expect(device.ConnectTimeout).toEqual(null);
     });
 
     it("should assign project to MSMQTTAgentDevice", () => {
@@ -373,7 +373,7 @@ describe("MSMQTTAgentDevice", () => {
         mqttMessagesLimit: 123,
         qos: 1,
         publishTimeout: 1234,
-        reconnectInterval: 4321,
+        connectTimeout: 123,
       };
 
       activateMockFunc = jest.fn();
@@ -702,7 +702,7 @@ describe("MSMQTTAgentDevice", () => {
         mqttMessagesLimit: 123,
         qos: 1,
         publishTimeout: 1234,
-        reconnectInterval: 4321,
+        connectTimeout: 123,
         boarded: false,
       };
 
@@ -1369,7 +1369,7 @@ describe("MSMQTTAgentDevice", () => {
         mqttMessagesLimit: 123,
         qos: 1,
         publishTimeout: 1234,
-        reconnectInterval: 4321,
+        connectTimeout: 123,
       };
 
       activateMockFunc = jest.fn();
@@ -1700,7 +1700,7 @@ describe("MSMQTTAgentDevice", () => {
         mqttMessagesLimit: 123,
         qos: 1,
         publishTimeout: 1234,
-        reconnectInterval: 4321,
+        connectTimeout: 123,
         boarded: false,
       };
 
@@ -1980,7 +1980,7 @@ describe("MSMQTTAgentDevice", () => {
         mqttMessagesLimit: 123,
         qos: 1,
         publishTimeout: 1234,
-        reconnectInterval: 4321,
+        connectTimeout: 123,
       };
     });
 
@@ -2766,45 +2766,45 @@ describe("MSMQTTAgentDevice", () => {
       );
     });
 
-    it("should return message if reconnectInterval is not defined", () => {
-      delete payload.reconnectInterval;
+    it("should return message if connectTimeout is not defined", () => {
+      delete payload.connectTimeout;
 
       let result = exec();
 
-      expect(result).toEqual(`"reconnectInterval" is required`);
+      expect(result).toEqual(`"connectTimeout" is required`);
     });
 
-    it("should return message if reconnectInterval is null", () => {
-      payload.reconnectInterval = null;
+    it("should return message if connectTimeout is null", () => {
+      payload.connectTimeout = null;
 
       let result = exec();
 
-      expect(result).toEqual(`"reconnectInterval" must be a number`);
+      expect(result).toEqual(`"connectTimeout" must be a number`);
     });
 
-    it("should return message if reconnectInterval is not a number", () => {
-      payload.reconnectInterval = true;
+    it("should return message if connectTimeout is not a number", () => {
+      payload.connectTimeout = true;
 
       let result = exec();
 
-      expect(result).toEqual(`"reconnectInterval" must be a number`);
+      expect(result).toEqual(`"connectTimeout" must be a number`);
     });
 
-    it("should return message if reconnectInterval is not an integer", () => {
-      payload.reconnectInterval = 123.321;
+    it("should return message if connectTimeout is not an integer", () => {
+      payload.connectTimeout = 123.321;
 
       let result = exec();
 
-      expect(result).toEqual(`"reconnectInterval" must be an integer`);
+      expect(result).toEqual(`"connectTimeout" must be an integer`);
     });
 
-    it("should return message if reconnectInterval is samller then 0", () => {
-      payload.reconnectInterval = -1;
+    it("should return message if connectTimeout is samller then 100", () => {
+      payload.connectTimeout = -1;
 
       let result = exec();
 
       expect(result).toEqual(
-        `"reconnectInterval" must be greater than or equal to 0`
+        `"connectTimeout" must be greater than or equal to 100`
       );
     });
 
@@ -4175,7 +4175,7 @@ describe("MSMQTTAgentDevice", () => {
         mqttMessagesLimit: 123,
         qos: 1,
         publishTimeout: 1234,
-        reconnectInterval: 4321,
+        connectTimeout: 123,
       };
 
       activateMockFunc = jest.fn();
@@ -4528,7 +4528,7 @@ describe("MSMQTTAgentDevice", () => {
         mqttMessagesLimit: 5,
         qos: 1,
         publishTimeout: 1234,
-        reconnectInterval: 4321,
+        connectTimeout: 123,
       };
 
       activateMockFunc = jest.fn();
@@ -5285,7 +5285,7 @@ describe("MSMQTTAgentDevice", () => {
         mqttMessagesLimit: 5,
         qos: 1,
         publishTimeout: 1234,
-        reconnectInterval: 4321,
+        connectTimeout: 123,
       };
 
       //1607100000000 - Fri Dec 04 2020 17:40:00 GMT+0100 (Central European Standard Time)
@@ -5728,7 +5728,7 @@ describe("MSMQTTAgentDevice", () => {
         mqttMessagesLimit: 5,
         qos: 1,
         publishTimeout: 1234,
-        reconnectInterval: 4321,
+        connectTimeout: 123,
       };
     });
 
@@ -5762,7 +5762,7 @@ describe("MSMQTTAgentDevice", () => {
         protocol: "mqtt/tcp",
         host: "mciotextension.eu1.mindsphere.io",
         reconnectPeriod: 0,
-        connectTimeout: 1234,
+        connectTimeout: 123,
       };
 
       expect(result).toEqual(expectedResult);
@@ -5778,6 +5778,7 @@ describe("MSMQTTAgentDevice", () => {
     let deactivateMockFunc;
     let initPayload;
     let internetConnection;
+    let connectTimeout;
 
     beforeEach(async () => {
       await createDirIfNotExists(AgentsDirPath);
@@ -6069,8 +6070,9 @@ describe("MSMQTTAgentDevice", () => {
         mqttMessagesLimit: 5,
         qos: 1,
         publishTimeout: 1234,
-        reconnectInterval: 4321,
+        connectTimeout: 123,
       };
+      connectTimeout = 100;
 
       internetConnection = true;
     });
@@ -6081,6 +6083,8 @@ describe("MSMQTTAgentDevice", () => {
     });
 
     let exec = async () => {
+      initPayload.connectTimeout = connectTimeout;
+
       mqtt.mockSetInternetConnection(internetConnection);
       getElementMockFunc = jest.fn(() => getElementReturnValue);
       project.getElement = getElementMockFunc;
@@ -6104,7 +6108,7 @@ describe("MSMQTTAgentDevice", () => {
         protocol: "mqtt/tcp",
         host: "mciotextension.eu1.mindsphere.io",
         reconnectPeriod: 0,
-        connectTimeout: 1234,
+        connectTimeout: connectTimeout,
       };
 
       expect(mqtt.connectAsync).toHaveBeenCalledTimes(1);
@@ -6129,6 +6133,7 @@ describe("MSMQTTAgentDevice", () => {
 
       let error = null;
 
+      let startDate = Date.now();
       await expect(
         new Promise(async (resolve, reject) => {
           try {
@@ -6141,7 +6146,13 @@ describe("MSMQTTAgentDevice", () => {
         })
       ).rejects.toBeDefined();
 
+      let stopDate = Date.now();
+
       expect(error.message).toEqual("Cannot connect - no internet connection");
+
+      expect(stopDate - startDate).toBeGreaterThanOrEqual(
+        initPayload.connectTimeout
+      );
 
       //mqtt agent should not be assigned
       expect(agent._mqttClient).toEqual(null);
@@ -6449,7 +6460,7 @@ describe("MSMQTTAgentDevice", () => {
         mqttMessagesLimit: 5,
         qos: 1,
         publishTimeout: 1234,
-        reconnectInterval: 4321,
+        connectTimeout: 123,
       };
 
       internetConnection = true;
@@ -6506,6 +6517,7 @@ describe("MSMQTTAgentDevice", () => {
     let initAgent;
     let connectBroker;
     let disconnectAfterConnecting;
+    let connectTimeout;
 
     beforeEach(async () => {
       await createDirIfNotExists(AgentsDirPath);
@@ -6797,7 +6809,7 @@ describe("MSMQTTAgentDevice", () => {
         mqttMessagesLimit: 5,
         qos: 1,
         publishTimeout: 1234,
-        reconnectInterval: 4321,
+        connectTimeout: 123,
       };
 
       internetConnection = true;
@@ -6806,6 +6818,7 @@ describe("MSMQTTAgentDevice", () => {
 
       connectBroker = false;
       disconnectAfterConnecting = false;
+      connectTimeout = 100;
     });
 
     afterEach(async () => {
@@ -6814,6 +6827,8 @@ describe("MSMQTTAgentDevice", () => {
     });
 
     let exec = async () => {
+      initPayload.connectTimeout = connectTimeout;
+
       mqtt.mockSetInternetConnection(internetConnection);
       getElementMockFunc = jest.fn(() => getElementReturnValue);
       project.getElement = getElementMockFunc;
@@ -6838,7 +6853,7 @@ describe("MSMQTTAgentDevice", () => {
         protocol: "mqtt/tcp",
         host: "mciotextension.eu1.mindsphere.io",
         reconnectPeriod: 0,
-        connectTimeout: 1234,
+        connectTimeout: connectTimeout,
       };
 
       expect(mqtt.connectAsync).toHaveBeenCalledTimes(1);
@@ -6875,7 +6890,7 @@ describe("MSMQTTAgentDevice", () => {
         host: "mciotextension.eu1.mindsphere.io",
 
         reconnectPeriod: 0,
-        connectTimeout: 1234,
+        connectTimeout: connectTimeout,
       };
 
       expect(mqtt.connectAsync).toHaveBeenCalledTimes(2);
@@ -7234,7 +7249,7 @@ describe("MSMQTTAgentDevice", () => {
         mqttMessagesLimit: 5,
         qos: 1,
         publishTimeout: 1234,
-        reconnectInterval: 4321,
+        connectTimeout: 123,
       };
 
       internetConnection = true;
@@ -7885,7 +7900,7 @@ describe("MSMQTTAgentDevice", () => {
         mqttMessagesLimit: 5,
         qos: 1,
         publishTimeout: 1234,
-        reconnectInterval: 4321,
+        connectTimeout: 123,
       };
 
       internetConnection = true;
@@ -8155,6 +8170,7 @@ describe("MSMQTTAgentDevice", () => {
     let internetConnection;
     let qos;
     let publishTimeout;
+    let connectTimeout;
 
     beforeEach(async () => {
       await createDirIfNotExists(AgentsDirPath);
@@ -8164,7 +8180,7 @@ describe("MSMQTTAgentDevice", () => {
 
       qos = 1;
       publishTimeout = 100;
-
+      connectTimeout = 123;
       getElementReturnValue = {
         LastValueTick: 123,
         Value: 456.789,
@@ -8446,7 +8462,7 @@ describe("MSMQTTAgentDevice", () => {
         mqttMessagesLimit: 5,
         qos: 1,
         publishTimeout: 1234,
-        reconnectInterval: 4321,
+        connectTimeout: 123,
       };
 
       internetConnection = true;
@@ -8460,6 +8476,7 @@ describe("MSMQTTAgentDevice", () => {
     let exec = async () => {
       initPayload.qos = qos;
       initPayload.publishTimeout = publishTimeout;
+      initPayload.connectTimeout = connectTimeout;
 
       getElementMockFunc = jest.fn(() => getElementReturnValue);
       project.getElement = getElementMockFunc;
@@ -8492,7 +8509,7 @@ describe("MSMQTTAgentDevice", () => {
         host: "mciotextension.eu1.mindsphere.io",
 
         reconnectPeriod: 0,
-        connectTimeout: 100,
+        connectTimeout: connectTimeout,
       };
 
       expect(mqtt.connectAsync).toHaveBeenCalledTimes(1);
@@ -8572,7 +8589,7 @@ describe("MSMQTTAgentDevice", () => {
         host: "mciotextension.eu1.mindsphere.io",
 
         reconnectPeriod: 0,
-        connectTimeout: 100,
+        connectTimeout: connectTimeout,
       };
 
       expect(mqtt.connectAsync).toHaveBeenCalledTimes(1);
@@ -8897,7 +8914,7 @@ describe("MSMQTTAgentDevice", () => {
         mqttMessagesLimit: 5,
         qos: 1,
         publishTimeout: 1234,
-        reconnectInterval: 4321,
+        connectTimeout: 123,
       };
 
       internetConnection = true;
@@ -8959,6 +8976,7 @@ describe("MSMQTTAgentDevice", () => {
     let payloadToSend;
     let mqttMessagesLimit;
     let initialMQTTClient;
+    let connectTimeout;
 
     beforeEach(async () => {
       await createDirIfNotExists(AgentsDirPath);
@@ -8969,6 +8987,7 @@ describe("MSMQTTAgentDevice", () => {
       mqttMessagesLimit = 5;
       qos = 1;
       publishTimeout = 100;
+      connectTimeout = 123;
 
       getElementReturnValue = {
         LastValueTick: 123,
@@ -9251,7 +9270,7 @@ describe("MSMQTTAgentDevice", () => {
         mqttMessagesLimit: 5,
         qos: 1,
         publishTimeout: 1234,
-        reconnectInterval: 4321,
+        connectTimeout: 123,
       };
 
       internetConnection = true;
@@ -9294,6 +9313,7 @@ describe("MSMQTTAgentDevice", () => {
       initPayload.mqttMessagesLimit = mqttMessagesLimit;
       initPayload.qos = qos;
       initPayload.publishTimeout = publishTimeout;
+      initPayload.connectTimeout = connectTimeout;
 
       getElementMockFunc = jest.fn(() => getElementReturnValue);
       project.getElement = getElementMockFunc;
@@ -9569,7 +9589,7 @@ describe("MSMQTTAgentDevice", () => {
         host: "mciotextension.eu1.mindsphere.io",
 
         reconnectPeriod: 0,
-        connectTimeout: 100,
+        connectTimeout: connectTimeout,
       };
 
       //First time connect is called during firt connection - next during sending data
@@ -9636,7 +9656,7 @@ describe("MSMQTTAgentDevice", () => {
         host: "mciotextension.eu1.mindsphere.io",
 
         reconnectPeriod: 0,
-        connectTimeout: 100,
+        connectTimeout: connectTimeout,
       };
 
       expect(mqtt.connectAsync).toHaveBeenCalledTimes(1);
@@ -9844,6 +9864,7 @@ describe("MSMQTTAgentDevice", () => {
     let initialMQTTClient;
     let tickId;
     let elementId;
+    let connectTimeout;
     let value;
 
     beforeEach(async () => {
@@ -10137,7 +10158,7 @@ describe("MSMQTTAgentDevice", () => {
         mqttMessagesLimit: 5,
         qos: 1,
         publishTimeout: 1234,
-        reconnectInterval: 4321,
+        connectTimeout: 123,
       };
 
       internetConnection = true;
@@ -10147,6 +10168,7 @@ describe("MSMQTTAgentDevice", () => {
       connectBroker = true;
       disconnectAfterConnecting = false;
       endThrows = false;
+      connectTimeout = 123;
       publishThrows = false;
 
       //1607100000000 - Fri Dec 04 2020 17:40:00 GMT+0100 (Central European Standard Time)
@@ -10165,6 +10187,7 @@ describe("MSMQTTAgentDevice", () => {
       initPayload.mqttMessagesLimit = mqttMessagesLimit;
       initPayload.qos = qos;
       initPayload.publishTimeout = publishTimeout;
+      initPayload.connectTimeout = connectTimeout;
 
       getElementMockFunc = jest.fn(() => getElementReturnValue);
       project.getElement = getElementMockFunc;
@@ -10355,7 +10378,7 @@ describe("MSMQTTAgentDevice", () => {
         host: "mciotextension.eu1.mindsphere.io",
 
         reconnectPeriod: 0,
-        connectTimeout: 100,
+        connectTimeout: connectTimeout,
       };
 
       //First time connect is called during firt connection - next during sending data
@@ -10405,7 +10428,7 @@ describe("MSMQTTAgentDevice", () => {
         host: "mciotextension.eu1.mindsphere.io",
 
         reconnectPeriod: 0,
-        connectTimeout: 100,
+        connectTimeout: connectTimeout,
       };
 
       expect(mqtt.connectAsync).toHaveBeenCalledTimes(1);

@@ -35,7 +35,7 @@ class MSMQTTAgentDevice extends AgentDevice {
     this._mqttMessagesLimit = null;
     this._qos = null;
     this._publishTimeout = null;
-    this._reconnectInterval = null;
+    this._connectTimeout = null;
 
     //Flag for determining whether device was boarded before
     this._deviceCreatedViaMQTT = null;
@@ -116,10 +116,10 @@ class MSMQTTAgentDevice extends AgentDevice {
   }
 
   /**
-   * @ReconnectInterval Interval between reconnects of client [ms]
+   * @description Timeout of connect method
    */
-  get ReconnectInterval() {
-    return this._reconnectInterval;
+  get ConnectTimeout() {
+    return this._connectTimeout;
   }
 
   //#endregion ========= PROPERTIES =========
@@ -347,7 +347,7 @@ class MSMQTTAgentDevice extends AgentDevice {
       protocol: MQTTProtocol,
       host: MQTTHost,
       reconnectPeriod: 0,
-      connectTimeout: this.PublishTimeout,
+      connectTimeout: this.ConnectTimeout,
     };
   }
 
@@ -485,7 +485,7 @@ class MSMQTTAgentDevice extends AgentDevice {
 
     this._qos = payload.qos;
     this._publishTimeout = payload.publishTimeout;
-    this._reconnectInterval = payload.reconnectInterval;
+    this._connectTimeout = payload.connectTimeout;
 
     //Flag for determining whether device was boarded before
     this._deviceCreatedViaMQTT = false;
@@ -511,7 +511,7 @@ class MSMQTTAgentDevice extends AgentDevice {
 
     superPayload.qos = this.QoS;
     superPayload.publishTimeout = this.PublishTimeout;
-    superPayload.reconnectInterval = this.ReconnectInterval;
+    superPayload.connectTimeout = this.ConnectTimeout;
 
     return superPayload;
   }
