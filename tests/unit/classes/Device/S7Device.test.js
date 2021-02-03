@@ -1272,7 +1272,7 @@ describe("S7Device", () => {
         type: "DeviceConnectionVariable",
         unit: "FakeUnit",
         sampleTime: 15,
-        defaultValue: false,
+        defaultValue: 0,
       };
 
       payload.variables.testVariable2ID.type = "S7ByteArray";
@@ -1301,9 +1301,9 @@ describe("S7Device", () => {
             type: "DeviceConnectionVariable",
             unit: "FakeUnit",
             sampleTime: 15,
-            defaultValue: false,
+            defaultValue: 0,
             lastValueTick: 0,
-            value: false,
+            value: 0,
           },
           testVariable2ID: {
             id: "testVariable2ID",
@@ -7236,7 +7236,7 @@ describe("S7Device", () => {
 
       let result = exec();
 
-      expect(result).toEqual(`"defaultValue" must be a boolean`);
+      expect(result).toEqual(`"defaultValue" must be one of [0, 1]`);
     });
 
     it("should return message if there is associated variable present", () => {

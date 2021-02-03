@@ -151,7 +151,7 @@ describe("api/device", () => {
                   type: "DeviceConnectionVariable",
                   unit: "V",
                   sampleTime: 1,
-                  defaultValue: false,
+                  defaultValue: 0,
                 },
               },
               calcElements: {
@@ -298,7 +298,7 @@ describe("api/device", () => {
                   type: "DeviceConnectionVariable",
                   unit: "V",
                   sampleTime: 1,
-                  defaultValue: false,
+                  defaultValue: 0,
                 },
               },
               calcElements: {
@@ -445,7 +445,7 @@ describe("api/device", () => {
                   type: "DeviceConnectionVariable",
                   unit: "V",
                   sampleTime: 1,
-                  defaultValue: false,
+                  defaultValue: 0,
                 },
               },
               calcElements: {
@@ -1864,7 +1864,7 @@ describe("api/device", () => {
                   type: "DeviceConnectionVariable",
                   unit: "V",
                   sampleTime: 1,
-                  defaultValue: false,
+                  defaultValue: 0,
                 },
               },
               calcElements: {
@@ -2011,7 +2011,7 @@ describe("api/device", () => {
                   type: "DeviceConnectionVariable",
                   unit: "V",
                   sampleTime: 1,
-                  defaultValue: false,
+                  defaultValue: 0,
                 },
               },
               calcElements: {
@@ -2158,7 +2158,7 @@ describe("api/device", () => {
                   type: "DeviceConnectionVariable",
                   unit: "V",
                   sampleTime: 1,
-                  defaultValue: false,
+                  defaultValue: 0,
                 },
               },
               calcElements: {

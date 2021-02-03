@@ -54,7 +54,7 @@ describe("DeviceConnectionVariable", () => {
         type: "DeviceConnectionVariable",
         sampleTime: 876,
         unit: "Test",
-        defaultValue: true,
+        defaultValue: 1,
       };
     });
 
@@ -71,8 +71,8 @@ describe("DeviceConnectionVariable", () => {
 
       let expectedPayload = {
         ...payload,
-        defaultValue: true,
-        value: true,
+        defaultValue: 1,
+        value: 1,
         lastValueTick: 0,
         deviceId: "fakeDeviceId",
       };
@@ -91,7 +91,7 @@ describe("DeviceConnectionVariable", () => {
         type: "DeviceConnectionVariable",
         sampleTime: 876,
         unit: "%",
-        defaultValue: true,
+        defaultValue: 1,
       };
     });
 
@@ -261,15 +261,15 @@ describe("DeviceConnectionVariable", () => {
 
       let result = exec();
 
-      expect(result).toEqual(`"defaultValue" must be a boolean`);
+      expect(result).toEqual(`"defaultValue" must be one of [0, 1]`);
     });
 
-    it("should return message if defaultValue not a boolean - string", () => {
+    it("should return message if defaultValue not an integer - string", () => {
       payload.defaultValue = "abcd1234";
 
       let result = exec();
 
-      expect(result).toEqual(`"defaultValue" must be a boolean`);
+      expect(result).toEqual(`"defaultValue" must be one of [0, 1]`);
     });
   });
 
@@ -316,7 +316,7 @@ describe("DeviceConnectionVariable", () => {
         type: "DeviceConnectionVariable",
         sampleTime: 876,
         unit: "Test",
-        defaultValue: true,
+        defaultValue: 1,
       };
 
       tickID = 1234;
@@ -337,7 +337,7 @@ describe("DeviceConnectionVariable", () => {
       await exec();
 
       expect(variable.LastValueTick).toEqual(tickID);
-      expect(variable.Value).toEqual(true);
+      expect(variable.Value).toEqual(1);
     });
 
     it("should set value of isConnected of device - if device connected state is false", async () => {
@@ -345,7 +345,7 @@ describe("DeviceConnectionVariable", () => {
       await exec();
 
       expect(variable.LastValueTick).toEqual(tickID);
-      expect(variable.Value).toEqual(false);
+      expect(variable.Value).toEqual(0);
     });
 
     it("should do nothing - if device connection state is null", async () => {
@@ -354,7 +354,7 @@ describe("DeviceConnectionVariable", () => {
       await exec();
 
       expect(variable.LastValueTick).toEqual(0);
-      expect(variable.Value).toEqual(true);
+      expect(variable.Value).toEqual(1);
     });
   });
 });

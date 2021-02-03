@@ -63,7 +63,7 @@ describe("api/calcElement", () => {
   afterEach(async () => {
     //Stopping current project
     await projectService._stopCurrentProject();
-    
+
     //Clearing project file if exists
     await removeFileIfExistsAsync(projectFilePath);
 
@@ -152,7 +152,7 @@ describe("api/calcElement", () => {
                   type: "DeviceConnectionVariable",
                   unit: "V",
                   sampleTime: 1,
-                  defaultValue: false,
+                  defaultValue: 0,
                 },
               },
               calcElements: {
@@ -299,7 +299,7 @@ describe("api/calcElement", () => {
                   type: "DeviceConnectionVariable",
                   unit: "V",
                   sampleTime: 1,
-                  defaultValue: false,
+                  defaultValue: 0,
                 },
               },
               calcElements: {
@@ -446,7 +446,7 @@ describe("api/calcElement", () => {
                   type: "DeviceConnectionVariable",
                   unit: "V",
                   sampleTime: 1,
-                  defaultValue: false,
+                  defaultValue: 0,
                 },
               },
               calcElements: {
@@ -1611,7 +1611,7 @@ describe("api/calcElement", () => {
                   type: "DeviceConnectionVariable",
                   unit: "V",
                   sampleTime: 1,
-                  defaultValue: false,
+                  defaultValue: 0,
                 },
               },
               calcElements: {
@@ -1758,7 +1758,7 @@ describe("api/calcElement", () => {
                   type: "DeviceConnectionVariable",
                   unit: "V",
                   sampleTime: 1,
-                  defaultValue: false,
+                  defaultValue: 0,
                 },
               },
               calcElements: {
@@ -1905,7 +1905,7 @@ describe("api/calcElement", () => {
                   type: "DeviceConnectionVariable",
                   unit: "V",
                   sampleTime: 1,
-                  defaultValue: false,
+                  defaultValue: 0,
                 },
               },
               calcElements: {

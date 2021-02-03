@@ -48,7 +48,9 @@ class DeviceConnectionVariable extends InternalVariable {
     //If device has no IsConnected flag - return
     if (!exists(this._device.IsConnected)) return;
 
-    this._setValue(this._device.IsConnected, tickId);
+    let convertedValue = this._device.IsConnected ? 1 : 0;
+
+    this._setValue(convertedValue, tickId);
   }
 
   //#endregion ========= OVERRIDE PUBLIC METHODS =========

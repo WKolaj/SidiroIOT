@@ -2,7 +2,7 @@
   "tokenHeader": "x-auth-token",
   "port": 5000,
   "agentsDirName": "agentsData",
-  "maxProjectFileSize": 1048576,
+  "maxProjectFileSize": 104857600,
   "settingsPath": "settings",
   "userFileName": "userSettings.json",
   "projectFileName": "projectSettings.json",
