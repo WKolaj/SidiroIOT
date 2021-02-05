@@ -646,6 +646,38 @@ describe("MaxCalculator", () => {
       expect(calcElement._endIntervalTick).toEqual(200);
     });
 
+    it("should not begin new interval and not set value to calcElement - if value is smaller then actual interval and tickId is exactly the tick of interval end", async () => {
+      variable1Value = 9.9;
+      variable1LastValueTick = 200;
+
+      await exec();
+
+      //new value should have been set
+      expect(calcElement.Value).toEqual(value);
+      expect(calcElement.LastValueTick).toEqual(lastValueTick);
+
+      //interval should not be changed
+      expect(calcElement._refreshedFirstTime).toEqual(true);
+      expect(calcElement._beginIntervalTick).toEqual(100);
+      expect(calcElement._endIntervalTick).toEqual(200);
+    });
+
+    it("should not begin new interval but set value to calcElement - if value is greater then actual interval and tickId is exactly the tick of interval end", async () => {
+      variable1Value = 10.1;
+      variable1LastValueTick = 200;
+
+      await exec();
+
+      //new value should have been set
+      expect(calcElement.Value).toEqual(variable1Value);
+      expect(calcElement.LastValueTick).toEqual(variable1LastValueTick);
+
+      //interval should not be changed
+      expect(calcElement._refreshedFirstTime).toEqual(true);
+      expect(calcElement._beginIntervalTick).toEqual(100);
+      expect(calcElement._endIntervalTick).toEqual(200);
+    });
+
     it("should begin new interval and set value to calcElement - if value is smaller then actual but tick id is from new interval", async () => {
       variable1Value = 9.9;
       variable1LastValueTick = 201;

@@ -75,7 +75,7 @@ class ExtremeCalculator extends CalcElement {
    */
   _shouldStartNewInterval(tickId) {
     //Returning true if tick id is outside actual interval
-    return tickId >= this._endIntervalTick;
+    return tickId > this._endIntervalTick;
   }
 
   /**
