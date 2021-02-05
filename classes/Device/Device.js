@@ -14,6 +14,8 @@ const ExactValuesAlert = require("../Element/Alerts/ExactValuesAlert");
 const HighLimitAlert = require("../Element/Alerts/HighLimitAlert");
 const LowLimitAlert = require("../Element/Alerts/LowLimitAlert");
 const ExpressionCalculator = require("../Element/CalcElement/ExpressionCalculator");
+const MaxCalculator = require("../Element/CalcElement/ExtremeCalculator/MaxCalculator");
+const MinCalculator = require("../Element/CalcElement/ExtremeCalculator/MinCalculator");
 
 class Device {
   //#region ========= CONSTRUCTOR =========
@@ -334,6 +336,10 @@ class Device {
         return new AverageCalculator(this._project, this);
       case "ExpressionCalculator":
         return new ExpressionCalculator(this._project, this);
+      case "MaxCalculator":
+        return new MaxCalculator(this._project, this);
+      case "MinCalculator":
+        return new MinCalculator(this._project, this);
       default:
         throw new Error(`Unrecognized CalcElement type: ${type}`);
     }

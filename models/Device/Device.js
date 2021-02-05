@@ -5,6 +5,8 @@ const HighLimitAlert = require("../../classes/Element/Alerts/HighLimitAlert");
 const LowLimitAlert = require("../../classes/Element/Alerts/LowLimitAlert");
 const AverageCalculator = require("../../classes/Element/CalcElement/AverageCalculator");
 const ExpressionCalculator = require("../../classes/Element/CalcElement/ExpressionCalculator");
+const MaxCalculator = require("../../classes/Element/CalcElement/ExtremeCalculator/MaxCalculator");
+const MinCalculator = require("../../classes/Element/CalcElement/ExtremeCalculator/MinCalculator");
 const FactorCalculator = require("../../classes/Element/CalcElement/FactorCalculator");
 const IncreaseCalculator = require("../../classes/Element/CalcElement/IncreaseCalculator");
 const SumCalculator = require("../../classes/Element/CalcElement/SumCalculator");
@@ -81,6 +83,12 @@ const validateCalcElementsPayload = (calcElementsPayload, helpers) => {
         calcElementMessage = ExpressionCalculator.validatePayload(
           calcElementPayload
         );
+        break;
+      case "MaxCalculator":
+        calcElementMessage = MaxCalculator.validatePayload(calcElementPayload);
+        break;
+      case "MinCalculator":
+        calcElementMessage = MinCalculator.validatePayload(calcElementPayload);
         break;
       default:
         calcElementMessage = "calcElement type not recognized";
