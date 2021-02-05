@@ -571,7 +571,7 @@ describe("MaxCalculator", () => {
       beginIntervalTick = 100;
       endIntervalTick = 200;
       value = 10;
-      lastValueTick = 110;
+      lastValueTick = 200;
       tickId = 150;
 
       refreshedFirstTime = true;
@@ -623,7 +623,7 @@ describe("MaxCalculator", () => {
 
       //new value should have been set
       expect(calcElement.Value).toEqual(variable1Value);
-      expect(calcElement.LastValueTick).toEqual(variable1LastValueTick);
+      expect(calcElement.LastValueTick).toEqual(200);
 
       //interval and refreshedFirstTime should stay as they are
       expect(calcElement._refreshedFirstTime).toEqual(true);
@@ -638,7 +638,7 @@ describe("MaxCalculator", () => {
 
       //new value should have been set
       expect(calcElement.Value).toEqual(value);
-      expect(calcElement.LastValueTick).toEqual(lastValueTick);
+      expect(calcElement.LastValueTick).toEqual(200);
 
       //interval and refreshedFirstTime should stay as they are
       expect(calcElement._refreshedFirstTime).toEqual(true);
@@ -654,7 +654,7 @@ describe("MaxCalculator", () => {
 
       //new value should have been set
       expect(calcElement.Value).toEqual(value);
-      expect(calcElement.LastValueTick).toEqual(lastValueTick);
+      expect(calcElement.LastValueTick).toEqual(200);
 
       //interval should not be changed
       expect(calcElement._refreshedFirstTime).toEqual(true);
@@ -670,7 +670,7 @@ describe("MaxCalculator", () => {
 
       //new value should have been set
       expect(calcElement.Value).toEqual(variable1Value);
-      expect(calcElement.LastValueTick).toEqual(variable1LastValueTick);
+      expect(calcElement.LastValueTick).toEqual(200);
 
       //interval should not be changed
       expect(calcElement._refreshedFirstTime).toEqual(true);
@@ -686,7 +686,7 @@ describe("MaxCalculator", () => {
 
       //new value should have been set
       expect(calcElement.Value).toEqual(variable1Value);
-      expect(calcElement.LastValueTick).toEqual(variable1LastValueTick);
+      expect(calcElement.LastValueTick).toEqual(300);
 
       //interval should be set to new interval
       expect(calcElement._refreshedFirstTime).toEqual(true);
@@ -702,7 +702,7 @@ describe("MaxCalculator", () => {
 
       //new value should have been set
       expect(calcElement.Value).toEqual(variable1Value);
-      expect(calcElement.LastValueTick).toEqual(variable1LastValueTick);
+      expect(calcElement.LastValueTick).toEqual(300);
 
       //interval should be set to new interval
       expect(calcElement._refreshedFirstTime).toEqual(true);
@@ -718,7 +718,7 @@ describe("MaxCalculator", () => {
 
       //new value should have been set
       expect(calcElement.Value).toEqual(variable1Value);
-      expect(calcElement.LastValueTick).toEqual(variable1LastValueTick);
+      expect(calcElement.LastValueTick).toEqual(400);
 
       //interval should be set to new interval
       expect(calcElement._refreshedFirstTime).toEqual(true);
@@ -734,7 +734,7 @@ describe("MaxCalculator", () => {
 
       //new value should have been set
       expect(calcElement.Value).toEqual(variable1Value);
-      expect(calcElement.LastValueTick).toEqual(variable1LastValueTick);
+      expect(calcElement.LastValueTick).toEqual(400);
 
       //interval should be set to new interval
       expect(calcElement._refreshedFirstTime).toEqual(true);
@@ -754,7 +754,7 @@ describe("MaxCalculator", () => {
 
       //new value should have been set
       expect(calcElement.Value).toEqual(variable1Value);
-      expect(calcElement.LastValueTick).toEqual(variable1LastValueTick);
+      expect(calcElement.LastValueTick).toEqual(400);
 
       //interval should be set to new interval
       expect(calcElement._refreshedFirstTime).toEqual(true);
@@ -774,7 +774,7 @@ describe("MaxCalculator", () => {
 
       //new value should have been set
       expect(calcElement.Value).toEqual(variable1Value);
-      expect(calcElement.LastValueTick).toEqual(variable1LastValueTick);
+      expect(calcElement.LastValueTick).toEqual(400);
 
       //interval should be set to new interval
       expect(calcElement._refreshedFirstTime).toEqual(true);
@@ -793,7 +793,7 @@ describe("MaxCalculator", () => {
 
       //new value should have been set
       expect(calcElement.Value).toEqual(variable1Value);
-      expect(calcElement.LastValueTick).toEqual(variable1LastValueTick);
+      expect(calcElement.LastValueTick).toEqual(400);
 
       //interval should be set to new interval
       expect(calcElement._refreshedFirstTime).toEqual(true);
@@ -812,7 +812,7 @@ describe("MaxCalculator", () => {
 
       //new value should have been set
       expect(calcElement.Value).toEqual(variable1Value);
-      expect(calcElement.LastValueTick).toEqual(variable1LastValueTick);
+      expect(calcElement.LastValueTick).toEqual(400);
 
       //interval should be set to new interval
       expect(calcElement._refreshedFirstTime).toEqual(true);
@@ -831,7 +831,7 @@ describe("MaxCalculator", () => {
 
       //new value should have been set
       expect(calcElement.Value).toEqual(variable1Value);
-      expect(calcElement.LastValueTick).toEqual(variable1LastValueTick);
+      expect(calcElement.LastValueTick).toEqual(400);
 
       //interval should be set to new interval
       expect(calcElement._refreshedFirstTime).toEqual(true);

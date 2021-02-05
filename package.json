@@ -1,6 +1,6 @@
 {
   "name": "template_backend_nodejs",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Back-end for NodeJS server",
   "main": "server.js",
   "scripts": {
