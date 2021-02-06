@@ -29,6 +29,7 @@ describe("AgentDevice", () => {
   beforeEach(() => {
     jest.setTimeout(30000);
   });
+
   describe("_getAndSaveElementsDataToClipboardIfFitsSendingInterval", () => {
     let project;
     let payload;
@@ -198,7 +199,366 @@ describe("AgentDevice", () => {
       });
     });
 
-    it("should not assign value to lastDataValue nor to clipboard - if elements sending interval does not fit tickId", async () => {
+    it("should properly assign value to lastDataValue and to clipboard - if tickNormalization is set to noNormalization", async () => {
+      lastDataValues = {};
+      dataClipboardContent = {};
+
+      elementId = "variable2ID";
+      tickId = 1000;
+      payload.dataToSendConfig.variable2ID.sendingInterval = 20;
+      payload.dataToSendConfig.variable2ID.tickNormalization =
+        "noNormalization";
+
+      variable2LastValueTick = 123;
+      variable2ID = "variable2ID";
+      variable2Value = 456;
+
+      await exec();
+
+      //value should be assigned to data clipboard
+      let clipboardContent = device._dataClipboard.getAllData();
+      expect(clipboardContent).toEqual({
+        [variable2LastValueTick]: { [variable2ID]: variable2Value },
+      });
+
+      //value should be assigned to lastValueData
+      let newLastDataValues = device._lastDataValues;
+
+      expect(newLastDataValues).toEqual({
+        [variable2ID]: {
+          tickId: variable2LastValueTick,
+          value: variable2Value,
+        },
+      });
+    });
+
+    it("should properly assign value to lastDataValue and to clipboard - if tickNormalization is set to setTickAsBeginOfInterval, tickId in between", async () => {
+      lastDataValues = {};
+      dataClipboardContent = {};
+
+      elementId = "variable2ID";
+      tickId = 1000;
+      payload.dataToSendConfig.variable2ID.sendingInterval = 20;
+      payload.dataToSendConfig.variable2ID.tickNormalization =
+        "setTickAsBeginOfInterval";
+
+      //123 - 120 --- 140
+      variable2LastValueTick = 123;
+      variable2ID = "variable2ID";
+      variable2Value = 456;
+
+      await exec();
+
+      //value should be assigned to data clipboard
+      let clipboardContent = device._dataClipboard.getAllData();
+      expect(clipboardContent).toEqual({
+        [120]: { [variable2ID]: variable2Value },
+      });
+
+      //value should be assigned to lastValueData
+      let newLastDataValues = device._lastDataValues;
+
+      expect(newLastDataValues).toEqual({
+        [variable2ID]: {
+          tickId: 120,
+          value: variable2Value,
+        },
+      });
+    });
+
+    it("should properly assign value to lastDataValue and to clipboard - if tickNormalization is set to setTickAsBeginOfInterval, tickId is the end of interval", async () => {
+      lastDataValues = {};
+      dataClipboardContent = {};
+
+      elementId = "variable2ID";
+      tickId = 1000;
+      payload.dataToSendConfig.variable2ID.sendingInterval = 20;
+      payload.dataToSendConfig.variable2ID.tickNormalization =
+        "setTickAsBeginOfInterval";
+
+      //123 - 120 --- 140
+      variable2LastValueTick = 140;
+      variable2ID = "variable2ID";
+      variable2Value = 456;
+
+      await exec();
+
+      //value should be assigned to data clipboard
+      let clipboardContent = device._dataClipboard.getAllData();
+      expect(clipboardContent).toEqual({
+        [120]: { [variable2ID]: variable2Value },
+      });
+
+      //value should be assigned to lastValueData
+      let newLastDataValues = device._lastDataValues;
+
+      expect(newLastDataValues).toEqual({
+        [variable2ID]: {
+          tickId: 120,
+          value: variable2Value,
+        },
+      });
+    });
+
+    it("should properly assign value to lastDataValue and to clipboard - if tickNormalization is set to setTickAsEndOfInterval, tickId in between", async () => {
+      lastDataValues = {};
+      dataClipboardContent = {};
+
+      elementId = "variable2ID";
+      tickId = 1000;
+      payload.dataToSendConfig.variable2ID.sendingInterval = 20;
+      payload.dataToSendConfig.variable2ID.tickNormalization =
+        "setTickAsEndOfInterval";
+
+      //123 - 120 --- 140
+      variable2LastValueTick = 123;
+      variable2ID = "variable2ID";
+      variable2Value = 456;
+
+      await exec();
+
+      //value should be assigned to data clipboard
+      let clipboardContent = device._dataClipboard.getAllData();
+      expect(clipboardContent).toEqual({
+        [140]: { [variable2ID]: variable2Value },
+      });
+
+      //value should be assigned to lastValueData
+      let newLastDataValues = device._lastDataValues;
+
+      expect(newLastDataValues).toEqual({
+        [variable2ID]: {
+          tickId: 140,
+          value: variable2Value,
+        },
+      });
+    });
+
+    it("should properly assign value to lastDataValue and to clipboard - if tickNormalization is set to setTickAsEndOfInterval, tickId is the end of interval", async () => {
+      lastDataValues = {};
+      dataClipboardContent = {};
+
+      elementId = "variable2ID";
+      tickId = 1000;
+      payload.dataToSendConfig.variable2ID.sendingInterval = 20;
+      payload.dataToSendConfig.variable2ID.tickNormalization =
+        "setTickAsEndOfInterval";
+
+      //123 - 120 --- 140
+      variable2LastValueTick = 140;
+      variable2ID = "variable2ID";
+      variable2Value = 456;
+
+      await exec();
+
+      //value should be assigned to data clipboard
+      let clipboardContent = device._dataClipboard.getAllData();
+      expect(clipboardContent).toEqual({
+        [140]: { [variable2ID]: variable2Value },
+      });
+
+      //value should be assigned to lastValueData
+      let newLastDataValues = device._lastDataValues;
+
+      expect(newLastDataValues).toEqual({
+        [variable2ID]: {
+          tickId: 140,
+          value: variable2Value,
+        },
+      });
+    });
+
+    it("should properly assign value to lastDataValue and to clipboard - if tickNormalization is set to sendOnlyIfTickFitsSendingInterval, tickId is the end of interval", async () => {
+      lastDataValues = {};
+      dataClipboardContent = {};
+
+      elementId = "variable2ID";
+      tickId = 1000;
+      payload.dataToSendConfig.variable2ID.sendingInterval = 20;
+      payload.dataToSendConfig.variable2ID.tickNormalization =
+        "sendOnlyIfTickFitsSendingInterval";
+
+      //123 - 120 --- 140
+      variable2LastValueTick = 140;
+      variable2ID = "variable2ID";
+      variable2Value = 456;
+
+      await exec();
+
+      //value should be assigned to data clipboard
+      let clipboardContent = device._dataClipboard.getAllData();
+      expect(clipboardContent).toEqual({
+        [140]: { [variable2ID]: variable2Value },
+      });
+
+      //value should be assigned to lastValueData
+      let newLastDataValues = device._lastDataValues;
+
+      expect(newLastDataValues).toEqual({
+        [variable2ID]: {
+          tickId: 140,
+          value: variable2Value,
+        },
+      });
+    });
+
+    it("should not assign value to lastDataValue and to clipboard - if tickNormalization is set to setTickAsBeginOfInterval, and tickId of the begin of the interval, together with the same value is present in lastValues", async () => {
+      lastDataValues = {
+        [variable2ID]: {
+          tickId: 120,
+          value: 456,
+        },
+      };
+      dataClipboardContent = {};
+
+      elementId = "variable2ID";
+      tickId = 1000;
+      payload.dataToSendConfig.variable2ID.sendingInterval = 20;
+      payload.dataToSendConfig.variable2ID.tickNormalization =
+        "setTickAsBeginOfInterval";
+
+      //123 - 120 --- 140
+      variable2LastValueTick = 123;
+      variable2ID = "variable2ID";
+      variable2Value = 456;
+
+      await exec();
+
+      //value should not be assigned to data clipboard
+      let clipboardContent = device._dataClipboard.getAllData();
+      expect(clipboardContent).toEqual({});
+
+      //value should in lastValuesData should stay as it was
+      let newLastDataValues = device._lastDataValues;
+
+      expect(newLastDataValues).toEqual({
+        [variable2ID]: {
+          tickId: 120,
+          value: 456,
+        },
+      });
+    });
+
+    it("should assign value to lastDataValue and to clipboard - if tickNormalization is set to setTickAsBeginOfInterval, and tickId of the begin of the interval with different value is present in lastValues", async () => {
+      lastDataValues = {
+        [variable2ID]: {
+          tickId: 120,
+          value: 123,
+        },
+      };
+      dataClipboardContent = {};
+
+      elementId = "variable2ID";
+      tickId = 1000;
+      payload.dataToSendConfig.variable2ID.sendingInterval = 20;
+      payload.dataToSendConfig.variable2ID.tickNormalization =
+        "setTickAsBeginOfInterval";
+
+      //123 - 120 --- 140
+      variable2LastValueTick = 123;
+      variable2ID = "variable2ID";
+      variable2Value = 456;
+
+      await exec();
+
+      //value should not be assigned to data clipboard
+      let clipboardContent = device._dataClipboard.getAllData();
+      expect(clipboardContent).toEqual({
+        120: {
+          variable2ID: variable2Value,
+        },
+      });
+
+      //value should in lastValuesData should stay as it was
+      let newLastDataValues = device._lastDataValues;
+
+      expect(newLastDataValues).toEqual({
+        [variable2ID]: {
+          tickId: 120,
+          value: 456,
+        },
+      });
+    });
+
+    it("should assign value to lastDataValue and to clipboard - if tickNormalization is set to setTickAsEndOfInterval, and tickId of the end of the interval with different value is present in lastValues", async () => {
+      lastDataValues = {
+        [variable2ID]: {
+          tickId: 140,
+          value: 123,
+        },
+      };
+      dataClipboardContent = {};
+
+      elementId = "variable2ID";
+      tickId = 1000;
+      payload.dataToSendConfig.variable2ID.sendingInterval = 20;
+      payload.dataToSendConfig.variable2ID.tickNormalization =
+        "setTickAsEndOfInterval";
+
+      //123 - 120 --- 140
+      variable2LastValueTick = 123;
+      variable2ID = "variable2ID";
+      variable2Value = 456;
+
+      await exec();
+
+      //value should not be assigned to data clipboard
+      let clipboardContent = device._dataClipboard.getAllData();
+      expect(clipboardContent).toEqual({
+        140: {
+          variable2ID: variable2Value,
+        },
+      });
+
+      //value should in lastValuesData should stay as it was
+      let newLastDataValues = device._lastDataValues;
+
+      expect(newLastDataValues).toEqual({
+        [variable2ID]: {
+          tickId: 140,
+          value: 456,
+        },
+      });
+    });
+
+    it("should not assign value to lastDataValue and to clipboard - if tickNormalization is set to setTickAsEndOfInterval, and tickId of the end of the interval, together with the same value is present in lastValues", async () => {
+      lastDataValues = {
+        [variable2ID]: {
+          tickId: 140,
+          value: 456,
+        },
+      };
+      dataClipboardContent = {};
+
+      elementId = "variable2ID";
+      tickId = 1000;
+      payload.dataToSendConfig.variable2ID.sendingInterval = 20;
+      payload.dataToSendConfig.variable2ID.tickNormalization =
+        "setTickAsEndOfInterval";
+
+      //123 - 120 --- 140
+      variable2LastValueTick = 123;
+      variable2ID = "variable2ID";
+      variable2Value = 456;
+
+      await exec();
+
+      //value should not be assigned to data clipboard
+      let clipboardContent = device._dataClipboard.getAllData();
+      expect(clipboardContent).toEqual({});
+
+      //value should in lastValuesData should stay as it was
+      let newLastDataValues = device._lastDataValues;
+
+      expect(newLastDataValues).toEqual({
+        [variable2ID]: {
+          tickId: 140,
+          value: 456,
+        },
+      });
+    });
+
+    it("should not assign value to lastDataValue and to clipboard - if tickNormalization is set to sendOnlyIfTickFitsSendingInterval, tickId is not the end of interval", async () => {
       lastDataValues = {
         [variable1LastValueTick]: { [variable1ID]: variable1Value },
         [variable3LastValueTick]: { [variable3ID]: variable3Value },
@@ -216,7 +576,107 @@ describe("AgentDevice", () => {
 
       elementId = "variable2ID";
       tickId = 1000;
-      payload.dataToSendConfig.variable2ID.sendingInterval = 11;
+      payload.dataToSendConfig.variable2ID.sendingInterval = 20;
+      payload.dataToSendConfig.variable2ID.tickNormalization =
+        "sendOnlyIfTickFitsSendingInterval";
+
+      //123 - 120 --- 140
+      variable2LastValueTick = 123;
+      variable2ID = "variable2ID";
+      variable2Value = 456;
+
+      await exec();
+      //value should be assigned to data clipboard
+      let clipboardContent = device._dataClipboard.getAllData();
+      expect(clipboardContent).toEqual({
+        [variable3ID]: {
+          tickId: variable3LastValueTick,
+          value: variable3Value,
+        },
+        [variable1ID]: {
+          tickId: variable1LastValueTick,
+          value: variable1Value,
+        },
+      });
+
+      //value should be assigned to lastValueData
+      let newLastDataValues = device._lastDataValues;
+
+      expect(newLastDataValues).toEqual({
+        [variable1LastValueTick]: { [variable1ID]: variable1Value },
+        [variable3LastValueTick]: { [variable3ID]: variable3Value },
+      });
+    });
+
+    it("should not assign value to lastDataValue nor to clipboard - if elements sending interval does not fit tickId", async () => {
+      lastDataValues = {
+        [variable1LastValueTick]: { [variable1ID]: variable1Value },
+        [variable3LastValueTick]: { [variable3ID]: variable3Value },
+      };
+      dataClipboardContent = {
+        [variable3ID]: {
+          tickId: variable3LastValueTick,
+          value: variable3Value,
+        },
+        [variable1ID]: {
+          tickId: variable1LastValueTick,
+          value: variable1Value,
+        },
+      };
+
+      elementId = "variable2ID";
+      tickId = 1001;
+      payload.dataToSendConfig.variable2ID.sendingInterval = 20;
+
+      variable2LastValueTick = 123;
+      variable2ID = "variable2ID";
+      variable2Value = 456;
+
+      await exec();
+
+      //value should be assigned to data clipboard
+      let clipboardContent = device._dataClipboard.getAllData();
+      expect(clipboardContent).toEqual({
+        [variable3ID]: {
+          tickId: variable3LastValueTick,
+          value: variable3Value,
+        },
+        [variable1ID]: {
+          tickId: variable1LastValueTick,
+          value: variable1Value,
+        },
+      });
+
+      //value should be assigned to lastValueData
+      let newLastDataValues = device._lastDataValues;
+
+      expect(newLastDataValues).toEqual({
+        [variable1LastValueTick]: { [variable1ID]: variable1Value },
+        [variable3LastValueTick]: { [variable3ID]: variable3Value },
+      });
+    });
+
+    it("should not assign value to lastDataValue nor to clipboard - if elements sending interval does not fit tickId, tickNormalization is set to setTickAsEndOfInterval", async () => {
+      lastDataValues = {
+        [variable1LastValueTick]: { [variable1ID]: variable1Value },
+        [variable3LastValueTick]: { [variable3ID]: variable3Value },
+      };
+      dataClipboardContent = {
+        [variable3ID]: {
+          tickId: variable3LastValueTick,
+          value: variable3Value,
+        },
+        [variable1ID]: {
+          tickId: variable1LastValueTick,
+          value: variable1Value,
+        },
+      };
+
+      elementId = "variable2ID";
+      tickId = 1001;
+      payload.dataToSendConfig.variable2ID.sendingInterval = 20;
+      payload.dataToSendConfig.variable2ID.tickNormalization =
+        "setTickAsEndOfInterval";
 
       variable2LastValueTick = 123;
       variable2ID = "variable2ID";
@@ -313,6 +773,53 @@ describe("AgentDevice", () => {
       };
 
       await exec();
+
+      //value should be assigned to data clipboard
+      let clipboardContent = device._dataClipboard.getAllData();
+      expect(clipboardContent).toEqual({
+        [variable3ID]: {
+          tickId: variable3LastValueTick,
+          value: variable3Value,
+        },
+        [variable1ID]: {
+          tickId: variable1LastValueTick,
+          value: variable1Value,
+        },
+      });
+
+      //value should be assigned to lastValueData
+      let newLastDataValues = device._lastDataValues;
+
+      expect(newLastDataValues).toEqual({
+        [variable1LastValueTick]: { [variable1ID]: variable1Value },
+        [variable3LastValueTick]: { [variable3ID]: variable3Value },
+      });
+    });
+
+    it("should not assign value to lastDataValue nor to clipboard - if element does not exist, and TickNormalizer is used", async () => {
+      lastDataValues = {
+        [variable1LastValueTick]: { [variable1ID]: variable1Value },
+        [variable3LastValueTick]: { [variable3ID]: variable3Value },
+      };
+      dataClipboardContent = {
+        [variable3ID]: {
+          tickId: variable3LastValueTick,
+          value: variable3Value,
+        },
+        [variable1ID]: {
+          tickId: variable1LastValueTick,
+          value: variable1Value,
+        },
+      };
+
+      elementId = "variable4ID";
+
+      payload.dataToSendConfig.variable4ID = {
+        elementId: "variable4ID",
+        deviceId: "testDevice1ID",
+        sendingInterval: 40,
+        tickNormalization: "setTickAsEndOfInterval",
+      };
 
       //value should be assigned to data clipboard
       let clipboardContent = device._dataClipboard.getAllData();

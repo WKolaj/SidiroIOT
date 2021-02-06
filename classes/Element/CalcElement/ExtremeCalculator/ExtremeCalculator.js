@@ -66,7 +66,7 @@ class ExtremeCalculator extends CalcElement {
     this._endIntervalTick = this._calculateIntervalEndTick(tickId);
 
     //Initializing value of extreme
-    this.setValue(variableValue, this._endIntervalTick);
+    this.setValue(variableValue, tickId);
   }
 
   /**
@@ -87,11 +87,11 @@ class ExtremeCalculator extends CalcElement {
     let newBeginInterval = this._calculateIntervalBeginTick(tickId);
     let newEndInterval = this._calculateIntervalEndTick(tickId);
 
+    //Initializing value of extreme for new period
+    this.setValue(value, tickId);
+
     this._beginIntervalTick = newBeginInterval;
     this._endIntervalTick = newEndInterval;
-
-    //Initializing value of extreme for new period
-    this.setValue(value, this._endIntervalTick);
   }
 
   /**
@@ -183,7 +183,7 @@ class ExtremeCalculator extends CalcElement {
     //Checking if new value is an extreme
     if (this._checkIfValueIsExtreme(value)) {
       //setting new value as an extreme
-      this.setValue(value, this._endIntervalTick);
+      this.setValue(value, lastTickId);
     }
   }
 

@@ -2,6 +2,9 @@ const Joi = require("joi");
 const deviceSchema = require("./AgentDevice");
 const { boardingKeySchema } = require("./PropertiesValues/MCBoardingKey");
 const { dataConverterSchema } = require("./PropertiesValues/DataConverter");
+const {
+  TickIdNormalizeType,
+} = require("../../classes/Device/AgentDevice/TickIdNormalizer");
 
 const dataToSendConfigSchemaContent = {
   elementId: Joi.string().min(1).required(),
@@ -10,6 +13,9 @@ const dataToSendConfigSchemaContent = {
   qualityCodeEnabled: Joi.boolean().required(),
   datapointId: Joi.string().required(),
   dataConverter: dataConverterSchema.allow(null).required(),
+  tickNormalization: Joi.string()
+    .valid(...Object.values(TickIdNormalizeType))
+    .optional(),
 };
 
 const dataToSendConfigSchema = Joi.object({

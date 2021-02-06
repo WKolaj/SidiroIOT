@@ -11,6 +11,7 @@ const Device = require("../Device");
 const path = require("path");
 const Sampler = require("../../Sampler/Sampler");
 const logger = require("../../../logger/logger");
+const { TickIdNormalizer } = require("./TickIdNormalizer");
 
 const dataStorageDirName = "dataToSend";
 const eventStorageDirName = "eventsToSend";
@@ -40,6 +41,7 @@ class AgentDevice extends Device {
     this._eventsToSendConfig = null;
     this._boarded = null;
     this._busy = null;
+    this._tickIdNormalizers = null;
   }
 
   //#endregion ========= CONSTRUCTOR =========
@@ -109,6 +111,13 @@ class AgentDevice extends Device {
     return this._boarded;
   }
 
+  /**
+   * @description Normalizers of tick id
+   */
+  get TickIdNormalizers() {
+    return this._tickIdNormalizers;
+  }
+
   //#endregion ========= PROPERTIES ========
 
   //#region ========= PRIVATE METHODS =========
@@ -156,6 +165,30 @@ class AgentDevice extends Device {
   }
 
   /**
+   * @description Method for initialize tick id normalizers based on dataConfig
+   */
+  _initTickIdNormalizers() {
+    this._tickIdNormalizers = {};
+
+    let allElementsConfig = Object.values(this.DataToSendConfig);
+
+    for (let elementConfig of allElementsConfig) {
+      let elementId = elementConfig.elementId;
+      let elementSendingInterval = elementConfig.sendingInterval;
+      let tickIdNormalizationType = elementConfig.tickNormalization;
+
+      if (exists(tickIdNormalizationType)) {
+        let normalizationType = tickIdNormalizationType;
+        let normalizer = new TickIdNormalizer(
+          elementSendingInterval,
+          normalizationType
+        );
+        this._tickIdNormalizers[elementId] = normalizer;
+      }
+    }
+  }
+
+  /**
    * @description Method for getting and saving all actual values of elements from data
    * @param {Number} tickNumber actual tick number
    */
@@ -196,24 +229,31 @@ class AgentDevice extends Device {
     let elementsValue = element.Value;
     let elementsLastValueTick = element.LastValueTick;
 
+    //Normalizing tickid
+    let normalizer = this.TickIdNormalizers[elementId];
+    let normalizedTickId = elementsLastValueTick;
+
+    if (normalizer)
+      normalizedTickId = normalizer.normalizeTickId(elementsLastValueTick);
+
+    //Checking if tick id after normalization is not null
+    if (normalizedTickId == null) return;
+
     //Checking if element's value is different then element's value in lastDataValues
     let valueFromLastValues = this._lastDataValues[elementId];
     if (
       exists(valueFromLastValues) &&
-      valueFromLastValues.tickId === elementsLastValueTick &&
+      valueFromLastValues.tickId === normalizedTickId &&
       valueFromLastValues.value === elementsValue
     )
       return;
 
-    //Adding data to clipboard
-    this._dataClipboard.addData(
-      elementsLastValueTick,
-      elementId,
-      elementsValue
-    );
-    //Adding data to lastDataValues
+    //Adding data to clipboard - tickId in dataClipboard should be normalized - in order to obtain data consistency
+    this._dataClipboard.addData(normalizedTickId, elementId, elementsValue);
+
+    //Adding data to lastDataValues - tickId in last values should be normalized in order not to send the same data again
     this._lastDataValues[elementId] = {
-      tickId: elementsLastValueTick,
+      tickId: normalizedTickId,
       value: elementsValue,
     };
   }
@@ -656,6 +696,7 @@ class AgentDevice extends Device {
     this._boarded = false;
     this._busy = false;
 
+    this._initTickIdNormalizers();
     await this._initializeMainDirectory();
     await this._initializeClipboards();
     await this._initializeStorages();

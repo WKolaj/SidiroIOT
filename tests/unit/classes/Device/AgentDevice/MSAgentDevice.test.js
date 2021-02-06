@@ -12,7 +12,6 @@ const {
 const path = require("path");
 const { MindConnectAgent, retry } = require("@mindconnect/mindconnect-nodejs");
 const logger = require("../../../../../logger/logger");
-
 const AgentsDirPath = "__testDir/settings/agentsData";
 
 describe("MSAgentDevice", () => {
@@ -655,6 +654,341 @@ describe("MSAgentDevice", () => {
             qualityCodeEnabled: true,
             datapointId: "cccc2222",
             dataConverter: null,
+          },
+        },
+        eventsToSendConfig: {
+          testElement1ID: {
+            elementId: "testElement1ID",
+            deviceId: "testDevice1ID",
+            sendingInterval: 100,
+            entityId: "aaaa0000",
+            severity: 20,
+            source: "source1234",
+            correlationId: "corelation123",
+            code: "1234",
+            acknowledged: false,
+          },
+          testElement2ID: {
+            elementId: "testElement2ID",
+            deviceId: "testDevice2ID",
+            sendingInterval: 200,
+            entityId: "bbbb1111",
+            severity: 30,
+            source: "source1244",
+            correlationId: "corelation124",
+            code: "1244",
+            acknowledged: false,
+          },
+          testElement3ID: {
+            elementId: "testElement3ID",
+            deviceId: "testDevice3ID",
+            sendingInterval: 300,
+            entityId: "cccc2222",
+            severity: 40,
+            source: "source1255",
+            correlationId: "corelation125",
+            code: "1254",
+            acknowledged: false,
+          },
+        },
+        numberOfSendDataRetries: 5,
+        numberOfSendEventRetries: 3,
+        boarded: false,
+      };
+
+      expect(device.generatePayload()).toEqual(expectedPayload);
+    });
+
+    it("should initialize device based on given payload - if tickNormalizers are used", async () => {
+      payload.dataToSendConfig["testElement1ID"].tickNormalization =
+        "noNormalization";
+      payload.dataToSendConfig["testElement2ID"].tickNormalization =
+        "setTickAsBeginOfInterval";
+      payload.dataToSendConfig["testElement3ID"].tickNormalization =
+        "setTickAsEndOfInterval";
+
+      payload.dataToSendConfig["testElement4ID"] = {
+        elementId: "testElement4ID",
+        deviceId: "testDevice4ID",
+        sendingInterval: 400,
+        qualityCodeEnabled: true,
+        datapointId: "dddd4444",
+        dataConverter: null,
+        tickNormalization: "sendOnlyIfTickFitsSendingInterval",
+      };
+
+      await exec();
+
+      let expectedPayload = {
+        id: "deviceID",
+        name: "deviceName",
+        type: "MSAgentDevice",
+        variables: {
+          associatedVariableID: {
+            id: "associatedVariableID",
+            deviceId: "deviceID",
+            lastValueTick: 0,
+            name: "associatedVariableName",
+            type: "AssociatedVariable",
+            unit: "A",
+            sampleTime: 1,
+            associatedElementID: "fakeDeviceID",
+            associatedDeviceID: "fakeVariableID",
+            value: 987.321,
+            defaultValue: 987.321,
+          },
+        },
+        calcElements: {
+          averageCalculatorID: {
+            id: "averageCalculatorID",
+            name: "averageCalculatorName",
+            type: "AverageCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            calculationInterval: 15,
+            deviceId: "deviceID",
+            lastValueTick: 0,
+            value: 123456.654321,
+          },
+          factorCalculatorID: {
+            id: "factorCalculatorID",
+            name: "factorCalculatorName",
+            type: "FactorCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            deviceId: "deviceID",
+            lastValueTick: 0,
+            value: 123456.654321,
+          },
+          increaseCalculatorID: {
+            id: "increaseCalculatorID",
+            name: "increaseCalculatorName",
+            type: "IncreaseCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            calculationInterval: 15,
+            overflow: 1234,
+            deviceId: "deviceID",
+            lastValueTick: 0,
+            value: 123456.654321,
+          },
+          sumCalculatorID: {
+            id: "sumCalculatorID",
+            name: "sumCalculatorName",
+            type: "SumCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableIDs: [
+              { variableID: "fakeVariableID1", factor: 1 },
+              { variableID: "fakeVariableID2", factor: 2 },
+              { variableID: "fakeVariableID3", factor: 3 },
+            ],
+            deviceId: "deviceID",
+            lastValueTick: 0,
+            value: 123456.654321,
+          },
+          valueFromByteArrayCalculatorID: {
+            id: "valueFromByteArrayCalculatorID",
+            name: "valueFromByteArrayCalculatorName",
+            type: "ValueFromByteArrayCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 15,
+            variableID: "fakeVariableID",
+            bitNumber: 4,
+            byteNumber: 3,
+            length: 2,
+            deviceId: "deviceID",
+            lastValueTick: 0,
+            value: 15,
+          },
+          expessionCalculatorID: {
+            id: "expessionCalculatorID",
+            name: "expessionCalculatorName",
+            type: "ExpressionCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 15,
+            expression: "p1+p2+p3",
+            parameters: {
+              p1: { type: "static", value: 100 },
+              p2: { type: "dynamic", elementId: "associatedVariableID" },
+              p3: { type: "dynamic", elementId: "cpuLoadVariableID" },
+            },
+            deviceId: "deviceID",
+            value: 15,
+            lastValueTick: 0,
+          },
+        },
+        alerts: {
+          bandwidthLimitAlertID: {
+            id: "bandwidthLimitAlertID",
+            name: "bandwidthLimitAlertName",
+            type: "BandwidthLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            highLimit: 100,
+            lowLimit: -50,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              highLimit: {
+                pl: "fakeHighLimitTextPL",
+                en: "fakeHighLimitTextEN",
+              },
+              lowLimit: {
+                pl: "fakeLowLimitTextPL",
+                en: "fakeLowLimitTextEN",
+              },
+            },
+            deviceId: "deviceID",
+            lastValueTick: 0,
+            value: null,
+          },
+          exactValuesAlertID: {
+            id: "exactValuesAlertID",
+            name: "exactValuesAlertName",
+            type: "ExactValuesAlert",
+            unit: "A",
+            sampleTime: 1,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            alertValues: [10, 20, 30, 40, 50],
+            severity: 10,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              10: {
+                en: "step 1: $VALUE",
+                pl: "próg 1: $VALUE",
+              },
+              20: {
+                en: "step 2: $VALUE",
+                pl: "próg 2: $VALUE",
+              },
+              30: {
+                en: "step 3: $VALUE",
+                pl: "próg 3: $VALUE",
+              },
+              40: {
+                en: "step 4: $VALUE",
+                pl: "próg 4: $VALUE",
+              },
+              50: {
+                en: "step 5: $VALUE",
+                pl: "próg 5: $VALUE",
+              },
+            },
+            deviceId: "deviceID",
+            lastValueTick: 0,
+            value: null,
+          },
+          highLimitAlertID: {
+            id: "highLimitAlertID",
+            name: "highLimitAlertName",
+            type: "HighLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            highLimit: 100,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              pl: "fakeTextPL",
+              en: "fakeTextEN",
+            },
+            deviceId: "deviceID",
+            lastValueTick: 0,
+            value: null,
+          },
+          lowLimitAlertID: {
+            id: "lowLimitAlertID",
+            name: "lowLimitAlertName",
+            type: "LowLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            lowLimit: 100,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              pl: "fakeTextPL",
+              en: "fakeTextEN",
+            },
+            deviceId: "deviceID",
+            lastValueTick: 0,
+            value: null,
+          },
+        },
+        isActive: true,
+        sendDataFileInterval: 10,
+        sendEventFileInterval: 5,
+        dataStorageSize: 20,
+        eventStorageSize: 30,
+        numberOfDataFilesToSend: 3,
+        numberOfEventFilesToSend: 6,
+        dataToSendConfig: {
+          testElement1ID: {
+            elementId: "testElement1ID",
+            deviceId: "testDevice1ID",
+            sendingInterval: 100,
+            qualityCodeEnabled: true,
+            datapointId: "aaaa0000",
+            dataConverter: {
+              conversionType: "fixed",
+              precision: 3,
+            },
+            tickNormalization: "noNormalization",
+          },
+          testElement2ID: {
+            elementId: "testElement2ID",
+            deviceId: "testDevice2ID",
+            sendingInterval: 200,
+            qualityCodeEnabled: true,
+            datapointId: "bbbb1111",
+            dataConverter: {
+              conversionType: "precision",
+              precision: 3,
+            },
+            tickNormalization: "setTickAsBeginOfInterval",
+          },
+          testElement3ID: {
+            elementId: "testElement3ID",
+            deviceId: "testDevice3ID",
+            sendingInterval: 300,
+            qualityCodeEnabled: true,
+            datapointId: "cccc2222",
+            dataConverter: null,
+            tickNormalization: "setTickAsEndOfInterval",
+          },
+          testElement4ID: {
+            elementId: "testElement4ID",
+            deviceId: "testDevice4ID",
+            sendingInterval: 400,
+            qualityCodeEnabled: true,
+            datapointId: "dddd4444",
+            dataConverter: null,
+            tickNormalization: "sendOnlyIfTickFitsSendingInterval",
           },
         },
         eventsToSendConfig: {
@@ -1611,6 +1945,7 @@ describe("MSAgentDevice", () => {
               conversionType: "precision",
               precision: 3,
             },
+            tickNormalization: "noNormalization",
           },
           testElement3ID: {
             elementId: "testElement3ID",
@@ -1619,6 +1954,25 @@ describe("MSAgentDevice", () => {
             qualityCodeEnabled: true,
             datapointId: "cccc2222",
             dataConverter: null,
+            tickNormalization: "setTickAsBeginOfInterval",
+          },
+          testElement4ID: {
+            elementId: "testElement4ID",
+            deviceId: "testDevice4ID",
+            sendingInterval: 400,
+            qualityCodeEnabled: true,
+            datapointId: "dddd3333",
+            dataConverter: null,
+            tickNormalization: "setTickAsEndOfInterval",
+          },
+          testElement5ID: {
+            elementId: "testElement5ID",
+            deviceId: "testDevice5ID",
+            sendingInterval: 500,
+            qualityCodeEnabled: true,
+            datapointId: "eeee4444",
+            dataConverter: null,
+            tickNormalization: "sendOnlyIfTickFitsSendingInterval",
           },
         },
         eventsToSendConfig: {
@@ -1928,6 +2282,7 @@ describe("MSAgentDevice", () => {
               conversionType: "precision",
               precision: 3,
             },
+            tickNormalization: "noNormalization",
           },
           testElement3ID: {
             elementId: "testElement3ID",
@@ -1936,6 +2291,25 @@ describe("MSAgentDevice", () => {
             qualityCodeEnabled: true,
             datapointId: "cccc2222",
             dataConverter: null,
+            tickNormalization: "setTickAsBeginOfInterval",
+          },
+          testElement4ID: {
+            elementId: "testElement4ID",
+            deviceId: "testDevice4ID",
+            sendingInterval: 400,
+            qualityCodeEnabled: true,
+            datapointId: "dddd3333",
+            dataConverter: null,
+            tickNormalization: "setTickAsEndOfInterval",
+          },
+          testElement5ID: {
+            elementId: "testElement5ID",
+            deviceId: "testDevice5ID",
+            sendingInterval: 500,
+            qualityCodeEnabled: true,
+            datapointId: "eeee4444",
+            dataConverter: null,
+            tickNormalization: "sendOnlyIfTickFitsSendingInterval",
           },
         },
         eventsToSendConfig: {
@@ -2199,6 +2573,7 @@ describe("MSAgentDevice", () => {
               conversionType: "precision",
               precision: 3,
             },
+            tickNormalization: "noNormalization",
           },
           testElement3ID: {
             elementId: "testElement3ID",
@@ -2207,6 +2582,25 @@ describe("MSAgentDevice", () => {
             qualityCodeEnabled: true,
             datapointId: "cccc2222",
             dataConverter: null,
+            tickNormalization: "setTickAsBeginOfInterval",
+          },
+          testElement4ID: {
+            elementId: "testElement4ID",
+            deviceId: "testDevice4ID",
+            sendingInterval: 400,
+            qualityCodeEnabled: true,
+            datapointId: "dddd3333",
+            dataConverter: null,
+            tickNormalization: "setTickAsEndOfInterval",
+          },
+          testElement5ID: {
+            elementId: "testElement5ID",
+            deviceId: "testDevice5ID",
+            sendingInterval: 500,
+            qualityCodeEnabled: true,
+            datapointId: "eeee4444",
+            dataConverter: null,
+            tickNormalization: "sendOnlyIfTickFitsSendingInterval",
           },
         },
         eventsToSendConfig: {
@@ -3216,6 +3610,37 @@ describe("MSAgentDevice", () => {
 
       expect(result).toEqual(
         `dataToSendConfig error: "dataConverter.precision" must be greater than or equal to 0`
+      );
+    });
+
+    it("should return message if one of dataToSendConfigs has invalid tickNormalization - null", () => {
+      payload.dataToSendConfig.testElement2ID.tickNormalization = null;
+
+      let result = exec();
+
+      expect(result).toEqual(
+        `dataToSendConfig error: "tickNormalization" must be one of [noNormalization, setTickAsBeginOfInterval, setTickAsEndOfInterval, sendOnlyIfTickFitsSendingInterval]`
+      );
+    });
+
+    it("should return message if one of dataToSendConfigs has invalid tickNormalization - number", () => {
+      payload.dataToSendConfig.testElement2ID.tickNormalization = 1234;
+
+      let result = exec();
+
+      expect(result).toEqual(
+        `dataToSendConfig error: "tickNormalization" must be one of [noNormalization, setTickAsBeginOfInterval, setTickAsEndOfInterval, sendOnlyIfTickFitsSendingInterval]`
+      );
+    });
+
+    it("should return message if one of dataToSendConfigs has invalid tickNormalization - invalid string", () => {
+      payload.dataToSendConfig.testElement2ID.tickNormalization =
+        "fakeNormalization";
+
+      let result = exec();
+
+      expect(result).toEqual(
+        `dataToSendConfig error: "tickNormalization" must be one of [noNormalization, setTickAsBeginOfInterval, setTickAsEndOfInterval, sendOnlyIfTickFitsSendingInterval]`
       );
     });
 

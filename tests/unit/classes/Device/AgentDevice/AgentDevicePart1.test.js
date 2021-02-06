@@ -586,6 +586,539 @@ describe("AgentDevice", () => {
       expect(device.generatePayload()).toEqual(expectedPayload);
     });
 
+    it("should initialize device based on given payload - if there are tickNormalize elements", async () => {
+      payload = {
+        id: "deviceID",
+        name: "deviceName",
+        type: "AgentDevice",
+        variables: {
+          associatedVariableID: {
+            id: "associatedVariableID",
+            name: "associatedVariableName",
+            type: "AssociatedVariable",
+            unit: "A",
+            sampleTime: 1,
+            associatedElementID: "fakeDeviceID",
+            associatedDeviceID: "fakeVariableID",
+          },
+        },
+        calcElements: {
+          averageCalculatorID: {
+            id: "averageCalculatorID",
+            name: "averageCalculatorName",
+            type: "AverageCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            calculationInterval: 15,
+          },
+          factorCalculatorID: {
+            id: "factorCalculatorID",
+            name: "factorCalculatorName",
+            type: "FactorCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+          },
+          increaseCalculatorID: {
+            id: "increaseCalculatorID",
+            name: "increaseCalculatorName",
+            type: "IncreaseCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            calculationInterval: 15,
+            overflow: 1234,
+          },
+          sumCalculatorID: {
+            id: "sumCalculatorID",
+            name: "sumCalculatorName",
+            type: "SumCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableIDs: [
+              { variableID: "fakeVariableID1", factor: 1 },
+              { variableID: "fakeVariableID2", factor: 2 },
+              { variableID: "fakeVariableID3", factor: 3 },
+            ],
+          },
+          valueFromByteArrayCalculatorID: {
+            id: "valueFromByteArrayCalculatorID",
+            name: "valueFromByteArrayCalculatorName",
+            type: "ValueFromByteArrayCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 15,
+            variableID: "fakeVariableID",
+            bitNumber: 4,
+            byteNumber: 3,
+            length: 2,
+          },
+        },
+        alerts: {
+          bandwidthLimitAlertID: {
+            id: "bandwidthLimitAlertID",
+            name: "bandwidthLimitAlertName",
+            type: "BandwidthLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            highLimit: 100,
+            lowLimit: -50,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              highLimit: {
+                pl: "fakeHighLimitTextPL",
+                en: "fakeHighLimitTextEN",
+              },
+              lowLimit: {
+                pl: "fakeLowLimitTextPL",
+                en: "fakeLowLimitTextEN",
+              },
+            },
+          },
+          exactValuesAlertID: {
+            id: "exactValuesAlertID",
+            name: "exactValuesAlertName",
+            type: "ExactValuesAlert",
+            unit: "A",
+            sampleTime: 1,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            alertValues: [10, 20, 30, 40, 50],
+            severity: 10,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              10: {
+                en: "step 1: $VALUE",
+                pl: "próg 1: $VALUE",
+              },
+              20: {
+                en: "step 2: $VALUE",
+                pl: "próg 2: $VALUE",
+              },
+              30: {
+                en: "step 3: $VALUE",
+                pl: "próg 3: $VALUE",
+              },
+              40: {
+                en: "step 4: $VALUE",
+                pl: "próg 4: $VALUE",
+              },
+              50: {
+                en: "step 5: $VALUE",
+                pl: "próg 5: $VALUE",
+              },
+            },
+          },
+          highLimitAlertID: {
+            id: "highLimitAlertID",
+            name: "highLimitAlertName",
+            type: "HighLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            highLimit: 100,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              pl: "fakeTextPL",
+              en: "fakeTextEN",
+            },
+          },
+          lowLimitAlertID: {
+            id: "lowLimitAlertID",
+            name: "lowLimitAlertName",
+            type: "LowLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            lowLimit: 100,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            texts: {
+              pl: "fakeTextPL",
+              en: "fakeTextEN",
+            },
+          },
+        },
+        isActive: true,
+        sendDataFileInterval: 10,
+        sendEventFileInterval: 5,
+        dataStorageSize: 20,
+        eventStorageSize: 30,
+        numberOfDataFilesToSend: 3,
+        numberOfEventFilesToSend: 6,
+        dataToSendConfig: {
+          testElement1ID: {
+            elementId: "testElement1ID",
+            deviceId: "testDevice1ID",
+            sendingInterval: 100,
+          },
+          testElement2ID: {
+            elementId: "testElement2ID",
+            deviceId: "testDevice2ID",
+            sendingInterval: 200,
+            tickNormalization: "noNormalization",
+          },
+          testElement3ID: {
+            elementId: "testElement3ID",
+            deviceId: "testDevice3ID",
+            sendingInterval: 300,
+            tickNormalization: "setTickAsBeginOfInterval",
+          },
+          testElement4ID: {
+            elementId: "testElement4ID",
+            deviceId: "testDevice4ID",
+            sendingInterval: 400,
+            tickNormalization: "testElement2ID",
+            tickNormalization: "setTickAsEndOfInterval",
+          },
+          testElement5ID: {
+            elementId: "testElement5ID",
+            deviceId: "testDevice5ID",
+            sendingInterval: 500,
+            tickNormalization: "testElement2ID",
+            tickNormalization: "sendOnlyIfTickFitsSendingInterval",
+          },
+        },
+        eventsToSendConfig: {
+          testElement4ID: {
+            elementId: "testElement4ID",
+            deviceId: "testDevice4ID",
+            sendingInterval: 400,
+          },
+          testElement5ID: {
+            elementId: "testElement5ID",
+            deviceId: "testDevice5ID",
+            sendingInterval: 500,
+          },
+          testElement6ID: {
+            elementId: "testElement6ID",
+            deviceId: "testDevice6ID",
+            sendingInterval: 600,
+          },
+        },
+      };
+
+      await exec();
+
+      let expectedPayload = {
+        id: "deviceID",
+        name: "deviceName",
+        type: "AgentDevice",
+        variables: {
+          associatedVariableID: {
+            id: "associatedVariableID",
+            name: "associatedVariableName",
+            type: "AssociatedVariable",
+            unit: "A",
+            sampleTime: 1,
+            associatedElementID: "fakeDeviceID",
+            associatedDeviceID: "fakeVariableID",
+            defaultValue: getElementReturnValue.DefaultValue,
+            value: getElementReturnValue.DefaultValue,
+            lastValueTick: 0,
+            deviceId: "deviceID",
+          },
+        },
+        calcElements: {
+          averageCalculatorID: {
+            id: "averageCalculatorID",
+            name: "averageCalculatorName",
+            type: "AverageCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            calculationInterval: 15,
+            lastValueTick: 0,
+            deviceId: "deviceID",
+            value: 123456.654321,
+          },
+          factorCalculatorID: {
+            id: "factorCalculatorID",
+            name: "factorCalculatorName",
+            type: "FactorCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            lastValueTick: 0,
+            deviceId: "deviceID",
+            value: 123456.654321,
+          },
+          increaseCalculatorID: {
+            id: "increaseCalculatorID",
+            name: "increaseCalculatorName",
+            type: "IncreaseCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            variableID: "fakeVariableID",
+            factor: 5,
+            calculationInterval: 15,
+            overflow: 1234,
+            lastValueTick: 0,
+            deviceId: "deviceID",
+            value: 123456.654321,
+          },
+          sumCalculatorID: {
+            id: "sumCalculatorID",
+            name: "sumCalculatorName",
+            type: "SumCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 123456.654321,
+            lastValueTick: 0,
+            deviceId: "deviceID",
+            variableIDs: [
+              { variableID: "fakeVariableID1", factor: 1 },
+              { variableID: "fakeVariableID2", factor: 2 },
+              { variableID: "fakeVariableID3", factor: 3 },
+            ],
+            value: 123456.654321,
+          },
+          valueFromByteArrayCalculatorID: {
+            id: "valueFromByteArrayCalculatorID",
+            name: "valueFromByteArrayCalculatorName",
+            type: "ValueFromByteArrayCalculator",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: 15,
+            variableID: "fakeVariableID",
+            bitNumber: 4,
+            byteNumber: 3,
+            length: 2,
+            lastValueTick: 0,
+            deviceId: "deviceID",
+            value: 15,
+          },
+        },
+        alerts: {
+          bandwidthLimitAlertID: {
+            id: "bandwidthLimitAlertID",
+            name: "bandwidthLimitAlertName",
+            type: "BandwidthLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            value: null,
+            variableID: "fakeVariableID",
+            highLimit: 100,
+            lowLimit: -50,
+            severity: 1,
+            hysteresis: 15,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            lastValueTick: 0,
+            deviceId: "deviceID",
+            texts: {
+              highLimit: {
+                pl: "fakeHighLimitTextPL",
+                en: "fakeHighLimitTextEN",
+              },
+              lowLimit: {
+                pl: "fakeLowLimitTextPL",
+                en: "fakeLowLimitTextEN",
+              },
+            },
+          },
+          exactValuesAlertID: {
+            id: "exactValuesAlertID",
+            name: "exactValuesAlertName",
+            type: "ExactValuesAlert",
+            unit: "A",
+            sampleTime: 1,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            alertValues: [10, 20, 30, 40, 50],
+            severity: 10,
+            timeOnDelay: 5,
+            value: null,
+            timeOffDelay: 10,
+            lastValueTick: 0,
+            deviceId: "deviceID",
+            texts: {
+              10: {
+                en: "step 1: $VALUE",
+                pl: "próg 1: $VALUE",
+              },
+              20: {
+                en: "step 2: $VALUE",
+                pl: "próg 2: $VALUE",
+              },
+              30: {
+                en: "step 3: $VALUE",
+                pl: "próg 3: $VALUE",
+              },
+              40: {
+                en: "step 4: $VALUE",
+                pl: "próg 4: $VALUE",
+              },
+              50: {
+                en: "step 5: $VALUE",
+                pl: "próg 5: $VALUE",
+              },
+            },
+          },
+          highLimitAlertID: {
+            id: "highLimitAlertID",
+            name: "highLimitAlertName",
+            type: "HighLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            highLimit: 100,
+            severity: 1,
+            hysteresis: 15,
+            value: null,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            lastValueTick: 0,
+            deviceId: "deviceID",
+            texts: {
+              pl: "fakeTextPL",
+              en: "fakeTextEN",
+            },
+          },
+          lowLimitAlertID: {
+            id: "lowLimitAlertID",
+            name: "lowLimitAlertName",
+            type: "LowLimitAlert",
+            unit: "FakeUnit",
+            sampleTime: 15,
+            defaultValue: null,
+            variableID: "fakeVariableID",
+            lowLimit: 100,
+            severity: 1,
+            hysteresis: 15,
+            value: null,
+            timeOnDelay: 5,
+            timeOffDelay: 10,
+            lastValueTick: 0,
+            deviceId: "deviceID",
+            texts: {
+              pl: "fakeTextPL",
+              en: "fakeTextEN",
+            },
+          },
+        },
+        isActive: true,
+        sendDataFileInterval: 10,
+        sendEventFileInterval: 5,
+        dataStorageSize: 20,
+        eventStorageSize: 30,
+        numberOfDataFilesToSend: 3,
+        numberOfEventFilesToSend: 6,
+        dataToSendConfig: {
+          testElement1ID: {
+            elementId: "testElement1ID",
+            deviceId: "testDevice1ID",
+            sendingInterval: 100,
+          },
+          testElement2ID: {
+            elementId: "testElement2ID",
+            deviceId: "testDevice2ID",
+            sendingInterval: 200,
+            tickNormalization: "noNormalization",
+          },
+          testElement3ID: {
+            elementId: "testElement3ID",
+            deviceId: "testDevice3ID",
+            sendingInterval: 300,
+            tickNormalization: "setTickAsBeginOfInterval",
+          },
+          testElement4ID: {
+            elementId: "testElement4ID",
+            deviceId: "testDevice4ID",
+            sendingInterval: 400,
+            tickNormalization: "testElement2ID",
+            tickNormalization: "setTickAsEndOfInterval",
+          },
+          testElement5ID: {
+            elementId: "testElement5ID",
+            deviceId: "testDevice5ID",
+            sendingInterval: 500,
+            tickNormalization: "testElement2ID",
+            tickNormalization: "sendOnlyIfTickFitsSendingInterval",
+          },
+        },
+        eventsToSendConfig: {
+          testElement4ID: {
+            elementId: "testElement4ID",
+            deviceId: "testDevice4ID",
+            sendingInterval: 400,
+          },
+          testElement5ID: {
+            elementId: "testElement5ID",
+            deviceId: "testDevice5ID",
+            sendingInterval: 500,
+          },
+          testElement6ID: {
+            elementId: "testElement6ID",
+            deviceId: "testDevice6ID",
+            sendingInterval: 600,
+          },
+        },
+        boarded: false,
+      };
+
+      expect(device.generatePayload()).toEqual(expectedPayload);
+
+      expect(device.TickIdNormalizers).toBeDefined();
+      expect(device.TickIdNormalizers["testElement1ID"]).not.toBeDefined();
+      expect(device.TickIdNormalizers["testElement2ID"]).toBeDefined();
+      expect(
+        device.TickIdNormalizers["testElement2ID"].NormalizationType
+      ).toEqual("noNormalization");
+      expect(
+        device.TickIdNormalizers["testElement2ID"].SendingInterval
+      ).toEqual(200);
+      expect(device.TickIdNormalizers["testElement3ID"]).toBeDefined();
+      expect(
+        device.TickIdNormalizers["testElement3ID"].NormalizationType
+      ).toEqual("setTickAsBeginOfInterval");
+      expect(
+        device.TickIdNormalizers["testElement3ID"].SendingInterval
+      ).toEqual(300);
+      expect(device.TickIdNormalizers["testElement4ID"]).toBeDefined();
+      expect(
+        device.TickIdNormalizers["testElement4ID"].NormalizationType
+      ).toEqual("setTickAsEndOfInterval");
+      expect(
+        device.TickIdNormalizers["testElement4ID"].SendingInterval
+      ).toEqual(400);
+      expect(device.TickIdNormalizers["testElement5ID"]).toBeDefined();
+      expect(
+        device.TickIdNormalizers["testElement5ID"].NormalizationType
+      ).toEqual("sendOnlyIfTickFitsSendingInterval");
+      expect(
+        device.TickIdNormalizers["testElement5ID"].SendingInterval
+      ).toEqual(500);
+    });
+
     it("should set busy to false", async () => {
       await exec();
 
@@ -1095,11 +1628,27 @@ describe("AgentDevice", () => {
             elementId: "testElement2ID",
             deviceId: "testDevice2ID",
             sendingInterval: 200,
+            tickNormalization: "noNormalization",
           },
           testElement3ID: {
             elementId: "testElement3ID",
             deviceId: "testDevice3ID",
             sendingInterval: 300,
+            tickNormalization: "setTickAsBeginOfInterval",
+          },
+          testElement4ID: {
+            elementId: "testElement4ID",
+            deviceId: "testDevice4ID",
+            sendingInterval: 400,
+            tickNormalization: "testElement2ID",
+            tickNormalization: "setTickAsEndOfInterval",
+          },
+          testElement5ID: {
+            elementId: "testElement5ID",
+            deviceId: "testDevice5ID",
+            sendingInterval: 500,
+            tickNormalization: "testElement2ID",
+            tickNormalization: "sendOnlyIfTickFitsSendingInterval",
           },
         },
         eventsToSendConfig: {
@@ -1360,6 +1909,7 @@ describe("AgentDevice", () => {
         eventStorageSize: 30,
         numberOfDataFilesToSend: 3,
         numberOfEventFilesToSend: 6,
+
         dataToSendConfig: {
           testElement1ID: {
             elementId: "testElement1ID",
@@ -1370,11 +1920,27 @@ describe("AgentDevice", () => {
             elementId: "testElement2ID",
             deviceId: "testDevice2ID",
             sendingInterval: 200,
+            tickNormalization: "noNormalization",
           },
           testElement3ID: {
             elementId: "testElement3ID",
             deviceId: "testDevice3ID",
             sendingInterval: 300,
+            tickNormalization: "setTickAsBeginOfInterval",
+          },
+          testElement4ID: {
+            elementId: "testElement4ID",
+            deviceId: "testDevice4ID",
+            sendingInterval: 400,
+            tickNormalization: "testElement2ID",
+            tickNormalization: "setTickAsEndOfInterval",
+          },
+          testElement5ID: {
+            elementId: "testElement5ID",
+            deviceId: "testDevice5ID",
+            sendingInterval: 500,
+            tickNormalization: "testElement2ID",
+            tickNormalization: "sendOnlyIfTickFitsSendingInterval",
           },
         },
 

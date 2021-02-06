@@ -1,10 +1,16 @@
 const Joi = require("joi");
+const {
+  TickIdNormalizeType,
+} = require("../../classes/Device/AgentDevice/TickIdNormalizer");
 const deviceSchema = require("./Device");
 
 const dataToSendConfigSchemaContent = {
   elementId: Joi.string().min(1).required(),
   deviceId: Joi.string().min(1).required(),
   sendingInterval: Joi.number().integer().min(1).required(),
+  tickNormalization: Joi.string()
+    .valid(...Object.values(TickIdNormalizeType))
+    .optional(),
 };
 
 const dataToSendConfigSchema = Joi.object({
